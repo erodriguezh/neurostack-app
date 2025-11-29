@@ -1,0 +1,34 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+
+# Coding Conventions and Standards
+
+## Coding Standards
+
+- Use PascalCase for class names (e.g., TodoService, HomeViewModel).
+- Use camelCase for variables and methods.
+- All state in Services and viewmodels should use ValueNotifier.
+- ViewModels must receive Services through constructor injection and forward their state with a getter.
+- Views must use ValueListenableBuilder for state updates.
+- Use comments sparingly and only when they add value.
+- Prefer self-documenting code through descriptive naming.
+
+- Feature Files:
+  Simple feature (flat structure):
+
+  - `{feature_name}/{name}_model.dart`
+  - `{feature_name}/{name}_service.dart`
+  - `{feature_name}/{name}_view_model.dart`
+  - `{feature_name}/{name}_view.dart`
+
+  Complex feature (with subdirectories):
+
+  - Models: `{feature_name}/models/{name}.dart`
+  - Services: `{feature_name}/services/{name}_service.dart`
+  - ViewModels: `{feature_name}/viewmodels/{name}_view_model.dart`
+  - Views: `{feature_name}/views/{name}_view.dart`
+
+- Tests: should mirror the real file location but in the test folder.

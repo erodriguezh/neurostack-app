@@ -1,0 +1,17 @@
+{
+  "[dart]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "always"
+    },
+    "editor.selectionHighlight": false,
+    "editor.suggest.snippetsPreventQuickSuggestions": false,
+    "editor.suggestSelection": "first",
+    "editor.tabCompletion": "onlySnippets",
+    "editor.wordBasedSuggestions": "off",
+    "editor.formatOnSave": true
+  },
+  "cmake.ignoreCMakeListsMissing": true,
+  "editor.bracketPairColorization.enabled": true,
+  "dart.previewFlutterUiGuides": true,
+  "editor.stickyScroll.enabled": true
+}

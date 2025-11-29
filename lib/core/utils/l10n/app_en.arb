@@ -1,0 +1,39 @@
+{
+  "@@locale": "en",
+  "appName": "Flutter Kit",
+  "@appName": {
+    "description": "The name of the app"
+  },
+  "errorGeneric": "Oops! Something went wrong",
+  "@errorGeneric": {
+    "description": "The generic error message"
+  },
+  "errorStartingApp": "We encountered an error while starting the app.",
+  "@errorStartingApp": {
+    "description": "The error message when the app fails to start"
+  },
+  "retry": "Retry",
+  "@retry": {
+    "description": "The text for the retry button"
+  },
+  "notFoundTitle": "404",
+  "@notFoundTitle": {
+    "description": "Title shown on the 404 page"
+  },
+  "notFoundMessage": "Page Not Found",
+  "@notFoundMessage": {
+    "description": "Message shown on the 404 page"
+  },
+  "notFoundGoHome": "Go Home",
+  "@notFoundGoHome": {
+    "description": "Text for the button that takes users back to home page"
+  },
+  "counter": "You have pushed the button this many times:",
+  "@counter": {
+    "description": "Text for the counter"
+  },
+  "success": "Success",
+  "@success": {
+    "description": "Text for the success message"
+  }
+}

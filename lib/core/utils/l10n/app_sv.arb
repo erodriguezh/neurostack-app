@@ -1,0 +1,12 @@
+{
+  "@@locale": "sv",
+  "appName": "Flutter Kit",
+  "errorGeneric": "Hoppsan! Något gick fel",
+  "errorStartingApp": "Vi stötte på ett fel när appen startades.",
+  "retry": "Försök igen",
+  "notFoundTitle": "404",
+  "notFoundMessage": "Sidan hittades inte",
+  "notFoundGoHome": "Gå till startsidan",
+  "counter": "Du har tryckt på knappen så här många gånger:",
+  "success": "Lyckades"
+}

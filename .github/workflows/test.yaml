@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  FLUTTER_VERSION: "3.32.0"
+  CHANNEL: "stable"
+
+jobs:
+  lint:
+    name: Lint and Format Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze project source
+        run: flutter analyze
+
+      - name: Format project source
+        run: dart format $(find lib -name "*.dart" \
+          -not -name "*.*freezed.dart" \
+          -not -name "*.*g.dart" \
+          -not -name "app_localizations.dart" \
+          -not -name "app_localizations_*.dart") \
+          --set-exit-if-changed
+
+  unit_and_widget_tests:
+    needs: lint
+    name: Unit and Widget tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+
+      - name: Run tests
+        run: flutter test --exclude-tags=golden
+
+  # Uncomment when golden tests exists
+  # golden_tests:
+  #   needs: lint
+  #   name: Golden tests
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     - uses: subosito/flutter-action@v2
+  #       with:
+  #         channel: ${{ env.CHANNEL }}
+  #         flutter-version: ${{ env.FLUTTER_VERSION }}
+
+  #     - name: Run golden tests
+  #       run: flutter test --tags=golden
+
+  #     - name: Upload failure artifacts
+  #       if: failure()
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: golden-failure-artifacts
+  #         path: |
+  #           test/failures/
+  #           test/goldens/
