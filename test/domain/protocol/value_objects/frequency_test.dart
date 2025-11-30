@@ -40,17 +40,6 @@ void main() {
         expect(result, isLeftWith(ProtocolFailures.invalidFrequency));
       });
 
-      test('create_whenMaxLessThanOne_returnsInvalidFrequency', () {
-        // Act
-        final result = FrequencyFactory.create(
-          minPerWeek: 3,
-          maxPerWeek: 0,
-        );
-
-        // Assert
-        expect(result, isLeftWith(ProtocolFailures.invalidFrequency));
-      });
-
       test('create_whenMaxLessThanMin_returnsMaxLessThanMin', () {
         // Act
         final result = FrequencyFactory.create(

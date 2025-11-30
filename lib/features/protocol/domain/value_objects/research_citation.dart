@@ -81,9 +81,18 @@ sealed class ResearchCitation with _$ResearchCitation {
   }
 
   /// Full citation format for detailed display.
-  /// Example: "Wisløff et al. (2007). Superior cardiovascular effect... Circulation."
+  /// Example: "Wisløff et al. (2007). Superior cardiovascular effect... Circulation. DOI: 10.1161/..."
   String get fullCitation {
     final shortTitle = title.length > 60 ? '${title.substring(0, 57)}...' : title;
-    return '$shortCitation. $shortTitle. $journal.';
+    final citation = '$shortCitation. $shortTitle. $journal.';
+    
+    // Add DOI or URL if available (DOI preferred)
+    if (doi != null && doi!.isNotEmpty) {
+      return '$citation DOI: $doi';
+    } else if (url != null && url!.isNotEmpty) {
+      return '$citation URL: $url';
+    }
+    
+    return citation;
   }
 }

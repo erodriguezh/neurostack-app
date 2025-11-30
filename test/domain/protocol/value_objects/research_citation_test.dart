@@ -132,12 +132,11 @@ void main() {
         // Act
         final full = citation.fullCitation;
 
-        // Assert
-        expect(full, contains('Wisløff U, Støylen A, Loennechen JP'));
-        expect(full, contains('2007'));
+        // Assert - Verify complete format with DOI
+        expect(full, startsWith('Wisløff et al. (2007).'));
         expect(full, contains('Superior cardiovascular effect'));
-        expect(full, contains('Circulation'));
-        expect(full, contains('10.1161/CIRCULATIONAHA.106.675041'));
+        expect(full, contains('Circulation.'));
+        expect(full, endsWith('DOI: 10.1161/CIRCULATIONAHA.106.675041'));
       });
 
       test('fullCitation_withUrl_includesUrl', () {
@@ -153,8 +152,65 @@ void main() {
         // Act
         final full = citation.fullCitation;
 
+        // Assert - Verify complete format with URL
+        expect(full, equals('Smith (2020). A Study. Science. URL: https://example.com/study'));
+        expect(full, endsWith('URL: https://example.com/study'));
+      });
+
+      test('fullCitation_withoutDoiOrUrl_excludesLinks', () {
+        // Arrange
+        final citation = ResearchCitationFactory.create(
+          authors: 'Smith J',
+          year: 2020,
+          title: 'A Study',
+          journal: 'Science',
+        ).getOrElse((l) => throw Exception('Failed to create citation: $l'));
+
+        // Act
+        final full = citation.fullCitation;
+
         // Assert
-        expect(full, contains('https://example.com/study'));
+        expect(full, equals('Smith (2020). A Study. Science.'));
+        expect(full, isNot(contains('DOI:')));
+        expect(full, isNot(contains('URL:')));
+      });
+
+      test('fullCitation_withLongTitle_truncatesTo57Chars', () {
+        // Arrange
+        final longTitle = 'A' * 65; // 65 characters, should be truncated
+        final citation = ResearchCitationFactory.create(
+          authors: 'Smith J',
+          year: 2020,
+          title: longTitle,
+          journal: 'Science',
+        ).getOrElse((l) => throw Exception('Failed to create citation: $l'));
+
+        // Act
+        final full = citation.fullCitation;
+
+        // Assert
+        final expectedTitle = '${'A' * 57}...';
+        expect(full, contains(expectedTitle));
+        expect(full, equals('Smith (2020). $expectedTitle. Science.'));
+      });
+
+      test('fullCitation_withBothDoiAndUrl_prefersDoi', () {
+        // Arrange
+        final citation = ResearchCitationFactory.create(
+          authors: 'Smith J',
+          year: 2020,
+          title: 'A Study',
+          journal: 'Science',
+          doi: '10.1234/test',
+          url: 'https://example.com/study',
+        ).getOrElse((l) => throw Exception('Failed to create citation: $l'));
+
+        // Act
+        final full = citation.fullCitation;
+
+        // Assert
+        expect(full, contains('DOI: 10.1234/test'));
+        expect(full, isNot(contains('URL:')));
       });
     });
   });
