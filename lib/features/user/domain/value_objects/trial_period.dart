@@ -47,7 +47,7 @@ sealed class TrialPeriod with _$TrialPeriod {
   /// Days remaining in the trial (0 if expired).
   int daysRemaining(DateTime currentTime) {
     if (isExpired(currentTime)) return 0;
-    return endDate.difference(currentTime).inDays + 1;
+    return endDate.difference(currentTime).inDays;
   }
 
   /// Get the trial status as of [currentTime].

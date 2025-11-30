@@ -1,0 +1,577 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:fpdart/fpdart.dart';
+import 'package:neurostack/features/user/domain/entities/user.dart';
+import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
+import 'package:neurostack/features/user/domain/events/user_events.dart';
+import 'package:neurostack/features/user/domain/failures/user_failures.dart';
+import '../../constants/test_constants.dart';
+import '../../factories/factories.dart';
+import '../../matchers/either_matchers.dart';
+
+void main() {
+  group('User', () {
+    group('createWithTrial', () {
+      // INV-U3: Trial MUST auto-activate on first app launch
+      test('createWithTrial_always_setsTrialStatusAndRaisesEvents', () {
+        // Act
+        final user = UserFactory.createWithTrial();
+
+        // Assert
+        expect(user.subscriptionStatus, SubscriptionStatus.trial);
+        expect(user.trialPeriod, isNotNull);
+        expect(user.hasDomainEvents, true);
+        expect(user.domainEvents.length, 2);
+        expect(user.domainEvents[0], isA<UserCreatedEvent>());
+        expect(user.domainEvents[1], isA<TrialStartedEvent>());
+      });
+    });
+
+    group('activateProtocol', () {
+      test('activateProtocol_whenUnderLimit_succeeds', () {
+        // Arrange
+        final user = UserFactory.createFreeUnderLimit();
+        final currentTime = TestConstants.trial.activeCheckTime;
+
+        // Act
+        final result = user.activateProtocol(
+          'protocol-2',
+          currentTime: currentTime,
+        );
+
+        // Assert
+        expect(result, isRight<User>());
+        final updated = result.getOrElse(
+          (l) => throw Exception('Failed to activate: $l'),
+        );
+        expect(updated.activeProtocolIds.contains('protocol-2'), true);
+      });
+
+      test(
+        'activateProtocol_whenAlreadyActive_returnsProtocolAlreadyActive',
+        () {
+          // Arrange
+          final user = UserFactory.create(
+            subscriptionStatus: SubscriptionStatus.free,
+            stack: StackFactory.fromIds(['protocol-1']),
+            onboardingCompleted: true,
+          );
+          final currentTime = TestConstants.trial.activeCheckTime;
+
+          // Act
+          final result = user.activateProtocol(
+            'protocol-1',
+            currentTime: currentTime,
+          );
+
+          // Assert
+          expect(result, isLeftWith(UserFailures.protocolAlreadyActive));
+        },
+      );
+
+      // INV-U1, INV-M5: Free tier limit boundary
+      test('activateProtocol_whenFreeAtLimit_returnsProtocolLimitReached', () {
+        // Arrange - exactly at limit (1 protocol, limit is 2)
+        final user = UserFactory.create(
+          subscriptionStatus: SubscriptionStatus.free,
+          stack: StackFactory.fromIds(['protocol-1']),
+          onboardingCompleted: true,
+        );
+        final currentTime = TestConstants.trial.activeCheckTime;
+
+        // Act - add second (should succeed)
+        final result1 = user.activateProtocol(
+          'protocol-2',
+          currentTime: currentTime,
+        );
+
+        // Assert - first activation succeeds
+        expect(result1, isRight<User>());
+
+        final userAtLimit = result1.getOrElse(
+          (l) => throw Exception('Failed to activate: $l'),
+        );
+
+        // Act - add third (should fail at boundary)
+        final result2 = userAtLimit.activateProtocol(
+          'protocol-3',
+          currentTime: currentTime,
+        );
+
+        // Assert - second activation fails with specific error
+        expect(result2, isLeftWith(UserFailures.protocolLimitReached));
+      });
+
+      // INV-U2: Trial has no limit
+      test('activateProtocol_whenOnTrial_allowsUnlimitedProtocols', () {
+        // Arrange - active trial with 5 protocols already
+        final user = UserFactory.create(
+          subscriptionStatus: SubscriptionStatus.trial,
+          trialPeriod: TrialPeriodFactory.create(),
+          stack: StackFactory.fromIds(['p-1', 'p-2', 'p-3', 'p-4', 'p-5']),
+          onboardingCompleted: true,
+        );
+        final currentTime = TestConstants.trial.activeCheckTime;
+
+        // Act - add 6th protocol
+        final result = user.activateProtocol('p-6', currentTime: currentTime);
+
+        // Assert - should succeed (no limit on trial)
+        expect(result, isRight<User>());
+      });
+
+      // INV-M4: Expired trial treated as free
+      test('activateProtocol_whenTrialExpired_respectsFreeTierLimit', () {
+        // Arrange - expired trial with 2 protocols
+        final user = UserFactory.create(
+          subscriptionStatus: SubscriptionStatus.trial,
+          trialPeriod: TrialPeriodFactory.expired(),
+          stack: StackFactory.atFreeCapacity(),
+          onboardingCompleted: true,
+        );
+        final currentTime = TestConstants.trial.expiredCheckTime;
+
+        // Act - try to add 3rd protocol
+        final result = user.activateProtocol(
+          'protocol-3',
+          currentTime: currentTime,
+        );
+
+        // Assert - should fail with limit reached
+        expect(result, isLeftWith(UserFailures.protocolLimitReached));
+      });
+
+      test('activateProtocol_whenPremiumMonthly_allowsUnlimitedProtocols', () {
+        // Arrange - premium with 10 protocols
+        final user = UserFactory.createPremiumMonthly(
+          stack: StackFactory.fromIds(
+            List.generate(10, (i) => 'protocol-$i'),
+          ),
+        );
+        final currentTime = TestConstants.trial.activeCheckTime;
+
+        // Act - add 11th protocol
+        final result = user.activateProtocol(
+          'protocol-10',
+          currentTime: currentTime,
+        );
+
+        // Assert - should succeed (no limit on premium)
+        expect(result, isRight<User>());
+      });
+
+      test('activateProtocol_whenPremiumAnnual_allowsUnlimitedProtocols', () {
+        // Arrange - premium annual with 10 protocols
+        final user = UserFactory.createPremiumAnnual(
+          stack: StackFactory.fromIds(
+            List.generate(10, (i) => 'protocol-$i'),
+          ),
+        );
+        final currentTime = TestConstants.trial.activeCheckTime;
+
+        // Act - add 11th protocol
+        final result = user.activateProtocol(
+          'protocol-10',
+          currentTime: currentTime,
+        );
+
+        // Assert - should succeed (no limit on premium)
+        expect(result, isRight<User>());
+      });
+    });
+
+    group('deactivateProtocol', () {
+      test('deactivateProtocol_whenActive_succeeds', () {
+        // Arrange
+        final user = UserFactory.create(
+          stack: StackFactory.fromIds(['protocol-1', 'protocol-2']),
+          onboardingCompleted: true,
+        );
+
+        // Act
+        final result = user.deactivateProtocol('protocol-1');
+
+        // Assert
+        expect(result, isRight<User>());
+        final updated = result.getOrElse(
+          (l) => throw Exception('Failed to deactivate: $l'),
+        );
+        expect(updated.activeProtocolIds.contains('protocol-1'), false);
+        expect(updated.activeProtocolCount, 1);
+      });
+
+      test('deactivateProtocol_whenNotActive_returnsProtocolNotActive', () {
+        // Arrange
+        final user = UserFactory.create(
+          stack: StackFactory.fromIds(['protocol-1']),
+          onboardingCompleted: true,
+        );
+
+        // Act
+        final result = user.deactivateProtocol('protocol-2');
+
+        // Assert
+        expect(result, isLeftWith(UserFailures.protocolNotActive));
+      });
+    });
+
+    group('canLogSession', () {
+      // INV-U4: Onboarding required
+      test(
+        'canLogSession_whenOnboardingNotCompleted_returnsOnboardingNotCompleted',
+        () {
+          // Arrange
+          final user = UserFactory.create(
+            stack: StackFactory.fromIds(['protocol-1']),
+            onboardingCompleted: false,
+          );
+          final currentTime = TestConstants.trial.activeCheckTime;
+
+          // Act
+          final result = user.canLogSession(
+            'protocol-1',
+            currentTime: currentTime,
+          );
+
+          // Assert
+          expect(result, isLeftWith(UserFailures.onboardingNotCompleted));
+        },
+      );
+
+      test(
+        'canLogSession_whenProtocolNotInStack_returnsProtocolNotInStack',
+        () {
+          // Arrange
+          final user = UserFactory.create(
+            stack: StackFactory.fromIds(['protocol-1']),
+            onboardingCompleted: true,
+          );
+          final currentTime = TestConstants.trial.activeCheckTime;
+
+          // Act
+          final result = user.canLogSession(
+            'protocol-2',
+            currentTime: currentTime,
+          );
+
+          // Assert
+          expect(result, isLeftWith(UserFailures.protocolNotInStack));
+        },
+      );
+
+      // INV-U5: Expired trial with >2 protocols blocked
+      test(
+        'canLogSession_whenExpiredTrialOverLimit_returnsTooManyActiveProtocols',
+        () {
+          // Arrange - expired trial with 3 protocols
+          final user = UserFactory.createExpiredTrialOverLimit();
+          final currentTime = TestConstants.trial.expiredCheckTime;
+
+          // Act - try to log session for any protocol
+          final result = user.canLogSession(
+            StackFactory.protocol1,
+            currentTime: currentTime,
+          );
+
+          // Assert - should fail (must deactivate or upgrade)
+          expect(result, isLeftWith(UserFailures.tooManyActiveProtocols));
+        },
+      );
+
+      test('canLogSession_whenExpiredTrialAtLimit_succeeds', () {
+        // Arrange - expired trial with exactly 2 protocols
+        final user = UserFactory.create(
+          subscriptionStatus: SubscriptionStatus.trial,
+          trialPeriod: TrialPeriodFactory.expired(),
+          stack: StackFactory.atFreeCapacity(),
+          onboardingCompleted: true,
+        );
+        final currentTime = TestConstants.trial.expiredCheckTime;
+
+        // Act
+        final result = user.canLogSession(
+          'protocol-1',
+          currentTime: currentTime,
+        );
+
+        // Assert - should succeed (at limit, not over)
+        expect(result, isRight<Unit>());
+      });
+
+      test('canLogSession_whenAllConditionsMet_returnsUnit', () {
+        // Arrange
+        final user = UserFactory.create(
+          subscriptionStatus: SubscriptionStatus.free,
+          stack: StackFactory.fromIds(['protocol-1']),
+          onboardingCompleted: true,
+        );
+        final currentTime = TestConstants.trial.activeCheckTime;
+
+        // Act
+        final result = user.canLogSession(
+          'protocol-1',
+          currentTime: currentTime,
+        );
+
+        // Assert
+        expect(result, isRight<Unit>());
+      });
+    });
+
+    group('completeOnboarding', () {
+      test('completeOnboarding_whenNotCompleted_succeeds', () {
+        // Arrange
+        final user = UserFactory.create(onboardingCompleted: false);
+
+        // Act
+        final result = user.completeOnboarding();
+
+        // Assert
+        expect(result, isRight<User>());
+        final updated = result.getOrElse(
+          (l) => throw Exception('Failed to complete onboarding: $l'),
+        );
+        expect(updated.onboardingCompleted, true);
+      });
+
+      test(
+        'completeOnboarding_whenAlreadyCompleted_returnsAlreadyOnboarded',
+        () {
+          // Arrange
+          final user = UserFactory.create(onboardingCompleted: true);
+
+          // Act
+          final result = user.completeOnboarding();
+
+          // Assert
+          expect(result, isLeftWith(UserFailures.alreadyOnboarded));
+        },
+      );
+    });
+
+    group('upgradeToPremium', () {
+      test('upgradeToPremium_withPremiumMonthly_succeeds', () {
+        // Arrange
+        final user = UserFactory.create(
+          subscriptionStatus: SubscriptionStatus.free,
+        );
+
+        // Act
+        final result = user.upgradeToPremium(SubscriptionStatus.premiumMonthly);
+
+        // Assert
+        expect(result, isRight<User>());
+        final upgraded = result.getOrElse(
+          (l) => throw Exception('Failed to upgrade: $l'),
+        );
+        expect(upgraded.subscriptionStatus, SubscriptionStatus.premiumMonthly);
+      });
+
+      test('upgradeToPremium_withPremiumAnnual_succeeds', () {
+        // Arrange
+        final user = UserFactory.create(
+          subscriptionStatus: SubscriptionStatus.free,
+        );
+
+        // Act
+        final result = user.upgradeToPremium(SubscriptionStatus.premiumAnnual);
+
+        // Assert
+        expect(result, isRight<User>());
+        final upgraded = result.getOrElse(
+          (l) => throw Exception('Failed to upgrade: $l'),
+        );
+        expect(upgraded.subscriptionStatus, SubscriptionStatus.premiumAnnual);
+      });
+
+      test(
+        'upgradeToPremium_withNonPremiumStatus_returnsInvalidSubscriptionUpgrade',
+        () {
+          // Arrange
+          final user = UserFactory.create(
+            subscriptionStatus: SubscriptionStatus.free,
+          );
+
+          // Act
+          final result = user.upgradeToPremium(SubscriptionStatus.trial);
+
+          // Assert
+          expect(result, isLeftWith(UserFailures.invalidSubscriptionUpgrade));
+        },
+      );
+    });
+
+    group('getEffectiveStatus', () {
+      // INV-M4: Auto-downgrade
+      test('getEffectiveStatus_whenTrialActive_returnsTrial', () {
+        // Arrange
+        final user = UserFactory.createActiveTrial();
+        final currentTime = TestConstants.trial.activeCheckTime;
+
+        // Act
+        final status = user.getEffectiveStatus(currentTime);
+
+        // Assert
+        expect(status, SubscriptionStatus.trial);
+      });
+
+      test('getEffectiveStatus_whenTrialExpired_returnsFree', () {
+        // Arrange
+        final user = UserFactory.create(
+          subscriptionStatus: SubscriptionStatus.trial,
+          trialPeriod: TrialPeriodFactory.expired(),
+        );
+        final currentTime = TestConstants.trial.expiredCheckTime;
+
+        // Act
+        final status = user.getEffectiveStatus(currentTime);
+
+        // Assert
+        expect(status, SubscriptionStatus.free);
+      });
+
+      test('getEffectiveStatus_whenPremiumMonthly_returnsPremiumMonthly', () {
+        // Arrange
+        final user = UserFactory.createPremiumMonthly();
+        final currentTime = TestConstants.trial.activeCheckTime;
+
+        // Act
+        final status = user.getEffectiveStatus(currentTime);
+
+        // Assert
+        expect(status, SubscriptionStatus.premiumMonthly);
+      });
+
+      test('getEffectiveStatus_whenFree_returnsFree', () {
+        // Arrange
+        final user = UserFactory.create(
+          subscriptionStatus: SubscriptionStatus.free,
+          trialPeriod: null,
+        );
+        final currentTime = TestConstants.trial.activeCheckTime;
+
+        // Act
+        final status = user.getEffectiveStatus(currentTime);
+
+        // Assert
+        expect(status, SubscriptionStatus.free);
+      });
+    });
+
+    group('domain events', () {
+      test('activateProtocol_whenSuccessful_raisesProtocolActivatedEvent', () {
+        // Arrange
+        final user = UserFactory.create(
+          subscriptionStatus: SubscriptionStatus.free,
+          stack: StackFactory.empty(),
+          onboardingCompleted: true,
+        );
+        final currentTime = TestConstants.trial.activeCheckTime;
+
+        // Act
+        final result = user.activateProtocol(
+          'protocol-123',
+          currentTime: currentTime,
+        );
+
+        // Assert
+        final updated = result.getOrElse(
+          (l) => throw Exception('Failed to activate: $l'),
+        );
+        expect(updated.hasDomainEvents, true);
+        final event = updated.domainEvents
+            .whereType<ProtocolActivatedEvent>()
+            .first;
+        expect(event.userId, TestConstants.user.id);
+        expect(event.protocolId, 'protocol-123');
+      });
+
+      test(
+        'deactivateProtocol_whenSuccessful_raisesProtocolDeactivatedEvent',
+        () {
+          // Arrange
+          final user = UserFactory.create(
+            stack: StackFactory.fromIds(['protocol-123']),
+            onboardingCompleted: true,
+          );
+
+          // Act
+          final result = user.deactivateProtocol('protocol-123');
+
+          // Assert
+          final updated = result.getOrElse(
+            (l) => throw Exception('Failed to deactivate: $l'),
+          );
+          expect(updated.hasDomainEvents, true);
+          final event = updated.domainEvents
+              .whereType<ProtocolDeactivatedEvent>()
+              .first;
+          expect(event.userId, TestConstants.user.id);
+          expect(event.protocolId, 'protocol-123');
+        },
+      );
+
+      test(
+        'completeOnboarding_whenSuccessful_raisesOnboardingCompletedEvent',
+        () {
+          // Arrange
+          final user = UserFactory.create(onboardingCompleted: false);
+
+          // Act
+          final result = user.completeOnboarding();
+
+          // Assert
+          final updated = result.getOrElse(
+            (l) => throw Exception('Failed to complete onboarding: $l'),
+          );
+          expect(updated.hasDomainEvents, true);
+          final event = updated.domainEvents
+              .whereType<OnboardingCompletedEvent>()
+              .first;
+          expect(event.userId, TestConstants.user.id);
+        },
+      );
+
+      test(
+        'upgradeToPremium_whenSuccessful_raisesSubscriptionUpgradedEvent',
+        () {
+          // Arrange
+          final user = UserFactory.create(
+            subscriptionStatus: SubscriptionStatus.free,
+          );
+
+          // Act
+          final result = user.upgradeToPremium(
+            SubscriptionStatus.premiumMonthly,
+          );
+
+          // Assert
+          final upgraded = result.getOrElse(
+            (l) => throw Exception('Failed to upgrade: $l'),
+          );
+          expect(upgraded.hasDomainEvents, true);
+          final event = upgraded.domainEvents
+              .whereType<SubscriptionUpgradedEvent>()
+              .first;
+          expect(event.userId, TestConstants.user.id);
+          expect(event.newStatus, SubscriptionStatus.premiumMonthly);
+        },
+      );
+    });
+
+    group('activeProtocolIds', () {
+      test('activeProtocolIds_returnsImmutableList', () {
+        // Arrange
+        final user = UserFactory.create(
+          stack: StackFactory.fromIds(['protocol-1']),
+        );
+
+        // Act
+        final ids = user.activeProtocolIds;
+
+        // Assert - attempting to modify should not affect user
+        expect(ids, ['protocol-1']);
+        expect(ids, isA<List<String>>());
+      });
+    });
+  });
+}

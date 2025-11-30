@@ -150,10 +150,12 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
       createdAt: createdAt,
     );
 
-    updated.raiseDomainEvent(ProtocolActivatedEvent(
-      userId: id,
-      protocolId: protocolId,
-    ));
+    updated.raiseDomainEvent(
+      ProtocolActivatedEvent(
+        userId: id,
+        protocolId: protocolId,
+      ),
+    );
 
     return right(updated);
   }
@@ -175,10 +177,12 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
       createdAt: createdAt,
     );
 
-    updated.raiseDomainEvent(ProtocolDeactivatedEvent(
-      userId: id,
-      protocolId: protocolId,
-    ));
+    updated.raiseDomainEvent(
+      ProtocolDeactivatedEvent(
+        userId: id,
+        protocolId: protocolId,
+      ),
+    );
 
     return right(updated);
   }
@@ -261,10 +265,12 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
       createdAt: createdAt,
     );
 
-    updated.raiseDomainEvent(SubscriptionUpgradedEvent(
-      userId: id,
-      newStatus: newStatus,
-    ));
+    updated.raiseDomainEvent(
+      SubscriptionUpgradedEvent(
+        userId: id,
+        newStatus: newStatus,
+      ),
+    );
 
     return right(updated);
   }
