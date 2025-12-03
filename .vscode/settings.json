@@ -3,15 +3,40 @@
     "editor.codeActionsOnSave": {
       "source.fixAll": "always"
     },
+    "editor.formatOnSave": true,
     "editor.selectionHighlight": false,
     "editor.suggest.snippetsPreventQuickSuggestions": false,
     "editor.suggestSelection": "first",
     "editor.tabCompletion": "onlySnippets",
-    "editor.wordBasedSuggestions": "off",
-    "editor.formatOnSave": true
+    "editor.wordBasedSuggestions": "off"
   },
   "cmake.ignoreCMakeListsMissing": true,
-  "editor.bracketPairColorization.enabled": true,
+  "dart.flutterAdditionalArgs": [
+    "--dart-define-from-file=env/env.json"
+  ],
   "dart.previewFlutterUiGuides": true,
-  "editor.stickyScroll.enabled": true
+  "editor.bracketPairColorization.enabled": true,
+  "editor.stickyScroll.enabled": true,
+  "[typescript]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  },
+  "deno.enablePaths": [
+    "supabase/functions"
+  ],
+  "deno.lint": true,
+  "deno.unstable": [
+    "bare-node-builtins",
+    "byonm",
+    "sloppy-imports",
+    "unsafe-proto",
+    "webgpu",
+    "broadcast-channel",
+    "worker-options",
+    "cron",
+    "kv",
+    "ffi",
+    "fs",
+    "http",
+    "net"
+  ],
 }

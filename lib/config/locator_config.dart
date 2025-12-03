@@ -5,6 +5,7 @@ import 'package:neurostack/config/route_config.dart';
 import 'package:neurostack/core/utils/locator.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/core/utils/internal_notification/notify_service.dart';
+import 'package:neurostack/core/utils/data_source/data_source_abstraction.dart';
 
 final modules = [
   Module<RouterService>(
@@ -20,6 +21,10 @@ final modules = [
         ),
       ],
     ),
+    lazy: true,
+  ),
+  Module<DataSourceAbstraction>(
+    builder: () => DataSourceAbstraction.instance(),
     lazy: true,
   ),
 ];

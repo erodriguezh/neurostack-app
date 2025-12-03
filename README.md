@@ -25,3 +25,13 @@ This could have been a package, but we believe in owning your code. All these fe
 
 ### Align with the Flutter Team
 Our goal is to align closely with the Flutter team's recommendations and best practices. When something is missing, we use our expertise to fill the gaps.
+
+### Supabase config
+
+copy `env/default.env.json` to `env.json` and fill with config value.
+
+#### How to get Supabase config values
+
+1. Launch the Studio
+2. Click on "connect" button at the top left corner (right next to the "Default Project")
+3. Click on Mobile Frameworks tab
