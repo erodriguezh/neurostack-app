@@ -25,9 +25,10 @@ abstract class SessionDto with _$SessionDto {
 
   const factory SessionDto({
     required String id,
-    required String protocolId,
-    required String completedAt,
-    int? durationSeconds,
+    @JsonKey(name: 'protocol_id') required String protocolId,
+    @JsonKey(name: 'user_id') required String userId,
+    @JsonKey(name: 'completed_at') required String completedAt,
+    @JsonKey(name: 'duration_seconds') int? durationSeconds,
     String? notes,
   }) = _SessionDto;
 
@@ -51,9 +52,15 @@ abstract class SessionDto with _$SessionDto {
           Duration(seconds: durationSeconds!),
         );
         if (durationResult.isLeft()) {
-          return left(durationResult.getLeft().getOrElse(() => throw StateError('Unreachable')));
+          return left(
+            durationResult.getLeft().getOrElse(
+              () => throw StateError('Unreachable'),
+            ),
+          );
         }
-        domainDuration = durationResult.getOrElse((l) => throw StateError('Unreachable'));
+        domainDuration = durationResult.getOrElse(
+          (l) => throw StateError('Unreachable'),
+        );
       }
 
       // Parse date
@@ -80,10 +87,11 @@ abstract class SessionDto with _$SessionDto {
   }
 
   /// Creates a DTO from a domain [Session] aggregate.
-  factory SessionDto.fromDomain(Session session) {
+  factory SessionDto.fromDomain(Session session, String userId) {
     return SessionDto(
       id: session.id,
       protocolId: session.protocolId,
+      userId: userId,
       completedAt: session.completedAt.toIso8601String(),
       durationSeconds: session.duration?.inSeconds,
       notes: session.notes,

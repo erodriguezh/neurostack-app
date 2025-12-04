@@ -31,10 +31,10 @@ abstract class ProtocolDto with _$ProtocolDto {
     required String name,
     required TargetDto target,
     required String category,
-    required String evidenceLevel,
+    @JsonKey(name: 'evidence_level') required String evidenceLevel,
     required List<ResearchCitationDto> citations,
-    required String createdAt,
-    String? deletedAt,
+    @JsonKey(name: 'created_at') required String createdAt,
+    @JsonKey(name: 'deleted_at') String? deletedAt,
   }) = _ProtocolDto;
 
   factory ProtocolDto.fromJson(Map<String, dynamic> json) =>

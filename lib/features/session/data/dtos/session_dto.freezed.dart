@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SessionDto {
 
- String get id; String get protocolId; String get completedAt; int? get durationSeconds; String? get notes;
+ String get id;@JsonKey(name: 'protocol_id') String get protocolId;@JsonKey(name: 'user_id') String get userId;@JsonKey(name: 'completed_at') String get completedAt;@JsonKey(name: 'duration_seconds') int? get durationSeconds; String? get notes;
 /// Create a copy of SessionDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $SessionDtoCopyWith<SessionDto> get copyWith => _$SessionDtoCopyWithImpl<Session
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SessionDto&&(identical(other.id, id) || other.id == id)&&(identical(other.protocolId, protocolId) || other.protocolId == protocolId)&&(identical(other.completedAt, completedAt) || other.completedAt == completedAt)&&(identical(other.durationSeconds, durationSeconds) || other.durationSeconds == durationSeconds)&&(identical(other.notes, notes) || other.notes == notes));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SessionDto&&(identical(other.id, id) || other.id == id)&&(identical(other.protocolId, protocolId) || other.protocolId == protocolId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.completedAt, completedAt) || other.completedAt == completedAt)&&(identical(other.durationSeconds, durationSeconds) || other.durationSeconds == durationSeconds)&&(identical(other.notes, notes) || other.notes == notes));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,protocolId,completedAt,durationSeconds,notes);
+int get hashCode => Object.hash(runtimeType,id,protocolId,userId,completedAt,durationSeconds,notes);
 
 @override
 String toString() {
-  return 'SessionDto(id: $id, protocolId: $protocolId, completedAt: $completedAt, durationSeconds: $durationSeconds, notes: $notes)';
+  return 'SessionDto(id: $id, protocolId: $protocolId, userId: $userId, completedAt: $completedAt, durationSeconds: $durationSeconds, notes: $notes)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $SessionDtoCopyWith<$Res>  {
   factory $SessionDtoCopyWith(SessionDto value, $Res Function(SessionDto) _then) = _$SessionDtoCopyWithImpl;
 @useResult
 $Res call({
- String id, String protocolId, String completedAt, int? durationSeconds, String? notes
+ String id,@JsonKey(name: 'protocol_id') String protocolId,@JsonKey(name: 'user_id') String userId,@JsonKey(name: 'completed_at') String completedAt,@JsonKey(name: 'duration_seconds') int? durationSeconds, String? notes
 });
 
 
@@ -65,10 +65,11 @@ class _$SessionDtoCopyWithImpl<$Res>
 
 /// Create a copy of SessionDto
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? protocolId = null,Object? completedAt = null,Object? durationSeconds = freezed,Object? notes = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? protocolId = null,Object? userId = null,Object? completedAt = null,Object? durationSeconds = freezed,Object? notes = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,protocolId: null == protocolId ? _self.protocolId : protocolId // ignore: cast_nullable_to_non_nullable
+as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String,completedAt: null == completedAt ? _self.completedAt : completedAt // ignore: cast_nullable_to_non_nullable
 as String,durationSeconds: freezed == durationSeconds ? _self.durationSeconds : durationSeconds // ignore: cast_nullable_to_non_nullable
 as int?,notes: freezed == notes ? _self.notes : notes // ignore: cast_nullable_to_non_nullable
@@ -157,10 +158,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String protocolId,  String completedAt,  int? durationSeconds,  String? notes)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'protocol_id')  String protocolId, @JsonKey(name: 'user_id')  String userId, @JsonKey(name: 'completed_at')  String completedAt, @JsonKey(name: 'duration_seconds')  int? durationSeconds,  String? notes)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SessionDto() when $default != null:
-return $default(_that.id,_that.protocolId,_that.completedAt,_that.durationSeconds,_that.notes);case _:
+return $default(_that.id,_that.protocolId,_that.userId,_that.completedAt,_that.durationSeconds,_that.notes);case _:
   return orElse();
 
 }
@@ -178,10 +179,10 @@ return $default(_that.id,_that.protocolId,_that.completedAt,_that.durationSecond
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String protocolId,  String completedAt,  int? durationSeconds,  String? notes)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'protocol_id')  String protocolId, @JsonKey(name: 'user_id')  String userId, @JsonKey(name: 'completed_at')  String completedAt, @JsonKey(name: 'duration_seconds')  int? durationSeconds,  String? notes)  $default,) {final _that = this;
 switch (_that) {
 case _SessionDto():
-return $default(_that.id,_that.protocolId,_that.completedAt,_that.durationSeconds,_that.notes);case _:
+return $default(_that.id,_that.protocolId,_that.userId,_that.completedAt,_that.durationSeconds,_that.notes);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -198,10 +199,10 @@ return $default(_that.id,_that.protocolId,_that.completedAt,_that.durationSecond
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String protocolId,  String completedAt,  int? durationSeconds,  String? notes)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'protocol_id')  String protocolId, @JsonKey(name: 'user_id')  String userId, @JsonKey(name: 'completed_at')  String completedAt, @JsonKey(name: 'duration_seconds')  int? durationSeconds,  String? notes)?  $default,) {final _that = this;
 switch (_that) {
 case _SessionDto() when $default != null:
-return $default(_that.id,_that.protocolId,_that.completedAt,_that.durationSeconds,_that.notes);case _:
+return $default(_that.id,_that.protocolId,_that.userId,_that.completedAt,_that.durationSeconds,_that.notes);case _:
   return null;
 
 }
@@ -213,13 +214,14 @@ return $default(_that.id,_that.protocolId,_that.completedAt,_that.durationSecond
 @JsonSerializable()
 
 class _SessionDto extends SessionDto {
-  const _SessionDto({required this.id, required this.protocolId, required this.completedAt, this.durationSeconds, this.notes}): super._();
+  const _SessionDto({required this.id, @JsonKey(name: 'protocol_id') required this.protocolId, @JsonKey(name: 'user_id') required this.userId, @JsonKey(name: 'completed_at') required this.completedAt, @JsonKey(name: 'duration_seconds') this.durationSeconds, this.notes}): super._();
   factory _SessionDto.fromJson(Map<String, dynamic> json) => _$SessionDtoFromJson(json);
 
 @override final  String id;
-@override final  String protocolId;
-@override final  String completedAt;
-@override final  int? durationSeconds;
+@override@JsonKey(name: 'protocol_id') final  String protocolId;
+@override@JsonKey(name: 'user_id') final  String userId;
+@override@JsonKey(name: 'completed_at') final  String completedAt;
+@override@JsonKey(name: 'duration_seconds') final  int? durationSeconds;
 @override final  String? notes;
 
 /// Create a copy of SessionDto
@@ -235,16 +237,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SessionDto&&(identical(other.id, id) || other.id == id)&&(identical(other.protocolId, protocolId) || other.protocolId == protocolId)&&(identical(other.completedAt, completedAt) || other.completedAt == completedAt)&&(identical(other.durationSeconds, durationSeconds) || other.durationSeconds == durationSeconds)&&(identical(other.notes, notes) || other.notes == notes));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SessionDto&&(identical(other.id, id) || other.id == id)&&(identical(other.protocolId, protocolId) || other.protocolId == protocolId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.completedAt, completedAt) || other.completedAt == completedAt)&&(identical(other.durationSeconds, durationSeconds) || other.durationSeconds == durationSeconds)&&(identical(other.notes, notes) || other.notes == notes));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,protocolId,completedAt,durationSeconds,notes);
+int get hashCode => Object.hash(runtimeType,id,protocolId,userId,completedAt,durationSeconds,notes);
 
 @override
 String toString() {
-  return 'SessionDto(id: $id, protocolId: $protocolId, completedAt: $completedAt, durationSeconds: $durationSeconds, notes: $notes)';
+  return 'SessionDto(id: $id, protocolId: $protocolId, userId: $userId, completedAt: $completedAt, durationSeconds: $durationSeconds, notes: $notes)';
 }
 
 
@@ -255,7 +257,7 @@ abstract mixin class _$SessionDtoCopyWith<$Res> implements $SessionDtoCopyWith<$
   factory _$SessionDtoCopyWith(_SessionDto value, $Res Function(_SessionDto) _then) = __$SessionDtoCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String protocolId, String completedAt, int? durationSeconds, String? notes
+ String id,@JsonKey(name: 'protocol_id') String protocolId,@JsonKey(name: 'user_id') String userId,@JsonKey(name: 'completed_at') String completedAt,@JsonKey(name: 'duration_seconds') int? durationSeconds, String? notes
 });
 
 
@@ -272,10 +274,11 @@ class __$SessionDtoCopyWithImpl<$Res>
 
 /// Create a copy of SessionDto
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? protocolId = null,Object? completedAt = null,Object? durationSeconds = freezed,Object? notes = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? protocolId = null,Object? userId = null,Object? completedAt = null,Object? durationSeconds = freezed,Object? notes = freezed,}) {
   return _then(_SessionDto(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,protocolId: null == protocolId ? _self.protocolId : protocolId // ignore: cast_nullable_to_non_nullable
+as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String,completedAt: null == completedAt ? _self.completedAt : completedAt // ignore: cast_nullable_to_non_nullable
 as String,durationSeconds: freezed == durationSeconds ? _self.durationSeconds : durationSeconds // ignore: cast_nullable_to_non_nullable
 as int?,notes: freezed == notes ? _self.notes : notes // ignore: cast_nullable_to_non_nullable

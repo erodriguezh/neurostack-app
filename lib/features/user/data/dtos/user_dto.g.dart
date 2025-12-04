@@ -8,22 +8,22 @@ part of 'user_dto.dart';
 
 _UserDto _$UserDtoFromJson(Map<String, dynamic> json) => _UserDto(
   id: json['id'] as String,
-  subscriptionStatus: json['subscriptionStatus'] as String,
-  trialPeriod: json['trialPeriod'] == null
+  subscriptionStatus: json['subscription_status'] as String,
+  trialPeriod: json['trial_period'] == null
       ? null
-      : TrialPeriodDto.fromJson(json['trialPeriod'] as Map<String, dynamic>),
-  protocolIds: (json['protocolIds'] as List<dynamic>)
+      : TrialPeriodDto.fromJson(json['trial_period'] as Map<String, dynamic>),
+  protocolIds: (json['protocol_ids'] as List<dynamic>)
       .map((e) => e as String)
       .toList(),
-  onboardingCompleted: json['onboardingCompleted'] as bool,
-  createdAt: json['createdAt'] as String,
+  onboardingCompleted: json['onboarding_completed'] as bool,
+  createdAt: json['created_at'] as String,
 );
 
 Map<String, dynamic> _$UserDtoToJson(_UserDto instance) => <String, dynamic>{
   'id': instance.id,
-  'subscriptionStatus': instance.subscriptionStatus,
-  'trialPeriod': instance.trialPeriod,
-  'protocolIds': instance.protocolIds,
-  'onboardingCompleted': instance.onboardingCompleted,
-  'createdAt': instance.createdAt,
+  'subscription_status': instance.subscriptionStatus,
+  'trial_period': instance.trialPeriod,
+  'protocol_ids': instance.protocolIds,
+  'onboarding_completed': instance.onboardingCompleted,
+  'created_at': instance.createdAt,
 };

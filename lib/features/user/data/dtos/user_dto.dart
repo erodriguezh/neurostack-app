@@ -29,11 +29,11 @@ abstract class UserDto with _$UserDto {
 
   const factory UserDto({
     required String id,
-    required String subscriptionStatus,
-    TrialPeriodDto? trialPeriod,
-    required List<String> protocolIds,
-    required bool onboardingCompleted,
-    required String createdAt,
+    @JsonKey(name: 'subscription_status') required String subscriptionStatus,
+    @JsonKey(name: 'trial_period') TrialPeriodDto? trialPeriod,
+    @JsonKey(name: 'protocol_ids') required List<String> protocolIds,
+    @JsonKey(name: 'onboarding_completed') required bool onboardingCompleted,
+    @JsonKey(name: 'created_at') required String createdAt,
   }) = _UserDto;
 
   factory UserDto.fromJson(Map<String, dynamic> json) =>

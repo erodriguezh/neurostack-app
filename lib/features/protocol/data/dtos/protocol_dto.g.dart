@@ -11,12 +11,12 @@ _ProtocolDto _$ProtocolDtoFromJson(Map<String, dynamic> json) => _ProtocolDto(
   name: json['name'] as String,
   target: TargetDto.fromJson(json['target'] as Map<String, dynamic>),
   category: json['category'] as String,
-  evidenceLevel: json['evidenceLevel'] as String,
+  evidenceLevel: json['evidence_level'] as String,
   citations: (json['citations'] as List<dynamic>)
       .map((e) => ResearchCitationDto.fromJson(e as Map<String, dynamic>))
       .toList(),
-  createdAt: json['createdAt'] as String,
-  deletedAt: json['deletedAt'] as String?,
+  createdAt: json['created_at'] as String,
+  deletedAt: json['deleted_at'] as String?,
 );
 
 Map<String, dynamic> _$ProtocolDtoToJson(_ProtocolDto instance) =>
@@ -25,8 +25,8 @@ Map<String, dynamic> _$ProtocolDtoToJson(_ProtocolDto instance) =>
       'name': instance.name,
       'target': instance.target,
       'category': instance.category,
-      'evidenceLevel': instance.evidenceLevel,
+      'evidence_level': instance.evidenceLevel,
       'citations': instance.citations,
-      'createdAt': instance.createdAt,
-      'deletedAt': instance.deletedAt,
+      'created_at': instance.createdAt,
+      'deleted_at': instance.deletedAt,
     };

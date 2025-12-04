@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ProtocolDto {
 
- String get id; String get name; TargetDto get target; String get category; String get evidenceLevel; List<ResearchCitationDto> get citations; String get createdAt; String? get deletedAt;
+ String get id; String get name; TargetDto get target; String get category;@JsonKey(name: 'evidence_level') String get evidenceLevel; List<ResearchCitationDto> get citations;@JsonKey(name: 'created_at') String get createdAt;@JsonKey(name: 'deleted_at') String? get deletedAt;
 /// Create a copy of ProtocolDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $ProtocolDtoCopyWith<$Res>  {
   factory $ProtocolDtoCopyWith(ProtocolDto value, $Res Function(ProtocolDto) _then) = _$ProtocolDtoCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, TargetDto target, String category, String evidenceLevel, List<ResearchCitationDto> citations, String createdAt, String? deletedAt
+ String id, String name, TargetDto target, String category,@JsonKey(name: 'evidence_level') String evidenceLevel, List<ResearchCitationDto> citations,@JsonKey(name: 'created_at') String createdAt,@JsonKey(name: 'deleted_at') String? deletedAt
 });
 
 
@@ -169,7 +169,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  TargetDto target,  String category,  String evidenceLevel,  List<ResearchCitationDto> citations,  String createdAt,  String? deletedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  TargetDto target,  String category, @JsonKey(name: 'evidence_level')  String evidenceLevel,  List<ResearchCitationDto> citations, @JsonKey(name: 'created_at')  String createdAt, @JsonKey(name: 'deleted_at')  String? deletedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ProtocolDto() when $default != null:
 return $default(_that.id,_that.name,_that.target,_that.category,_that.evidenceLevel,_that.citations,_that.createdAt,_that.deletedAt);case _:
@@ -190,7 +190,7 @@ return $default(_that.id,_that.name,_that.target,_that.category,_that.evidenceLe
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  TargetDto target,  String category,  String evidenceLevel,  List<ResearchCitationDto> citations,  String createdAt,  String? deletedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  TargetDto target,  String category, @JsonKey(name: 'evidence_level')  String evidenceLevel,  List<ResearchCitationDto> citations, @JsonKey(name: 'created_at')  String createdAt, @JsonKey(name: 'deleted_at')  String? deletedAt)  $default,) {final _that = this;
 switch (_that) {
 case _ProtocolDto():
 return $default(_that.id,_that.name,_that.target,_that.category,_that.evidenceLevel,_that.citations,_that.createdAt,_that.deletedAt);case _:
@@ -210,7 +210,7 @@ return $default(_that.id,_that.name,_that.target,_that.category,_that.evidenceLe
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  TargetDto target,  String category,  String evidenceLevel,  List<ResearchCitationDto> citations,  String createdAt,  String? deletedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  TargetDto target,  String category, @JsonKey(name: 'evidence_level')  String evidenceLevel,  List<ResearchCitationDto> citations, @JsonKey(name: 'created_at')  String createdAt, @JsonKey(name: 'deleted_at')  String? deletedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _ProtocolDto() when $default != null:
 return $default(_that.id,_that.name,_that.target,_that.category,_that.evidenceLevel,_that.citations,_that.createdAt,_that.deletedAt);case _:
@@ -225,14 +225,14 @@ return $default(_that.id,_that.name,_that.target,_that.category,_that.evidenceLe
 @JsonSerializable()
 
 class _ProtocolDto extends ProtocolDto {
-  const _ProtocolDto({required this.id, required this.name, required this.target, required this.category, required this.evidenceLevel, required final  List<ResearchCitationDto> citations, required this.createdAt, this.deletedAt}): _citations = citations,super._();
+  const _ProtocolDto({required this.id, required this.name, required this.target, required this.category, @JsonKey(name: 'evidence_level') required this.evidenceLevel, required final  List<ResearchCitationDto> citations, @JsonKey(name: 'created_at') required this.createdAt, @JsonKey(name: 'deleted_at') this.deletedAt}): _citations = citations,super._();
   factory _ProtocolDto.fromJson(Map<String, dynamic> json) => _$ProtocolDtoFromJson(json);
 
 @override final  String id;
 @override final  String name;
 @override final  TargetDto target;
 @override final  String category;
-@override final  String evidenceLevel;
+@override@JsonKey(name: 'evidence_level') final  String evidenceLevel;
  final  List<ResearchCitationDto> _citations;
 @override List<ResearchCitationDto> get citations {
   if (_citations is EqualUnmodifiableListView) return _citations;
@@ -240,8 +240,8 @@ class _ProtocolDto extends ProtocolDto {
   return EqualUnmodifiableListView(_citations);
 }
 
-@override final  String createdAt;
-@override final  String? deletedAt;
+@override@JsonKey(name: 'created_at') final  String createdAt;
+@override@JsonKey(name: 'deleted_at') final  String? deletedAt;
 
 /// Create a copy of ProtocolDto
 /// with the given fields replaced by the non-null parameter values.
@@ -276,7 +276,7 @@ abstract mixin class _$ProtocolDtoCopyWith<$Res> implements $ProtocolDtoCopyWith
   factory _$ProtocolDtoCopyWith(_ProtocolDto value, $Res Function(_ProtocolDto) _then) = __$ProtocolDtoCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, TargetDto target, String category, String evidenceLevel, List<ResearchCitationDto> citations, String createdAt, String? deletedAt
+ String id, String name, TargetDto target, String category,@JsonKey(name: 'evidence_level') String evidenceLevel, List<ResearchCitationDto> citations,@JsonKey(name: 'created_at') String createdAt,@JsonKey(name: 'deleted_at') String? deletedAt
 });
 
 
