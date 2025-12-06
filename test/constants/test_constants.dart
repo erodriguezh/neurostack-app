@@ -7,6 +7,8 @@ abstract final class TestConstants {
   static const citation = _Citation();
   static const subscription = _Subscription();
   static const trial = _Trial();
+  static const dto = _Dto();
+  static const postgrest = _Postgrest();
 }
 
 final class _Subscription {
@@ -76,4 +78,32 @@ final class _Citation {
       'Superior cardiovascular effect of aerobic interval training';
   final String journal = 'Circulation';
   final String doi = '10.1161/CIRCULATIONAHA.106.675041';
+}
+
+final class _Dto {
+  const _Dto();
+
+  // Default IDs for DTO testing
+  final String defaultProtocolId = 'protocol-dto-001';
+  final String defaultUserId = 'user-dto-001';
+
+  // DateTime strings
+  final String validIsoDateTime = '2025-01-15T10:00:00Z';
+  final String invalidDateTime = 'not-a-date';
+
+  // Invalid enum values for testing parse failures
+  final String invalidCategory = 'invalidCategory';
+  final String invalidEvidenceLevel = 'invalidLevel';
+  final String invalidSubscriptionStatus = 'invalidStatus';
+}
+
+final class _Postgrest {
+  const _Postgrest();
+
+  // PostgreSQL/Supabase error codes
+  final String notFound = 'PGRST116';
+  final String uniqueViolation = '23505';
+  final String foreignKeyViolation = '23503';
+  final String rlsViolation = '42501';
+  final String connectionFailed = 'PGRST301';
 }

@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FrequencyDto {
 
- int get minPerWeek; int get maxPerWeek;
+@JsonKey(name: 'min_per_week') int get minPerWeek;@JsonKey(name: 'max_per_week') int get maxPerWeek;
 /// Create a copy of FrequencyDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $FrequencyDtoCopyWith<$Res>  {
   factory $FrequencyDtoCopyWith(FrequencyDto value, $Res Function(FrequencyDto) _then) = _$FrequencyDtoCopyWithImpl;
 @useResult
 $Res call({
- int minPerWeek, int maxPerWeek
+@JsonKey(name: 'min_per_week') int minPerWeek,@JsonKey(name: 'max_per_week') int maxPerWeek
 });
 
 
@@ -154,7 +154,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int minPerWeek,  int maxPerWeek)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'min_per_week')  int minPerWeek, @JsonKey(name: 'max_per_week')  int maxPerWeek)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FrequencyDto() when $default != null:
 return $default(_that.minPerWeek,_that.maxPerWeek);case _:
@@ -175,7 +175,7 @@ return $default(_that.minPerWeek,_that.maxPerWeek);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int minPerWeek,  int maxPerWeek)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'min_per_week')  int minPerWeek, @JsonKey(name: 'max_per_week')  int maxPerWeek)  $default,) {final _that = this;
 switch (_that) {
 case _FrequencyDto():
 return $default(_that.minPerWeek,_that.maxPerWeek);case _:
@@ -195,7 +195,7 @@ return $default(_that.minPerWeek,_that.maxPerWeek);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int minPerWeek,  int maxPerWeek)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'min_per_week')  int minPerWeek, @JsonKey(name: 'max_per_week')  int maxPerWeek)?  $default,) {final _that = this;
 switch (_that) {
 case _FrequencyDto() when $default != null:
 return $default(_that.minPerWeek,_that.maxPerWeek);case _:
@@ -210,11 +210,11 @@ return $default(_that.minPerWeek,_that.maxPerWeek);case _:
 @JsonSerializable()
 
 class _FrequencyDto extends FrequencyDto {
-  const _FrequencyDto({required this.minPerWeek, required this.maxPerWeek}): super._();
+  const _FrequencyDto({@JsonKey(name: 'min_per_week') required this.minPerWeek, @JsonKey(name: 'max_per_week') required this.maxPerWeek}): super._();
   factory _FrequencyDto.fromJson(Map<String, dynamic> json) => _$FrequencyDtoFromJson(json);
 
-@override final  int minPerWeek;
-@override final  int maxPerWeek;
+@override@JsonKey(name: 'min_per_week') final  int minPerWeek;
+@override@JsonKey(name: 'max_per_week') final  int maxPerWeek;
 
 /// Create a copy of FrequencyDto
 /// with the given fields replaced by the non-null parameter values.
@@ -249,7 +249,7 @@ abstract mixin class _$FrequencyDtoCopyWith<$Res> implements $FrequencyDtoCopyWi
   factory _$FrequencyDtoCopyWith(_FrequencyDto value, $Res Function(_FrequencyDto) _then) = __$FrequencyDtoCopyWithImpl;
 @override @useResult
 $Res call({
- int minPerWeek, int maxPerWeek
+@JsonKey(name: 'min_per_week') int minPerWeek,@JsonKey(name: 'max_per_week') int maxPerWeek
 });
 
 

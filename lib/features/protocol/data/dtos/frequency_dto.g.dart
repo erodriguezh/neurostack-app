@@ -8,12 +8,12 @@ part of 'frequency_dto.dart';
 
 _FrequencyDto _$FrequencyDtoFromJson(Map<String, dynamic> json) =>
     _FrequencyDto(
-      minPerWeek: (json['minPerWeek'] as num).toInt(),
-      maxPerWeek: (json['maxPerWeek'] as num).toInt(),
+      minPerWeek: (json['min_per_week'] as num).toInt(),
+      maxPerWeek: (json['max_per_week'] as num).toInt(),
     );
 
 Map<String, dynamic> _$FrequencyDtoToJson(_FrequencyDto instance) =>
     <String, dynamic>{
-      'minPerWeek': instance.minPerWeek,
-      'maxPerWeek': instance.maxPerWeek,
+      'min_per_week': instance.minPerWeek,
+      'max_per_week': instance.maxPerWeek,
     };

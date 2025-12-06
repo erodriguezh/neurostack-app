@@ -15,8 +15,8 @@ abstract class FrequencyDto with _$FrequencyDto {
   const FrequencyDto._();
 
   const factory FrequencyDto({
-    required int minPerWeek,
-    required int maxPerWeek,
+    @JsonKey(name: 'min_per_week') required int minPerWeek,
+    @JsonKey(name: 'max_per_week') required int maxPerWeek,
   }) = _FrequencyDto;
 
   factory FrequencyDto.fromJson(Map<String, dynamic> json) =>
