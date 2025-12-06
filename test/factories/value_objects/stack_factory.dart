@@ -20,4 +20,13 @@ abstract final class StackFactory {
   /// Creates a Stack over free tier capacity (3 protocols).
   static Stack overFreeCapacity() =>
       Stack.fromIds([protocol1, protocol2, protocol3]);
+
+  /// Creates a Stack containing a specific protocol.
+  /// Use for testing protocol-specific operations.
+  static Stack withProtocol(String protocolId) => Stack.fromIds([protocolId]);
+
+  /// Creates a Stack containing multiple specific protocols.
+  /// Use for testing multi-protocol scenarios.
+  static Stack withProtocols(List<String> protocolIds) =>
+      Stack.fromIds(protocolIds);
 }
