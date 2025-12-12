@@ -54,6 +54,36 @@ class KitColorsExtension extends ThemeExtension<KitColorsExtension> {
   final Color neutral900;
   final Color neutral950;
 
+  // Brand Colors
+  final Color brandSky;
+  final Color brandDark;
+  final Color panel;
+  final Color background;
+
+  // Semantic Colors
+  final Color success;
+  final Color successLight;
+  final Color warning;
+  final Color info;
+
+  // Evidence Level Colors
+  final Color evidenceStrong;
+  final Color evidenceModerate;
+  final Color evidenceWeak;
+
+  // White Opacity Scale
+  final Color white90;
+  final Color white80;
+  final Color white70;
+  final Color white60;
+  final Color white50;
+  final Color white40;
+  final Color white30;
+  final Color white20;
+  final Color white10;
+  final Color white05;
+  final Color white02;
+
   const KitColorsExtension({
     // Red Colors
     this.red50 = KitColors.red50,
@@ -103,6 +133,32 @@ class KitColorsExtension extends ThemeExtension<KitColorsExtension> {
     this.neutral800 = KitColors.neutral800,
     this.neutral900 = KitColors.neutral900,
     this.neutral950 = KitColors.neutral950,
+    // Brand Colors
+    this.brandSky = KitColors.brandSky,
+    this.brandDark = KitColors.brandDark,
+    this.panel = KitColors.panel,
+    this.background = KitColors.background,
+    // Semantic Colors
+    this.success = KitColors.success,
+    this.successLight = KitColors.successLight,
+    this.warning = KitColors.warning,
+    this.info = KitColors.info,
+    // Evidence Level Colors
+    this.evidenceStrong = KitColors.evidenceStrong,
+    this.evidenceModerate = KitColors.evidenceModerate,
+    this.evidenceWeak = KitColors.evidenceWeak,
+    // White Opacity Scale
+    this.white90 = KitColors.white90,
+    this.white80 = KitColors.white80,
+    this.white70 = KitColors.white70,
+    this.white60 = KitColors.white60,
+    this.white50 = KitColors.white50,
+    this.white40 = KitColors.white40,
+    this.white30 = KitColors.white30,
+    this.white20 = KitColors.white20,
+    this.white10 = KitColors.white10,
+    this.white05 = KitColors.white05,
+    this.white02 = KitColors.white02,
   });
 
   @override
@@ -155,6 +211,32 @@ class KitColorsExtension extends ThemeExtension<KitColorsExtension> {
     Color? neutral800,
     Color? neutral900,
     Color? neutral950,
+    // Brand Colors
+    Color? brandSky,
+    Color? brandDark,
+    Color? panel,
+    Color? background,
+    // Semantic Colors
+    Color? success,
+    Color? successLight,
+    Color? warning,
+    Color? info,
+    // Evidence Level Colors
+    Color? evidenceStrong,
+    Color? evidenceModerate,
+    Color? evidenceWeak,
+    // White Opacity Scale
+    Color? white90,
+    Color? white80,
+    Color? white70,
+    Color? white60,
+    Color? white50,
+    Color? white40,
+    Color? white30,
+    Color? white20,
+    Color? white10,
+    Color? white05,
+    Color? white02,
   }) {
     return KitColorsExtension(
       // Red Colors
@@ -205,6 +287,32 @@ class KitColorsExtension extends ThemeExtension<KitColorsExtension> {
       neutral800: neutral800 ?? this.neutral800,
       neutral900: neutral900 ?? this.neutral900,
       neutral950: neutral950 ?? this.neutral950,
+      // Brand Colors
+      brandSky: brandSky ?? this.brandSky,
+      brandDark: brandDark ?? this.brandDark,
+      panel: panel ?? this.panel,
+      background: background ?? this.background,
+      // Semantic Colors
+      success: success ?? this.success,
+      successLight: successLight ?? this.successLight,
+      warning: warning ?? this.warning,
+      info: info ?? this.info,
+      // Evidence Level Colors
+      evidenceStrong: evidenceStrong ?? this.evidenceStrong,
+      evidenceModerate: evidenceModerate ?? this.evidenceModerate,
+      evidenceWeak: evidenceWeak ?? this.evidenceWeak,
+      // White Opacity Scale
+      white90: white90 ?? this.white90,
+      white80: white80 ?? this.white80,
+      white70: white70 ?? this.white70,
+      white60: white60 ?? this.white60,
+      white50: white50 ?? this.white50,
+      white40: white40 ?? this.white40,
+      white30: white30 ?? this.white30,
+      white20: white20 ?? this.white20,
+      white10: white10 ?? this.white10,
+      white05: white05 ?? this.white05,
+      white02: white02 ?? this.white02,
     );
   }
 
@@ -265,6 +373,32 @@ class KitColorsExtension extends ThemeExtension<KitColorsExtension> {
       neutral800: Color.lerp(neutral800, other.neutral800, t)!,
       neutral900: Color.lerp(neutral900, other.neutral900, t)!,
       neutral950: Color.lerp(neutral950, other.neutral950, t)!,
+      // Brand Colors
+      brandSky: Color.lerp(brandSky, other.brandSky, t)!,
+      brandDark: Color.lerp(brandDark, other.brandDark, t)!,
+      panel: Color.lerp(panel, other.panel, t)!,
+      background: Color.lerp(background, other.background, t)!,
+      // Semantic Colors
+      success: Color.lerp(success, other.success, t)!,
+      successLight: Color.lerp(successLight, other.successLight, t)!,
+      warning: Color.lerp(warning, other.warning, t)!,
+      info: Color.lerp(info, other.info, t)!,
+      // Evidence Level Colors
+      evidenceStrong: Color.lerp(evidenceStrong, other.evidenceStrong, t)!,
+      evidenceModerate: Color.lerp(evidenceModerate, other.evidenceModerate, t)!,
+      evidenceWeak: Color.lerp(evidenceWeak, other.evidenceWeak, t)!,
+      // White Opacity Scale
+      white90: Color.lerp(white90, other.white90, t)!,
+      white80: Color.lerp(white80, other.white80, t)!,
+      white70: Color.lerp(white70, other.white70, t)!,
+      white60: Color.lerp(white60, other.white60, t)!,
+      white50: Color.lerp(white50, other.white50, t)!,
+      white40: Color.lerp(white40, other.white40, t)!,
+      white30: Color.lerp(white30, other.white30, t)!,
+      white20: Color.lerp(white20, other.white20, t)!,
+      white10: Color.lerp(white10, other.white10, t)!,
+      white05: Color.lerp(white05, other.white05, t)!,
+      white02: Color.lerp(white02, other.white02, t)!,
     );
   }
 }
@@ -272,6 +406,7 @@ class KitColorsExtension extends ThemeExtension<KitColorsExtension> {
 class KitColors {
   const KitColors._(); // Private constructor to prevent instantiation
 
+  // Red Colors
   static const red50 = Color(0xFFFEF2F2);
   static const red100 = Color(0xFFFEE2E2);
   static const red200 = Color(0xFFFECACA);
@@ -284,6 +419,7 @@ class KitColors {
   static const red900 = Color(0xFF7F1D1D);
   static const red950 = Color(0xFF450A0A);
 
+  // Yellow Colors
   static const yellow50 = Color(0xFFFEFCE8);
   static const yellow100 = Color(0xFFFEF9C3);
   static const yellow200 = Color(0xFFFEF08A);
@@ -296,6 +432,7 @@ class KitColors {
   static const yellow900 = Color(0xFF713F12);
   static const yellow950 = Color(0xFF422006);
 
+  // Green Colors
   static const green50 = Color(0xFFF0FDF4);
   static const green100 = Color(0xFFDCFCE7);
   static const green200 = Color(0xFFBBF7D0);
@@ -308,6 +445,7 @@ class KitColors {
   static const green900 = Color(0xFF14532D);
   static const green950 = Color(0xFF052E16);
 
+  // Neutral Colors
   static const neutral50 = Color(0xFFFAFAFA);
   static const neutral100 = Color(0xFFF5F5F5);
   static const neutral200 = Color(0xFFE5E5E5);
@@ -319,4 +457,34 @@ class KitColors {
   static const neutral800 = Color(0xFF262626);
   static const neutral900 = Color(0xFF171717);
   static const neutral950 = Color(0xFF0A0A0A);
+
+  // Brand Colors
+  static const brandSky = Color(0xFF38BDF8);
+  static const brandDark = Color(0xFF050505);
+  static const panel = Color(0xFF0F110E);
+  static const background = Color(0xFF030303);
+
+  // Semantic Colors
+  static const success = Color(0xFF10B981); // Emerald-500
+  static const successLight = Color(0xFF34D399); // Emerald-400
+  static const warning = Color(0xFFFBBF24); // Amber-400
+  static const info = Color(0xFF3B82F6); // Blue-500
+
+  // Evidence Level Colors
+  static const evidenceStrong = Color(0xFF34D399); // Emerald-400
+  static const evidenceModerate = Color(0xFF38BDF8); // Brand Sky
+  static const evidenceWeak = Color(0x80FFFFFF); // white/50
+
+  // White Opacity Scale
+  static const white90 = Color(0xE6FFFFFF); // 0.9 - Headlines
+  static const white80 = Color(0xCCFFFFFF); // 0.8 - Body text light
+  static const white70 = Color(0xB3FFFFFF); // 0.7 - Subheadings
+  static const white60 = Color(0x99FFFFFF); // 0.6 - Secondary text
+  static const white50 = Color(0x80FFFFFF); // 0.5 - Tertiary text
+  static const white40 = Color(0x66FFFFFF); // 0.4 - Muted labels
+  static const white30 = Color(0x4DFFFFFF); // 0.3 - Disabled
+  static const white20 = Color(0x33FFFFFF); // 0.2 - Subtle elements
+  static const white10 = Color(0x1AFFFFFF); // 0.1 - Borders, dividers
+  static const white05 = Color(0x0DFFFFFF); // 0.05 - Subtle backgrounds
+  static const white02 = Color(0x05FFFFFF); // 0.02 - Card fills
 }

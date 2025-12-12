@@ -6,7 +6,6 @@
   "configurations": [
     {
       "name": "app",
-      "cwd": "app",
       "request": "launch",
       "type": "dart",
       "args": [
@@ -15,7 +14,6 @@
     },
     {
       "name": "app (profile mode)",
-      "cwd": "app",
       "request": "launch",
       "type": "dart",
       "flutterMode": "profile",
@@ -25,7 +23,6 @@
     },
     {
       "name": "app (release mode)",
-      "cwd": "app",
       "request": "launch",
       "type": "dart",
       "flutterMode": "release",

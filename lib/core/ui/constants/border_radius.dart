@@ -24,6 +24,12 @@ class CustomBorderRadius extends ThemeExtension<CustomBorderRadius> {
   /// 16
   final BorderRadius xxxl;
 
+  /// 24 - Protocol cards, modal content
+  final BorderRadius r24;
+
+  /// 32 - Bottom sheet top corners
+  final BorderRadius r32;
+
   /// 9999
   final BorderRadius full;
 
@@ -35,6 +41,8 @@ class CustomBorderRadius extends ThemeExtension<CustomBorderRadius> {
     this.xl = const BorderRadius.all(Radius.circular(8.0)),
     this.xxl = const BorderRadius.all(Radius.circular(12.0)),
     this.xxxl = const BorderRadius.all(Radius.circular(16.0)),
+    this.r24 = const BorderRadius.all(Radius.circular(24.0)),
+    this.r32 = const BorderRadius.all(Radius.circular(32.0)),
     this.full = const BorderRadius.all(Radius.circular(9999.0)),
   });
 
@@ -47,6 +55,8 @@ class CustomBorderRadius extends ThemeExtension<CustomBorderRadius> {
     BorderRadius? xl,
     BorderRadius? xxl,
     BorderRadius? xxxl,
+    BorderRadius? r24,
+    BorderRadius? r32,
     BorderRadius? full,
   }) {
     return CustomBorderRadius(
@@ -57,6 +67,8 @@ class CustomBorderRadius extends ThemeExtension<CustomBorderRadius> {
       xl: xl ?? this.xl,
       xxl: xxl ?? this.xxl,
       xxxl: xxxl ?? this.xxxl,
+      r24: r24 ?? this.r24,
+      r32: r32 ?? this.r32,
       full: full ?? this.full,
     );
   }
@@ -72,6 +84,8 @@ class CustomBorderRadius extends ThemeExtension<CustomBorderRadius> {
       xl: BorderRadius.lerp(xl, other.xl, t)!,
       xxl: BorderRadius.lerp(xxl, other.xxl, t)!,
       xxxl: BorderRadius.lerp(xxxl, other.xxxl, t)!,
+      r24: BorderRadius.lerp(r24, other.r24, t)!,
+      r32: BorderRadius.lerp(r32, other.r32, t)!,
       full: BorderRadius.lerp(full, other.full, t)!,
     );
   }

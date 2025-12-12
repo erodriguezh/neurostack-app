@@ -53,6 +53,7 @@ dependencies:
   uuid: ^4.5.2
   collection: ^1.19.1
   json_annotation: ^4.9.0
+  google_fonts: ^6.2.1
   supabase_flutter: ^2.10.3
   mocktail: ^1.0.4
 

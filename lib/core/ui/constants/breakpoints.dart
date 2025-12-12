@@ -5,19 +5,24 @@ import 'dart:ui'; // For lerpDouble
 /// inspired by Tailwind CSS.
 @immutable
 class CustomBreakpoints extends ThemeExtension<CustomBreakpoints> {
-  /// 640
+  /// 640 - Compact/Medium boundary
+  /// Below this: single-pane layouts, bottom navigation
   final double sm;
 
-  /// 768
+  /// 768 - Medium/Expanded boundary
+  /// Above this: navigation rail becomes viable, two-pane layouts
   final double md;
 
-  /// 1024
+  /// 1024 - Medium/Expanded boundary
+  /// Navigation rail becomes viable, two-pane layouts
   final double lg;
 
-  /// 1280
+  /// 1280 - Expanded/Large boundary
+  /// Above this: navigation drawer, multi-pane layouts
   final double xl;
 
-  /// 1536
+  /// 1536 - Large/ExtraLarge boundary
+  /// Above this: max-width containers recommended, 4K displays
   final double xxl;
 
   const CustomBreakpoints({
