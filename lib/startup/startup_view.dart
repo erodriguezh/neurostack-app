@@ -7,6 +7,7 @@ import 'package:neurostack/core/utils/l10n/translate_extension.dart';
 import 'package:neurostack/core/utils/navigation/best_router.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/core/utils/l10n/translate.dart';
+import 'package:neurostack/startup/splash_screen.dart';
 import 'package:neurostack/startup/startup_view_model.dart';
 
 class StartupView extends StatefulWidget {
@@ -110,6 +111,6 @@ class _StartupErrorView extends StatelessWidget {
 class _SplashView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    return const SplashScreen();
   }
 }

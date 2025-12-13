@@ -56,6 +56,7 @@ dependencies:
   google_fonts: ^6.2.1
   supabase_flutter: ^2.10.3
   mocktail: ^1.0.4
+  flutter_svg: ^2.2.3
 
 dev_dependencies:
   flutter_test:
@@ -85,8 +86,11 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-    # - assets/
+  assets:
+    - assets/
+
+  shaders:
+    - shaders/beam.frag
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
