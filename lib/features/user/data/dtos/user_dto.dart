@@ -28,8 +28,12 @@ abstract class UserDto with _$UserDto {
   const UserDto._();
 
   const factory UserDto({
-    required String id,
-    @JsonKey(name: 'subscription_status') required String subscriptionStatus,
+    @JsonKey(fromJson: _stringFromJson) required String id,
+    @JsonKey(
+      name: 'subscription_status',
+      fromJson: _stringFromJson,
+    )
+    required String subscriptionStatus,
     @JsonKey(name: 'trial_period') TrialPeriodDto? trialPeriod,
     @JsonKey(
       name: 'protocol_ids',
@@ -38,7 +42,8 @@ abstract class UserDto with _$UserDto {
     )
     required List<String> protocolIds,
     @JsonKey(name: 'onboarding_completed') required bool onboardingCompleted,
-    @JsonKey(name: 'created_at') required String createdAt,
+    @JsonKey(name: 'created_at', fromJson: _stringFromJson)
+    required String createdAt,
   }) = _UserDto;
 
   factory UserDto.fromJson(Map<String, dynamic> json) =>
@@ -68,21 +73,25 @@ abstract class UserDto with _$UserDto {
         );
       }
 
+      // Parse date (needed for trial fallback)
+      final createdAtDate = DateTime.parse(createdAt);
+
       // Parse trial period if present
       TrialPeriod? domainTrialPeriod;
       if (trialPeriod != null) {
         final trialResult = trialPeriod!.toDomain();
-        if (trialResult.isLeft()) {
-          return left(trialResult.getLeft().getOrElse(() => throw StateError('Unreachable')));
+        if (trialResult.isRight()) {
+          domainTrialPeriod =
+              trialResult.getOrElse((l) => throw StateError('Unreachable'));
+        } else if (domainStatus == SubscriptionStatus.trial) {
+          domainTrialPeriod = TrialPeriod.fromStartDate(createdAtDate);
         }
-        domainTrialPeriod = trialResult.getOrElse((l) => throw StateError('Unreachable'));
+      } else if (domainStatus == SubscriptionStatus.trial) {
+        domainTrialPeriod = TrialPeriod.fromStartDate(createdAtDate);
       }
 
       // Create stack from protocol IDs
       final domainStack = Stack.fromIds(protocolIds);
-
-      // Parse date
-      final createdAtDate = DateTime.parse(createdAt);
 
       // Reconstitute (not create) to avoid domain events
       return right(
@@ -118,6 +127,13 @@ abstract class UserDto with _$UserDto {
       createdAt: user.createdAt.toIso8601String(),
     );
   }
+}
+
+String _stringFromJson(dynamic raw) {
+  if (raw == null) {
+    return '';
+  }
+  return raw.toString();
 }
 
 List<String> _protocolIdsFromJson(dynamic raw) {

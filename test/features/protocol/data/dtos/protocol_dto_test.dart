@@ -99,8 +99,6 @@ void main() {
         // Arrange
         final json = ProtocolDtoFactory.createValidJson();
 
-        print(json);
-
         // Act
         final dto = ProtocolDto.fromJson(json);
 

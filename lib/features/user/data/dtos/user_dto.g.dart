@@ -7,14 +7,14 @@ part of 'user_dto.dart';
 // **************************************************************************
 
 _UserDto _$UserDtoFromJson(Map<String, dynamic> json) => _UserDto(
-  id: json['id'] as String,
-  subscriptionStatus: json['subscription_status'] as String,
+  id: _stringFromJson(json['id']),
+  subscriptionStatus: _stringFromJson(json['subscription_status']),
   trialPeriod: json['trial_period'] == null
       ? null
       : TrialPeriodDto.fromJson(json['trial_period'] as Map<String, dynamic>),
   protocolIds: _protocolIdsFromJson(json['protocol_ids']),
   onboardingCompleted: json['onboarding_completed'] as bool,
-  createdAt: json['created_at'] as String,
+  createdAt: _stringFromJson(json['created_at']),
 );
 
 Map<String, dynamic> _$UserDtoToJson(_UserDto instance) => <String, dynamic>{

@@ -16,7 +16,8 @@ abstract class TrialPeriodDto with _$TrialPeriodDto {
   const TrialPeriodDto._();
 
   const factory TrialPeriodDto({
-    @JsonKey(name: 'start_date') required String startDate,
+    @JsonKey(name: 'start_date', fromJson: _stringFromJson)
+    required String startDate,
   }) = _TrialPeriodDto;
 
   factory TrialPeriodDto.fromJson(Map<String, dynamic> json) =>
@@ -43,4 +44,11 @@ abstract class TrialPeriodDto with _$TrialPeriodDto {
   factory TrialPeriodDto.fromDomain(TrialPeriod trial) {
     return TrialPeriodDto(startDate: trial.startDate.toIso8601String());
   }
+}
+
+String _stringFromJson(dynamic raw) {
+  if (raw == null) {
+    return '';
+  }
+  return raw.toString();
 }

@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$TrialPeriodDto {
 
-@JsonKey(name: 'start_date') String get startDate;
+@JsonKey(name: 'start_date', fromJson: _stringFromJson) String get startDate;
 /// Create a copy of TrialPeriodDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $TrialPeriodDtoCopyWith<$Res>  {
   factory $TrialPeriodDtoCopyWith(TrialPeriodDto value, $Res Function(TrialPeriodDto) _then) = _$TrialPeriodDtoCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'start_date') String startDate
+@JsonKey(name: 'start_date', fromJson: _stringFromJson) String startDate
 });
 
 
@@ -153,7 +153,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'start_date')  String startDate)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'start_date', fromJson: _stringFromJson)  String startDate)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TrialPeriodDto() when $default != null:
 return $default(_that.startDate);case _:
@@ -174,7 +174,7 @@ return $default(_that.startDate);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'start_date')  String startDate)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'start_date', fromJson: _stringFromJson)  String startDate)  $default,) {final _that = this;
 switch (_that) {
 case _TrialPeriodDto():
 return $default(_that.startDate);case _:
@@ -194,7 +194,7 @@ return $default(_that.startDate);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'start_date')  String startDate)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'start_date', fromJson: _stringFromJson)  String startDate)?  $default,) {final _that = this;
 switch (_that) {
 case _TrialPeriodDto() when $default != null:
 return $default(_that.startDate);case _:
@@ -209,10 +209,10 @@ return $default(_that.startDate);case _:
 @JsonSerializable()
 
 class _TrialPeriodDto extends TrialPeriodDto {
-  const _TrialPeriodDto({@JsonKey(name: 'start_date') required this.startDate}): super._();
+  const _TrialPeriodDto({@JsonKey(name: 'start_date', fromJson: _stringFromJson) required this.startDate}): super._();
   factory _TrialPeriodDto.fromJson(Map<String, dynamic> json) => _$TrialPeriodDtoFromJson(json);
 
-@override@JsonKey(name: 'start_date') final  String startDate;
+@override@JsonKey(name: 'start_date', fromJson: _stringFromJson) final  String startDate;
 
 /// Create a copy of TrialPeriodDto
 /// with the given fields replaced by the non-null parameter values.
@@ -247,7 +247,7 @@ abstract mixin class _$TrialPeriodDtoCopyWith<$Res> implements $TrialPeriodDtoCo
   factory _$TrialPeriodDtoCopyWith(_TrialPeriodDto value, $Res Function(_TrialPeriodDto) _then) = __$TrialPeriodDtoCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'start_date') String startDate
+@JsonKey(name: 'start_date', fromJson: _stringFromJson) String startDate
 });
 
 

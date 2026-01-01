@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UserDto {
 
- String get id;@JsonKey(name: 'subscription_status') String get subscriptionStatus;@JsonKey(name: 'trial_period') TrialPeriodDto? get trialPeriod;@JsonKey(name: 'protocol_ids', fromJson: _protocolIdsFromJson, toJson: _protocolIdsToJson) List<String> get protocolIds;@JsonKey(name: 'onboarding_completed') bool get onboardingCompleted;@JsonKey(name: 'created_at') String get createdAt;
+@JsonKey(fromJson: _stringFromJson) String get id;@JsonKey(name: 'subscription_status', fromJson: _stringFromJson) String get subscriptionStatus;@JsonKey(name: 'trial_period') TrialPeriodDto? get trialPeriod;@JsonKey(name: 'protocol_ids', fromJson: _protocolIdsFromJson, toJson: _protocolIdsToJson) List<String> get protocolIds;@JsonKey(name: 'onboarding_completed') bool get onboardingCompleted;@JsonKey(name: 'created_at', fromJson: _stringFromJson) String get createdAt;
 /// Create a copy of UserDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $UserDtoCopyWith<$Res>  {
   factory $UserDtoCopyWith(UserDto value, $Res Function(UserDto) _then) = _$UserDtoCopyWithImpl;
 @useResult
 $Res call({
- String id,@JsonKey(name: 'subscription_status') String subscriptionStatus,@JsonKey(name: 'trial_period') TrialPeriodDto? trialPeriod,@JsonKey(name: 'protocol_ids', fromJson: _protocolIdsFromJson, toJson: _protocolIdsToJson) List<String> protocolIds,@JsonKey(name: 'onboarding_completed') bool onboardingCompleted,@JsonKey(name: 'created_at') String createdAt
+@JsonKey(fromJson: _stringFromJson) String id,@JsonKey(name: 'subscription_status', fromJson: _stringFromJson) String subscriptionStatus,@JsonKey(name: 'trial_period') TrialPeriodDto? trialPeriod,@JsonKey(name: 'protocol_ids', fromJson: _protocolIdsFromJson, toJson: _protocolIdsToJson) List<String> protocolIds,@JsonKey(name: 'onboarding_completed') bool onboardingCompleted,@JsonKey(name: 'created_at', fromJson: _stringFromJson) String createdAt
 });
 
 
@@ -170,7 +170,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'subscription_status')  String subscriptionStatus, @JsonKey(name: 'trial_period')  TrialPeriodDto? trialPeriod, @JsonKey(name: 'protocol_ids', fromJson: _protocolIdsFromJson, toJson: _protocolIdsToJson)  List<String> protocolIds, @JsonKey(name: 'onboarding_completed')  bool onboardingCompleted, @JsonKey(name: 'created_at')  String createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(fromJson: _stringFromJson)  String id, @JsonKey(name: 'subscription_status', fromJson: _stringFromJson)  String subscriptionStatus, @JsonKey(name: 'trial_period')  TrialPeriodDto? trialPeriod, @JsonKey(name: 'protocol_ids', fromJson: _protocolIdsFromJson, toJson: _protocolIdsToJson)  List<String> protocolIds, @JsonKey(name: 'onboarding_completed')  bool onboardingCompleted, @JsonKey(name: 'created_at', fromJson: _stringFromJson)  String createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserDto() when $default != null:
 return $default(_that.id,_that.subscriptionStatus,_that.trialPeriod,_that.protocolIds,_that.onboardingCompleted,_that.createdAt);case _:
@@ -191,7 +191,7 @@ return $default(_that.id,_that.subscriptionStatus,_that.trialPeriod,_that.protoc
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'subscription_status')  String subscriptionStatus, @JsonKey(name: 'trial_period')  TrialPeriodDto? trialPeriod, @JsonKey(name: 'protocol_ids', fromJson: _protocolIdsFromJson, toJson: _protocolIdsToJson)  List<String> protocolIds, @JsonKey(name: 'onboarding_completed')  bool onboardingCompleted, @JsonKey(name: 'created_at')  String createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(fromJson: _stringFromJson)  String id, @JsonKey(name: 'subscription_status', fromJson: _stringFromJson)  String subscriptionStatus, @JsonKey(name: 'trial_period')  TrialPeriodDto? trialPeriod, @JsonKey(name: 'protocol_ids', fromJson: _protocolIdsFromJson, toJson: _protocolIdsToJson)  List<String> protocolIds, @JsonKey(name: 'onboarding_completed')  bool onboardingCompleted, @JsonKey(name: 'created_at', fromJson: _stringFromJson)  String createdAt)  $default,) {final _that = this;
 switch (_that) {
 case _UserDto():
 return $default(_that.id,_that.subscriptionStatus,_that.trialPeriod,_that.protocolIds,_that.onboardingCompleted,_that.createdAt);case _:
@@ -211,7 +211,7 @@ return $default(_that.id,_that.subscriptionStatus,_that.trialPeriod,_that.protoc
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'subscription_status')  String subscriptionStatus, @JsonKey(name: 'trial_period')  TrialPeriodDto? trialPeriod, @JsonKey(name: 'protocol_ids', fromJson: _protocolIdsFromJson, toJson: _protocolIdsToJson)  List<String> protocolIds, @JsonKey(name: 'onboarding_completed')  bool onboardingCompleted, @JsonKey(name: 'created_at')  String createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(fromJson: _stringFromJson)  String id, @JsonKey(name: 'subscription_status', fromJson: _stringFromJson)  String subscriptionStatus, @JsonKey(name: 'trial_period')  TrialPeriodDto? trialPeriod, @JsonKey(name: 'protocol_ids', fromJson: _protocolIdsFromJson, toJson: _protocolIdsToJson)  List<String> protocolIds, @JsonKey(name: 'onboarding_completed')  bool onboardingCompleted, @JsonKey(name: 'created_at', fromJson: _stringFromJson)  String createdAt)?  $default,) {final _that = this;
 switch (_that) {
 case _UserDto() when $default != null:
 return $default(_that.id,_that.subscriptionStatus,_that.trialPeriod,_that.protocolIds,_that.onboardingCompleted,_that.createdAt);case _:
@@ -226,11 +226,11 @@ return $default(_that.id,_that.subscriptionStatus,_that.trialPeriod,_that.protoc
 @JsonSerializable()
 
 class _UserDto extends UserDto {
-  const _UserDto({required this.id, @JsonKey(name: 'subscription_status') required this.subscriptionStatus, @JsonKey(name: 'trial_period') this.trialPeriod, @JsonKey(name: 'protocol_ids', fromJson: _protocolIdsFromJson, toJson: _protocolIdsToJson) required final  List<String> protocolIds, @JsonKey(name: 'onboarding_completed') required this.onboardingCompleted, @JsonKey(name: 'created_at') required this.createdAt}): _protocolIds = protocolIds,super._();
+  const _UserDto({@JsonKey(fromJson: _stringFromJson) required this.id, @JsonKey(name: 'subscription_status', fromJson: _stringFromJson) required this.subscriptionStatus, @JsonKey(name: 'trial_period') this.trialPeriod, @JsonKey(name: 'protocol_ids', fromJson: _protocolIdsFromJson, toJson: _protocolIdsToJson) required final  List<String> protocolIds, @JsonKey(name: 'onboarding_completed') required this.onboardingCompleted, @JsonKey(name: 'created_at', fromJson: _stringFromJson) required this.createdAt}): _protocolIds = protocolIds,super._();
   factory _UserDto.fromJson(Map<String, dynamic> json) => _$UserDtoFromJson(json);
 
-@override final  String id;
-@override@JsonKey(name: 'subscription_status') final  String subscriptionStatus;
+@override@JsonKey(fromJson: _stringFromJson) final  String id;
+@override@JsonKey(name: 'subscription_status', fromJson: _stringFromJson) final  String subscriptionStatus;
 @override@JsonKey(name: 'trial_period') final  TrialPeriodDto? trialPeriod;
  final  List<String> _protocolIds;
 @override@JsonKey(name: 'protocol_ids', fromJson: _protocolIdsFromJson, toJson: _protocolIdsToJson) List<String> get protocolIds {
@@ -240,7 +240,7 @@ class _UserDto extends UserDto {
 }
 
 @override@JsonKey(name: 'onboarding_completed') final  bool onboardingCompleted;
-@override@JsonKey(name: 'created_at') final  String createdAt;
+@override@JsonKey(name: 'created_at', fromJson: _stringFromJson) final  String createdAt;
 
 /// Create a copy of UserDto
 /// with the given fields replaced by the non-null parameter values.
@@ -275,7 +275,7 @@ abstract mixin class _$UserDtoCopyWith<$Res> implements $UserDtoCopyWith<$Res> {
   factory _$UserDtoCopyWith(_UserDto value, $Res Function(_UserDto) _then) = __$UserDtoCopyWithImpl;
 @override @useResult
 $Res call({
- String id,@JsonKey(name: 'subscription_status') String subscriptionStatus,@JsonKey(name: 'trial_period') TrialPeriodDto? trialPeriod,@JsonKey(name: 'protocol_ids', fromJson: _protocolIdsFromJson, toJson: _protocolIdsToJson) List<String> protocolIds,@JsonKey(name: 'onboarding_completed') bool onboardingCompleted,@JsonKey(name: 'created_at') String createdAt
+@JsonKey(fromJson: _stringFromJson) String id,@JsonKey(name: 'subscription_status', fromJson: _stringFromJson) String subscriptionStatus,@JsonKey(name: 'trial_period') TrialPeriodDto? trialPeriod,@JsonKey(name: 'protocol_ids', fromJson: _protocolIdsFromJson, toJson: _protocolIdsToJson) List<String> protocolIds,@JsonKey(name: 'onboarding_completed') bool onboardingCompleted,@JsonKey(name: 'created_at', fromJson: _stringFromJson) String createdAt
 });
 
 

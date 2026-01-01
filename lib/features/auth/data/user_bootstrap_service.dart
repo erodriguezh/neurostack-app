@@ -1,4 +1,7 @@
 import 'package:fpdart/fpdart.dart';
+import 'package:logging/logging.dart';
+
+import '../../../core/utils/app_environment.dart';
 import '../../../core/failures/domain_failure.dart';
 import '../../../core/utils/data_source/data_source_abstraction.dart';
 import '../../user/data/data_sources/user_remote_data_source.dart';
@@ -23,6 +26,7 @@ class UserBootstrapService {
   final UserRepository _userRepository;
   final UserRemoteDataSource _userRemoteDataSource;
   final DataSourceAbstraction _dataSource;
+  final Logger _logger = Logger('UserBootstrap');
 
   bool _hasRemoteUserRecord = false;
 
@@ -43,9 +47,16 @@ class UserBootstrapService {
       return right(UserBootstrapResult(user: user, didRecoverUpsert: false));
     }
 
-    final failure = fetchResult.getLeft().getOrElse(() =>
-        DomainFailure(code: 'User.UnexpectedError', message: 'Unknown error'));
+    final failure = fetchResult.getLeft().getOrElse(
+      () => const DomainFailure(
+        code: 'User.UnexpectedError',
+        message: 'Unknown error',
+      ),
+    );
     if (failure.code == 'User.NotFound') {
+      _logger.info(
+        'User record missing (env=${AppEnvironment.tag}, userId=$userId). Attempting recovery upsert.',
+      );
       final createdAt = _resolveAuthCreatedAt(authCreatedAt);
       final newUser = User.createWithTrial(
         id: userId,
@@ -61,6 +72,9 @@ class UserBootstrapService {
           ignoreDuplicates: true,
         );
       } catch (e) {
+        _logger.warning(
+          'User recovery upsert failed (env=${AppEnvironment.tag}, userId=$userId): $e',
+        );
         return left(
           DomainFailure(
             code: 'User.RecoveryUpsertFailed',
@@ -75,16 +89,23 @@ class UserBootstrapService {
         final user = retryResult.getOrElse((_) => throw StateError('Unreachable'));
         return right(UserBootstrapResult(user: user, didRecoverUpsert: true));
       }
-      return left(
-        retryResult.getLeft().getOrElse(
-          () => DomainFailure(
-            code: 'User.UnexpectedError',
-            message: 'User fetch failed after recovery upsert',
-          ),
+      final retryFailure = retryResult.getLeft().getOrElse(
+        () => const DomainFailure(
+          code: 'User.UnexpectedError',
+          message: 'User fetch failed after recovery upsert',
         ),
+      );
+      _logger.warning(
+        'User fetch failed after recovery upsert (env=${AppEnvironment.tag}, userId=$userId, code=${retryFailure.code}, message=${retryFailure.message})',
+      );
+      return left(
+        retryFailure,
       );
     }
 
+    _logger.warning(
+      'User fetch failed (env=${AppEnvironment.tag}, userId=$userId, code=${failure.code}, message=${failure.message})',
+    );
     return left(failure);
   }
 

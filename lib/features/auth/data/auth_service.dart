@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:logging/logging.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
+import '../../../core/failures/domain_failure.dart';
 import '../../../core/utils/app_environment.dart';
 import '../../../core/utils/app_lifecycle_service.dart';
 import '../../../core/utils/connectivity/connectivity_service.dart';
@@ -186,8 +188,14 @@ class AuthService {
 
     if (result.isLeft()) {
       authState.value = const Unauthenticated();
+      final failure = result.getLeft().getOrElse(
+        () => const DomainFailure(
+          code: 'User.UnexpectedError',
+          message: 'Unknown error',
+        ),
+      );
       _logger.warning(
-        'Auth rehydrate failed (env=${AppEnvironment.tag}, userId=${session.user.id})',
+        'Auth rehydrate failed (env=${AppEnvironment.tag}, userId=${session.user.id}, code=${failure.code}, message=${failure.message})',
       );
       return;
     }

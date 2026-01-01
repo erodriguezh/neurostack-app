@@ -26,7 +26,7 @@ class _HomeViewState extends State<HomeView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('MVVM Counter')),
+      appBar: AppBar(title: const Text('MVVM Counter')),
       body: Center(
         child: ValueListenableBuilder<int>(
           valueListenable: _viewModel.counter,

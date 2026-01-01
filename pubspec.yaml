@@ -61,7 +61,6 @@ dependencies:
   connectivity_plus: ^6.1.4
   mocktail: ^1.0.4
   flutter_svg: ^2.2.3
-  supabase_auth_ui: ^0.5.5
 
 dev_dependencies:
   flutter_test:
