@@ -35,5 +35,65 @@
   "success": "Success",
   "@success": {
     "description": "Text for the success message"
+  },
+  "authTitle": "Sign in",
+  "@authTitle": {
+    "description": "Title for the magic link auth screen"
+  },
+  "authSubtitle": "We'll send you a magic link to continue.",
+  "@authSubtitle": {
+    "description": "Subtitle for the magic link auth screen"
+  },
+  "checkEmailTitle": "Check your email",
+  "@checkEmailTitle": {
+    "description": "Title for the check email screen"
+  },
+  "checkEmailInstruction": "Check your inbox and tap the link to continue.",
+  "@checkEmailInstruction": {
+    "description": "Instruction text for magic link check email screen"
+  },
+  "checkEmailSpamHint": "Hint: Check your spam folder if you don't see it.",
+  "@checkEmailSpamHint": {
+    "description": "Spam folder hint on check email screen"
+  },
+  "authResendLink": "Resend link",
+  "@authResendLink": {
+    "description": "Button label to resend magic link"
+  },
+  "authResendAvailableIn": "Resend available in",
+  "@authResendAvailableIn": {
+    "description": "Prefix label for resend cooldown"
+  },
+  "authChangeEmail": "Change email",
+  "@authChangeEmail": {
+    "description": "Link text for changing the email on check email screen"
+  },
+  "authMissingEmail": "Email not available",
+  "@authMissingEmail": {
+    "description": "Fallback text when no email is stored"
+  },
+  "authRateLimited": "Too many requests. Please wait and try again.",
+  "@authRateLimited": {
+    "description": "Toast message when resend is rate limited"
+  },
+  "authUnexpectedError": "Something went wrong. Please try again.",
+  "@authUnexpectedError": {
+    "description": "Generic auth error message"
+  },
+  "offlineNoUserTitle": "You're offline",
+  "@offlineNoUserTitle": {
+    "description": "Title for offline blocking screen"
+  },
+  "offlineNoUserBody": "Connect to the internet to continue.",
+  "@offlineNoUserBody": {
+    "description": "Body text for offline blocking screen"
+  },
+  "offlineUsingCachedData": "Offline · Using cached data",
+  "@offlineUsingCachedData": {
+    "description": "Banner text shown when offline with cached data"
+  },
+  "offlineConnectionLost": "Offline · Connection lost. Retrying in background.",
+  "@offlineConnectionLost": {
+    "description": "Toast text when connection drops mid-session"
   }
 }

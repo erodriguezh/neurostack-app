@@ -8,5 +8,20 @@
   "notFoundMessage": "Sidan hittades inte",
   "notFoundGoHome": "Gå till startsidan",
   "counter": "Du har tryckt på knappen så här många gånger:",
-  "success": "Lyckades"
+  "success": "Lyckades",
+  "authTitle": "Logga in",
+  "authSubtitle": "Vi skickar en magisk länk för att fortsätta.",
+  "checkEmailTitle": "Kolla din e-post",
+  "checkEmailInstruction": "Öppna din inkorg och tryck på länken för att fortsätta.",
+  "checkEmailSpamHint": "Tips: Kolla skräpposten om du inte ser den.",
+  "authResendLink": "Skicka länk igen",
+  "authResendAvailableIn": "Skicka igen om",
+  "authChangeEmail": "Byt e-post",
+  "authMissingEmail": "E-post saknas",
+  "authRateLimited": "För många försök. Vänta och försök igen.",
+  "authUnexpectedError": "Något gick fel. Försök igen.",
+  "offlineNoUserTitle": "Du är offline",
+  "offlineNoUserBody": "Anslut till internet för att fortsätta.",
+  "offlineUsingCachedData": "Offline · Använder cachelagrad data",
+  "offlineConnectionLost": "Offline · Anslutningen bröts. Försöker igen i bakgrunden."
 }

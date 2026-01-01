@@ -35,4 +35,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get success => 'Success';
+
+  @override
+  String get authTitle => 'Sign in';
+
+  @override
+  String get authSubtitle => 'We\'ll send you a magic link to continue.';
+
+  @override
+  String get checkEmailTitle => 'Check your email';
+
+  @override
+  String get checkEmailInstruction =>
+      'Check your inbox and tap the link to continue.';
+
+  @override
+  String get checkEmailSpamHint =>
+      'Hint: Check your spam folder if you don\'t see it.';
+
+  @override
+  String get authResendLink => 'Resend link';
+
+  @override
+  String get authResendAvailableIn => 'Resend available in';
+
+  @override
+  String get authChangeEmail => 'Change email';
+
+  @override
+  String get authMissingEmail => 'Email not available';
+
+  @override
+  String get authRateLimited => 'Too many requests. Please wait and try again.';
+
+  @override
+  String get authUnexpectedError => 'Something went wrong. Please try again.';
+
+  @override
+  String get offlineNoUserTitle => 'You\'re offline';
+
+  @override
+  String get offlineNoUserBody => 'Connect to the internet to continue.';
+
+  @override
+  String get offlineUsingCachedData => 'Offline · Using cached data';
+
+  @override
+  String get offlineConnectionLost =>
+      'Offline · Connection lost. Retrying in background.';
 }

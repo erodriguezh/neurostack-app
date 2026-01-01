@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:neurostack/core/utils/navigation/utils.dart';
 
 class RouteEntry {
-  RouteEntry({required this.path, required this.builder});
+  RouteEntry({
+    required this.path,
+    required this.builder,
+    this.requiresAuth = false,
+  });
 
   final String path;
   final Widget Function(ValueKey<String>? key, RouteData routeData) builder;
+  final bool requiresAuth;
 }
 
 class Path {

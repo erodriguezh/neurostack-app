@@ -12,9 +12,7 @@ _UserDto _$UserDtoFromJson(Map<String, dynamic> json) => _UserDto(
   trialPeriod: json['trial_period'] == null
       ? null
       : TrialPeriodDto.fromJson(json['trial_period'] as Map<String, dynamic>),
-  protocolIds: (json['protocol_ids'] as List<dynamic>)
-      .map((e) => e as String)
-      .toList(),
+  protocolIds: _protocolIdsFromJson(json['protocol_ids']),
   onboardingCompleted: json['onboarding_completed'] as bool,
   createdAt: json['created_at'] as String,
 );
@@ -23,7 +21,7 @@ Map<String, dynamic> _$UserDtoToJson(_UserDto instance) => <String, dynamic>{
   'id': instance.id,
   'subscription_status': instance.subscriptionStatus,
   'trial_period': instance.trialPeriod,
-  'protocol_ids': instance.protocolIds,
+  'protocol_ids': _protocolIdsToJson(instance.protocolIds),
   'onboarding_completed': instance.onboardingCompleted,
   'created_at': instance.createdAt,
 };
