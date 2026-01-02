@@ -21,7 +21,7 @@ abstract final class FrequencyDtoFactory {
 
   /// Invalid: min < 1 triggers Protocol.InvalidFrequency
   static FrequencyDto createWithInvalidMin() {
-    return FrequencyDto(
+    return const FrequencyDto(
       minPerWeek: 0,
       maxPerWeek: 4,
     );
@@ -29,7 +29,7 @@ abstract final class FrequencyDtoFactory {
 
   /// Invalid: max < min triggers Protocol.MaxLessThanMin
   static FrequencyDto createWithMaxLessThanMin() {
-    return FrequencyDto(
+    return const FrequencyDto(
       minPerWeek: 5,
       maxPerWeek: 3,
     );

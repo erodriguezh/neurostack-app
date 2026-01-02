@@ -151,6 +151,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Success'**
   String get success;
+
+  /// Title for the magic link auth screen
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get authTitle;
+
+  /// Subtitle for the magic link auth screen
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll send you a magic link to continue.'**
+  String get authSubtitle;
+
+  /// Title for the check email screen
+  ///
+  /// In en, this message translates to:
+  /// **'Check your email'**
+  String get checkEmailTitle;
+
+  /// Instruction text for magic link check email screen
+  ///
+  /// In en, this message translates to:
+  /// **'Check your inbox and tap the link to continue.'**
+  String get checkEmailInstruction;
+
+  /// Spam folder hint on check email screen
+  ///
+  /// In en, this message translates to:
+  /// **'Hint: Check your spam folder if you don\'t see it.'**
+  String get checkEmailSpamHint;
+
+  /// Button label to resend magic link
+  ///
+  /// In en, this message translates to:
+  /// **'Resend link'**
+  String get authResendLink;
+
+  /// Prefix label for resend cooldown
+  ///
+  /// In en, this message translates to:
+  /// **'Resend available in'**
+  String get authResendAvailableIn;
+
+  /// Link text for changing the email on check email screen
+  ///
+  /// In en, this message translates to:
+  /// **'Change email'**
+  String get authChangeEmail;
+
+  /// Fallback text when no email is stored
+  ///
+  /// In en, this message translates to:
+  /// **'Email not available'**
+  String get authMissingEmail;
+
+  /// Toast message when resend is rate limited
+  ///
+  /// In en, this message translates to:
+  /// **'Too many requests. Please wait and try again.'**
+  String get authRateLimited;
+
+  /// Generic auth error message
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get authUnexpectedError;
+
+  /// Title for offline blocking screen
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re offline'**
+  String get offlineNoUserTitle;
+
+  /// Body text for offline blocking screen
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to the internet to continue.'**
+  String get offlineNoUserBody;
+
+  /// Banner text shown when offline with cached data
+  ///
+  /// In en, this message translates to:
+  /// **'Offline · Using cached data'**
+  String get offlineUsingCachedData;
+
+  /// Toast text when connection drops mid-session
+  ///
+  /// In en, this message translates to:
+  /// **'Offline · Connection lost. Retrying in background.'**
+  String get offlineConnectionLost;
 }
 
 class _AppLocalizationsDelegate

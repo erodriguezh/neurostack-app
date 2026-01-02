@@ -1,7 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:neurostack/core/utils/locator.dart';
+import 'package:neurostack/core/utils/navigation/navigation_intent_store.dart';
 import 'package:neurostack/core/utils/navigation/route_data.dart';
 import 'package:neurostack/core/utils/navigation/navigation_observable.dart';
 import 'package:neurostack/core/utils/navigation/utils.dart';
+import 'package:neurostack/features/auth/data/auth_service.dart';
 
 /// Service responsible for managing navigation state using MVVM pattern
 class RouterService with ObservableRouter {
@@ -20,6 +25,12 @@ class RouterService with ObservableRouter {
       return;
     }
 
+    if (_shouldRedirectToAuth(path.name)) {
+      _persistIntendedRoute(path.name);
+      _pushAuthRouteIfNeeded();
+      return;
+    }
+
     final newRoute = _createRouteData(path);
     _navigationStack.value = [..._navigationStack.value, newRoute];
     notifyPush(newRoute);
@@ -28,6 +39,12 @@ class RouterService with ObservableRouter {
   void replace(Path path) {
     if (_pathNotSupported(path.name)) {
       _handlePathNotSupported();
+      return;
+    }
+
+    if (_shouldRedirectToAuth(path.name)) {
+      _persistIntendedRoute(path.name);
+      _replaceWithAuthRoute();
       return;
     }
 
@@ -54,6 +71,14 @@ class RouterService with ObservableRouter {
   }
 
   void replaceAll(List<Path> routeDatas) {
+    if (routeDatas.isNotEmpty &&
+        _shouldRedirectToAuth(routeDatas.last.name)) {
+      _persistIntendedRoute(routeDatas.last.name);
+      _navigationStack.value = [_createRouteData(Path(name: '/auth'))];
+      notifyReplace(_navigationStack.value);
+      return;
+    }
+
     final newRoutes = <RouteData>[];
     for (final routeData in routeDatas) {
       if (_pathNotSupported(routeData.name)) {
@@ -90,6 +115,14 @@ class RouterService with ObservableRouter {
   void replaceAllWithRoute(RouteData resolvedRoute) {
     if (_pathNotSupported(resolvedRoute.pathWithParams)) {
       _handlePathNotSupported();
+      return;
+    }
+
+    if (_shouldRedirectToAuth(resolvedRoute.pathWithParams) &&
+        _requiresAuthForPattern(resolvedRoute.routePattern)) {
+      _persistIntendedRoute(resolvedRoute.pathWithParams);
+      _navigationStack.value = [_createRouteData(Path(name: '/auth'))];
+      notifyReplace(_navigationStack.value);
       return;
     }
 
@@ -137,5 +170,62 @@ class RouterService with ObservableRouter {
       routePattern: findMatchingRoutePattern(uri, supportedRoutes),
       extra: path.extra,
     );
+  }
+
+  bool _shouldRedirectToAuth(String path) {
+    if (!_requiresAuthForPath(path)) {
+      return false;
+    }
+    final authService = locator<AuthService>();
+    return !authService.isAuthenticated;
+  }
+
+  bool _requiresAuthForPath(String path) {
+    final uri = Uri.parse(path);
+    for (final route in supportedRoutes) {
+      if (matchRoute(route.path, uri)) {
+        return route.requiresAuth;
+      }
+    }
+    return false;
+  }
+
+  bool _requiresAuthForPattern(String pattern) {
+    for (final route in supportedRoutes) {
+      if (route.path == pattern) {
+        return route.requiresAuth;
+      }
+    }
+    return false;
+  }
+
+  void _persistIntendedRoute(String path) {
+    final intentStore = locator<NavigationIntentStore>();
+    unawaited(intentStore.saveIntendedRoute(path));
+  }
+
+  void _pushAuthRouteIfNeeded() {
+    final authRoute = _createRouteData(Path(name: '/auth'));
+    if (_navigationStack.value.isNotEmpty &&
+        _navigationStack.value.last.pathWithParams == '/auth') {
+      return;
+    }
+    _navigationStack.value = [..._navigationStack.value, authRoute];
+    notifyPush(authRoute);
+  }
+
+  void _replaceWithAuthRoute() {
+    if (_navigationStack.value.isEmpty) {
+      _navigationStack.value = [_createRouteData(Path(name: '/auth'))];
+      notifyReplace(_navigationStack.value);
+      return;
+    }
+
+    final authRoute = _createRouteData(Path(name: '/auth'));
+    _navigationStack.value = [
+      ..._navigationStack.value.sublist(0, _navigationStack.value.length - 1),
+      authRoute,
+    ];
+    notifyReplace([authRoute]);
   }
 }

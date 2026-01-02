@@ -7,7 +7,7 @@ part of 'trial_period_dto.dart';
 // **************************************************************************
 
 _TrialPeriodDto _$TrialPeriodDtoFromJson(Map<String, dynamic> json) =>
-    _TrialPeriodDto(startDate: json['startDate'] as String);
+    _TrialPeriodDto(startDate: _stringFromJson(json['start_date']));
 
 Map<String, dynamic> _$TrialPeriodDtoToJson(_TrialPeriodDto instance) =>
-    <String, dynamic>{'startDate': instance.startDate};
+    <String, dynamic>{'start_date': instance.startDate};

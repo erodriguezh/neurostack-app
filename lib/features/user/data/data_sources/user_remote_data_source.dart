@@ -54,4 +54,17 @@ class UserRemoteDataSource {
   Future<void> saveUser(UserDto dto) async {
     await _dataSource.from(_table).upsert(dto.toJson());
   }
+
+  /// Inserts a user with explicit conflict handling for recovery flows.
+  Future<void> upsertUser(
+    UserDto dto, {
+    String? onConflict,
+    bool ignoreDuplicates = false,
+  }) async {
+    await _dataSource.from(_table).upsert(
+      dto.toJson(),
+      onConflict: onConflict,
+      ignoreDuplicates: ignoreDuplicates,
+    );
+  }
 }

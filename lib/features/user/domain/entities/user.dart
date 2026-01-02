@@ -77,14 +77,20 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
   /// Enforces **INV-U3**: Trial MUST auto-activate on first app launch.
   ///
   /// This is the primary factory for new users.
-  static User createWithTrial({required String id, DateTime? createdAt}) {
+  static User createWithTrial({
+    required String id,
+    DateTime? createdAt,
+    DateTime? trialStartDate,
+  }) {
+    final effectiveCreatedAt = createdAt ?? DateTime.now();
+    final effectiveTrialStart = trialStartDate ?? effectiveCreatedAt;
     final user = User._(
       id: id,
       subscriptionStatus: SubscriptionStatus.trial,
-      trialPeriod: TrialPeriod.startNow(),
+      trialPeriod: TrialPeriod.fromStartDate(effectiveTrialStart),
       stack: Stack.empty(),
       onboardingCompleted: false,
-      createdAt: createdAt ?? DateTime.now(),
+      createdAt: effectiveCreatedAt,
     );
 
     user.raiseDomainEvent(UserCreatedEvent(userId: id));

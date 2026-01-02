@@ -2,7 +2,6 @@ import '../../../../core/utils/data_source/data_source_abstraction.dart';
 import '../../domain/enums/category.dart';
 import '../../domain/enums/evidence_level.dart';
 import '../dtos/protocol_dto.dart';
-import '../dtos/research_citation_dto.dart';
 
 /// Remote data source for Protocol aggregate.
 ///

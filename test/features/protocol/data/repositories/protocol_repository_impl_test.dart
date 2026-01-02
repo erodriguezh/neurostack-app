@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:neurostack/core/failures/domain_failure.dart';
 import 'package:neurostack/features/protocol/data/repositories/protocol_repository_impl.dart';
 import 'package:neurostack/features/protocol/domain/entities/protocol.dart';
 import 'package:neurostack/features/protocol/domain/enums/category.dart';
@@ -93,7 +92,7 @@ void main() {
       test('getById_whenAuthException_returnsAuthFailure', () async {
         // Arrange
         when(() => mockDataSource.getProtocol(any())).thenThrow(
-          AuthException('Session expired'),
+          const AuthException('Session expired'),
         );
 
         // Act
@@ -345,7 +344,7 @@ void main() {
         final protocol = protocolResult.getRight().toNullable()!;
 
         when(() => mockDataSource.saveProtocol(any())).thenThrow(
-          AuthException('Not authenticated'),
+          const AuthException('Not authenticated'),
         );
 
         // Act
