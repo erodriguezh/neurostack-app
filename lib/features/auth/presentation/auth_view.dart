@@ -211,7 +211,7 @@ class _MagicLinkAuthState extends State<_MagicLinkAuth> {
     final kitColors = context.kitColors;
     final textTheme = context.theme.textTheme;
     final localization = widget.localization;
-    final isEnabled = !_isLoading && _hasText;
+    final isEnabled = !_isLoading && _isValidEmail();
 
     return Form(
       key: _formKey,
@@ -248,7 +248,7 @@ class _MagicLinkAuthState extends State<_MagicLinkAuth> {
               textInputAction: TextInputAction.send,
               autofillHints: const [AutofillHints.email],
               autovalidateMode: _showError
-                  ? AutovalidateMode.onUserInteraction
+                  ? AutovalidateMode.always
                   : AutovalidateMode.disabled,
               validator: (_) {
                 if (!_isValidEmail()) {
@@ -352,12 +352,15 @@ class _MagicLinkAuthState extends State<_MagicLinkAuth> {
   }
 
   void _handleEmailChanged() {
-    final hasText = _email.text.trim().isNotEmpty;
-    if (hasText == _hasText) {
+    final trimmed = _email.text.trim();
+    final hasText = trimmed.isNotEmpty;
+    final showError = hasText && !EmailValidator.validate(trimmed);
+    if (hasText == _hasText && showError == _showError) {
       return;
     }
     setState(() {
       _hasText = hasText;
+      _showError = showError;
     });
   }
 
