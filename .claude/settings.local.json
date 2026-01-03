@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(flow-plan)",
+      "Bash(rp-cli builder:*)",
+      "Bash(rp-cli:*)",
+      "Bash(cat:*)",
+      "Bash(timeout 120 rp-cli:*)"
+    ]
+  }
+}
