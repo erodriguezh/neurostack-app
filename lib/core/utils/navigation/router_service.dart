@@ -8,6 +8,9 @@ import 'package:neurostack/core/utils/navigation/navigation_observable.dart';
 import 'package:neurostack/core/utils/navigation/utils.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
 
+/// Callback to check if onboarding should be shown.
+typedef OnboardingCheck = bool Function();
+
 /// Service responsible for managing navigation state using MVVM pattern
 class RouterService with ObservableRouter {
   RouterService({required this.supportedRoutes}) {
@@ -18,6 +21,16 @@ class RouterService with ObservableRouter {
   ValueNotifier<List<RouteData>> get navigationStack => _navigationStack;
 
   final List<RouteEntry> supportedRoutes;
+
+  OnboardingCheck? _onboardingCheck;
+
+  /// Sets the callback to check if onboarding should be shown.
+  void setOnboardingGuard(OnboardingCheck check) {
+    _onboardingCheck = check;
+  }
+
+  /// Returns true if onboarding should be shown (guard is set and returns true).
+  bool shouldShowOnboarding() => _onboardingCheck?.call() ?? false;
 
   void goTo(Path path) {
     if (_pathNotSupported(path.name)) {
@@ -71,8 +84,7 @@ class RouterService with ObservableRouter {
   }
 
   void replaceAll(List<Path> routeDatas) {
-    if (routeDatas.isNotEmpty &&
-        _shouldRedirectToAuth(routeDatas.last.name)) {
+    if (routeDatas.isNotEmpty && _shouldRedirectToAuth(routeDatas.last.name)) {
       _persistIntendedRoute(routeDatas.last.name);
       _navigationStack.value = [_createRouteData(Path(name: '/auth'))];
       notifyReplace(_navigationStack.value);

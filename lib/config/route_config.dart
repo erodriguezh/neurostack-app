@@ -3,6 +3,8 @@ import 'package:neurostack/core/utils/navigation/route_data.dart';
 import 'package:neurostack/not_found/not_found_view.dart';
 import 'package:neurostack/features/auth/presentation/auth_view.dart';
 import 'package:neurostack/features/auth/presentation/check_email_view.dart';
+import 'package:neurostack/features/onboarding/presentation/onboarding_view.dart';
+import 'package:neurostack/features/offline/offline_retry_view.dart';
 
 final routes = [
   RouteEntry(
@@ -15,5 +17,13 @@ final routes = [
     path: '/auth/check-email',
     builder: (key, routeData) => const CheckEmailView(),
   ),
+  RouteEntry(
+    path: '/onboarding',
+    builder: (key, routeData) => OnboardingView(key: key),
+  ),
   RouteEntry(path: '/404', builder: (key, routeData) => const NotFoundView()),
+  RouteEntry(
+    path: '/offline',
+    builder: (key, routeData) => const OfflineRetryView(),
+  ),
 ];

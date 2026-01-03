@@ -14,6 +14,7 @@ import 'package:neurostack/core/utils/navigation/navigation_intent_store.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/features/auth/presentation/auth_view_model.dart';
 import 'package:neurostack/features/auth/presentation/widgets/auth_background.dart';
+import 'package:neurostack/core/ui/widgets/app_primary_cta.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 
 class AuthView extends StatefulWidget {
@@ -313,37 +314,11 @@ class _MagicLinkAuthState extends State<_MagicLinkAuth> {
             ),
           ),
           SizedBox(height: context.spacing.lg),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: context.borderRadius.full,
-              boxShadow: isEnabled ? context.shadows.skyGlowStrong : const [],
-            ),
-            child: FilledButton(
-              onPressed: isEnabled ? _sendMagicLink : null,
-              style: _buildCtaStyle(context),
-              child: AnimatedSwitcher(
-                duration: context.durations.duration150,
-                child: _isLoading
-                    ? SizedBox(
-                        key: const ValueKey('auth-loading'),
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          color: kitColors.background,
-                          strokeWidth: 2,
-                        ),
-                      )
-                    : Row(
-                        key: const ValueKey('auth-label'),
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(localization.continueWithMagicLink),
-                          SizedBox(width: context.spacing.xs),
-                          const Icon(Icons.arrow_forward, size: 16),
-                        ],
-                      ),
-              ),
-            ),
+          AppPrimaryCta(
+            label: localization.continueWithMagicLink,
+            onPressed: _sendMagicLink,
+            enabled: isEnabled,
+            loading: _isLoading,
           ),
           SizedBox(height: context.spacing.lg),
         ],
@@ -370,38 +345,6 @@ class _MagicLinkAuthState extends State<_MagicLinkAuth> {
 
   bool _isValidEmail() {
     return EmailValidator.validate(_email.text.trim());
-  }
-
-  ButtonStyle _buildCtaStyle(BuildContext context) {
-    final kitColors = context.kitColors;
-
-    return FilledButton.styleFrom(
-      minimumSize: const Size.fromHeight(56),
-      shape: RoundedRectangleBorder(borderRadius: context.borderRadius.full),
-      textStyle: context.theme.textTheme.labelLarge?.copyWith(
-        fontWeight: FontWeight.w600,
-        letterSpacing: 0.2,
-      ),
-    ).copyWith(
-      backgroundColor: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.disabled)) {
-          return kitColors.white05;
-        }
-        return kitColors.brandSky;
-      }),
-      foregroundColor: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.disabled)) {
-          return kitColors.white30;
-        }
-        return kitColors.background;
-      }),
-      side: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.disabled)) {
-          return BorderSide(color: kitColors.white10);
-        }
-        return BorderSide(color: kitColors.brandSky);
-      }),
-    );
   }
 
   Future<void> _sendMagicLink() async {

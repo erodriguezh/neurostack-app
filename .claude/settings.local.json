@@ -5,7 +5,12 @@
       "Bash(rp-cli builder:*)",
       "Bash(rp-cli:*)",
       "Bash(cat:*)",
-      "Bash(timeout 120 rp-cli:*)"
+      "Bash(timeout 120 rp-cli:*)",
+      "Skill(flow:work)",
+      "Bash(flutter pub get:*)",
+      "Bash(flutter analyze:*)",
+      "Bash(flutter test:*)",
+      "Bash(dart format:*)"
     ]
   }
 }

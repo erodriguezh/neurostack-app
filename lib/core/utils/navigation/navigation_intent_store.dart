@@ -7,6 +7,7 @@ class NavigationIntentStore {
 
   static const _intendedRouteKey = 'intended_route';
   static const _authEmailKey = 'auth_email';
+  static const _forceOnboardingKey = 'force_onboarding';
 
   Future<void> saveIntendedRoute(String route) async {
     await _prefs.setString(_intendedRouteKey, route);
@@ -26,5 +27,17 @@ class NavigationIntentStore {
 
   Future<void> clearAuthEmail() async {
     await _prefs.remove(_authEmailKey);
+  }
+
+  Future<void> setForceOnboarding() async {
+    await _prefs.setBool(_forceOnboardingKey, true);
+  }
+
+  bool shouldForceOnboarding() {
+    return _prefs.getBool(_forceOnboardingKey) ?? false;
+  }
+
+  Future<void> clearForceOnboarding() async {
+    await _prefs.remove(_forceOnboardingKey);
   }
 }
