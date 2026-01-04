@@ -254,14 +254,14 @@ class _CheckEmailViewState extends State<CheckEmailView>
         fontWeight: FontWeight.w500,
       ),
     ).copyWith(
-      foregroundColor: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.disabled)) {
+      foregroundColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.disabled)) {
           return kitColors.white30;
         }
         return kitColors.white70;
       }),
-      side: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.disabled)) {
+      side: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.disabled)) {
           return BorderSide(color: kitColors.white10);
         }
         return BorderSide(color: kitColors.white10);

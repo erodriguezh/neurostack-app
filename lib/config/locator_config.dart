@@ -19,6 +19,7 @@ import 'package:neurostack/features/user/data/data_sources/user_remote_data_sour
 import 'package:neurostack/features/auth/data/auth_service.dart';
 import 'package:neurostack/features/auth/data/cached_user_store.dart';
 import 'package:neurostack/features/auth/data/user_bootstrap_service.dart';
+import 'package:neurostack/features/onboarding/data/onboarding_store.dart';
 
 // Repository interfaces
 import 'package:neurostack/features/protocol/domain/repositories/protocol_repository.dart';
@@ -37,7 +38,10 @@ List<Module> buildModules({required SharedPreferences sharedPreferences}) => [
     lazy: false,
   ),
   Module<NotifyService>(builder: () => NotifyService(), lazy: false),
-  Module<AppLifecycleService>(builder: () => AppLifecycleService(), lazy: false),
+  Module<AppLifecycleService>(
+    builder: () => AppLifecycleService(),
+    lazy: false,
+  ),
   Module<ConnectivityService>(
     builder: () => ConnectivityService(Connectivity()),
     lazy: false,
@@ -62,6 +66,10 @@ List<Module> buildModules({required SharedPreferences sharedPreferences}) => [
   ),
   Module<CachedUserStore>(
     builder: () => CachedUserStore(locator<SharedPreferences>()),
+    lazy: true,
+  ),
+  Module<OnboardingStore>(
+    builder: () => OnboardingStore(locator<SharedPreferences>()),
     lazy: true,
   ),
 

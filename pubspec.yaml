@@ -40,6 +40,7 @@ dependencies:
 
   # Icons
   cupertino_icons: ^1.0.8
+  lucide_icons_flutter: ^3.1.9  # Value prop icons only
 
   # Logging
   logging: ^1.2.0

@@ -5,7 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
 import 'package:neurostack/core/ui/constants/curves.dart';
 import 'package:neurostack/core/ui/constants/durations.dart';
-import 'package:neurostack/startup/widgets/splash_grid_background.dart';
+import 'package:neurostack/core/ui/widgets/app_grid_background.dart';
 
 /// The splash screen displayed during app initialization.
 ///
@@ -113,7 +113,7 @@ class _SplashScreenState extends State<SplashScreen>
         children: [
           // Grid background
           Positioned.fill(
-            child: SplashGridBackground(
+            child: GridPattern(
               lineColor: kitColors.white02,
             ),
           ),

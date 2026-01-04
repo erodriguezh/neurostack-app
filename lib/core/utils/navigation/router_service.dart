@@ -8,6 +8,9 @@ import 'package:neurostack/core/utils/navigation/navigation_observable.dart';
 import 'package:neurostack/core/utils/navigation/utils.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
 
+/// Callback to check if onboarding should be shown.
+typedef OnboardingCheck = bool Function();
+
 /// Service responsible for managing navigation state using MVVM pattern
 class RouterService with ObservableRouter {
   RouterService({required this.supportedRoutes}) {
@@ -19,14 +22,30 @@ class RouterService with ObservableRouter {
 
   final List<RouteEntry> supportedRoutes;
 
+  OnboardingCheck? _onboardingCheck;
+
+  /// Sets the callback to check if onboarding should be shown.
+  void setOnboardingGuard(OnboardingCheck check) {
+    _onboardingCheck = check;
+  }
+
+  /// Returns true if onboarding should be shown (guard is set and returns true).
+  bool shouldShowOnboarding() => _onboardingCheck?.call() ?? false;
+
   void goTo(Path path) {
     if (_pathNotSupported(path.name)) {
       _handlePathNotSupported();
       return;
     }
 
+    if (_shouldRedirectToOnboarding(path.name)) {
+      _persistIntendedRouteIfEligible(path.name);
+      _replaceWithOnboardingRoute();
+      return;
+    }
+
     if (_shouldRedirectToAuth(path.name)) {
-      _persistIntendedRoute(path.name);
+      _persistIntendedRouteIfEligible(path.name);
       _pushAuthRouteIfNeeded();
       return;
     }
@@ -42,8 +61,14 @@ class RouterService with ObservableRouter {
       return;
     }
 
+    if (_shouldRedirectToOnboarding(path.name)) {
+      _persistIntendedRouteIfEligible(path.name);
+      _replaceWithOnboardingRoute();
+      return;
+    }
+
     if (_shouldRedirectToAuth(path.name)) {
-      _persistIntendedRoute(path.name);
+      _persistIntendedRouteIfEligible(path.name);
       _replaceWithAuthRoute();
       return;
     }
@@ -72,8 +97,15 @@ class RouterService with ObservableRouter {
 
   void replaceAll(List<Path> routeDatas) {
     if (routeDatas.isNotEmpty &&
-        _shouldRedirectToAuth(routeDatas.last.name)) {
-      _persistIntendedRoute(routeDatas.last.name);
+        _shouldRedirectToOnboarding(routeDatas.last.name)) {
+      _persistIntendedRouteIfEligible(routeDatas.last.name);
+      _navigationStack.value = [_createRouteData(Path(name: '/onboarding'))];
+      notifyReplace(_navigationStack.value);
+      return;
+    }
+
+    if (routeDatas.isNotEmpty && _shouldRedirectToAuth(routeDatas.last.name)) {
+      _persistIntendedRouteIfEligible(routeDatas.last.name);
       _navigationStack.value = [_createRouteData(Path(name: '/auth'))];
       notifyReplace(_navigationStack.value);
       return;
@@ -118,9 +150,16 @@ class RouterService with ObservableRouter {
       return;
     }
 
+    if (_shouldRedirectToOnboarding(resolvedRoute.pathWithParams)) {
+      _persistIntendedRouteIfEligible(resolvedRoute.pathWithParams);
+      _navigationStack.value = [_createRouteData(Path(name: '/onboarding'))];
+      notifyReplace(_navigationStack.value);
+      return;
+    }
+
     if (_shouldRedirectToAuth(resolvedRoute.pathWithParams) &&
         _requiresAuthForPattern(resolvedRoute.routePattern)) {
-      _persistIntendedRoute(resolvedRoute.pathWithParams);
+      _persistIntendedRouteIfEligible(resolvedRoute.pathWithParams);
       _navigationStack.value = [_createRouteData(Path(name: '/auth'))];
       notifyReplace(_navigationStack.value);
       return;
@@ -180,6 +219,18 @@ class RouterService with ObservableRouter {
     return !authService.isAuthenticated;
   }
 
+  bool _isOnboardingRoute(String path) {
+    final uri = Uri.parse(path);
+    return uri.path == '/onboarding';
+  }
+
+  bool _shouldRedirectToOnboarding(String path) {
+    if (_isOnboardingRoute(path)) {
+      return false;
+    }
+    return shouldShowOnboarding();
+  }
+
   bool _requiresAuthForPath(String path) {
     final uri = Uri.parse(path);
     for (final route in supportedRoutes) {
@@ -199,9 +250,9 @@ class RouterService with ObservableRouter {
     return false;
   }
 
-  void _persistIntendedRoute(String path) {
+  void _persistIntendedRouteIfEligible(String path) {
     final intentStore = locator<NavigationIntentStore>();
-    unawaited(intentStore.saveIntendedRoute(path));
+    unawaited(intentStore.saveIntendedRouteIfEligible(path));
   }
 
   void _pushAuthRouteIfNeeded() {
@@ -227,5 +278,20 @@ class RouterService with ObservableRouter {
       authRoute,
     ];
     notifyReplace([authRoute]);
+  }
+
+  void _replaceWithOnboardingRoute() {
+    if (_navigationStack.value.isEmpty) {
+      _navigationStack.value = [_createRouteData(Path(name: '/onboarding'))];
+      notifyReplace(_navigationStack.value);
+      return;
+    }
+
+    final onboardingRoute = _createRouteData(Path(name: '/onboarding'));
+    _navigationStack.value = [
+      ..._navigationStack.value.sublist(0, _navigationStack.value.length - 1),
+      onboardingRoute,
+    ];
+    notifyReplace([onboardingRoute]);
   }
 }

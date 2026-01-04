@@ -27,13 +27,13 @@ class AuthService {
     required RouterService routerService,
     required ConnectivityService connectivityService,
     required AppLifecycleService appLifecycleService,
-  })  : _dataSource = dataSource,
-        _userBootstrapService = userBootstrapService,
-        _navigationIntentStore = navigationIntentStore,
-        _cachedUserStore = cachedUserStore,
-        _routerService = routerService,
-        _connectivityService = connectivityService,
-        _appLifecycleService = appLifecycleService;
+  }) : _dataSource = dataSource,
+       _userBootstrapService = userBootstrapService,
+       _navigationIntentStore = navigationIntentStore,
+       _cachedUserStore = cachedUserStore,
+       _routerService = routerService,
+       _connectivityService = connectivityService,
+       _appLifecycleService = appLifecycleService;
 
   final DataSourceAbstraction _dataSource;
   final UserBootstrapService _userBootstrapService;
@@ -44,8 +44,9 @@ class AuthService {
   final AppLifecycleService _appLifecycleService;
   final Logger _logger = Logger('Auth');
 
-  final ValueNotifier<AuthState> authState =
-      ValueNotifier<AuthState>(const AuthUnknown());
+  final ValueNotifier<AuthState> authState = ValueNotifier<AuthState>(
+    const AuthUnknown(),
+  );
 
   StreamSubscription<supabase.AuthState>? _authSubscription;
   VoidCallback? _connectivityListener;
@@ -73,11 +74,18 @@ class AuthService {
     await _bootstrapFromCurrentSession();
   }
 
-  Future<void> logout() async {
+  /// Signs the user out and restarts the app.
+  ///
+  /// When [forceOnboarding] is true (default), the user will see the
+  /// onboarding flow again after re-authenticating.
+  Future<void> logout({bool forceOnboarding = true}) async {
     await _dataSource.auth.signOut(scope: supabase.SignOutScope.local);
     await _cachedUserStore.clearUser();
     await _navigationIntentStore.clearIntendedRoute();
     await _navigationIntentStore.clearAuthEmail();
+    if (forceOnboarding) {
+      await _navigationIntentStore.setForceOnboarding();
+    }
     _currentUser = null;
     authState.value = const Unauthenticated();
     await _appLifecycleService.restartApp();
@@ -105,7 +113,11 @@ class AuthService {
       return;
     }
 
-    await _rehydrateFromSession(session, isOnline: isOnline, shouldNavigate: true);
+    await _rehydrateFromSession(
+      session,
+      isOnline: isOnline,
+      shouldNavigate: true,
+    );
   }
 
   Future<void> _handleAuthChange(
@@ -228,13 +240,25 @@ class AuthService {
   }
 
   Future<void> _handlePostAuthNavigation() async {
-    final intendedRoute = _navigationIntentStore.getIntendedRoute();
+    // Check force onboarding flag (set after logout) or onboarding guard
+    final forceOnboarding = _navigationIntentStore.shouldForceOnboarding();
+    if (forceOnboarding) {
+      await _navigationIntentStore.clearForceOnboarding();
+      _routerService.replaceAll([Path(name: '/onboarding')]);
+      return;
+    }
+
+    if (_routerService.shouldShowOnboarding()) {
+      _routerService.replaceAll([Path(name: '/onboarding')]);
+      return;
+    }
+
+    final intendedRoute = await _navigationIntentStore.consumeIntendedRoute();
     if (intendedRoute != null && intendedRoute.isNotEmpty) {
       _routerService.replaceAll([Path(name: intendedRoute)]);
     } else {
       _routerService.replaceAll([Path(name: '/')]);
     }
-    await _navigationIntentStore.clearIntendedRoute();
     await _navigationIntentStore.clearAuthEmail();
   }
 

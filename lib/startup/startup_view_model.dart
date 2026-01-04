@@ -10,6 +10,7 @@ import 'package:neurostack/core/utils/navigation/route_data.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
 import 'package:neurostack/features/auth/domain/auth_state.dart' as auth_state;
+import 'package:neurostack/features/onboarding/data/onboarding_store.dart';
 import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -41,8 +42,8 @@ class StartupViewModel {
   StartupViewModel({
     required SharedPreferences sharedPreferences,
     LoggingAbstraction? loggingAbstraction,
-  })  : _sharedPreferences = sharedPreferences,
-        _loggingAbstraction = loggingAbstraction ?? LoggingAbstraction();
+  }) : _sharedPreferences = sharedPreferences,
+       _loggingAbstraction = loggingAbstraction ?? LoggingAbstraction();
 
   final appStateNotifier = ValueNotifier<AppState>(const InitializingApp());
 
@@ -60,18 +61,28 @@ class StartupViewModel {
       loggingSubscription = _loggingAbstraction.initializeLogging();
       locator<AppLifecycleService>().attachStartupViewModel(this);
 
+      // Initialize onboarding store (runs async migration)
+      final onboardingStore = locator<OnboardingStore>();
+      await onboardingStore.init();
+
+      // Set up onboarding guard for post-auth navigation
+      final routerService = locator<RouterService>();
+      routerService.setOnboardingGuard(() => !onboardingStore.isCompleted);
+
       final authService = locator<AuthService>();
       await authService.init();
 
-      final routerService = locator<RouterService>();
-      if (authService.authState.value is auth_state.Unauthenticated) {
-        routerService.replaceAll([Path(name: '/auth')]);
-      }
-
       if (authService.authState.value is auth_state.OfflineNoUser) {
         appStateNotifier.value = const OfflineNoUserState();
-      } else {
-        appStateNotifier.value = const AppInitialized();
+        return;
+      }
+
+      appStateNotifier.value = const AppInitialized();
+
+      if (routerService.shouldShowOnboarding()) {
+        routerService.replaceAll([Path(name: '/onboarding')]);
+      } else if (authService.authState.value is auth_state.Unauthenticated) {
+        routerService.replaceAll([Path(name: '/auth')]);
       }
     } catch (e, st) {
       appStateNotifier.value = AppInitializationError(e, st);
