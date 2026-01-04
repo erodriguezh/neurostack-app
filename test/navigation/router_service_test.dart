@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:neurostack/core/utils/locator.dart';
+import 'package:neurostack/core/utils/navigation/navigation_intent_store.dart';
 import 'package:neurostack/core/utils/navigation/best_router.dart';
 import 'package:neurostack/core/utils/navigation/route_data.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   group('Navigation Tests', () {
@@ -322,6 +325,95 @@ void main() {
         expect(routerService.navigationStack.value.length, 2);
       });
     });
+  });
+
+  group('Onboarding Guard Tests', () {
+    late RouterService routerService;
+    late NavigationIntentStore intentStore;
+
+    setUpAll(() {
+      TestWidgetsFlutterBinding.ensureInitialized();
+    });
+
+    setUp(() async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+      locator.reset();
+      locator.registerMany([
+        Module<NavigationIntentStore>(
+          builder: () => NavigationIntentStore(prefs),
+          lazy: true,
+        ),
+      ]);
+      intentStore = locator<NavigationIntentStore>();
+      routerService = RouterService(
+        supportedRoutes: [
+          RouteEntry(
+            path: '/',
+            builder: (key, routeData) => const Placeholder(),
+          ),
+          RouteEntry(
+            path: '/details',
+            builder: (key, routeData) => const Placeholder(),
+          ),
+          RouteEntry(
+            path: '/auth',
+            builder: (key, routeData) => const Placeholder(),
+          ),
+          RouteEntry(
+            path: '/onboarding',
+            builder: (key, routeData) => const Placeholder(),
+          ),
+        ],
+      );
+      routerService.setOnboardingGuard(() => true);
+    });
+
+    tearDown(() {
+      locator.reset();
+    });
+
+    testWidgets('goTo_onboardingGuardTrue_redirectsToOnboarding', (tester) async {
+      routerService.goTo(Path(name: '/details?from=link'));
+      await tester.pump();
+
+      expect(
+        routerService.navigationStack.value.last.pathWithParams,
+        '/onboarding',
+      );
+      expect(intentStore.getIntendedRoute(), '/details?from=link');
+    });
+
+    testWidgets(
+      'goTo_onboardingGuardTrue_ineligibleRouteDoesNotOverwriteIntendedRoute',
+      (tester) async {
+        await intentStore.saveIntendedRoute('/details?prev=true');
+        routerService.goTo(Path(name: '/auth?foo=bar'));
+        await tester.pump();
+
+        expect(intentStore.getIntendedRoute(), '/details?prev=true');
+      },
+    );
+
+    testWidgets(
+      'replaceAllWithRoute_onboardingGuardTrue_redirectsToOnboarding',
+      (tester) async {
+        final resolvedRoute = RouteData(
+          uri: Uri.parse('/details?from=restore'),
+          routePattern: '/details',
+        );
+
+        routerService.replaceAllWithRoute(resolvedRoute);
+        await tester.pump();
+
+        expect(routerService.navigationStack.value.length, 1);
+        expect(
+          routerService.navigationStack.value.first.pathWithParams,
+          '/onboarding',
+        );
+        expect(intentStore.getIntendedRoute(), '/details?from=restore');
+      },
+    );
   });
 }
 

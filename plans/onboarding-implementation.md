@@ -15,7 +15,7 @@ Implement a 4-screen emotional onboarding flow (PAS → AIDA framework) that ser
 - Shared scaffold with grid background and progress dots
 - Page navigation with PageView + PageStorageKey for state preservation
 - SharedPreferences flag for completion tracking (with migration for existing users)
-- Startup flow integration (before auth init)
+- Startup flow integration (onboarding store init before auth; routing after auth with offline precedence)
 - Portrait orientation lock (with restore)
 - Offline retry path (/offline route)
 
@@ -486,13 +486,13 @@ void dispose() {
 - Keys: `has_completed_onboarding`, `has_ever_launched`, `onboarding_migration_version` (consistent snake_case)
 - API:
   - `Future<void> init()` - async migration, sets `isInitialized` when done
-  - `bool get isInitialized` - gate for router guard race condition
+  - `bool get isInitialized` - optional diagnostic flag (startup awaits init before routing)
   - `bool get isCompleted` - sync getter (cached after init)
   - `Future<void> markCompleted()` - sets completion flag
 
 **Task 7.1b: Migration for Existing Users (CRITICAL)**
 - **Problem:** Existing users will be forced through onboarding on app update
-- **Solution:** Durable `has_ever_launched` marker + version-based migration with `isInitialized` gate:
+- **Solution:** Durable `has_ever_launched` marker + version-based migration (startup awaits init before routing):
 ```dart
 class OnboardingStore {
   OnboardingStore(this._prefs);
@@ -504,10 +504,10 @@ class OnboardingStore {
   static const _migrationVersionKey = 'onboarding_migration_version';
   static const _currentMigrationVersion = 1;  // Bump when migration logic changes
 
-  bool _isInitialized = false;      // Gate for router guard race condition
+  bool _isInitialized = false;      // Init lifecycle flag (startup awaits init before routing)
   bool _isCompletedCached = false;  // Cached result for sync access
 
-  /// Returns true once init() has completed - used by router guard
+  /// Returns true once init() has completed - useful for diagnostics
   bool get isInitialized => _isInitialized;
 
   /// Call once at startup before any routing
@@ -567,7 +567,7 @@ class OnboardingStore {
 }
 ```
 - **Init/sync pattern:** `init()` runs migration once async, `isCompleted` is sync getter
-- **Race-safe:** `isInitialized` gate prevents routing before init completes
+- **Race-safe:** Startup awaits `init()` before any onboarding/auth routing
 - **Durable marker:** `has_ever_launched` survives logout and cache clears - seeded by pre-onboarding versions
 - **Crash-safe migration:** Migration version written AFTER `markCompleted()` succeeds, so crash retries work
 - **Layered detection:** Checks durable marker OR legacy app data (cached_user, auth_email only - NOT intended_route which guard now writes)
@@ -597,142 +597,53 @@ if (!(_sharedPreferences.getBool('has_ever_launched') ?? false)) {
 
 **Task 7.3: Modify StartupViewModel (CRITICAL ORDER)**
 - File: `lib/startup/startup_view_model.dart`
-- **Move onboarding check BEFORE auth init** to prevent auth-driven navigation override:
-
-**Task 7.3b: Add Router-Level Onboarding Guard (Injected Callback)**
-- **Problem:** Direct `locator<OnboardingStore>()` in RouterService creates core→feature dependency
-- **Solution:** Inject a lightweight gate callback
-
-**Step 1:** Add optional gate callback to existing `RouterService` constructor:
-```dart
-class RouterService {
-  RouterService({
-    required this.supportedRoutes,  // Existing parameter
-    this.routeGuard,  // NEW: optional gate callback
-  });
-
-  final bool Function(String path)? routeGuard;  // Returns true if allowed
-```
-
-**Step 2:** Apply guard with stack-clearing semantics:
-```dart
-// In _resolveNavigation (internal helper, called by all navigation methods):
-({List<Path> paths, bool forceReplaceAll}) _resolveNavigation(List<Path> paths) {
-  if (routeGuard != null && paths.isNotEmpty) {
-    final targetPath = paths.last.name;
-    if (!routeGuard!(targetPath)) {
-      // Force stack clear to prevent back navigation escaping onboarding
-      return (paths: [Path(name: '/onboarding')], forceReplaceAll: true);
-    }
-  }
-  return (paths: paths, forceReplaceAll: false);
-}
-
-// Example usage in goTo():
-void goTo(Path path) {
-  final result = _resolveNavigation([path]);
-  if (result.forceReplaceAll) {
-    _replaceAllInternal(result.paths);  // Clears entire stack
-  } else {
-    _pushInternal(result.paths.last);
-  }
-}
-```
-- **CRITICAL:** When guard denies, ALWAYS clear the stack via replaceAll semantics
-- This prevents `back()` from escaping onboarding to guarded routes
-
-**Step 3:** Wire up in `locator_config.dart`:
-```dart
-// Required import: import 'dart:async' show unawaited;
-
-Module<RouterService>(
-  builder: () => RouterService(
-    supportedRoutes: routes,  // Existing parameter
-    routeGuard: (path) {
-      // Use Uri.parse to handle query params correctly
-      final pathOnly = Uri.parse(path).path;
-      if (pathOnly == '/onboarding') return true;  // Always allow onboarding
-
-      final onboardingStore = locator<OnboardingStore>();
-      final navStore = locator<NavigationIntentStore>();
-
-      // CRITICAL: Check force flag FIRST - forced onboarding starts fresh (no deep link preservation)
-      // This must come before isInitialized check to handle app relaunch with deep link during forced flow
-      if (navStore.shouldForceOnboarding()) return false;
-
-      // Helper: only save paths that require auth (skip public routes)
-      // Prevents stale deep links from being replayed after auth
-      // NOTE: Derives from RouteEntry.requiresAuth for single source of truth
-      bool isProtectedPath(String p) {
-        RouteEntry? matchedRoute;
-        for (final route in routes) {
-          if (matchRoute(route.path, Uri.parse(p)) != null) {
-            matchedRoute = route;
-            break;
-          }
-        }
-        // Unmatched routes and public routes (requiresAuth: false) are not saved
-        return matchedRoute != null && matchedRoute.requiresAuth;
-      }
-
-      // Gate: if onboarding hasn't initialized yet, store path and redirect
-      if (!onboardingStore.isInitialized) {
-        if (isProtectedPath(pathOnly)) {
-          unawaited(navStore.saveIntendedRoute(path));  // Preserve protected deep link
-        }
-        return false;  // Redirect to /onboarding (splash until init completes)
-      }
-
-      // Check first-time onboarding - preserve deep link for after completion
-      if (!onboardingStore.isCompleted) {
-        if (isProtectedPath(pathOnly)) {
-          unawaited(navStore.saveIntendedRoute(path));  // Preserve protected deep link
-        }
-        return false;
-      }
-
-      return true;
-    },
-  ),
-),
-```
-
-- **Decoupled:** RouterService has no feature dependencies, gate logic is injected
-- **Testable:** Tests inject `routeGuard: (_) => true` to bypass
-- **Centralized:** All navigation methods use `_resolveNavigation()`
-- **Force flag first:** Checked before isInitialized to prevent deep link preservation during forced onboarding
-- **Sync access:** Guard uses cached `isCompleted` getter (init runs at startup)
-- **Race-safe:** `isInitialized` gate defers routing until init completes
-- **Protected paths only:** Only saves deep links for auth-required routes (skips /auth*, /offline, /404)
-- **Import note:** Requires `import 'dart:async' show unawaited;`
+- Initialize onboarding store first, set the onboarding guard, then init auth.
+- Apply offline precedence, then route based on onboarding/auth state.
 
 **Task 7.3 Implementation:**
 ```dart
-Future<void> initializeApp() async {
-  appStateNotifier.value = const InitializingApp();
-  try {
-    locator.registerMany(buildModules(sharedPreferences: _sharedPreferences));
-    loggingSubscription?.cancel();
-    loggingSubscription = _loggingAbstraction.initializeLogging();
-    locator<AppLifecycleService>().attachStartupViewModel(this);
+final onboardingStore = locator<OnboardingStore>();
+await onboardingStore.init();
 
-    // INIT ONBOARDING STORE FIRST (runs migration, caches result)
-    final onboardingStore = locator<OnboardingStore>();
-    await onboardingStore.init();  // Async migration, then sync access
+final routerService = locator<RouterService>();
+routerService.setOnboardingGuard(() => !onboardingStore.isCompleted);
 
-    // CHECK ONBOARDING (before auth init)
-    if (!onboardingStore.isCompleted) {  // Sync getter (cached)
-      final routerService = locator<RouterService>();
-      routerService.replaceAll([Path(name: '/onboarding')]);
-      appStateNotifier.value = const AppInitialized();
-      return; // Skip auth init entirely
-    }
+final authService = locator<AuthService>();
+await authService.init();
 
-    // Then proceed with auth
-    final authService = locator<AuthService>();
-    await authService.init();
-    // ... rest of existing logic
-  }
+if (authService.authState.value is auth_state.OfflineNoUser) {
+  appStateNotifier.value = const OfflineNoUserState();
+  return;
+}
+
+appStateNotifier.value = const AppInitialized();
+
+if (routerService.shouldShowOnboarding()) {
+  routerService.replaceAll([Path(name: '/onboarding')]);
+} else if (authService.authState.value is auth_state.Unauthenticated) {
+  routerService.replaceAll([Path(name: '/auth')]);
+}
+```
+
+**Task 7.3b: Onboarding Guard in RouterService (Onboarding-First)**
+- RouterService exposes `setOnboardingGuard` and checks onboarding before auth in
+  `goTo`, `replace`, `replaceAll`, and `replaceAllWithRoute`.
+- Redirects persist intended routes only if eligible via `NavigationIntentStore`.
+- Eligibility uses `Uri.parse(path).path` and blocks `/auth`, `/auth/check-email`,
+  `/onboarding`, `/offline`, `/404`.
+
+**Guard order (simplified):**
+```dart
+if (_shouldRedirectToOnboarding(path)) {
+  _persistIntendedRouteIfEligible(path);
+  _replaceWithOnboardingRoute();
+  return;
+}
+
+if (_shouldRedirectToAuth(path)) {
+  _persistIntendedRouteIfEligible(path);
+  _replaceWithAuthRoute();
+  return;
 }
 ```
 
@@ -786,30 +697,11 @@ Future<void> logout() async {
   // Route guard + force flag handle all edge cases
 }
 ```
-**IMPORTANT:** Removed `restartApp()` from logout to prevent RouterService desync. The force flag survives any app restarts and the router guard prevents bypassing onboarding. User-scoped services are explicitly reset via injected dependencies (not locator access) to prevent state leaking across sessions.
+**IMPORTANT:** Removed `restartApp()` from logout to prevent RouterService desync. The force flag survives any app restarts and is handled in `AuthService._handlePostAuthNavigation()`, while RouterService enforces normal onboarding. User-scoped services are explicitly reset via injected dependencies (not locator access) to prevent state leaking across sessions.
 
-**Step 3:** Modify `StartupViewModel.initializeApp()` to check force flag FIRST:
-```dart
-// At start of initializeApp(), after locator registration:
-
-// ALWAYS init onboarding store first (sets isInitialized, runs migration)
-// This must happen before ANY routing to prevent guard race condition
-final onboardingStore = locator<OnboardingStore>();
-await onboardingStore.init();
-
-// Then check force flag
-final navigationIntentStore = locator<NavigationIntentStore>();
-if (navigationIntentStore.shouldForceOnboarding()) {
-  // DO NOT clear flag here - clear only when onboarding completes
-  final routerService = locator<RouterService>();
-  routerService.replaceAll([Path(name: '/onboarding')]);
-  appStateNotifier.value = const AppInitialized();
-  return;
-}
-
-// Then check onboarding completion...
-if (!onboardingStore.isCompleted) { ... }
-```
+**Step 3:** StartupViewModel does not check the force flag directly.
+Forced onboarding is handled in `AuthService._handlePostAuthNavigation()` after auth init, while
+RouterService uses `setOnboardingGuard` for normal onboarding gating.
 
 **Step 4:** Force flag cleared by `OnboardingViewModel.completeOnboarding()` (see Task 6.2):
 - OnboardingStore.markCompleted() only sets the completion flag
@@ -818,7 +710,7 @@ if (!onboardingStore.isCompleted) { ... }
 
 - **Deterministic:** Flag survives restart, only cleared when onboarding finishes
 - **App kill during forced onboarding:** Relaunches to onboarding (flag still set)
-- **No race condition:** Force flag is checked before any auth init
+- **No race condition:** Force flag is handled in `AuthService._handlePostAuthNavigation()` after auth init; onboarding guard covers normal onboarding
 
 ---
 
@@ -826,11 +718,11 @@ if (!onboardingStore.isCompleted) { ... }
 
 | Risk | Mitigation |
 |------|------------|
-| Auth init navigation override | Check onboarding BEFORE auth.init() in StartupViewModel |
+| Onboarding/auth ordering mismatch | StartupViewModel routes after auth init with offline precedence; RouterService applies onboarding guard before auth guard |
 | Existing users forced into onboarding | Migration checks has_ever_launched OR cached_user/auth_email (Task 7.1b); requires pre-onboarding release to seed marker |
 | RouterService desync after restart | Removed restartApp() from logout(); use explicit routing + force flag |
-| Deep links bypass onboarding | Router guard checks both isCompleted() AND force flag |
-| Router core→feature dependency | Inject gate callback, don't use locator in RouterService |
+| Deep links bypass onboarding | RouterService onboarding-first guard; intended routes saved only if eligible |
+| Router core→feature dependency | Use setOnboardingGuard callback; RouterService stays feature-agnostic |
 | Offline/no-user after onboarding | Explicit routing to /offline in completeOnboarding() |
 | Authenticated offline after onboarding | Explicit routing to / in completeOnboarding() |
 | Auth init failure | try/catch in completeOnboarding(), route to /auth on error |
@@ -842,7 +734,7 @@ if (!onboardingStore.isCompleted) { ... }
 | Sign-out routing vs restartApp race | Removed restartApp(); force flag + router guard handle all cases |
 | App kill during forced onboarding | Force flag persists, relaunches to onboarding |
 | Guard needs sync access to onboarding state | OnboardingStore.init() runs at startup; guard uses cached sync getter |
-| Router guard race with deep links | `isInitialized` gate defers routing; deep links stored via `setIntendedRoute` |
+| Router guard race with deep links | Intended routes stored only if eligible; guarded redirects happen before auth |
 | Checkbox state lost on PageView page dispose | Checkbox state in ViewModel (`disclaimerAccepted`), not widget state |
 
 ---
@@ -880,6 +772,10 @@ if (!onboardingStore.isCompleted) { ... }
   - `init_newUserNoLegacyData_showsOnboarding`
   - `init_calledTwice_idempotent` (migration version check)
   - `isInitialized_falseBeforeInit_trueAfter`
+- Test `NavigationIntentStore`:
+  - `isEligibleIntendedRoute_withBlockedPaths_returnsFalse`
+  - `saveIntendedRouteIfEligible_ineligible_doesNotOverwrite`
+  - `consumeIntendedRoute_withExisting_clearsAndReturns`
 - **Widget tests use real `OnboardingViewModel`** (per CLAUDE.md: "Widget tests use real ViewModels")
 - Use `SharedPreferences.setMockInitialValues` for store tests
 - Navigation tests: verify route transitions and back navigation
@@ -890,7 +786,7 @@ if (!onboardingStore.isCompleted) { ... }
   - `initializeApp_onboardingNotCompleted_routesToOnboarding`
   - `initializeApp_onboardingCompleted_callsAuthInit`
   - `initializeApp_onboardingCompletedUnauthenticated_routesToAuth`
-  - `initializeApp_forceOnboardingFlag_routesToOnboarding`
+  - `initializeApp_offlineNoUser_setsOfflineStateAndSkipsRouting`
 - `test/features/auth/data/auth_service_test.dart`:
   - `logout_setsForceOnboardingFlag`
   - `logout_routesToOnboarding`
@@ -911,16 +807,11 @@ if (!onboardingStore.isCompleted) { ... }
 
 **Router Guard Tests:**
 - `test/navigation/router_service_test.dart`:
-  - Existing tests: inject `routeGuard: (_) => true` to bypass guard
+  - Existing tests: leave guard unset or call `routerService.setOnboardingGuard(() => false)` to bypass onboarding redirects
   - New tests:
-    - `replaceAll_guardReturnsFalse_redirectsToOnboarding`
-    - `goTo_guardReturnsFalse_redirectsToOnboarding`
-    - `goTo_guardReturnsFalse_clearsStack`
-    - `replace_guardReturnsFalse_redirectsToOnboarding`
-    - `replaceAllWithRoute_guardReturnsFalse_redirectsToOnboarding`
-    - `back_afterGuardDenial_cannotEscapeOnboarding` - verify stack is cleared so back() doesn't reveal guarded routes
-    - `guard_isInitializedFalse_savesIntendedRouteAndRedirects` - verify deep link preserved during init
-    - `guard_isInitializedTrue_allowsRouting` - verify guard passes after init completes
+    - `goTo_onboardingGuardTrue_redirectsToOnboarding`
+    - `replaceAllWithRoute_onboardingGuardTrue_redirectsToOnboarding`
+    - `goTo_onboardingGuardTrue_ineligibleRouteDoesNotOverwriteIntendedRoute`
 
 **Deep Link Recovery Tests:**
 - `test/features/auth/data/auth_service_test.dart`:

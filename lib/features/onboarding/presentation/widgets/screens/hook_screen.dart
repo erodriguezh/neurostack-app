@@ -58,7 +58,7 @@ class _HookScreenState extends State<HookScreen> {
               SizedBox(height: spacing.xxl * 2),
               // Headline
               _AnimatedText(
-                delay: Duration(milliseconds: _headlineDelay),
+                delay: const Duration(milliseconds: _headlineDelay),
                 duration: durations.duration500,
                 skipped: _skipped,
                 child: Text(
@@ -75,7 +75,7 @@ class _HookScreenState extends State<HookScreen> {
               SizedBox(height: spacing.lg),
               // Body lines
               _AnimatedText(
-                delay: Duration(milliseconds: _line1Delay),
+                delay:  const Duration(milliseconds: _line1Delay),
                 duration: durations.duration500,
                 skipped: _skipped,
                 child: Text(
@@ -85,7 +85,7 @@ class _HookScreenState extends State<HookScreen> {
               ),
               SizedBox(height: spacing.sm),
               _AnimatedText(
-                delay: Duration(milliseconds: _line2Delay),
+                delay: const Duration(milliseconds: _line2Delay),
                 duration: durations.duration500,
                 skipped: _skipped,
                 child: Text(
@@ -95,7 +95,7 @@ class _HookScreenState extends State<HookScreen> {
               ),
               SizedBox(height: spacing.sm),
               _AnimatedText(
-                delay: Duration(milliseconds: _line3Delay),
+                delay: const Duration(milliseconds: _line3Delay),
                 duration: durations.duration500,
                 skipped: _skipped,
                 child: Text.rich(
@@ -118,7 +118,7 @@ class _HookScreenState extends State<HookScreen> {
               SizedBox(height: spacing.xxl),
               // Kicker
               _AnimatedText(
-                delay: Duration(milliseconds: _kickerDelay),
+                delay: const Duration(milliseconds: _kickerDelay),
                 duration: durations.duration500,
                 skipped: _skipped,
                 useScale: true,

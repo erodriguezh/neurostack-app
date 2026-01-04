@@ -253,13 +253,12 @@ class AuthService {
       return;
     }
 
-    final intendedRoute = _navigationIntentStore.getIntendedRoute();
+    final intendedRoute = await _navigationIntentStore.consumeIntendedRoute();
     if (intendedRoute != null && intendedRoute.isNotEmpty) {
       _routerService.replaceAll([Path(name: intendedRoute)]);
     } else {
       _routerService.replaceAll([Path(name: '/')]);
     }
-    await _navigationIntentStore.clearIntendedRoute();
     await _navigationIntentStore.clearAuthEmail();
   }
 

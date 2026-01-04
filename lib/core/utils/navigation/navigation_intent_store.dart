@@ -8,12 +8,51 @@ class NavigationIntentStore {
   static const _intendedRouteKey = 'intended_route';
   static const _authEmailKey = 'auth_email';
   static const _forceOnboardingKey = 'force_onboarding';
+  static const Set<String> _blockedIntendedRoutes = {
+    '/auth',
+    '/auth/check-email',
+    '/onboarding',
+    '/offline',
+    '/404',
+  };
 
   Future<void> saveIntendedRoute(String route) async {
     await _prefs.setString(_intendedRouteKey, route);
   }
 
   String? getIntendedRoute() => _prefs.getString(_intendedRouteKey);
+
+  bool isEligibleIntendedRoute(String path) {
+    final normalizedPath = Uri.parse(path).path;
+    return !_blockedIntendedRoutes.contains(normalizedPath);
+  }
+
+  Future<void> saveIntendedRouteIfEligible(
+    String route, {
+    bool overwrite = true,
+  }) async {
+    if (!isEligibleIntendedRoute(route)) {
+      return;
+    }
+    if (!overwrite && hasIntendedRoute()) {
+      return;
+    }
+    await _prefs.setString(_intendedRouteKey, route);
+  }
+
+  bool hasIntendedRoute() {
+    final route = getIntendedRoute();
+    return route != null && route.isNotEmpty;
+  }
+
+  Future<String?> consumeIntendedRoute() async {
+    final route = getIntendedRoute();
+    if (route == null || route.isEmpty) {
+      return null;
+    }
+    await clearIntendedRoute();
+    return route;
+  }
 
   Future<void> clearIntendedRoute() async {
     await _prefs.remove(_intendedRouteKey);

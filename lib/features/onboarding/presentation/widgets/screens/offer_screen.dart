@@ -165,17 +165,17 @@ class _ValuePropsCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _ValuePropRow(
+          const _ValuePropRow(
             icon: LucideIcons.eye,
             text: "See exactly what to do today",
           ),
           SizedBox(height: spacing.md),
-          _ValuePropRow(
+          const _ValuePropRow(
             icon: LucideIcons.flame,
             text: "Build streaks that feel good to maintain",
           ),
           SizedBox(height: spacing.md),
-          _ValuePropRow(
+          const _ValuePropRow(
             icon: LucideIcons.sparkles,
             text: "Actually become the person who does this stuff",
           ),

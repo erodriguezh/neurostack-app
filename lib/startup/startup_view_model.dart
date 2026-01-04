@@ -72,14 +72,17 @@ class StartupViewModel {
       final authService = locator<AuthService>();
       await authService.init();
 
-      if (authService.authState.value is auth_state.Unauthenticated) {
-        routerService.replaceAll([Path(name: '/auth')]);
-      }
-
       if (authService.authState.value is auth_state.OfflineNoUser) {
         appStateNotifier.value = const OfflineNoUserState();
-      } else {
-        appStateNotifier.value = const AppInitialized();
+        return;
+      }
+
+      appStateNotifier.value = const AppInitialized();
+
+      if (routerService.shouldShowOnboarding()) {
+        routerService.replaceAll([Path(name: '/onboarding')]);
+      } else if (authService.authState.value is auth_state.Unauthenticated) {
+        routerService.replaceAll([Path(name: '/auth')]);
       }
     } catch (e, st) {
       appStateNotifier.value = AppInitializationError(e, st);

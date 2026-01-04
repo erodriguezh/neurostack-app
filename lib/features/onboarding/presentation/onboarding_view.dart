@@ -71,10 +71,10 @@ class _OnboardingViewState extends State<OnboardingView> {
 
   Widget _buildScreen(OnboardingStep step, OnboardingState state) {
     return switch (step) {
-      OnboardingStep.hook => HookScreen(
+      OnboardingStep.agitate => AgitateScreen(
         onNext: _viewModel.nextStep,
       ),
-      OnboardingStep.agitate => AgitateScreen(
+      OnboardingStep.hook => HookScreen(
         onNext: _viewModel.nextStep,
       ),
       OnboardingStep.offer => OfferScreen(
