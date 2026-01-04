@@ -12,7 +12,7 @@ class AppRouteInformationParser extends RouteInformationParser<RouteData> {
   Future<RouteData> parseRouteInformation(
     RouteInformation routeInformation,
   ) async {
-    final uri = routeInformation.uri;
+    final uri = normalizeAuthCallbackUri(routeInformation.uri);
     return SynchronousFuture(
       RouteData(uri: uri, routePattern: findMatchingRoutePattern(uri, routes)),
     );

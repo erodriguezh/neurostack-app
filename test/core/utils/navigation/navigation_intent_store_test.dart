@@ -17,6 +17,7 @@ void main() {
     test('isEligibleIntendedRoute_withBlockedPaths_returnsFalse', () {
       expect(store.isEligibleIntendedRoute('/auth'), isFalse);
       expect(store.isEligibleIntendedRoute('/auth?foo=bar'), isFalse);
+      expect(store.isEligibleIntendedRoute('/auth/callback'), isFalse);
       expect(store.isEligibleIntendedRoute('/auth/check-email'), isFalse);
       expect(store.isEligibleIntendedRoute('/onboarding'), isFalse);
       expect(store.isEligibleIntendedRoute('/offline'), isFalse);
