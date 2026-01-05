@@ -1,11 +1,10 @@
-import 'dart:async';
-
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
 import 'package:neurostack/core/ui/constants/curves.dart';
 import 'package:neurostack/core/ui/constants/durations.dart';
+import 'package:neurostack/core/ui/constants/widget_keys.dart';
 import 'package:neurostack/core/utils/app_environment.dart';
 import 'package:neurostack/core/utils/internal_notification/notify_service.dart';
 import 'package:neurostack/core/utils/locator.dart';
@@ -132,7 +131,6 @@ class _AuthViewState extends State<AuthView>
                           key: const ValueKey('auth_magic_link'),
                           redirectUrl: _redirectUrl(),
                           localization: const SupaMagicAuthLocalization(),
-                          onSuccess: (_) {},
                           onMagicLinkSent: _viewModel.handleMagicLinkSent,
                           onError: _viewModel.handleAuthError,
                         ),
@@ -160,12 +158,11 @@ class _AuthViewState extends State<AuthView>
 class _MagicLinkAuth extends SupaMagicAuth {
   const _MagicLinkAuth({
     super.key,
-    required super.onSuccess,
     required this.onMagicLinkSent,
     super.onError,
     super.redirectUrl,
     super.localization = const SupaMagicAuthLocalization(),
-  });
+  }) : super(onSuccess: _noopAuthSuccess);
 
   final void Function(String email) onMagicLinkSent;
 
@@ -173,11 +170,12 @@ class _MagicLinkAuth extends SupaMagicAuth {
   State<_MagicLinkAuth> createState() => _MagicLinkAuthState();
 }
 
+void _noopAuthSuccess(Object? _) {}
+
 class _MagicLinkAuthState extends State<_MagicLinkAuth> {
   final _formKey = GlobalKey<FormState>();
   final _email = TextEditingController();
   final _emailFocusNode = FocusNode();
-  late final StreamSubscription<AuthState> _gotrueSubscription;
 
   bool _isLoading = false;
   bool _hasText = false;
@@ -186,13 +184,6 @@ class _MagicLinkAuthState extends State<_MagicLinkAuth> {
   @override
   void initState() {
     super.initState();
-    _gotrueSubscription =
-        Supabase.instance.client.auth.onAuthStateChange.listen((data) {
-      final session = data.session;
-      if (session != null && mounted) {
-        widget.onSuccess(session);
-      }
-    });
     _email.addListener(_handleEmailChanged);
     _emailFocusNode.addListener(_handleFocusChanged);
   }
@@ -203,7 +194,6 @@ class _MagicLinkAuthState extends State<_MagicLinkAuth> {
     _emailFocusNode.removeListener(_handleFocusChanged);
     _email.dispose();
     _emailFocusNode.dispose();
-    _gotrueSubscription.cancel();
     super.dispose();
   }
 
@@ -243,6 +233,7 @@ class _MagicLinkAuthState extends State<_MagicLinkAuth> {
                   : const [],
             ),
             child: TextFormField(
+              key: WidgetKeys.authEmailField,
               controller: _email,
               focusNode: _emailFocusNode,
               keyboardType: TextInputType.emailAddress,
@@ -315,6 +306,7 @@ class _MagicLinkAuthState extends State<_MagicLinkAuth> {
           ),
           SizedBox(height: context.spacing.lg),
           AppPrimaryCta(
+            key: WidgetKeys.authSubmitButton,
             label: localization.continueWithMagicLink,
             onPressed: _sendMagicLink,
             enabled: isEnabled,

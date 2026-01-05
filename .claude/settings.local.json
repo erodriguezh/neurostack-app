@@ -10,7 +10,9 @@
       "Bash(flutter pub get:*)",
       "Bash(flutter analyze:*)",
       "Bash(flutter test:*)",
-      "Bash(dart format:*)"
+      "Bash(dart format:*)",
+      "Bash(find:*)",
+      "Bash(tree:*)"
     ]
   }
 }
