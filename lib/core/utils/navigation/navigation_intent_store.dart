@@ -10,6 +10,7 @@ class NavigationIntentStore {
   static const _forceOnboardingKey = 'force_onboarding';
   static const Set<String> _blockedIntendedRoutes = {
     '/auth',
+    '/auth/callback',
     '/auth/check-email',
     '/onboarding',
     '/offline',
