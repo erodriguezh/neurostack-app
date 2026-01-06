@@ -11,8 +11,7 @@ class MockAuthStates {
 }
 
 class TestAuthStateNotifier extends ValueNotifier<AuthState> {
-  TestAuthStateNotifier([AuthState initial = const Unauthenticated()])
-      : super(initial);
+  TestAuthStateNotifier([super.initial = const Unauthenticated()]);
 
   void setAuthenticated(User user) => value = AuthenticatedOnline(user);
   void setUnauthenticated() => value = const Unauthenticated();

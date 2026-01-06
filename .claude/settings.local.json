@@ -12,7 +12,8 @@
       "Bash(flutter test:*)",
       "Bash(dart format:*)",
       "Bash(find:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Skill(flow:flow-interview)"
     ]
   }
 }
