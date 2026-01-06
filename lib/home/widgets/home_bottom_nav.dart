@@ -48,7 +48,7 @@ class HomeBottomNav extends StatelessWidget {
               ),
               _NavItem(
                 label: 'Progress',
-                icon: Icons.show_chart,
+                icon: LucideIcons.chartLine,
                 isActive: activeTab == HomeBottomTab.progress,
                 onTap: () => onSelect(HomeBottomTab.progress),
               ),

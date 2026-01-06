@@ -98,11 +98,11 @@ class HomeViewModel {
   }
 
   void onAddProtocol() {
-    _routerService.goTo(Path(name: '/library'));
+    _routerService.replaceAll([Path(name: '/library')]);
   }
 
   void onBrowseLibrary() {
-    _routerService.goTo(Path(name: '/library'));
+    _routerService.replaceAll([Path(name: '/library')]);
   }
 
   void onLogSession(String protocolId) {
@@ -137,6 +137,15 @@ class HomeViewModel {
     if (tab == HomeBottomTab.stack) {
       return;
     }
+
+    if (tab == HomeBottomTab.library) {
+      _routerService.replaceAll([Path(name: '/library')]);
+      return;
+    }
+
+    _notifyService.setToastEvent(
+      ToastEventInfo(message: 'Coming soon'),
+    );
   }
 
   void handleUseFreeTier() {
