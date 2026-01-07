@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
 import 'package:neurostack/core/ui/constants/kit_colors.dart';
+import 'package:neurostack/core/ui/extensions/category_ui.dart';
 import 'package:neurostack/core/ui/widgets/dashed_rounded_border.dart';
 import 'package:neurostack/core/ui/widgets/spotlight_card.dart';
 import 'package:neurostack/library/library_state.dart';
-import 'package:neurostack/features/protocol/domain/enums/evidence_level.dart';
+import 'package:neurostack/library/library_ui.dart';
 
 class LibraryProtocolCard extends StatefulWidget {
   const LibraryProtocolCard({
@@ -64,6 +65,7 @@ class _LibraryProtocolCardState extends State<LibraryProtocolCard> {
               _CategoryPill(
                 label: widget.model.category.displayName.toUpperCase(),
                 isMuted: isLocked,
+                icon: widget.model.category.iconData,
               ),
             ],
           ),
@@ -81,16 +83,12 @@ class _LibraryProtocolCardState extends State<LibraryProtocolCard> {
             widget.model.evidenceLevel.label,
             style: context.theme.textTheme.bodySmall?.copyWith(
               fontSize: 12,
-              color: _evidenceColor(context, widget.model.evidenceLevel, isLocked),
-            ),
-          ),
-          SizedBox(height: spacing.xs),
-          Text(
-            widget.model.targetDescription,
-            style: context.theme.textTheme.bodySmall?.copyWith(
-              fontSize: 12,
-              height: 1.4,
-              color: isLocked ? kitColors.white30 : kitColors.white50,
+              color: isLocked
+                  ? kitColors.white30
+                  : libraryEvidenceColor(
+                      context,
+                      widget.model.evidenceLevel,
+                    ),
             ),
           ),
           SizedBox(height: spacing.md),
@@ -150,23 +148,6 @@ class _LibraryProtocolCardState extends State<LibraryProtocolCard> {
     );
   }
 
-  Color _evidenceColor(
-    BuildContext context,
-    EvidenceLevel evidence,
-    bool isLocked,
-  ) {
-    if (isLocked) {
-      return context.kitColors.white30;
-    }
-    final kitColors = context.kitColors;
-    return switch (evidence) {
-      EvidenceLevel.multipleRcts => kitColors.evidenceStrong,
-      EvidenceLevel.singleRct => kitColors.evidenceStrong,
-      EvidenceLevel.observational => kitColors.evidenceModerate,
-      EvidenceLevel.expertConsensus => kitColors.evidenceWeak,
-    };
-  }
-
   String _statusLabel(LibraryCardStatus status) {
     return switch (status) {
       LibraryCardStatus.inStack => 'In your stack',
@@ -189,17 +170,20 @@ class _CategoryPill extends StatelessWidget {
   const _CategoryPill({
     required this.label,
     required this.isMuted,
+    this.icon,
   });
 
   final String label;
   final bool isMuted;
+  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
     final kitColors = context.kitColors;
+    final textColor = isMuted ? kitColors.white30 : kitColors.white50;
     final textStyle = context.textStyles.mono.copyWith(
       fontSize: 10,
-      color: isMuted ? kitColors.white30 : kitColors.white50,
+      color: textColor,
       letterSpacing: 1.5,
     );
 
@@ -210,7 +194,16 @@ class _CategoryPill extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: kitColors.white05),
       ),
-      child: Text(label, style: textStyle),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 12, color: textColor),
+            const SizedBox(width: 6),
+          ],
+          Text(label, style: textStyle),
+        ],
+      ),
     );
   }
 }

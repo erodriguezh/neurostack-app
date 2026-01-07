@@ -14,7 +14,7 @@ class LibraryCategoryHeader extends StatelessWidget {
     final kitColors = context.kitColors;
     return Text(
       label,
-      style: context.textStyles.mono.copyWith(
+      style: context.theme.textTheme.bodySmall?.copyWith(
         fontSize: 12,
         letterSpacing: 1.2,
         color: kitColors.white50,

@@ -16,7 +16,6 @@ class LibraryProtocolCardModel {
     required this.name,
     required this.category,
     required this.evidenceLevel,
-    required this.targetDescription,
     required this.status,
     this.isOfflineDisabled = false,
     this.animateBadge = false,
@@ -26,10 +25,19 @@ class LibraryProtocolCardModel {
   final String name;
   final Category category;
   final EvidenceLevel evidenceLevel;
-  final String targetDescription;
   final LibraryCardStatus status;
   final bool isOfflineDisabled;
   final bool animateBadge;
+}
+
+class LibrarySectionModel {
+  const LibrarySectionModel({
+    required this.category,
+    required this.cards,
+  });
+
+  final Category category;
+  final List<LibraryProtocolCardModel> cards;
 }
 
 class LibraryProtocolStats {
@@ -48,6 +56,7 @@ class LibraryViewState {
   const LibraryViewState({
     this.status = LibraryStatus.loading,
     this.cards = const [],
+    this.sections = const [],
     this.user,
     this.protocolsById = const {},
     this.isOffline = false,
@@ -58,6 +67,7 @@ class LibraryViewState {
 
   final LibraryStatus status;
   final List<LibraryProtocolCardModel> cards;
+  final List<LibrarySectionModel> sections;
   final User? user;
   final Map<String, Protocol> protocolsById;
   final bool isOffline;
@@ -68,6 +78,7 @@ class LibraryViewState {
   LibraryViewState copyWith({
     LibraryStatus? status,
     List<LibraryProtocolCardModel>? cards,
+    List<LibrarySectionModel>? sections,
     Object? user = _unset,
     Object? protocolsById = _unset,
     bool? isOffline,
@@ -78,6 +89,7 @@ class LibraryViewState {
     return LibraryViewState(
       status: status ?? this.status,
       cards: cards ?? this.cards,
+      sections: sections ?? this.sections,
       user: user == _unset ? this.user : user as User?,
       protocolsById: protocolsById == _unset
           ? this.protocolsById

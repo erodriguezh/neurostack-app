@@ -7,18 +7,25 @@ import 'package:neurostack/core/utils/internal_notification/notify_service.dart'
 import 'package:neurostack/core/utils/locator.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
-import 'package:neurostack/features/protocol/domain/enums/category.dart';
 import 'package:neurostack/features/protocol/domain/entities/protocol.dart';
 import 'package:neurostack/features/protocol/domain/repositories/protocol_repository.dart';
 import 'package:neurostack/features/session/domain/repositories/session_repository.dart';
 import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
+import 'package:neurostack/home/home_state.dart';
 import 'package:neurostack/home/widgets/home_bottom_nav.dart';
+import 'package:neurostack/home/widgets/home_status_banner.dart';
 import 'package:neurostack/library/library_state.dart';
 import 'package:neurostack/library/library_view_model.dart';
 import 'package:neurostack/library/widgets/library_category_header.dart';
 import 'package:neurostack/library/widgets/library_protocol_card.dart';
 import 'package:neurostack/library/widgets/protocol_detail_sheet.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+
+const _libraryOfflineBanner = HomeBannerModel(
+  type: HomeBannerType.offline,
+  message: 'Offline mode',
+  isTappable: false,
+  isDismissible: false,
+);
 
 class LibraryView extends StatefulWidget {
   const LibraryView({super.key});
@@ -131,7 +138,14 @@ class _LibraryViewState extends State<LibraryView> {
         SliverToBoxAdapter(
           child: Padding(
             padding: EdgeInsets.only(top: spacing.sm),
-            child: const _OfflineBanner(),
+            child: const _StaggeredFadeIn(
+              index: 0,
+              child: HomeStatusBanner(
+                banner: _libraryOfflineBanner,
+                onDismiss: null,
+                onTap: null,
+              ),
+            ),
           ),
         ),
       );
@@ -172,6 +186,8 @@ class _LibraryViewState extends State<LibraryView> {
                 child: Text(
                   'Protocol Library',
                   style: context.theme.textTheme.headlineLarge?.copyWith(
+                    fontSize: 32,
+                    fontStyle: FontStyle.italic,
                     letterSpacing: -0.8,
                     color: context.kitColors.white90,
                   ),
@@ -192,53 +208,51 @@ class _LibraryViewState extends State<LibraryView> {
             ),
           );
         } else {
-          final items = _buildItems(state.cards);
+          final children = <Widget>[];
+          var staggerIndex = 2;
+
+          for (int sectionIndex = 0;
+              sectionIndex < state.sections.length;
+              sectionIndex++) {
+            final section = state.sections[sectionIndex];
+            children.add(
+              Padding(
+                padding: EdgeInsets.only(
+                  top: sectionIndex == 0 ? 0 : spacing.lg,
+                  bottom: spacing.sm,
+                ),
+                child: _StaggeredFadeIn(
+                  index: staggerIndex++,
+                  child: LibraryCategoryHeader(
+                    label: section.category.displayName.toUpperCase(),
+                  ),
+                ),
+              ),
+            );
+
+            for (final card in section.cards) {
+              children.add(
+                Padding(
+                  padding: EdgeInsets.only(bottom: spacing.md),
+                  child: _StaggeredFadeIn(
+                    index: staggerIndex++,
+                    child: LibraryProtocolCard(
+                      model: card,
+                      onTapCard: () => _showDetails(context, state, card),
+                      onTapBadge: () =>
+                          _handleBadgeTap(context, state, card),
+                    ),
+                  ),
+                ),
+              );
+            }
+          }
+
           slivers.add(
             SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: spacing.lg),
               sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final item = items[index];
-
-                    if (item.isHeader) {
-                      return Padding(
-                        padding: EdgeInsets.only(
-                          top: index == 0 ? 0 : spacing.lg,
-                          bottom: spacing.sm,
-                        ),
-                        child: _StaggeredFadeIn(
-                          index: index + 2,
-                          child: Builder(
-                            builder: (context) {
-                              final category = item.category;
-                              if (category == null) {
-                                return const SizedBox.shrink();
-                              }
-                              return LibraryCategoryHeader(
-                                label: category.displayName.toUpperCase(),
-                              );
-                            },
-                          ),
-                        ),
-                      );
-                    }
-
-                    final card = item.card!;
-                    return Padding(
-                      padding: EdgeInsets.only(bottom: spacing.md),
-                      child: _StaggeredFadeIn(
-                        index: index + 2,
-                        child: LibraryProtocolCard(
-                          model: card,
-                          onTapCard: () => _showDetails(context, state, card),
-                          onTapBadge: () => _handleBadgeTap(context, state, card),
-                        ),
-                      ),
-                    );
-                  },
-                  childCount: items.length,
-                ),
+                delegate: SliverChildListDelegate(children),
               ),
             ),
           );
@@ -352,76 +366,6 @@ class _LibraryViewState extends State<LibraryView> {
     await _viewModel.removeProtocol(protocol.id);
   }
 
-  List<_LibraryListItem> _buildItems(List<LibraryProtocolCardModel> cards) {
-    final items = <_LibraryListItem>[];
-    Category? current;
-
-    for (final card in cards) {
-      if (current != card.category) {
-        current = card.category;
-        items.add(_LibraryListItem.header(current));
-      }
-      items.add(_LibraryListItem.card(card));
-    }
-
-    return items;
-  }
-}
-
-class _LibraryListItem {
-  const _LibraryListItem.header(this.category)
-      : card = null,
-        isHeader = true;
-
-  const _LibraryListItem.card(this.card)
-      : category = null,
-        isHeader = false;
-
-  final bool isHeader;
-  final Category? category;
-  final LibraryProtocolCardModel? card;
-}
-
-class _OfflineBanner extends StatelessWidget {
-  const _OfflineBanner();
-
-  @override
-  Widget build(BuildContext context) {
-    final spacing = context.spacing;
-    final kitColors = context.kitColors;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: spacing.lg),
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: spacing.lg,
-          vertical: spacing.sm,
-        ),
-        decoration: BoxDecoration(
-          color: kitColors.white05,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: kitColors.white10),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              LucideIcons.wifiOff,
-              size: 16,
-              color: kitColors.white70,
-            ),
-            SizedBox(width: spacing.sm),
-            Text(
-              'Offline mode',
-              style: context.theme.textTheme.bodySmall?.copyWith(
-                fontSize: 13,
-                color: kitColors.white70,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 class _EmptyState extends StatelessWidget {

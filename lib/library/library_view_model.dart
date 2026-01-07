@@ -9,6 +9,8 @@ import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
 import 'package:neurostack/features/auth/domain/auth_state.dart';
 import 'package:neurostack/features/protocol/domain/entities/protocol.dart';
+import 'package:neurostack/features/protocol/domain/enums/category.dart'
+    as protocol;
 import 'package:neurostack/features/protocol/domain/repositories/protocol_repository.dart';
 import 'package:neurostack/features/session/domain/entities/session.dart';
 import 'package:neurostack/features/session/domain/repositories/session_repository.dart';
@@ -16,8 +18,10 @@ import 'package:neurostack/features/user/domain/entities/user.dart';
 import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
 import 'package:neurostack/features/user/domain/failures/user_failures.dart';
 import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
+import 'package:neurostack/home/home_bottom_tab_coordinator.dart';
 import 'package:neurostack/home/home_state.dart';
 import 'package:neurostack/library/library_state.dart';
+import 'package:neurostack/library/library_stats.dart';
 
 class LibraryViewModel {
   LibraryViewModel({
@@ -28,13 +32,19 @@ class LibraryViewModel {
     required ProtocolRepository protocolRepository,
     required SessionRepository sessionRepository,
     required ConnectivityService connectivityService,
+    HomeBottomTabCoordinator? tabCoordinator,
   })  : _notifyService = notifyService,
         _routerService = routerService,
         _authService = authService,
         _userRepository = userRepository,
         _protocolRepository = protocolRepository,
         _sessionRepository = sessionRepository,
-        _connectivityService = connectivityService;
+        _connectivityService = connectivityService,
+        _tabCoordinator = tabCoordinator ??
+            HomeBottomTabCoordinator(
+              routerService: routerService,
+              notifyService: notifyService,
+            );
 
   final NotifyService _notifyService;
   final RouterService _routerService;
@@ -43,6 +53,7 @@ class LibraryViewModel {
   final ProtocolRepository _protocolRepository;
   final SessionRepository _sessionRepository;
   final ConnectivityService _connectivityService;
+  final HomeBottomTabCoordinator _tabCoordinator;
 
   final ValueNotifier<LibraryViewState> state = ValueNotifier(
     const LibraryViewState(),
@@ -71,18 +82,10 @@ class LibraryViewModel {
   }
 
   void onSelectBottomTab(HomeBottomTab tab) {
-    switch (tab) {
-      case HomeBottomTab.stack:
-        _routerService.replaceAll([Path(name: '/')]);
-        break;
-      case HomeBottomTab.library:
-        break;
-      case HomeBottomTab.progress:
-        _notifyService.setToastEvent(
-          ToastEventInfo(message: 'Coming soon'),
-        );
-        break;
-    }
+    _tabCoordinator.onSelect(
+      tab,
+      currentTab: state.value.activeTab,
+    );
   }
 
   void goToPaywall() {
@@ -238,7 +241,7 @@ class LibraryViewModel {
       );
     }
 
-    return _buildStats(sessions);
+    return buildLibraryProtocolStats(sessions);
   }
 
   void dispose() {
@@ -249,7 +252,10 @@ class LibraryViewModel {
     state.dispose();
   }
 
-  Future<void> _loadLibrary({required bool showLoading}) async {
+  Future<void> _loadLibrary({
+    required bool showLoading,
+    bool preferCacheWhenOffline = true,
+  }) async {
     if (_isLoading || _isDisposed) {
       return;
     }
@@ -265,6 +271,15 @@ class LibraryViewModel {
       isOffline: isOffline,
       errorMessage: null,
     );
+
+    if (isOffline &&
+        preferCacheWhenOffline &&
+        _cachedUser != null &&
+        _cachedProtocols.isNotEmpty) {
+      _updateCards(_cachedUser!, _cachedProtocols);
+      _isLoading = false;
+      return;
+    }
 
     final userId = _resolveUserId();
     if (userId == null) {
@@ -311,6 +326,7 @@ class LibraryViewModel {
     );
 
     final status = cards.isEmpty ? LibraryStatus.empty : LibraryStatus.loaded;
+    final sections = _buildSections(cards);
     final protocolsById = {
       for (final protocol in protocols) protocol.id: protocol,
     };
@@ -319,6 +335,7 @@ class LibraryViewModel {
       status: status,
       user: user,
       cards: cards,
+      sections: sections,
       protocolsById: protocolsById,
       isRefreshing: false,
       errorMessage: null,
@@ -364,12 +381,50 @@ class LibraryViewModel {
         name: protocol.name.value,
         category: protocol.category,
         evidenceLevel: protocol.evidenceLevel,
-        targetDescription: protocol.target.displayText,
         status: status,
         isOfflineDisabled: disableBadge,
         animateBadge: protocol.id == highlightProtocolId,
       );
     }).toList();
+  }
+
+  List<LibrarySectionModel> _buildSections(
+    List<LibraryProtocolCardModel> cards,
+  ) {
+    if (cards.isEmpty) {
+      return const [];
+    }
+
+    final sections = <LibrarySectionModel>[];
+    protocol.Category? current;
+    var bucket = <LibraryProtocolCardModel>[];
+
+    for (final card in cards) {
+      if (current != card.category) {
+        if (current != null) {
+          sections.add(
+            LibrarySectionModel(
+              category: current,
+              cards: List<LibraryProtocolCardModel>.unmodifiable(bucket),
+            ),
+          );
+        }
+        current = card.category;
+        bucket = <LibraryProtocolCardModel>[];
+      }
+      bucket.add(card);
+    }
+
+    if (current != null) {
+      sections.add(
+        LibrarySectionModel(
+          category: current,
+          cards: List<LibraryProtocolCardModel>.unmodifiable(bucket),
+        ),
+      );
+    }
+
+    return sections;
   }
 
   LibraryCardStatus _deriveCardStatus(
@@ -421,52 +476,6 @@ class LibraryViewModel {
     });
   }
 
-  LibraryProtocolStats _buildStats(List<Session> sessions) {
-    final sorted = List<Session>.from(sessions)
-      ..sort((a, b) => b.completedAt.compareTo(a.completedAt));
-
-    final lastSession = sorted.first.completedAt;
-    final streak = _calculateStreak(sorted);
-
-    return LibraryProtocolStats(
-      totalSessions: sessions.length,
-      currentStreakDays: streak,
-      lastSessionAt: lastSession,
-    );
-  }
-
-  int _calculateStreak(List<Session> sessions) {
-    if (sessions.isEmpty) {
-      return 0;
-    }
-
-    final days = <DateTime>[];
-    for (final session in sessions) {
-      final day = DateTime(
-        session.completedAt.year,
-        session.completedAt.month,
-        session.completedAt.day,
-      );
-      if (!days.contains(day)) {
-        days.add(day);
-      }
-    }
-
-    int streak = 1;
-    DateTime current = days.first;
-
-    for (int i = 1; i < days.length; i++) {
-      final next = days[i];
-      if (current.difference(next).inDays == 1) {
-        streak += 1;
-        current = next;
-      } else {
-        break;
-      }
-    }
-
-    return streak;
-  }
 
   String? _resolveUserId() {
     final authState = _authService.authState.value;
@@ -488,17 +497,31 @@ class LibraryViewModel {
       return;
     }
 
-    if (_cachedUser != null && _cachedProtocols.isNotEmpty) {
-      final cards = _buildCards(
-        _cachedUser!,
-        _cachedProtocols,
-        isOffline: isOffline,
-      );
-      state.value = current.copyWith(isOffline: isOffline, cards: cards);
+    if (isOffline) {
+      if (_cachedUser != null && _cachedProtocols.isNotEmpty) {
+        final cards = _buildCards(
+          _cachedUser!,
+          _cachedProtocols,
+          isOffline: true,
+        );
+        final sections = _buildSections(cards);
+        state.value = current.copyWith(
+          isOffline: true,
+          cards: cards,
+          sections: sections,
+        );
+        return;
+      }
+
+      state.value = current.copyWith(isOffline: true);
       return;
     }
 
-    state.value = current.copyWith(isOffline: isOffline);
+    state.value = current.copyWith(isOffline: false);
+    _loadLibrary(
+      showLoading: current.cards.isEmpty,
+      preferCacheWhenOffline: false,
+    );
   }
 
   String _failureMessage<T>(Either<DomainFailure, T> result) {

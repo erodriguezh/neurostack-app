@@ -3,8 +3,8 @@ import 'package:neurostack/core/ui/app_theme.dart';
 import 'package:neurostack/core/ui/extensions/category_ui.dart';
 import 'package:neurostack/core/ui/widgets/app_primary_cta.dart';
 import 'package:neurostack/features/protocol/domain/entities/protocol.dart';
-import 'package:neurostack/features/protocol/domain/enums/evidence_level.dart';
 import 'package:neurostack/library/library_state.dart';
+import 'package:neurostack/library/library_ui.dart';
 
 class ProtocolDetailSheet extends StatefulWidget {
   const ProtocolDetailSheet({
@@ -97,7 +97,10 @@ class _ProtocolDetailSheetState extends State<ProtocolDetailSheet> {
                 widget.protocol.evidenceLevel.label,
                 style: context.theme.textTheme.bodySmall?.copyWith(
                   fontSize: 12,
-                  color: _evidenceColor(context, widget.protocol.evidenceLevel),
+                  color: libraryEvidenceColor(
+                    context,
+                    widget.protocol.evidenceLevel,
+                  ),
                 ),
               ),
               SizedBox(height: spacing.sm),
@@ -134,15 +137,6 @@ class _ProtocolDetailSheetState extends State<ProtocolDetailSheet> {
     );
   }
 
-  Color _evidenceColor(BuildContext context, EvidenceLevel level) {
-    final kitColors = context.kitColors;
-    return switch (level) {
-      EvidenceLevel.multipleRcts => kitColors.evidenceStrong,
-      EvidenceLevel.singleRct => kitColors.evidenceStrong,
-      EvidenceLevel.observational => kitColors.evidenceModerate,
-      EvidenceLevel.expertConsensus => kitColors.evidenceWeak,
-    };
-  }
 }
 
 class _CategoryRow extends StatelessWidget {
