@@ -16,6 +16,7 @@ import 'package:neurostack/features/user/domain/entities/user.dart';
 import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
 import 'package:neurostack/features/user/domain/failures/user_failures.dart';
 import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
+import 'package:neurostack/home/home_bottom_tab_coordinator.dart';
 import 'package:neurostack/home/home_state.dart';
 
 class HomeViewModel {
@@ -27,13 +28,19 @@ class HomeViewModel {
     required ProtocolRepository protocolRepository,
     required SessionRepository sessionRepository,
     required ConnectivityService connectivityService,
+    HomeBottomTabCoordinator? tabCoordinator,
   })  : _notifyService = notifyService,
         _routerService = routerService,
         _authService = authService,
         _userRepository = userRepository,
         _protocolRepository = protocolRepository,
         _sessionRepository = sessionRepository,
-        _connectivityService = connectivityService;
+        _connectivityService = connectivityService,
+        _tabCoordinator = tabCoordinator ??
+            HomeBottomTabCoordinator(
+              routerService: routerService,
+              notifyService: notifyService,
+            );
 
   final NotifyService _notifyService;
   final RouterService _routerService;
@@ -42,6 +49,7 @@ class HomeViewModel {
   final ProtocolRepository _protocolRepository;
   final SessionRepository _sessionRepository;
   final ConnectivityService _connectivityService;
+  final HomeBottomTabCoordinator _tabCoordinator;
 
   final ValueNotifier<HomeViewState> state = ValueNotifier(
     const HomeViewState(),
@@ -98,11 +106,11 @@ class HomeViewModel {
   }
 
   void onAddProtocol() {
-    _routerService.goTo(Path(name: '/library'));
+    _routerService.replaceAll([Path(name: '/library')]);
   }
 
   void onBrowseLibrary() {
-    _routerService.goTo(Path(name: '/library'));
+    _routerService.replaceAll([Path(name: '/library')]);
   }
 
   void onLogSession(String protocolId) {
@@ -134,9 +142,10 @@ class HomeViewModel {
   }
 
   void onSelectBottomTab(HomeBottomTab tab) {
-    if (tab == HomeBottomTab.stack) {
-      return;
-    }
+    _tabCoordinator.onSelect(
+      tab,
+      currentTab: state.value.activeTab,
+    );
   }
 
   void handleUseFreeTier() {
