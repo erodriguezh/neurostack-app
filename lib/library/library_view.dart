@@ -7,6 +7,8 @@ import 'package:neurostack/core/utils/internal_notification/notify_service.dart'
 import 'package:neurostack/core/utils/locator.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
+import 'package:neurostack/features/auth/data/cached_user_store.dart';
+import 'package:neurostack/features/protocol/data/cached_protocol_store.dart';
 import 'package:neurostack/features/protocol/domain/entities/protocol.dart';
 import 'package:neurostack/features/protocol/domain/repositories/protocol_repository.dart';
 import 'package:neurostack/features/session/domain/repositories/session_repository.dart';
@@ -43,6 +45,8 @@ class _LibraryViewState extends State<LibraryView> {
     protocolRepository: locator<ProtocolRepository>(),
     sessionRepository: locator<SessionRepository>(),
     connectivityService: locator<ConnectivityService>(),
+    cachedUserStore: locator<CachedUserStore>(),
+    cachedProtocolStore: locator<CachedProtocolStore>(),
   );
 
   @override

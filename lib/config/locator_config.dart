@@ -20,6 +20,8 @@ import 'package:neurostack/features/auth/data/auth_service.dart';
 import 'package:neurostack/features/auth/data/cached_user_store.dart';
 import 'package:neurostack/features/auth/data/user_bootstrap_service.dart';
 import 'package:neurostack/features/onboarding/data/onboarding_store.dart';
+import 'package:neurostack/features/protocol/data/cached_protocol_store.dart';
+import 'package:neurostack/progress/data/cached_week_progress_store.dart';
 
 // Repository interfaces
 import 'package:neurostack/features/protocol/domain/repositories/protocol_repository.dart';
@@ -66,6 +68,14 @@ List<Module> buildModules({required SharedPreferences sharedPreferences}) => [
   ),
   Module<CachedUserStore>(
     builder: () => CachedUserStore(locator<SharedPreferences>()),
+    lazy: true,
+  ),
+  Module<CachedProtocolStore>(
+    builder: () => CachedProtocolStore(locator<SharedPreferences>()),
+    lazy: true,
+  ),
+  Module<CachedWeekProgressStore>(
+    builder: () => CachedWeekProgressStore(locator<SharedPreferences>()),
     lazy: true,
   ),
   Module<OnboardingStore>(
