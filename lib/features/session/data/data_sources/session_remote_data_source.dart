@@ -51,10 +51,13 @@ class SessionRemoteDataSource {
     return jsonList.map<SessionDto>((json) => SessionDto.fromJson(json)).toList();
   }
 
-  /// Persists a session (insert or update).
+  /// Persists a session.
   ///
-  /// Sessions are typically immutable after creation, but upsert handles both cases.
+  /// Sessions are immutable after creation, so this issues an insert and lets
+  /// the database generate the identity primary key.
   Future<void> saveSession(SessionDto dto) async {
-    await _dataSource.from(_table).upsert(dto.toJson());
+    final payload = Map<String, dynamic>.from(dto.toJson());
+    payload.remove('id');
+    await _dataSource.from(_table).insert(payload);
   }
 }

@@ -41,10 +41,31 @@ class ProgressGrid extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final maxWidth = constraints.maxWidth;
-          final nameWidth = (maxWidth * 0.32).clamp(88.0, 144.0);
           const cellGap = 8.0;
-          final availableWidth = maxWidth - nameWidth - (cellGap * 6);
-          final cellSize = (availableWidth / 7).clamp(28.0, 52.0);
+          const minCellSize = 28.0;
+          const maxCellSize = 52.0;
+          const minNameWidth = 64.0;
+
+          final desiredNameWidth = maxWidth * 0.32;
+          final maxNameWidth = math.max(
+            0.0,
+            maxWidth - (minCellSize * 7 + cellGap * 6),
+          );
+
+          double nameWidth;
+          if (maxNameWidth < minNameWidth) {
+            nameWidth = maxNameWidth;
+          } else {
+            nameWidth = desiredNameWidth
+                .clamp(minNameWidth, maxNameWidth)
+                .toDouble();
+          }
+
+          final availableWidth = math.max(
+            0.0,
+            maxWidth - nameWidth - (cellGap * 6),
+          );
+          final cellSize = math.min(maxCellSize, availableWidth / 7);
 
           if (rows.isEmpty) {
             return SizedBox(

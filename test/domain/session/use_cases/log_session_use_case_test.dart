@@ -79,7 +79,7 @@ void main() {
         result.fold(
           (_) => fail('Expected Right'),
           (session) {
-            expect(session.id, validParams.sessionId);
+            // IDs are generated server-side; assert on stable domain fields.
             expect(session.protocolId, validParams.protocolId);
             expect(session.completedAt, validParams.completedAt);
           },

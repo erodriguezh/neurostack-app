@@ -12,14 +12,15 @@ class HomeStatusDot extends StatefulWidget {
 
 class _HomeStatusDotState extends State<HomeStatusDot>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(seconds: 3),
-  );
+  late final AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    );
     if (widget.active) {
       _controller.repeat();
     }

@@ -9,6 +9,10 @@ import '../value_objects/session_duration.dart';
 /// Parameters for logging a session.
 ///
 /// Encapsulates all required inputs for the log session operation.
+///
+/// Note: [sessionId] is a client-generated identifier used to build the
+/// in-memory domain object. The persistence layer may ignore it if the
+/// database generates IDs server-side.
 class LogSessionParams {
   const LogSessionParams({
     required this.userId,
@@ -21,7 +25,7 @@ class LogSessionParams {
   });
 
   final String userId;
-  final String sessionId; // Caller generates ID (UUID)
+  final String sessionId; // Client-generated ID for the domain object.
   final String protocolId;
   final DateTime completedAt;
   final DateTime currentTime; // Injected for testability
