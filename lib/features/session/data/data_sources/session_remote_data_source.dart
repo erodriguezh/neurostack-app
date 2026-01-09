@@ -1,5 +1,6 @@
 import '../../../../core/utils/data_source/data_source_abstraction.dart';
 import '../dtos/session_dto.dart';
+import '../dtos/session_insert_dto.dart';
 
 /// Remote data source for Session aggregate.
 ///
@@ -51,13 +52,16 @@ class SessionRemoteDataSource {
     return jsonList.map<SessionDto>((json) => SessionDto.fromJson(json)).toList();
   }
 
-  /// Persists a session.
+  /// Persists a session and returns the inserted record.
   ///
   /// Sessions are immutable after creation, so this issues an insert and lets
   /// the database generate the identity primary key.
-  Future<void> saveSession(SessionDto dto) async {
-    final payload = Map<String, dynamic>.from(dto.toJson());
-    payload.remove('id');
-    await _dataSource.from(_table).insert(payload);
+  Future<SessionDto> createSession(SessionInsertDto dto) async {
+    final json = await _dataSource
+        .from(_table)
+        .insert(dto.toJson())
+        .select()
+        .single();
+    return SessionDto.fromJson(json);
   }
 }

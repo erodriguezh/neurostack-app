@@ -1,6 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 import '../../../../core/failures/domain_failure.dart';
 import '../entities/session.dart';
+import '../entities/session_draft.dart';
 
 /// Repository interface for Session aggregate persistence.
 ///
@@ -29,9 +30,9 @@ abstract interface class SessionRepository {
     DateTime? to,
   });
 
-  /// Persists a session (insert or update).
+  /// Creates a session and returns the persisted aggregate with server ID.
   ///
-  /// Sessions are immutable after creation, but save handles both operations.
-  /// Returns [Unit] on success, [DomainFailure] on infrastructure errors.
-  Future<Either<DomainFailure, Unit>> save(Session session);
+  /// Sessions are immutable after creation, so this is insert-only.
+  /// Returns [DomainFailure] on infrastructure errors.
+  Future<Either<DomainFailure, Session>> create(SessionDraft session);
 }

@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:neurostack/core/failures/domain_failure.dart';
@@ -21,7 +20,6 @@ import 'package:neurostack/home/home_bottom_tab_coordinator.dart';
 import 'package:neurostack/home/home_state.dart';
 import 'package:neurostack/progress/data/cached_week_progress_store.dart';
 import 'package:neurostack/progress/progress_state.dart';
-import 'package:uuid/uuid.dart';
 
 class ProgressViewModel {
   ProgressViewModel({
@@ -62,8 +60,6 @@ class ProgressViewModel {
   final CachedWeekProgressStore? _cachedWeekProgressStore;
   final LogSessionUseCase _logSessionUseCase;
   final HomeBottomTabCoordinator _tabCoordinator;
-  final Uuid _uuid = const Uuid();
-
   final ValueNotifier<ProgressState> state = ValueNotifier(
     const ProgressInitial(),
   );
@@ -142,7 +138,6 @@ class ProgressViewModel {
     final result = await _logSessionUseCase.execute(
       LogSessionParams(
         userId: userId,
-        sessionId: _uuid.v4(),
         protocolId: protocolId,
         completedAt: DateTime(day.year, day.month, day.day, 12),
         currentTime: DateTime.now(),
@@ -198,7 +193,7 @@ class ProgressViewModel {
       final cachedUser = await _resolveCachedUser();
       if (cachedUser != null && _cachedWeekProgressStore != null) {
         _cachedUser = cachedUser;
-        cache = await _cachedWeekProgressStore!.loadWeek(
+        cache = await _cachedWeekProgressStore.loadWeek(
           cachedUser.id,
           weekStart,
         );
@@ -343,7 +338,7 @@ class ProgressViewModel {
       return;
     }
     final cache = _buildCache(loaded);
-    await _cachedWeekProgressStore!.saveWeek(
+    await _cachedWeekProgressStore.saveWeek(
       userId,
       loaded.weekRange.start,
       cache,

@@ -41,73 +41,94 @@ class ProgressGrid extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final maxWidth = constraints.maxWidth;
-          const cellGap = 8.0;
-          const minCellSize = 28.0;
+          const preferredGap = 8.0;
+          const minGap = 2.0;
+          const minCellSize = 36.0;
           const maxCellSize = 52.0;
           const minNameWidth = 64.0;
 
-          final desiredNameWidth = maxWidth * 0.32;
-          final maxNameWidth = math.max(
+          final minGridWidth =
+              minNameWidth + (minCellSize * 7) + (preferredGap * 6);
+          final layoutWidth = math.max(maxWidth, minGridWidth);
+
+          final desiredNameWidth = layoutWidth * 0.32;
+          final maxNameWidthForMinCells = math.max(
             0.0,
-            maxWidth - (minCellSize * 7 + cellGap * 6),
+            layoutWidth - (minCellSize * 7 + preferredGap * 6),
           );
 
           double nameWidth;
-          if (maxNameWidth < minNameWidth) {
-            nameWidth = maxNameWidth;
+          if (maxNameWidthForMinCells < minNameWidth) {
+            nameWidth = math.max(0.0, maxNameWidthForMinCells);
           } else {
             nameWidth = desiredNameWidth
-                .clamp(minNameWidth, maxNameWidth)
+                .clamp(minNameWidth, maxNameWidthForMinCells)
                 .toDouble();
           }
+          nameWidth = math.min(nameWidth, layoutWidth);
+
+          final gapMax = math.max(0.0, (layoutWidth - nameWidth) / 6);
+          final cellGap = gapMax >= minGap
+              ? gapMax.clamp(minGap, preferredGap).toDouble()
+              : gapMax;
 
           final availableWidth = math.max(
             0.0,
-            maxWidth - nameWidth - (cellGap * 6),
+            layoutWidth - nameWidth - (cellGap * 6),
           );
           final cellSize = math.min(maxCellSize, availableWidth / 7);
 
           if (rows.isEmpty) {
-            return SizedBox(
-              height: math.max(140, cellSize * 4),
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      LucideIcons.layers,
-                      size: 32,
-                      color: kitColors.white20,
-                    ),
-                    SizedBox(height: spacing.sm),
-                    Text(
-                      'Add protocols to track',
-                      style: context.theme.textTheme.bodyMedium?.copyWith(
-                        color: kitColors.white40,
+            return SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SizedBox(
+                width: layoutWidth,
+                height: math.max(140, cellSize * 4),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        LucideIcons.layers,
+                        size: 32,
+                        color: kitColors.white20,
                       ),
-                    ),
-                  ],
+                      SizedBox(height: spacing.sm),
+                      Text(
+                        'Add protocols to track',
+                        style: context.theme.textTheme.bodyMedium?.copyWith(
+                          color: kitColors.white40,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );
           }
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeaderRow(context, nameWidth, cellSize, cellGap),
-              SizedBox(height: spacing.md),
-              for (final row in rows) ...[
-                _buildProtocolRow(
-                  context,
-                  row,
-                  nameWidth,
-                  cellSize,
-                  cellGap,
-                ),
-                SizedBox(height: spacing.lg - spacing.xs),
-              ],
-            ],
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: SizedBox(
+              width: layoutWidth,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeaderRow(context, nameWidth, cellSize, cellGap),
+                  SizedBox(height: spacing.md),
+                  for (final row in rows) ...[
+                    _buildProtocolRow(
+                      context,
+                      row,
+                      nameWidth,
+                      cellSize,
+                      cellGap,
+                    ),
+                    SizedBox(height: spacing.lg - spacing.xs),
+                  ],
+                ],
+              ),
+            ),
           );
         },
       ),
