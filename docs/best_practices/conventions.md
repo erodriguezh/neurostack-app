@@ -1,9 +1,3 @@
----
-description:
-globs:
-alwaysApply: true
----
-
 # Coding Conventions and Standards
 
 ## Coding Standards

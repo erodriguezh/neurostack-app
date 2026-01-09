@@ -1,10 +1,4 @@
----
-description:
-globs:
-alwaysApply: true
----
-
-# Testing Guidelines
+# Unit and Widget Testing Guidelines
 
 Unit Tests: input <-> output
 Widget Tests: action <-> result

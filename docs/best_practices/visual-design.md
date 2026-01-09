@@ -1,13 +1,8 @@
----
-description: Visual design tokens, theming, and screen specification standards
-globs:
-  - lib/core/ui/**
-  - lib/**/views/**
-  - lib/**/widgets/**
-alwaysApply: false
----
-
 # Visual Design System Rules
+
+## Purpose
+
+Visual design tokens, theming, and screen specification standards.
 
 ## Design Token Architecture
 

@@ -1,9 +1,3 @@
----
-description:
-globs:
-alwaysApply: true
----
-
 # Project Structure and Guidelines
 
 ## Architecture Overview
