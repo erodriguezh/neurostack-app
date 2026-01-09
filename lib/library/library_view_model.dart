@@ -7,7 +7,9 @@ import 'package:neurostack/core/utils/internal_notification/toast/toast_event.da
 import 'package:neurostack/core/utils/navigation/route_data.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
+import 'package:neurostack/features/auth/data/cached_user_store.dart';
 import 'package:neurostack/features/auth/domain/auth_state.dart';
+import 'package:neurostack/features/protocol/data/cached_protocol_store.dart';
 import 'package:neurostack/features/protocol/domain/entities/protocol.dart';
 import 'package:neurostack/features/protocol/domain/enums/category.dart'
     as protocol;
@@ -32,6 +34,8 @@ class LibraryViewModel {
     required ProtocolRepository protocolRepository,
     required SessionRepository sessionRepository,
     required ConnectivityService connectivityService,
+    CachedUserStore? cachedUserStore,
+    CachedProtocolStore? cachedProtocolStore,
     HomeBottomTabCoordinator? tabCoordinator,
   })  : _notifyService = notifyService,
         _routerService = routerService,
@@ -40,10 +44,11 @@ class LibraryViewModel {
         _protocolRepository = protocolRepository,
         _sessionRepository = sessionRepository,
         _connectivityService = connectivityService,
+        _cachedUserStore = cachedUserStore,
+        _cachedProtocolStore = cachedProtocolStore,
         _tabCoordinator = tabCoordinator ??
             HomeBottomTabCoordinator(
               routerService: routerService,
-              notifyService: notifyService,
             );
 
   final NotifyService _notifyService;
@@ -53,6 +58,8 @@ class LibraryViewModel {
   final ProtocolRepository _protocolRepository;
   final SessionRepository _sessionRepository;
   final ConnectivityService _connectivityService;
+  final CachedUserStore? _cachedUserStore;
+  final CachedProtocolStore? _cachedProtocolStore;
   final HomeBottomTabCoordinator _tabCoordinator;
 
   final ValueNotifier<LibraryViewState> state = ValueNotifier(
@@ -64,6 +71,7 @@ class LibraryViewModel {
   VoidCallback? _connectivityListener;
   User? _cachedUser;
   List<Protocol> _cachedProtocols = const [];
+  String? _cachedProtocolsUserId;
 
   Future<void> init() async {
     _connectivityListener ??= _handleConnectivityChange;
@@ -174,6 +182,7 @@ class LibraryViewModel {
       return;
     }
 
+    await _cachedUserStore?.saveUser(updatedUser);
     _clearBadgeAnimation(protocolId);
   }
 
@@ -214,7 +223,10 @@ class LibraryViewModel {
           );
       _notifyService.setToastEvent(ToastEventError(message: failure.message));
       await _loadLibrary(showLoading: false);
+      return;
     }
+
+    await _cachedUserStore?.saveUser(updatedUser);
   }
 
   Future<LibraryProtocolStats> loadStats(String protocolId) async {
@@ -272,13 +284,22 @@ class LibraryViewModel {
       errorMessage: null,
     );
 
-    if (isOffline &&
-        preferCacheWhenOffline &&
-        _cachedUser != null &&
-        _cachedProtocols.isNotEmpty) {
-      _updateCards(_cachedUser!, _cachedProtocols);
-      _isLoading = false;
-      return;
+    if (isOffline && preferCacheWhenOffline) {
+      final cachedUser = await _resolveCachedUser();
+      if (cachedUser != null) {
+        final shouldUseMemoryCache = _cachedProtocols.isNotEmpty &&
+            _cachedProtocolsUserId == cachedUser.id;
+        final cachedProtocols = shouldUseMemoryCache
+            ? _cachedProtocols
+            : await _cachedProtocolStore?.loadProtocols(cachedUser.id) ??
+                const [];
+        _cachedUser = cachedUser;
+        _cachedProtocols = cachedProtocols;
+        _cachedProtocolsUserId = cachedUser.id;
+        _updateCards(cachedUser, cachedProtocols);
+        _isLoading = false;
+        return;
+      }
     }
 
     final userId = _resolveUserId();
@@ -307,6 +328,9 @@ class LibraryViewModel {
         protocolsResult.getOrElse((_) => throw StateError('Unreachable'));
     _cachedUser = user;
     _cachedProtocols = protocols;
+    _cachedProtocolsUserId = user.id;
+    await _cachedUserStore?.saveUser(user);
+    await _cachedProtocolStore?.saveProtocols(user.id, protocols);
 
     _updateCards(user, protocols);
     _isLoading = false;
@@ -488,6 +512,31 @@ class LibraryViewModel {
     return null;
   }
 
+  Future<User?> _resolveCachedUser() async {
+    final currentUserId = _resolveUserId();
+    if (_cachedUser != null &&
+        (currentUserId == null || _cachedUser!.id == currentUserId)) {
+      return _cachedUser;
+    }
+
+    final authState = _authService.authState.value;
+    if (authState is AuthenticatedOffline) {
+      return authState.user;
+    }
+    if (authState is AuthenticatedOnline) {
+      return authState.user;
+    }
+
+    final cachedUser = await _cachedUserStore?.loadUser();
+    if (cachedUser == null) {
+      return null;
+    }
+    if (currentUserId != null && cachedUser.id != currentUserId) {
+      return null;
+    }
+    return cachedUser;
+  }
+
   void _handleConnectivityChange() {
     final isOffline =
         _connectivityService.status.value == NetworkStatus.offline;
@@ -498,7 +547,9 @@ class LibraryViewModel {
     }
 
     if (isOffline) {
-      if (_cachedUser != null && _cachedProtocols.isNotEmpty) {
+      if (_cachedUser != null &&
+          _cachedProtocols.isNotEmpty &&
+          _cachedProtocolsUserId == _cachedUser!.id) {
         final cards = _buildCards(
           _cachedUser!,
           _cachedProtocols,

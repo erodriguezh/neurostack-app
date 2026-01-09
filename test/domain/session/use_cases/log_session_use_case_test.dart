@@ -4,6 +4,7 @@ import 'package:mocktail/mocktail.dart';
 
 import 'package:neurostack/core/failures/domain_failure.dart';
 import 'package:neurostack/features/session/domain/entities/session.dart';
+import 'package:neurostack/features/session/domain/entities/session_draft.dart';
 import 'package:neurostack/features/session/domain/failures/session_failures.dart';
 import 'package:neurostack/features/session/domain/repositories/session_repository.dart';
 import 'package:neurostack/features/session/domain/use_cases/log_session_use_case.dart';
@@ -34,7 +35,14 @@ void main() {
 
   setUpAll(() {
     // Register fallback values for mocktail
-    registerFallbackValue(SessionFactory.valid());
+    final draft = SessionDraft.create(
+      protocolId: TestConstants.session.protocolId,
+      completedAt: TestConstants.session.validCompletedAt,
+      currentTime: TestConstants.session.currentTime,
+    ).getOrElse(
+      (l) => throw Exception('Factory produced invalid SessionDraft: $l'),
+    );
+    registerFallbackValue(draft);
   });
 
   setUp(() {
@@ -48,7 +56,6 @@ void main() {
     // Setup valid params for most tests
     validParams = LogSessionParams(
       userId: TestConstants.user.id,
-      sessionId: TestConstants.session.id,
       protocolId: TestConstants.session.protocolId,
       completedAt: TestConstants.session.validCompletedAt,
       currentTime: TestConstants.session.currentTime,
@@ -57,7 +64,7 @@ void main() {
 
   group('LogSessionUseCase', () {
     group('execute', () {
-      test('whenAllValid_returnsSessionAndSaves', () async {
+      test('whenAllValid_returnsSessionAndCreates', () async {
         // Arrange
         final validUser = UserFactory.create(
           onboardingCompleted: true,
@@ -68,8 +75,9 @@ void main() {
 
         when(() => mockUserRepository.getById(any()))
             .thenAnswer((_) async => right(validUser));
-        when(() => mockSessionRepository.save(any()))
-            .thenAnswer((_) async => right(unit));
+        final createdSession = SessionFactory.reconstitute();
+        when(() => mockSessionRepository.create(any()))
+            .thenAnswer((_) async => right(createdSession));
 
         // Act
         final result = await useCase.execute(validParams);
@@ -79,12 +87,12 @@ void main() {
         result.fold(
           (_) => fail('Expected Right'),
           (session) {
-            expect(session.id, validParams.sessionId);
-            expect(session.protocolId, validParams.protocolId);
-            expect(session.completedAt, validParams.completedAt);
+            // IDs are generated server-side; assert on stable domain fields.
+            expect(session.protocolId, createdSession.protocolId);
+            expect(session.completedAt, createdSession.completedAt);
           },
         );
-        verify(() => mockSessionRepository.save(any())).called(1);
+        verify(() => mockSessionRepository.create(any())).called(1);
       });
 
       test('whenUserNotFound_propagatesFailure', () async {
@@ -101,7 +109,7 @@ void main() {
 
         // Assert
         expect(result, isLeftWith(userNotFoundFailure));
-        verifyNever(() => mockSessionRepository.save(any()));
+        verifyNever(() => mockSessionRepository.create(any()));
       });
 
       test('whenOnboardingNotCompleted_returnsOnboardingNotCompleted',
@@ -122,7 +130,7 @@ void main() {
 
         // Assert
         expect(result, isLeftWith(UserFailures.onboardingNotCompleted));
-        verifyNever(() => mockSessionRepository.save(any()));
+        verifyNever(() => mockSessionRepository.create(any()));
       });
 
       test('whenProtocolNotInStack_returnsProtocolNotInStack', () async {
@@ -142,7 +150,7 @@ void main() {
 
         // Assert
         expect(result, isLeftWith(UserFailures.protocolNotInStack));
-        verifyNever(() => mockSessionRepository.save(any()));
+        verifyNever(() => mockSessionRepository.create(any()));
       });
 
       test('whenExpiredTrialOverLimit_returnsTooManyActiveProtocols',
@@ -156,7 +164,6 @@ void main() {
         // Use protocol from the expired user's stack
         final paramsWithStackProtocol = LogSessionParams(
           userId: validParams.userId,
-          sessionId: validParams.sessionId,
           protocolId: StackFactory.protocol1, // Protocol that exists in stack
           completedAt: validParams.completedAt,
           currentTime: validParams.currentTime,
@@ -167,7 +174,7 @@ void main() {
 
         // Assert
         expect(result, isLeftWith(UserFailures.tooManyActiveProtocols));
-        verifyNever(() => mockSessionRepository.save(any()));
+        verifyNever(() => mockSessionRepository.create(any()));
       });
 
       test('whenTimestampInFuture_returnsTimestampInFuture', () async {
@@ -184,7 +191,6 @@ void main() {
 
         final futureParams = LogSessionParams(
           userId: validParams.userId,
-          sessionId: validParams.sessionId,
           protocolId: validParams.protocolId,
           completedAt: TestConstants.session.futureCompletedAt,
           currentTime: TestConstants.session.currentTime,
@@ -195,10 +201,10 @@ void main() {
 
         // Assert
         expect(result, isLeftWith(SessionFailures.timestampInFuture));
-        verifyNever(() => mockSessionRepository.save(any()));
+        verifyNever(() => mockSessionRepository.create(any()));
       });
 
-      test('whenSaveFails_propagatesFailure', () async {
+      test('whenCreateFails_propagatesFailure', () async {
         // Arrange
         final validUser = UserFactory.create(
           onboardingCompleted: true,
@@ -214,7 +220,7 @@ void main() {
 
         when(() => mockUserRepository.getById(any()))
             .thenAnswer((_) async => right(validUser));
-        when(() => mockSessionRepository.save(any()))
+        when(() => mockSessionRepository.create(any()))
             .thenAnswer((_) async => left(saveFailure));
 
         // Act
@@ -222,10 +228,10 @@ void main() {
 
         // Assert
         expect(result, isLeftWith(saveFailure));
-        verify(() => mockSessionRepository.save(any())).called(1);
+        verify(() => mockSessionRepository.create(any())).called(1);
       });
 
-      test('whenValidationFails_doesNotCallSave', () async {
+      test('whenValidationFails_doesNotCallCreate', () async {
         // Arrange - user without protocol in stack
         final userWithoutProtocol = UserFactory.create(
           onboardingCompleted: true,
@@ -241,7 +247,7 @@ void main() {
         await useCase.execute(validParams);
 
         // Assert
-        verifyNever(() => mockSessionRepository.save(any()));
+        verifyNever(() => mockSessionRepository.create(any()));
       });
     });
   });

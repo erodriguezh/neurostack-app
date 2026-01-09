@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SessionDto {
 
- String get id;@JsonKey(name: 'protocol_id') String get protocolId;@JsonKey(name: 'user_id') String get userId;@JsonKey(name: 'completed_at') String get completedAt;@JsonKey(name: 'duration_seconds') int? get durationSeconds; String? get notes;
+@JsonKey(fromJson: _stringFromJson) String get id;@JsonKey(name: 'protocol_id', fromJson: _stringFromJson) String get protocolId;@JsonKey(name: 'user_id') String get userId;@JsonKey(name: 'completed_at') String get completedAt;@JsonKey(name: 'duration_seconds') int? get durationSeconds; String? get notes;
 /// Create a copy of SessionDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $SessionDtoCopyWith<$Res>  {
   factory $SessionDtoCopyWith(SessionDto value, $Res Function(SessionDto) _then) = _$SessionDtoCopyWithImpl;
 @useResult
 $Res call({
- String id,@JsonKey(name: 'protocol_id') String protocolId,@JsonKey(name: 'user_id') String userId,@JsonKey(name: 'completed_at') String completedAt,@JsonKey(name: 'duration_seconds') int? durationSeconds, String? notes
+@JsonKey(fromJson: _stringFromJson) String id,@JsonKey(name: 'protocol_id', fromJson: _stringFromJson) String protocolId,@JsonKey(name: 'user_id') String userId,@JsonKey(name: 'completed_at') String completedAt,@JsonKey(name: 'duration_seconds') int? durationSeconds, String? notes
 });
 
 
@@ -158,7 +158,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'protocol_id')  String protocolId, @JsonKey(name: 'user_id')  String userId, @JsonKey(name: 'completed_at')  String completedAt, @JsonKey(name: 'duration_seconds')  int? durationSeconds,  String? notes)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(fromJson: _stringFromJson)  String id, @JsonKey(name: 'protocol_id', fromJson: _stringFromJson)  String protocolId, @JsonKey(name: 'user_id')  String userId, @JsonKey(name: 'completed_at')  String completedAt, @JsonKey(name: 'duration_seconds')  int? durationSeconds,  String? notes)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SessionDto() when $default != null:
 return $default(_that.id,_that.protocolId,_that.userId,_that.completedAt,_that.durationSeconds,_that.notes);case _:
@@ -179,7 +179,7 @@ return $default(_that.id,_that.protocolId,_that.userId,_that.completedAt,_that.d
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'protocol_id')  String protocolId, @JsonKey(name: 'user_id')  String userId, @JsonKey(name: 'completed_at')  String completedAt, @JsonKey(name: 'duration_seconds')  int? durationSeconds,  String? notes)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(fromJson: _stringFromJson)  String id, @JsonKey(name: 'protocol_id', fromJson: _stringFromJson)  String protocolId, @JsonKey(name: 'user_id')  String userId, @JsonKey(name: 'completed_at')  String completedAt, @JsonKey(name: 'duration_seconds')  int? durationSeconds,  String? notes)  $default,) {final _that = this;
 switch (_that) {
 case _SessionDto():
 return $default(_that.id,_that.protocolId,_that.userId,_that.completedAt,_that.durationSeconds,_that.notes);case _:
@@ -199,7 +199,7 @@ return $default(_that.id,_that.protocolId,_that.userId,_that.completedAt,_that.d
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'protocol_id')  String protocolId, @JsonKey(name: 'user_id')  String userId, @JsonKey(name: 'completed_at')  String completedAt, @JsonKey(name: 'duration_seconds')  int? durationSeconds,  String? notes)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(fromJson: _stringFromJson)  String id, @JsonKey(name: 'protocol_id', fromJson: _stringFromJson)  String protocolId, @JsonKey(name: 'user_id')  String userId, @JsonKey(name: 'completed_at')  String completedAt, @JsonKey(name: 'duration_seconds')  int? durationSeconds,  String? notes)?  $default,) {final _that = this;
 switch (_that) {
 case _SessionDto() when $default != null:
 return $default(_that.id,_that.protocolId,_that.userId,_that.completedAt,_that.durationSeconds,_that.notes);case _:
@@ -214,11 +214,11 @@ return $default(_that.id,_that.protocolId,_that.userId,_that.completedAt,_that.d
 @JsonSerializable()
 
 class _SessionDto extends SessionDto {
-  const _SessionDto({required this.id, @JsonKey(name: 'protocol_id') required this.protocolId, @JsonKey(name: 'user_id') required this.userId, @JsonKey(name: 'completed_at') required this.completedAt, @JsonKey(name: 'duration_seconds') this.durationSeconds, this.notes}): super._();
+  const _SessionDto({@JsonKey(fromJson: _stringFromJson) required this.id, @JsonKey(name: 'protocol_id', fromJson: _stringFromJson) required this.protocolId, @JsonKey(name: 'user_id') required this.userId, @JsonKey(name: 'completed_at') required this.completedAt, @JsonKey(name: 'duration_seconds') this.durationSeconds, this.notes}): super._();
   factory _SessionDto.fromJson(Map<String, dynamic> json) => _$SessionDtoFromJson(json);
 
-@override final  String id;
-@override@JsonKey(name: 'protocol_id') final  String protocolId;
+@override@JsonKey(fromJson: _stringFromJson) final  String id;
+@override@JsonKey(name: 'protocol_id', fromJson: _stringFromJson) final  String protocolId;
 @override@JsonKey(name: 'user_id') final  String userId;
 @override@JsonKey(name: 'completed_at') final  String completedAt;
 @override@JsonKey(name: 'duration_seconds') final  int? durationSeconds;
@@ -257,7 +257,7 @@ abstract mixin class _$SessionDtoCopyWith<$Res> implements $SessionDtoCopyWith<$
   factory _$SessionDtoCopyWith(_SessionDto value, $Res Function(_SessionDto) _then) = __$SessionDtoCopyWithImpl;
 @override @useResult
 $Res call({
- String id,@JsonKey(name: 'protocol_id') String protocolId,@JsonKey(name: 'user_id') String userId,@JsonKey(name: 'completed_at') String completedAt,@JsonKey(name: 'duration_seconds') int? durationSeconds, String? notes
+@JsonKey(fromJson: _stringFromJson) String id,@JsonKey(name: 'protocol_id', fromJson: _stringFromJson) String protocolId,@JsonKey(name: 'user_id') String userId,@JsonKey(name: 'completed_at') String completedAt,@JsonKey(name: 'duration_seconds') int? durationSeconds, String? notes
 });
 
 

@@ -24,8 +24,9 @@ abstract class SessionDto with _$SessionDto {
   const SessionDto._();
 
   const factory SessionDto({
-    required String id,
-    @JsonKey(name: 'protocol_id') required String protocolId,
+    @JsonKey(fromJson: _stringFromJson) required String id,
+    @JsonKey(name: 'protocol_id', fromJson: _stringFromJson)
+    required String protocolId,
     @JsonKey(name: 'user_id') required String userId,
     @JsonKey(name: 'completed_at') required String completedAt,
     @JsonKey(name: 'duration_seconds') int? durationSeconds,
@@ -97,4 +98,11 @@ abstract class SessionDto with _$SessionDto {
       notes: session.notes,
     );
   }
+}
+
+String _stringFromJson(dynamic raw) {
+  if (raw == null) {
+    return '';
+  }
+  return raw.toString();
 }

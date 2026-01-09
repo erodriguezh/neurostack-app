@@ -10,36 +10,17 @@ class HomeStatusDot extends StatefulWidget {
   State<HomeStatusDot> createState() => _HomeStatusDotState();
 }
 
-class _HomeStatusDotState extends State<HomeStatusDot>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(seconds: 3),
-  );
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.active) {
-      _controller.repeat();
-    }
-  }
+class _HomeStatusDotState extends State<HomeStatusDot> {
+  int _pulseTick = 0;
 
   @override
   void didUpdateWidget(HomeStatusDot oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.active && !_controller.isAnimating) {
-      _controller.repeat();
+    if (!oldWidget.active && widget.active) {
+      setState(() {
+        _pulseTick += 1;
+      });
     }
-    if (!widget.active && _controller.isAnimating) {
-      _controller.stop();
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 
   @override
@@ -53,34 +34,47 @@ class _HomeStatusDotState extends State<HomeStatusDot>
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: dotColor,
-            ),
-          ),
+          _buildDot(dotColor),
           if (widget.active)
-            FadeTransition(
-              opacity: Tween<double>(begin: 0.4, end: 0.0).animate(
-                CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-              ),
-              child: ScaleTransition(
-                scale: Tween<double>(begin: 1, end: 2.2).animate(
-                  CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-                ),
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: dotColor,
+            TweenAnimationBuilder<double>(
+              key: ValueKey(_pulseTick),
+              tween: Tween(begin: 0.0, end: 1.0),
+              duration: const Duration(seconds: 3),
+              curve: Curves.easeOut,
+              onEnd: () {
+                if (!mounted || !widget.active) {
+                  return;
+                }
+                setState(() {
+                  _pulseTick += 1;
+                });
+              },
+              builder: (context, t, child) {
+                final opacity = 0.4 * (1 - t);
+                final scale = 1.0 + (2.2 - 1.0) * t;
+
+                return Opacity(
+                  opacity: opacity,
+                  child: Transform.scale(
+                    scale: scale,
+                    child: child,
                   ),
-                ),
-              ),
+                );
+              },
+              child: _buildDot(dotColor),
             ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDot(Color color) {
+    return Container(
+      width: 8,
+      height: 8,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color,
       ),
     );
   }

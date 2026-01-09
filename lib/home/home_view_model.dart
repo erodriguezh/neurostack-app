@@ -39,7 +39,6 @@ class HomeViewModel {
         _tabCoordinator = tabCoordinator ??
             HomeBottomTabCoordinator(
               routerService: routerService,
-              notifyService: notifyService,
             );
 
   final NotifyService _notifyService;

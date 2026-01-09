@@ -27,11 +27,12 @@ abstract class ProtocolDto with _$ProtocolDto {
   const ProtocolDto._();
 
   const factory ProtocolDto({
-    required String id,
+    @JsonKey(fromJson: _stringFromJson) required String id,
     required String name,
     required TargetDto target,
     required String category,
     @JsonKey(name: 'evidence_level') required String evidenceLevel,
+    @JsonKey(name: 'research_citations')
     required List<ResearchCitationDto> citations,
     @JsonKey(name: 'created_at') required String createdAt,
     @JsonKey(name: 'deleted_at') String? deletedAt,
@@ -164,4 +165,11 @@ abstract class ProtocolDto with _$ProtocolDto {
       deletedAt: protocol.deletedAt?.toIso8601String(),
     );
   }
+}
+
+String _stringFromJson(dynamic raw) {
+  if (raw == null) {
+    return '';
+  }
+  return raw.toString();
 }

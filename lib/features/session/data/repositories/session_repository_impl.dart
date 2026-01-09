@@ -5,9 +5,10 @@ import '../../../../core/data/supabase_error_mapper.dart';
 import '../../../../core/failures/domain_failure.dart';
 import '../../../../core/utils/data_source/data_source_abstraction.dart';
 import '../../domain/entities/session.dart';
+import '../../domain/entities/session_draft.dart';
 import '../../domain/repositories/session_repository.dart';
 import '../data_sources/session_remote_data_source.dart';
-import '../dtos/session_dto.dart';
+import '../dtos/session_insert_dto.dart';
 
 /// Repository implementation for Session aggregate using Supabase.
 ///
@@ -90,7 +91,7 @@ class SessionRepositoryImpl implements SessionRepository {
   }
 
   @override
-  Future<Either<DomainFailure, Unit>> save(Session session) async {
+  Future<Either<DomainFailure, Session>> create(SessionDraft session) async {
     try {
       // Get current user ID from auth context
       final userId = _auth.auth.currentUser?.id;
@@ -98,14 +99,14 @@ class SessionRepositoryImpl implements SessionRepository {
         return left(
           const DomainFailure(
             code: 'Session.NotAuthenticated',
-            message: 'User must be authenticated to save sessions',
+            message: 'User must be authenticated to create sessions',
           ),
         );
       }
 
-      final dto = SessionDto.fromDomain(session, userId);
-      await _dataSource.saveSession(dto);
-      return const Right(unit);
+      final dto = SessionInsertDto.fromDraft(session, userId);
+      final createdDto = await _dataSource.createSession(dto);
+      return createdDto.toDomain();
     } on PostgrestException catch (e) {
       return left(mapPostgrestError('Session', e));
     } on AuthException catch (e) {

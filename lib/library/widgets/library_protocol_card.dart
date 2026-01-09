@@ -93,10 +93,10 @@ class _LibraryProtocolCardState extends State<LibraryProtocolCard> {
           ),
           SizedBox(height: spacing.md),
           Text(
-            _statusLabel(status),
+            libraryStatusLabel(status),
             style: context.theme.textTheme.bodySmall?.copyWith(
               fontSize: 12,
-              color: _statusColor(context, status),
+              color: libraryStatusColor(context, status),
             ),
           ),
         ],
@@ -148,22 +148,6 @@ class _LibraryProtocolCardState extends State<LibraryProtocolCard> {
     );
   }
 
-  String _statusLabel(LibraryCardStatus status) {
-    return switch (status) {
-      LibraryCardStatus.inStack => 'In your stack',
-      LibraryCardStatus.available => 'Tap to add',
-      LibraryCardStatus.locked => 'Upgrade to unlock',
-    };
-  }
-
-  Color _statusColor(BuildContext context, LibraryCardStatus status) {
-    final kitColors = context.kitColors;
-    return switch (status) {
-      LibraryCardStatus.inStack => kitColors.brandSky,
-      LibraryCardStatus.available => kitColors.white40,
-      LibraryCardStatus.locked => kitColors.yellow400.withValues(alpha: 0.8),
-    };
-  }
 }
 
 class _CategoryPill extends StatelessWidget {

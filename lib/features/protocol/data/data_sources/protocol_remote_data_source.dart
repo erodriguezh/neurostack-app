@@ -69,6 +69,7 @@ class ProtocolRemoteDataSource {
     final protocolJson = dto.toJson();
     // Remove citations from protocol JSON - they're in a separate table
     protocolJson.remove('citations');
+    protocolJson.remove('research_citations');
     await _dataSource.from(_table).upsert(protocolJson);
 
     // 2. Delete existing citations for this protocol

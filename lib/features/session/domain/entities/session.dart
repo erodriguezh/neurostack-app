@@ -47,6 +47,7 @@ class Session with EntityMixin<String>, AggregateRootMixin<String> {
   /// Enforces **INV-S2**: [completedAt] cannot be in the future.
   ///
   /// - [currentTime]: Injected for testability (instead of DateTime.now())
+  /// - Use [SessionDraft] when the ID is server-generated.
   ///
   /// Returns [Left] with [SessionFailures.timestampInFuture] if completedAt > currentTime.
   static Either<DomainFailure, Session> create({
@@ -70,11 +71,7 @@ class Session with EntityMixin<String>, AggregateRootMixin<String> {
       notes: notes?.trim().isEmpty == true ? null : notes?.trim(),
     );
 
-    session.raiseDomainEvent(SessionLoggedEvent(
-      sessionId: id,
-      protocolId: protocolId,
-      completedAt: completedAt,
-    ));
+    session.raiseLoggedEvent();
 
     return right(session);
   }
@@ -95,6 +92,17 @@ class Session with EntityMixin<String>, AggregateRootMixin<String> {
       completedAt: completedAt,
       duration: duration,
       notes: notes,
+    );
+  }
+
+  /// Raises the domain event for a logged session.
+  void raiseLoggedEvent() {
+    raiseDomainEvent(
+      SessionLoggedEvent(
+        sessionId: id,
+        protocolId: protocolId,
+        completedAt: completedAt,
+      ),
     );
   }
 }

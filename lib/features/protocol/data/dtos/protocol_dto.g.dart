@@ -7,12 +7,12 @@ part of 'protocol_dto.dart';
 // **************************************************************************
 
 _ProtocolDto _$ProtocolDtoFromJson(Map<String, dynamic> json) => _ProtocolDto(
-  id: json['id'] as String,
+  id: _stringFromJson(json['id']),
   name: json['name'] as String,
   target: TargetDto.fromJson(json['target'] as Map<String, dynamic>),
   category: json['category'] as String,
   evidenceLevel: json['evidence_level'] as String,
-  citations: (json['citations'] as List<dynamic>)
+  citations: (json['research_citations'] as List<dynamic>)
       .map((e) => ResearchCitationDto.fromJson(e as Map<String, dynamic>))
       .toList(),
   createdAt: json['created_at'] as String,
@@ -26,7 +26,7 @@ Map<String, dynamic> _$ProtocolDtoToJson(_ProtocolDto instance) =>
       'target': instance.target,
       'category': instance.category,
       'evidence_level': instance.evidenceLevel,
-      'citations': instance.citations,
+      'research_citations': instance.citations,
       'created_at': instance.createdAt,
       'deleted_at': instance.deletedAt,
     };
