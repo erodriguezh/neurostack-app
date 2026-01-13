@@ -47,7 +47,7 @@ class ProgressGrid extends StatelessWidget {
           const maxCellSize = 52.0;
           const minNameWidth = 64.0;
 
-          final minGridWidth =
+          const minGridWidth =
               minNameWidth + (minCellSize * 7) + (preferredGap * 6);
           final layoutWidth = math.max(maxWidth, minGridWidth);
 
