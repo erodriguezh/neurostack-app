@@ -5,14 +5,15 @@
 - [AGENTS.md](../AGENTS.md) - repository guidelines, coding style, commit conventions, PR guidelines
 
 ## Architecture
-- [conventions.md](./best_practices/conventions.md) - naming conventions, PascalCase, camelCase, file structure, feature folders, coding standards, lower_snake_case, UpperCamelCase
-- [general_structure_and_guidelines.md](./best_practices/general_structure_and_guidelines.md) - MVVM, ValueNotifier, state management, dependency injection, service locator, routing, navigation, ViewModel, StatefulWidget, ValueListenableBuilder
-- [MVVM and DDD Guide](./best_practices/architecture/mvvm_and_ddd_guide.md) - MVVM, DDD, ValueNotifier, aggregate root, EntityMixin, AggregateRootMixin, value objects, Either, repository pattern, sealed state, DTO, flatMap, DomainFailure, fpdart, UnmodifiableListView
-- [MVVM + DDD Supabase Magic Link Authentication](./best_practices/architecture/mvvm_and_ddd_supabase_magic_link_authentication.md) - magic link, supabase auth, deep linking, PKCE, OTP verification, AuthState listener, SupaMagicAuth, passwordless login, email authentication
-- [MVVM + DDD Supabase Integration Supplement](./best_practices/architecture/mvvm_and_ddd_supabase_integration_supplement.md) - supabase, DataSourceAbstraction, DTO, @JsonKey, snake_case mapping, PostgrestException, error mapping, mocking supabase, sealed state, flatMap chaining, PGRST codes
+- [conventions.md](./best_practices/conventions.md) - naming conventions, file structure, feature folders, lower_snake_case, UpperCamelCase
+- [general_structure_and_guidelines.md](./best_practices/general_structure_and_guidelines.md) - MVVM wiring, ValueNotifier state, DI/service locator, routing and navigation
+- [MVVM and DDD Guide](./best_practices/architecture/mvvm_and_ddd_guide.md) - aggregates, invariants, Either flows, repositories, DTOs, domain events, fpdart
+- [MVVM + DDD Supabase Magic Link Authentication](./best_practices/architecture/mvvm_and_ddd_supabase_magic_link_authentication.md) - magic link auth flow, deep linking, PKCE/OTP, auth callbacks
+- [MVVM + DDD Supabase Integration Supplement](./best_practices/architecture/mvvm_and_ddd_supabase_integration_supplement.md) - Supabase data sources, DTO mapping, PostgrestException handling, mocking, PGRST codes
 
 ## Domain
-- [Ubiquitous Language](./ubiquitous-language.md) - domain terms, monetization, free tier, premium trial, subscription status, protocol, session, target, streak, stack, invariants, business rules, INV-U1, INV-M2
+- [Ubiquitous Language](./ubiquitous-language.md) - domain terms, subscription tiers, invariants, business rules, INV-U1, INV-M2
+- [DomainFailure](../lib/core/failures/domain_failure.dart) - canonical failure shape and naming convention ({Aggregate}.{Invariant})
 
 ## UI
 - [visual-design.md](./best_practices/design/visual-design.md) - design tokens, ColorScheme, Material 3, typography, TextTheme, spacing grid, AppColors, AppSpacing, theming, dark mode, accessibility
@@ -65,18 +66,22 @@
 - [Changelog: Library Screen](./changelogs/20260107224528_library_screen_changelog.md) - LibraryViewModel, LibraryViewState, protocol cache, offline mode, detail sheet, add remove protocol
 - [Changelog: Progress Screen](./changelogs/20260109105000_progress_screen_changelog.md) - ProgressViewModel, ProgressState, week cache, backdate session, SessionDraft, optimistic UI, grid overflow fix
 
----
-
-## Undocumented Areas (Placeholders)
-
-> These areas have implemented code but no formal spec. Use the template below to bootstrap.
-
 ### Core Infrastructure (Well-Documented in Code)
 - **Connectivity Service** - `lib/core/utils/connectivity/connectivity_service.dart` - NetworkStatus enum, online/offline detection, ValueNotifier status, connectivity_plus
 - **Supabase Error Mapper** - `lib/core/data/supabase_error_mapper.dart` - mapPostgrestError, PGRST codes, 23505 duplicate, 23503 foreign key, 42501 permission, aggregate prefix
 - **Router Service** - `lib/core/utils/navigation/router_service.dart` - GoRouter wrapper, route config, navigation, deep linking
+- **Navigation Utilities** - `lib/core/utils/navigation/` - route parsing, URL strategy, navigation intent store
 - **Toast/Notification** - `lib/core/utils/internal_notification/` - ToastViewModel, ToastEvent, HapticFeedbackListener, in-app notifications
 - **Data Source Abstraction** - `lib/core/utils/data_source/data_source_abstraction.dart` - Supabase client wrapper, testability, mocking
+- **Localization (l10n)** - `lib/core/utils/l10n/` - ARB files, generated localizations, translate helpers
+- **HTTP Abstraction** - `lib/core/utils/http/` - HTTP clients, interceptors, native/web adapters
+- **App Environment** - `lib/core/utils/app_environment.dart` - environment flags and config access
+- **App Lifecycle Service** - `lib/core/utils/app_lifecycle_service.dart` - app lifecycle hooks and foreground/background handling
+- **Service Locator** - `lib/core/utils/locator.dart` - locator access helpers and instance lookup
+
+### App Configuration (Implemented)
+- **Route Configuration** - `lib/config/route_config.dart` - route definitions, screen wiring, navigation entry points
+- **Service Registration** - `lib/config/locator_config.dart` - dependency registration graph and service setup
 
 ### Core UI Widgets (Well-Documented in Code)
 - **EnumPageView** - `lib/core/ui/widgets/enum_page_view.dart` - generic PageView driven by enum, smooth transitions, onboarding flows
@@ -88,8 +93,38 @@
 - **Border Radius** - `lib/core/ui/constants/border_radius.dart` - AppBorderRadius, consistent corners
 - **Shadows** - `lib/core/ui/constants/shadows.dart` - AppShadows, elevation system
 - **Curves** - `lib/core/ui/constants/curves.dart` - CustomCurves, emphasizedDecelerate, animation curves
+- **Durations** - `lib/core/ui/constants/durations.dart` - standardized animation timings
+- **Colors** - `lib/core/ui/constants/kit_colors.dart` - core palette and semantic color roles
+- **Text Styles** - `lib/core/ui/constants/text_styles.dart` - typography scale and text theme helpers
 - **Breakpoints** - `lib/core/ui/constants/breakpoints.dart` - responsive breakpoints, mobile/tablet/desktop
 - **Widget Keys** - `lib/core/ui/constants/widget_keys.dart` - WidgetKeys, test accessibility
+
+### Feature Modules (Implemented)
+- **Auth Feature Module** - `lib/features/auth/` - AuthService, AuthState, magic link views, bootstrap
+- **Onboarding Feature Module** - `lib/features/onboarding/` - onboarding steps, scaffolds, view model
+- **Protocol Feature Module** - `lib/features/protocol/` - protocol aggregates, DTOs, repository/data source, cache
+- **Session Feature Module** - `lib/features/session/` - session aggregates, logging use case, repository
+- **User Feature Module** - `lib/features/user/` - user aggregates, subscription status, DTOs, repository
+
+### UI Modules (Implemented)
+- **Home UI Module** - `lib/home/` - home view model, widgets, bottom tab coordinator
+- **Library UI Module** - `lib/library/` - library view model, widgets, protocol detail sheet
+- **Progress UI Module** - `lib/progress/` - progress view model, grid widgets, week cache store
+- **Startup UI Module** - `lib/startup/` - splash/startup routing and bootstrap logic
+- **Offline UI Module** - `lib/offline/` - offline retry view and view model
+- **Paywall UI Module** - `lib/paywall/` - paywall view and view model
+- **Not Found UI Module** - `lib/not_found/` - fallback routing view and view model
+
+### Environment & Backend (Implemented)
+- **Environment Template** - `env/default.env.json` - expected config keys and defaults
+- **Supabase Config** - `supabase/config.toml` - local Supabase project configuration
+- **Supabase Migrations** - `supabase/migrations/` - schema history, RLS, auth triggers
+- **Supabase Auth Templates** - `supabase/auth/email/` - magic link email templates
+
+### Integration Tests (Code Locations)
+- **Integration Test Utilities** - `integration_test/utils/` - test app harness, pump helpers
+- **Integration Test Flows** - `integration_test/flows/` - end-to-end flow definitions
+- **Integration Test Mocks** - `integration_test/mocks/` - mock states and mock data sources
 
 ---
 
