@@ -1,0 +1,23 @@
+{
+  "assignee": "erodriguez@greentube.com",
+  "claim_note": "",
+  "claimed_at": "2026-01-15T19:59:26.962682Z",
+  "created_at": "2026-01-15T19:57:12.779333Z",
+  "depends_on": [],
+  "epic": "fn-1-cl3",
+  "evidence": {
+    "commits": [
+      "a0ed3f83118a3ea4cf6889e0bb44ec27540ce9b0"
+    ],
+    "prs": [],
+    "tests": [
+      "flutter test test/features/session/data/data_sources/session_local_data_source_test.dart"
+    ]
+  },
+  "id": "fn-1-cl3.5",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-1-cl3.5.md",
+  "status": "done",
+  "title": "Create SessionLocalDataSource (Phase 2.2)",
+  "updated_at": "2026-01-15T20:05:07.996981Z"
+}

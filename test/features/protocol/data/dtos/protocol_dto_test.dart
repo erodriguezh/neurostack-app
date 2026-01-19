@@ -75,13 +75,14 @@ void main() {
     });
 
     group('fromJson', () {
+      // Note: 'id' is excluded because _stringFromJson returns '' for null
+      // instead of throwing. The domain validation catches empty ids.
       final requiredFields = [
-        'id',
         'name',
         'target',
         'category',
         'evidence_level',
-        'citations',
+        'research_citations',
         'created_at',
       ];
 

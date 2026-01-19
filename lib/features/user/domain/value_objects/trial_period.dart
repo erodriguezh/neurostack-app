@@ -42,7 +42,12 @@ sealed class TrialPeriod with _$TrialPeriod {
       startDate.add(const Duration(days: trialDurationDays));
 
   /// Check if the trial has expired as of [currentTime].
-  bool isExpired(DateTime currentTime) => currentTime.isAfter(endDate);
+  ///
+  /// Trial expires at [endDate] (inclusive). This ensures consistent behavior:
+  /// - `isExpired(endDate)` returns true
+  /// - `daysRemaining(endDate)` returns 0
+  /// - `displayText(endDate)` returns "Trial expired"
+  bool isExpired(DateTime currentTime) => !currentTime.isBefore(endDate);
 
   /// Days remaining in the trial (0 if expired).
   int daysRemaining(DateTime currentTime) {

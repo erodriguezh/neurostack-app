@@ -1,0 +1,19 @@
+{
+  "assignee": "erodriguez@greentube.com",
+  "claim_note": "",
+  "claimed_at": "2026-01-19T14:37:54.762483Z",
+  "created_at": "2026-01-19T14:37:26.042829Z",
+  "depends_on": [],
+  "epic": "fn-7-nea",
+  "evidence": {
+    "commits": [],
+    "prs": [],
+    "tests": []
+  },
+  "id": "fn-7-nea.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-7-nea.1.md",
+  "status": "done",
+  "title": "Phase 8.1: Domain tests - CheckEligibilityUseCase",
+  "updated_at": "2026-01-19T14:38:21.553785Z"
+}

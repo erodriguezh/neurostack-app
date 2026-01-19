@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-6-l31",
+  "created_at": "2026-01-18T19:26:58.694059Z",
+  "depends_on_epics": [],
+  "id": "fn-6-l31",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-6-l31.md",
+  "status": "open",
+  "title": "Phase 6: Sync Trigger Wiring",
+  "updated_at": "2026-01-18T19:26:58.694563Z"
+}

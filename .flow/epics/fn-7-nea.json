@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-7-nea",
+  "created_at": "2026-01-19T14:37:20.457609Z",
+  "depends_on_epics": [],
+  "id": "fn-7-nea",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-7-nea.md",
+  "status": "open",
+  "title": "Phase 8: Testing",
+  "updated_at": "2026-01-19T14:37:20.458340Z"
+}

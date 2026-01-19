@@ -1,46 +1,41 @@
-# Repository Guidelines
+# AGENTS.md (Neurostack app)
 
-## Project Structure & Module Organization
-- `lib/` holds the Flutter app. Key areas: `config/` (routing + DI), `core/` (domain mixins, failures, UI constants, utilities), and `features/{feature}/` split into `domain/`, `data/`, and `presentation/`.
-- `{simple_feature}/` is a flat folder for small features (<=5 files).
-- `test/` mirrors `lib/` and contains factories, constants, and custom matchers.
-- `env/` contains `default.env.json` (copy to `env/env.json` for local config).
-- `supabase/` has database config and migrations.
-- Platform targets live in `android/`, `ios/`, `macos/`, and `web/`.
+## Purpose
+- Bootstrap instructions for coding agents (keep this file small; link out for details).
+- Success = build, run, test, format, and locate the relevant spec/plan with minimal context.
 
-## Build, Test, and Development Commands
-- `flutter pub get` installs dependencies.
-- `flutter run` launches the app (use `-d chrome` for web).
-- `flutter run --dart-define-from-file=env/env.json` runs with Supabase config.
-- `flutter pub run build_runner build` generates code; `flutter pub run build_runner watch` runs watch mode.
-- `flutter test` runs unit tests; `flutter test test/domain/user/` runs a subset; `flutter test --coverage` generates coverage.
-- `flutter analyze` runs static analysis; `dart format lib/ test/` formats code.
-- `flutter clean && flutter pub get` resets build output.
+## Repo map
+- App code: `lib/` (feature-first: `lib/features/<feature>/{domain,data,presentation}`; shared: `lib/core/`)
+- Tests: `test/` (mirrors `lib/`; helpers in `test/factories/` + `test/matchers/`)
+- Specs: `docs/specs/` (example: `docs/specs/20260113180000_spec_log_session_modal.md`)
+- Plans: `plan_*.md` at repo root (example: `plan_log_session_modal.md`)
 
-## Architecture Overview
-- MVVM + Domain-Driven Design with `ValueNotifier` state (no external state management packages).
-- Decision framework: simple CRUD -> MVVM only; validation -> add Value Objects; multiple repositories -> add Use Case; complex rules -> add Aggregate Root.
-- Aggregate roots use mixins (`EntityMixin`, `AggregateRootMixin`), reference other aggregates by ID, and keep business logic in the domain layer.
+## Local config
+- Copy `env/default.env.json` → `env/env.json` (do not commit secrets).
 
-## Coding Style & Naming Conventions
-- Use Dart formatting (2-space indent) and keep files in `lower_snake_case.dart`.
-- Types are `UpperCamelCase`, variables/functions `lowerCamelCase`.
-- ViewModels expose a single `ValueNotifier` and no `BuildContext` access.
-- Domain failures use `Aggregate.Invariant` codes (example: `Session.CapacityExceeded`).
-- Use `fpdart` `Either` for domain results; do not throw for business rules.
-- DTOs map Supabase `snake_case` fields via `@JsonKey`, with `toDomain()` returning `Either` and `fromDomain(T)` for serialization.
+## Canonical commands
 
-## Testing Guidelines
-- Framework: `flutter test` with custom matchers in `test/matchers/`.
-- Use factories from `test/factories/` and follow AAA (Arrange-Act-Assert).
-- Test naming: `{method}_{scenario}_{expectedResult}` (example: `create_withInvalidName_returnsFailure`).
-- Widget tests use ViewModels (no mocking).
+### Setup
+- Install deps: `flutter pub get`
 
-## Commit & Pull Request Guidelines
-- Commit messages are short, lower-case, and imperative (examples: `setup supabase`, `fix unit tests`).
-- PRs should include a summary, testing notes/commands, and screenshots for UI changes.
-- Link relevant issues and call out config changes (e.g., `env/env.json`).
+### Code generation (freezed/json_serializable/build_runner)
+- Build once: `dart run build_runner build --delete-conflicting-outputs`
+- Watch: `dart run build_runner watch --delete-conflicting-outputs`
 
-## Configuration & Secrets
-- Copy `env/default.env.json` to `env/env.json` for local development.
-- Do not commit credentials or environment-specific values.
+### Format / Analyze
+- Format: `dart format lib test`
+- Analyze: `flutter analyze`
+
+### Tests
+- All: `flutter test`
+- Subset example: `flutter test test/domain/session/`
+- Coverage: `flutter test --coverage`
+
+### Run (dev)
+- Default: `flutter run -d 1EA9596A-EBDF-4B22-9781-181F20DEB836 --dart-define-from-file=env/env.json`
+- Web: `flutter run -d chrome --dart-define-from-file=env/env.json`
+
+## When commands fail
+- Typical recovery: `flutter pub get` → codegen → `flutter analyze` → `flutter test`
+- If build output is corrupted: `flutter clean && flutter pub get`
+- If the agent repeatedly fails the same command, add ONE minimal hint here (or link to a runbook).

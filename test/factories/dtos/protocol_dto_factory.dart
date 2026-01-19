@@ -99,7 +99,7 @@ abstract final class ProtocolDtoFactory {
       'target': TargetDtoFactory.createValidJson(),
       'category': 'exercise',
       'evidence_level': 'multipleRcts',
-      'citations': [ResearchCitationDtoFactory.createValidJson()],
+      'research_citations': [ResearchCitationDtoFactory.createValidJson()],
       'created_at': TestConstants.dto.validIsoDateTime
     };
   }

@@ -15,4 +15,10 @@ abstract final class SessionFailures {
     code: 'Session.DurationMustBePositive',
     message: 'Session duration must be greater than zero',
   );
+
+  // INV-S4: Session date CANNOT be more than 7 days in the past
+  static const dateTooOld = DomainFailure(
+    code: 'Session.DateTooOld',
+    message: 'Cannot log sessions more than 7 days in the past',
+  );
 }

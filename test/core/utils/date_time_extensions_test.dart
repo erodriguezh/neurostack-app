@@ -22,7 +22,12 @@ void main() {
       final result = date.weekEnd;
 
       // Assert
-      expect(result, DateTime(2025, 1, 19, 23, 59, 59));
+      // weekEnd now uses endOfDay (1 microsecond before next day)
+      final expectedNextDay = DateTime(2025, 1, 20);
+      expect(
+        result,
+        expectedNextDay.subtract(const Duration(microseconds: 1)),
+      );
     });
 
     test('weekStart_whenCrossingYear_returnsPreviousYearMonday', () {
@@ -44,7 +49,12 @@ void main() {
       final result = date.weekEnd;
 
       // Assert
-      expect(result, DateTime(2025, 1, 5, 23, 59, 59));
+      // weekEnd now uses endOfDay (1 microsecond before next day)
+      final expectedNextDay = DateTime(2025, 1, 6);
+      expect(
+        result,
+        expectedNextDay.subtract(const Duration(microseconds: 1)),
+      );
     });
 
     test('isSameDay_whenSameCalendarDay_returnsTrue', () {
@@ -69,6 +79,63 @@ void main() {
 
       // Assert
       expect(result, isFalse);
+    });
+
+    test('startOfDay_returnsDateAtMidnight', () {
+      // Arrange
+      final date = DateTime(2025, 3, 15, 14, 30, 45, 123);
+
+      // Act
+      final result = date.startOfDay;
+
+      // Assert
+      expect(result, DateTime(2025, 3, 15));
+      expect(result.isUtc, isFalse);
+    });
+
+    test('startOfDay_whenUtc_preservesUtc', () {
+      // Arrange
+      final date = DateTime.utc(2025, 3, 15, 14, 30);
+
+      // Act
+      final result = date.startOfDay;
+
+      // Assert
+      expect(result, DateTime.utc(2025, 3, 15));
+      expect(result.isUtc, isTrue);
+    });
+
+    test('endOfDay_returnsOneMicrosecondBeforeNextDay', () {
+      // Arrange
+      final date = DateTime(2025, 3, 15, 8, 0);
+
+      // Act
+      final result = date.endOfDay;
+
+      // Assert
+      // endOfDay is 1 microsecond before start of next day
+      final expectedNextDay = DateTime(2025, 3, 16);
+      expect(
+        result,
+        expectedNextDay.subtract(const Duration(microseconds: 1)),
+      );
+      expect(result.isUtc, isFalse);
+    });
+
+    test('endOfDay_whenUtc_preservesUtc', () {
+      // Arrange
+      final date = DateTime.utc(2025, 3, 15, 8, 0);
+
+      // Act
+      final result = date.endOfDay;
+
+      // Assert
+      final expectedNextDay = DateTime.utc(2025, 3, 16);
+      expect(
+        result,
+        expectedNextDay.subtract(const Duration(microseconds: 1)),
+      );
+      expect(result.isUtc, isTrue);
     });
   });
 }

@@ -60,6 +60,26 @@ abstract final class SessionFactory {
     );
   }
 
+  /// Creates a Session with a too-old timestamp (for testing INV-S4).
+  static Either<DomainFailure, Session> withTooOldTimestamp() {
+    return Session.create(
+      id: TestConstants.session.id,
+      protocolId: TestConstants.session.protocolId,
+      completedAt: TestConstants.session.tooOldCompletedAt,
+      currentTime: TestConstants.session.currentTime,
+    );
+  }
+
+  /// Creates a Session with exactly 7 days ago timestamp (boundary test).
+  static Either<DomainFailure, Session> withExactlySevenDaysAgo() {
+    return Session.create(
+      id: TestConstants.session.id,
+      protocolId: TestConstants.session.protocolId,
+      completedAt: TestConstants.session.exactlySevenDaysAgo,
+      currentTime: TestConstants.session.currentTime,
+    );
+  }
+
   /// Creates a Session with optional duration.
   static Either<DomainFailure, Session> withDuration({
     required Duration duration,

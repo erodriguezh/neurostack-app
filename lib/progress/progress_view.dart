@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
@@ -5,12 +6,17 @@ import 'package:neurostack/core/ui/constants/spacing.dart';
 import 'package:neurostack/core/ui/widgets/app_grid_background.dart';
 import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
 import 'package:neurostack/core/utils/internal_notification/notify_service.dart';
+import 'package:neurostack/core/utils/internal_notification/toast/toast_event.dart';
 import 'package:neurostack/core/utils/locator.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
 import 'package:neurostack/features/auth/data/cached_user_store.dart';
+import 'package:neurostack/features/auth/domain/auth_state.dart';
+import 'package:neurostack/features/protocol/data/cached_protocol_store.dart';
 import 'package:neurostack/features/protocol/domain/repositories/protocol_repository.dart';
+import 'package:neurostack/features/session/data/data_sources/session_local_data_source.dart';
 import 'package:neurostack/features/session/domain/repositories/session_repository.dart';
+import 'package:neurostack/features/session/presentation/log_session_modal.dart';
 import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
 import 'package:neurostack/home/home_state.dart';
 import 'package:neurostack/home/widgets/home_bottom_nav.dart';
@@ -18,7 +24,6 @@ import 'package:neurostack/home/widgets/home_status_banner.dart';
 import 'package:neurostack/progress/data/cached_week_progress_store.dart';
 import 'package:neurostack/progress/progress_state.dart';
 import 'package:neurostack/progress/progress_view_model.dart';
-import 'package:neurostack/progress/widgets/backdate_session_sheet.dart';
 import 'package:neurostack/progress/widgets/progress_grid.dart';
 
 const _progressOfflineBanner = HomeBannerModel(
@@ -44,6 +49,7 @@ class _ProgressViewState extends State<ProgressView>
     userRepository: locator<UserRepository>(),
     protocolRepository: locator<ProtocolRepository>(),
     sessionRepository: locator<SessionRepository>(),
+    sessionLocalDataSource: locator<SessionLocalDataSource>(),
     connectivityService: locator<ConnectivityService>(),
     cachedUserStore: locator<CachedUserStore>(),
     cachedWeekProgressStore: locator<CachedWeekProgressStore>(),
@@ -233,11 +239,9 @@ class _ProgressViewState extends State<ProgressView>
               todayIndex: state.todayIndex,
               isOffline: state.isOffline,
               onTapMissedCell: (protocolId, protocolName, day) {
-                _showBackdateSheet(
-                  context,
-                  protocolId,
-                  protocolName,
-                  day,
+                _showLogSessionModal(
+                  protocolId: protocolId,
+                  day: day,
                 );
               },
             ),
@@ -263,20 +267,55 @@ class _ProgressViewState extends State<ProgressView>
     return '$start - $end, $year';
   }
 
-  Future<void> _showBackdateSheet(
-    BuildContext context,
-    String protocolId,
-    String protocolName,
-    DateTime day,
-  ) async {
-    await showBackdateSessionSheet(
-      context: context,
-      protocolName: protocolName,
-      day: day,
-      onConfirm: () => _viewModel.backdateSession(
-        protocolId: protocolId,
-        day: day,
-      ),
+  Future<void> _showLogSessionModal({
+    required String protocolId,
+    required DateTime day,
+  }) async {
+    // Resolve userId from auth state
+    final authState = locator<AuthService>().authState.value;
+    String? userId;
+    if (authState is AuthenticatedOnline) {
+      userId = authState.user.id;
+    } else if (authState is AuthenticatedOffline) {
+      userId = authState.user.id;
+    }
+
+    if (userId == null) {
+      locator<NotifyService>().setToastEvent(
+        ToastEventError(message: 'Unable to identify user'),
+      );
+      return;
+    }
+
+    // Resolve Protocol: try cache first, then repository fallback
+    final cachedProtocols =
+        await locator<CachedProtocolStore>().loadProtocols(userId);
+    var protocol = cachedProtocols.firstWhereOrNull((p) => p.id == protocolId);
+
+    // Fallback to repository if not in cache (e.g., cache cleared, first run)
+    if (protocol == null) {
+      final repoResult =
+          await locator<ProtocolRepository>().getById(protocolId);
+      protocol = repoResult.fold((_) => null, (p) => p);
+    }
+
+    if (protocol == null) {
+      locator<NotifyService>().setToastEvent(
+        ToastEventError(message: 'Protocol not found'),
+      );
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    await showLogSessionModal(
+      context,
+      protocol: protocol,
+      userId: userId,
+      initialDate: day,
+      onSessionLogged: _viewModel.onSessionLogged,
     );
   }
 }

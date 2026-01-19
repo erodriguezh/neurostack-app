@@ -55,13 +55,14 @@ void main() {
         expect(trial.isExpired(checkTime), true);
       });
 
-      test('isExpired_exactlyAtEndDate_returnsFalse', () {
+      test('isExpired_exactlyAtEndDate_returnsTrue', () {
         // Arrange
         final trial = TrialPeriodFactory.create();
         final checkTime = TestConstants.trial.endDate;
 
-        // Act & Assert - boundary: exactly at end is NOT expired
-        expect(trial.isExpired(checkTime), false);
+        // Act & Assert - boundary: exactly at end IS expired (inclusive)
+        // This ensures consistency with daysRemaining(0) and displayText("Trial expired")
+        expect(trial.isExpired(checkTime), true);
       });
     });
 

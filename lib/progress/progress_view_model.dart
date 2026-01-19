@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:logging/logging.dart';
 import 'package:neurostack/core/failures/domain_failure.dart';
 import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
 import 'package:neurostack/core/utils/date_time_extensions.dart';
@@ -11,9 +12,9 @@ import 'package:neurostack/features/auth/data/auth_service.dart';
 import 'package:neurostack/features/auth/data/cached_user_store.dart';
 import 'package:neurostack/features/auth/domain/auth_state.dart';
 import 'package:neurostack/features/protocol/domain/repositories/protocol_repository.dart';
+import 'package:neurostack/features/session/data/data_sources/session_local_data_source.dart';
 import 'package:neurostack/features/session/domain/entities/session.dart';
 import 'package:neurostack/features/session/domain/repositories/session_repository.dart';
-import 'package:neurostack/features/session/domain/use_cases/log_session_use_case.dart';
 import 'package:neurostack/features/user/domain/entities/user.dart';
 import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
 import 'package:neurostack/home/home_bottom_tab_coordinator.dart';
@@ -22,6 +23,8 @@ import 'package:neurostack/progress/data/cached_week_progress_store.dart';
 import 'package:neurostack/progress/progress_state.dart';
 
 class ProgressViewModel {
+  final Logger _logger = Logger('Progress');
+
   ProgressViewModel({
     required NotifyService notifyService,
     required RouterService routerService,
@@ -29,6 +32,7 @@ class ProgressViewModel {
     required UserRepository userRepository,
     required ProtocolRepository protocolRepository,
     required SessionRepository sessionRepository,
+    required SessionLocalDataSource sessionLocalDataSource,
     required ConnectivityService connectivityService,
     CachedUserStore? cachedUserStore,
     CachedWeekProgressStore? cachedWeekProgressStore,
@@ -38,13 +42,10 @@ class ProgressViewModel {
         _userRepository = userRepository,
         _protocolRepository = protocolRepository,
         _sessionRepository = sessionRepository,
+        _sessionLocalDataSource = sessionLocalDataSource,
         _connectivityService = connectivityService,
         _cachedUserStore = cachedUserStore,
         _cachedWeekProgressStore = cachedWeekProgressStore,
-        _logSessionUseCase = LogSessionUseCase(
-          userRepository: userRepository,
-          sessionRepository: sessionRepository,
-        ),
         _tabCoordinator = tabCoordinator ??
             HomeBottomTabCoordinator(
               routerService: routerService,
@@ -55,10 +56,10 @@ class ProgressViewModel {
   final UserRepository _userRepository;
   final ProtocolRepository _protocolRepository;
   final SessionRepository _sessionRepository;
+  final SessionLocalDataSource _sessionLocalDataSource;
   final ConnectivityService _connectivityService;
   final CachedUserStore? _cachedUserStore;
   final CachedWeekProgressStore? _cachedWeekProgressStore;
-  final LogSessionUseCase _logSessionUseCase;
   final HomeBottomTabCoordinator _tabCoordinator;
   final ValueNotifier<ProgressState> state = ValueNotifier(
     const ProgressInitial(),
@@ -93,35 +94,27 @@ class ProgressViewModel {
     );
   }
 
-  Future<void> backdateSession({
-    required String protocolId,
-    required DateTime day,
-  }) async {
+  /// Updates the grid cell state when a session is logged via the modal.
+  ///
+  /// This is more efficient than [refresh] as it only updates the affected cell
+  /// without reloading all data from the server.
+  Future<void> onSessionLogged(Session session) async {
     final current = state.value;
     if (current is! ProgressLoaded) {
       return;
     }
 
-    if (current.isOffline) {
-      _notifyOffline();
-      return;
-    }
+    final dayStart = _startOfDay(session.completedAt);
 
-    final dayStart = _startOfDay(day);
-    final today = _startOfDay(DateTime.now());
-    if (!dayStart.isBefore(today)) {
-      return;
-    }
-
+    // Only update if the session date is within the displayed week
     if (dayStart.isBefore(current.weekRange.start) ||
         dayStart.isAfter(current.weekRange.end)) {
       return;
     }
 
-    final previous = current;
     final updated = _updateCellState(
       current,
-      protocolId,
+      session.protocolId,
       dayStart,
       CellState.completed,
     );
@@ -129,34 +122,12 @@ class ProgressViewModel {
     state.value = updated;
     _lastLoaded = updated;
 
-    final userId = _resolveUserId();
-    if (userId == null) {
-      _revertBackdate(previous, 'Unable to log session.');
-      return;
-    }
-
-    final result = await _logSessionUseCase.execute(
-      LogSessionParams(
-        userId: userId,
-        protocolId: protocolId,
-        completedAt: DateTime(day.year, day.month, day.day, 12),
-        currentTime: DateTime.now(),
-      ),
-    );
-
-    if (result.isLeft()) {
-      final failure = result.getLeft().getOrElse(
-            () => const DomainFailure(
-              code: 'Progress.UnexpectedError',
-              message: 'Unable to log session',
-            ),
-          );
-      _revertBackdate(previous, failure.message);
-      return;
-    }
-
     _notifyService.setHapticFeedbackEvent(HapticFeedbackEvent.success);
-    await _persistCache(userId, updated);
+
+    final userId = _resolveUserId();
+    if (userId != null) {
+      await _persistCache(userId, updated);
+    }
   }
 
   void dispose() {
@@ -189,10 +160,50 @@ class ProgressViewModel {
     }
 
     if (isOffline && preferCacheWhenOffline) {
-      WeekProgressCache? cache;
       final cachedUser = await _resolveCachedUser();
-      if (cachedUser != null && _cachedWeekProgressStore != null) {
+
+      // First, try reading from SessionLocalDataSource for combined sessions
+      // Build rows even if sessions is empty (to show active protocols)
+      if (cachedUser != null) {
         _cachedUser = cachedUser;
+        final sessions = await _sessionLocalDataSource.listSessions(
+          cachedUser.id,
+          from: weekStart,
+          to: weekEnd,
+        );
+
+        final protocolIds = <String>{...cachedUser.activeProtocolIds};
+        for (final session in sessions) {
+          protocolIds.add(session.protocolId);
+        }
+
+        // Only proceed with local DS if we have protocols to show
+        if (protocolIds.isNotEmpty) {
+          final protocolNamesById = await _resolveProtocolNames(protocolIds);
+          final completedDaysByProtocolId = _groupCompletedSessions(sessions);
+          final rows = _buildRows(
+            protocolNamesById: protocolNamesById,
+            completedDaysByProtocolId: completedDaysByProtocolId,
+            weekStart: weekStart,
+            now: now,
+          );
+
+          final loaded = ProgressLoaded(
+            rows: rows,
+            weekRange: weekRange,
+            todayIndex: todayIndex,
+            isOffline: true,
+          );
+
+          await _persistCache(cachedUser.id, loaded);
+          _setLoaded(loaded);
+          return;
+        }
+      }
+
+      // Fallback: try WeekProgressCache (for cases without cached user)
+      WeekProgressCache? cache;
+      if (cachedUser != null && _cachedWeekProgressStore != null) {
         cache = await _cachedWeekProgressStore.loadWeek(
           cachedUser.id,
           weekStart,
@@ -256,35 +267,49 @@ class ProgressViewModel {
     }
 
     final user = userResult.getOrElse((_) => throw StateError('Unreachable'));
-    final sessionsResult =
-        await _sessionRepository.list(from: weekStart, to: weekEnd);
-    if (sessionsResult.isLeft()) {
-      _setFailure(
-        _failureMessage(sessionsResult, 'Unable to load sessions.'),
-        preserveContent: !showLoading,
+    final isOnline =
+        _connectivityService.status.value == NetworkStatus.online;
+
+    // If online, fetch from remote and upsert to local cache (best-effort)
+    // Remote sync failure is non-fatal: we fall back to cached + pending sessions
+    if (isOnline) {
+      final sessionsResult = await _sessionRepository.list(
+        from: weekStart,
+        to: weekEnd,
       );
-      return;
+
+      await sessionsResult.fold(
+        (failure) async {
+          // Non-fatal: continue with cached + pending sessions
+          _logger.fine('Remote session fetch failed: ${failure.code}');
+        },
+        (remoteSessions) async {
+          try {
+            await _sessionLocalDataSource.upsertSyncedSessions(
+              userId,
+              remoteSessions,
+            );
+          } catch (e) {
+            // Cache write failure is also non-fatal
+            _logger.fine('Session cache upsert failed: $e');
+          }
+        },
+      );
     }
 
-    final sessions =
-        sessionsResult.getOrElse((_) => throw StateError('Unreachable'));
+    // Read combined sessions (synced + pending) from local data source
+    final sessions = await _sessionLocalDataSource.listSessions(
+      userId,
+      from: weekStart,
+      to: weekEnd,
+    );
 
     final protocolIds = <String>{...user.activeProtocolIds};
     for (final session in sessions) {
       protocolIds.add(session.protocolId);
     }
 
-    final protocolNamesById = <String, String>{};
-    for (final protocolId in protocolIds) {
-      final result = await _protocolRepository.getById(protocolId);
-      if (result.isLeft()) {
-        protocolNamesById[protocolId] = 'Protocol unavailable';
-      } else {
-        final protocol = result.getOrElse((_) => throw StateError('Unreachable'));
-        protocolNamesById[protocolId] = protocol.name.value;
-      }
-    }
-
+    final protocolNamesById = await _resolveProtocolNames(protocolIds);
     final completedDaysByProtocolId = _groupCompletedSessions(sessions);
     final rows = _buildRows(
       protocolNamesById: protocolNamesById,
@@ -297,7 +322,7 @@ class ProgressViewModel {
       rows: rows,
       weekRange: weekRange,
       todayIndex: todayIndex,
-      isOffline: false,
+      isOffline: !isOnline,
     );
 
     _cachedUser = user;
@@ -414,6 +439,20 @@ class ProgressViewModel {
     return grouped;
   }
 
+  Future<Map<String, String>> _resolveProtocolNames(
+    Set<String> protocolIds,
+  ) async {
+    final protocolNamesById = <String, String>{};
+    for (final protocolId in protocolIds) {
+      final result = await _protocolRepository.getById(protocolId);
+      protocolNamesById[protocolId] = result.fold(
+        (_) => 'Protocol unavailable',
+        (protocol) => protocol.name.value,
+      );
+    }
+    return protocolNamesById;
+  }
+
   int _todayIndex(DateTime now, DateTime weekStart, DateTime weekEnd) {
     if (now.isBefore(weekStart) || now.isAfter(weekEnd)) {
       return -1;
@@ -423,13 +462,6 @@ class ProgressViewModel {
 
   DateTime _startOfDay(DateTime date) {
     return DateTime(date.year, date.month, date.day);
-  }
-
-  void _revertBackdate(ProgressLoaded previous, String message) {
-    state.value = previous;
-    _lastLoaded = previous;
-    _notifyService.setToastEvent(ToastEventError(message: message));
-    _notifyService.setHapticFeedbackEvent(HapticFeedbackEvent.error);
   }
 
   void _setLoaded(ProgressLoaded loaded) {
@@ -529,10 +561,6 @@ class ProgressViewModel {
     }
 
     _loadWeek(showLoading: false, preferCacheWhenOffline: isOffline);
-  }
-
-  void _notifyOffline() {
-    _notifyService.setToastEvent(ToastEventInfo(message: 'Offline mode'));
   }
 
   @visibleForTesting

@@ -23,7 +23,9 @@ This document tracks the Progress screen implementation. Keep it current as the 
 - Progress route uses `/week` and integrates with bottom navigation via `HomeBottomTabCoordinator`.
 
 ### Supporting domain/data updates
-- Session logging now uses server-generated IDs via a `SessionDraft` insert path and `SessionInsertDto`.
+- Session logging uses **client-generated UUIDs** for idempotent offline sync via `SessionDraft` and `SessionInsertDto`.
+- The `sessions.id` column is UUID (via migration `20260109170000_sessions_uuid_id.sql`).
+- Repository handles duplicate key conflicts as idempotent success (fetches existing session).
 - Log session use case raises `SessionLoggedEvent` after persistence.
 
 ### Layout hardening

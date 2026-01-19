@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:logging/logging.dart';
 import 'package:neurostack/core/failures/domain_failure.dart';
 import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
+import 'package:neurostack/core/utils/date_time_extensions.dart';
 import 'package:neurostack/core/utils/internal_notification/notify_service.dart';
 import 'package:neurostack/core/utils/internal_notification/toast/toast_event.dart';
 import 'package:neurostack/core/utils/navigation/route_data.dart';
@@ -10,6 +12,7 @@ import 'package:neurostack/features/auth/data/auth_service.dart';
 import 'package:neurostack/features/auth/domain/auth_state.dart';
 import 'package:neurostack/features/protocol/domain/entities/protocol.dart';
 import 'package:neurostack/features/protocol/domain/repositories/protocol_repository.dart';
+import 'package:neurostack/features/session/data/data_sources/session_local_data_source.dart';
 import 'package:neurostack/features/session/domain/entities/session.dart';
 import 'package:neurostack/features/session/domain/repositories/session_repository.dart';
 import 'package:neurostack/features/user/domain/entities/user.dart';
@@ -20,6 +23,8 @@ import 'package:neurostack/home/home_bottom_tab_coordinator.dart';
 import 'package:neurostack/home/home_state.dart';
 
 class HomeViewModel {
+  final Logger _logger = Logger('Home');
+
   HomeViewModel({
     required NotifyService notifyService,
     required RouterService routerService,
@@ -27,19 +32,22 @@ class HomeViewModel {
     required UserRepository userRepository,
     required ProtocolRepository protocolRepository,
     required SessionRepository sessionRepository,
+    required SessionLocalDataSource sessionLocalDataSource,
     required ConnectivityService connectivityService,
     HomeBottomTabCoordinator? tabCoordinator,
-  })  : _notifyService = notifyService,
-        _routerService = routerService,
-        _authService = authService,
-        _userRepository = userRepository,
-        _protocolRepository = protocolRepository,
-        _sessionRepository = sessionRepository,
-        _connectivityService = connectivityService,
-        _tabCoordinator = tabCoordinator ??
-            HomeBottomTabCoordinator(
-              routerService: routerService,
-            );
+  }) : _notifyService = notifyService,
+       _routerService = routerService,
+       _authService = authService,
+       _userRepository = userRepository,
+       _protocolRepository = protocolRepository,
+       _sessionRepository = sessionRepository,
+       _sessionLocalDataSource = sessionLocalDataSource,
+       _connectivityService = connectivityService,
+       _tabCoordinator =
+           tabCoordinator ??
+           HomeBottomTabCoordinator(
+             routerService: routerService,
+           );
 
   final NotifyService _notifyService;
   final RouterService _routerService;
@@ -47,6 +55,7 @@ class HomeViewModel {
   final UserRepository _userRepository;
   final ProtocolRepository _protocolRepository;
   final SessionRepository _sessionRepository;
+  final SessionLocalDataSource _sessionLocalDataSource;
   final ConnectivityService _connectivityService;
   final HomeBottomTabCoordinator _tabCoordinator;
 
@@ -112,24 +121,25 @@ class HomeViewModel {
     _routerService.replaceAll([Path(name: '/library')]);
   }
 
-  void onLogSession(String protocolId) {
+  Future<void> onLogSession(String protocolId) async {
     final user = state.value.user;
     if (user == null) {
       return;
     }
 
+    final now = DateTime.now();
     final result = user.canLogSession(
       protocolId,
-      currentTime: DateTime.now(),
+      currentTime: now,
     );
 
     if (result.isLeft()) {
       final failure = result.getLeft().getOrElse(
-            () => const DomainFailure(
-              code: 'User.UnexpectedError',
-              message: 'Unable to log session',
-            ),
-          );
+        () => const DomainFailure(
+          code: 'User.UnexpectedError',
+          message: 'Unable to log session',
+        ),
+      );
 
       if (failure.code == UserFailures.tooManyActiveProtocols.code) {
         state.value = state.value.copyWith(showDeactivationModal: true);
@@ -137,6 +147,40 @@ class HomeViewModel {
       }
 
       _notifyService.setToastEvent(ToastEventError(message: failure.message));
+    } else {
+      // Resolve protocol to pass in the request
+      final protocolResult = await _protocolRepository.getById(protocolId);
+      if (protocolResult.isLeft()) {
+        final failure = protocolResult.getLeft().getOrElse(
+          () => const DomainFailure(
+            code: 'Protocol.UnexpectedError',
+            message: 'Unable to load protocol',
+          ),
+        );
+
+        // Show user-friendly message for not-found, real message for other errors
+        if (failure.code == 'Protocol.NotFound' ||
+            failure.code == 'Protocol.InvalidReference') {
+          _notifyService.setToastEvent(
+            ToastEventError(message: 'Protocol unavailable'),
+          );
+          return;
+        }
+
+        _notifyService.setToastEvent(ToastEventError(message: failure.message));
+        return;
+      }
+
+      final protocol = protocolResult.getOrElse(
+        (_) => throw StateError('Unreachable'),
+      );
+
+      state.value = state.value.copyWith(
+        logSessionRequest: LogSessionRequest(
+          protocol: protocol,
+          initialDate: now,
+        ),
+      );
     }
   }
 
@@ -168,6 +212,10 @@ class HomeViewModel {
 
   void acknowledgeDeactivationModal() {
     state.value = state.value.copyWith(showDeactivationModal: false);
+  }
+
+  void acknowledgeLogSessionRequest() {
+    state.value = state.value.copyWith(logSessionRequest: null);
   }
 
   void goToPaywall() {
@@ -243,18 +291,44 @@ class HomeViewModel {
     }
 
     final now = DateTime.now();
-    final sessionsResult = await _sessionRepository.list(
-      from: _startOfDay(now),
-      to: _endOfDay(now),
-    );
+    final userId = user.id;
+    final isOnline =
+        _connectivityService.status.value == NetworkStatus.online;
 
-    if (sessionsResult.isLeft()) {
-      _setError(_failureMessage(sessionsResult));
-      return null;
+    // If online, fetch from remote and upsert to local cache (best-effort)
+    // Remote sync failure is non-fatal: we fall back to cached + pending sessions
+    if (isOnline) {
+      final sessionsResult = await _sessionRepository.list(
+        from: now.startOfDay,
+        to: now.endOfDay,
+      );
+
+      await sessionsResult.fold(
+        (failure) async {
+          // Non-fatal: continue with cached + pending sessions
+          _logger.fine('Remote session fetch failed: ${failure.code}');
+        },
+        (remoteSessions) async {
+          try {
+            await _sessionLocalDataSource.upsertSyncedSessions(
+              userId,
+              remoteSessions,
+            );
+          } catch (e) {
+            // Cache write failure is also non-fatal
+            _logger.fine('Session cache upsert failed: $e');
+          }
+        },
+      );
     }
 
-    final sessions =
-        sessionsResult.getOrElse((_) => throw StateError('Unreachable'));
+    // Read combined sessions (synced + pending) from local data source
+    final sessions = await _sessionLocalDataSource.listSessions(
+      userId,
+      from: now.startOfDay,
+      to: now.endOfDay,
+    );
+
     final loggedToday = _mapLoggedToday(sessions);
 
     final cards = <HomeProtocolCardModel>[];
@@ -262,11 +336,11 @@ class HomeViewModel {
       final protocolResult = await _protocolRepository.getById(protocolId);
       if (protocolResult.isLeft()) {
         final failure = protocolResult.getLeft().getOrElse(
-              () => const DomainFailure(
-                code: 'Protocol.UnexpectedError',
-                message: 'Unable to load protocol',
-              ),
-            );
+          () => const DomainFailure(
+            code: 'Protocol.UnexpectedError',
+            message: 'Unable to load protocol',
+          ),
+        );
         if (failure.code == 'Protocol.NotFound' ||
             failure.code == 'Protocol.InvalidReference') {
           cards.add(_buildUnavailableCard(protocolId));
@@ -276,8 +350,9 @@ class HomeViewModel {
         return null;
       }
 
-      final protocol =
-          protocolResult.getOrElse((_) => throw StateError('Unreachable'));
+      final protocol = protocolResult.getOrElse(
+        (_) => throw StateError('Unreachable'),
+      );
       cards.add(
         _buildCard(
           protocol,
@@ -317,14 +392,6 @@ class HomeViewModel {
       loggedToday[session.protocolId] = true;
     }
     return loggedToday;
-  }
-
-  DateTime _startOfDay(DateTime now) {
-    return DateTime(now.year, now.month, now.day);
-  }
-
-  DateTime _endOfDay(DateTime now) {
-    return DateTime(now.year, now.month, now.day, 23, 59, 59, 999);
   }
 
   String? _resolveUserId() {
@@ -424,11 +491,11 @@ class HomeViewModel {
 
   String _failureMessage<T>(Either<DomainFailure, T> result) {
     final failure = result.getLeft().getOrElse(
-          () => const DomainFailure(
-            code: 'Home.UnexpectedError',
-            message: 'Unable to load home data',
-          ),
-        );
+      () => const DomainFailure(
+        code: 'Home.UnexpectedError',
+        message: 'Unable to load home data',
+      ),
+    );
     return failure.message;
   }
 

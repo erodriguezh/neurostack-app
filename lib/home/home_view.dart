@@ -4,11 +4,14 @@ import 'package:neurostack/core/ui/constants/spacing.dart';
 import 'package:neurostack/core/ui/widgets/app_grid_background.dart';
 import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
 import 'package:neurostack/core/utils/internal_notification/notify_service.dart';
+import 'package:neurostack/core/utils/internal_notification/toast/toast_event.dart';
 import 'package:neurostack/core/utils/locator.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
 import 'package:neurostack/features/protocol/domain/repositories/protocol_repository.dart';
+import 'package:neurostack/features/session/data/data_sources/session_local_data_source.dart';
 import 'package:neurostack/features/session/domain/repositories/session_repository.dart';
+import 'package:neurostack/features/session/presentation/log_session_modal.dart';
 import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
 import 'package:neurostack/home/home_state.dart';
 import 'package:neurostack/home/home_view_model.dart';
@@ -33,12 +36,14 @@ class _HomeViewState extends State<HomeView> {
     userRepository: locator<UserRepository>(),
     protocolRepository: locator<ProtocolRepository>(),
     sessionRepository: locator<SessionRepository>(),
+    sessionLocalDataSource: locator<SessionLocalDataSource>(),
     connectivityService: locator<ConnectivityService>(),
   );
 
   bool _showingTrialExpired = false;
   bool _showingGraceModal = false;
   bool _showingDeactivationModal = false;
+  bool _showingLogSessionModal = false;
 
   @override
   void initState() {
@@ -272,6 +277,43 @@ class _HomeViewState extends State<HomeView> {
         _viewModel.acknowledgeDeactivationModal();
       });
     }
+
+    if (state.logSessionRequest != null && !_showingLogSessionModal) {
+      _showingLogSessionModal = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await _showLogSessionModal(state, state.logSessionRequest!);
+        _showingLogSessionModal = false;
+        _viewModel.acknowledgeLogSessionRequest();
+      });
+    }
+  }
+
+  Future<void> _showLogSessionModal(
+    HomeViewState state,
+    LogSessionRequest request,
+  ) async {
+    // Use userId from already-loaded state.user (same source of truth)
+    final userId = state.user?.id;
+    if (userId == null) {
+      locator<NotifyService>().setToastEvent(
+        ToastEventError(message: 'Unable to identify user'),
+      );
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    await showLogSessionModal(
+      context,
+      protocol: request.protocol,
+      userId: userId,
+      initialDate: request.initialDate,
+      onSessionLogged: (session) {
+        _viewModel.refresh();
+      },
+    );
   }
 
   Future<void> _showTrialExpiredDialog(HomeViewState state) async {

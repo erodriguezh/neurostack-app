@@ -1,0 +1,25 @@
+{
+  "assignee": "erodriguez@greentube.com",
+  "claim_note": "",
+  "claimed_at": "2026-01-15T20:33:19.924535Z",
+  "created_at": "2026-01-15T20:32:42.869003Z",
+  "depends_on": [],
+  "epic": "fn-1-cl3",
+  "evidence": {
+    "commits": [
+      "cded96a",
+      "6abe80b",
+      "8ccf6e9"
+    ],
+    "prs": [],
+    "tests": [
+      "flutter test test/features/session/data/services/session_sync_service_test.dart"
+    ]
+  },
+  "id": "fn-1-cl3.6",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-1-cl3.6.md",
+  "status": "done",
+  "title": "Create SessionSyncService (Phase 2.3)",
+  "updated_at": "2026-01-16T19:13:54.801408Z"
+}

@@ -13,6 +13,7 @@ import '../value_objects/session_duration.dart';
 /// - **INV-S1**: A Session MUST belong to exactly one Protocol (by ID reference)
 /// - **INV-S2**: Session timestamp CANNOT be in the future
 /// - **INV-S3**: Session duration MUST be > 0 if specified (enforced by SessionDuration VO)
+/// - **INV-S4**: Session timestamp CANNOT be more than 7 days in the past
 ///
 /// Example: "Sauna session on Nov 21, 2025, 22 minutes"
 class Session with EntityMixin<String>, AggregateRootMixin<String> {
@@ -42,14 +43,20 @@ class Session with EntityMixin<String>, AggregateRootMixin<String> {
   /// Optional notes about the session.
   final String? notes;
 
+  /// Maximum number of days in the past a session can be logged.
+  static const maxBackdateDays = 7;
+
   /// Creates a new Session aggregate.
   ///
-  /// Enforces **INV-S2**: [completedAt] cannot be in the future.
+  /// Enforces:
+  /// - **INV-S2**: [completedAt] cannot be in the future
+  /// - **INV-S4**: [completedAt] cannot be more than 7 days in the past
   ///
   /// - [currentTime]: Injected for testability (instead of DateTime.now())
   /// - Use [SessionDraft] when the ID is server-generated.
   ///
   /// Returns [Left] with [SessionFailures.timestampInFuture] if completedAt > currentTime.
+  /// Returns [Left] with [SessionFailures.dateTooOld] if completedAt < currentTime - 7 days.
   static Either<DomainFailure, Session> create({
     required String id,
     required String protocolId,
@@ -63,12 +70,21 @@ class Session with EntityMixin<String>, AggregateRootMixin<String> {
       return left(SessionFailures.timestampInFuture);
     }
 
+    // INV-S4: Session timestamp CANNOT be more than 7 days in the past
+    final oldestAllowed =
+        currentTime.subtract(const Duration(days: maxBackdateDays));
+    if (completedAt.isBefore(oldestAllowed)) {
+      return left(SessionFailures.dateTooOld);
+    }
+
+    final trimmedNotes = notes?.trim();
+
     final session = Session._(
       id: id,
       protocolId: protocolId,
       completedAt: completedAt,
       duration: duration,
-      notes: notes?.trim().isEmpty == true ? null : notes?.trim(),
+      notes: trimmedNotes?.isEmpty == true ? null : trimmedNotes,
     );
 
     session.raiseLoggedEvent();

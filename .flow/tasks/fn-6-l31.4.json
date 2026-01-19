@@ -1,0 +1,19 @@
+{
+  "assignee": "erodriguez@greentube.com",
+  "claim_note": "",
+  "claimed_at": "2026-01-19T08:29:30.767733Z",
+  "created_at": "2026-01-19T08:29:16.137614Z",
+  "depends_on": [],
+  "epic": "fn-6-l31",
+  "evidence": {
+    "commits": [],
+    "prs": [],
+    "tests": []
+  },
+  "id": "fn-6-l31.4",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-6-l31.4.md",
+  "status": "done",
+  "title": "Add connectivity + lifecycle listeners in sync service (Phase 6.4)",
+  "updated_at": "2026-01-19T09:13:06.379481Z"
+}

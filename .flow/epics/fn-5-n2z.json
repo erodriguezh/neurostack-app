@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-5-n2z",
+  "created_at": "2026-01-18T19:08:31.737701Z",
+  "depends_on_epics": [],
+  "id": "fn-5-n2z",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-5-n2z.md",
+  "status": "open",
+  "title": "Phase 5.4: Deprecate backdateSession method",
+  "updated_at": "2026-01-18T19:08:31.738110Z"
+}

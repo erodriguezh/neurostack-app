@@ -4,6 +4,7 @@ abstract final class TestConstants {
   static const user = _User();
   static var protocol = _Protocol();
   static const session = _Session();
+  static const pendingSession = _PendingSession();
   static const citation = _Citation();
   static const subscription = _Subscription();
   static const trial = _Trial();
@@ -67,6 +68,23 @@ final class _Session {
 
   // INV-S2: Future timestamp
   DateTime get futureCompletedAt => currentTime.add(const Duration(hours: 1));
+
+  // INV-S4: Too old timestamp (more than 7 days in the past)
+  DateTime get tooOldCompletedAt =>
+      currentTime.subtract(const Duration(days: 8));
+
+  // Boundary: Exactly 7 days ago (should be valid)
+  DateTime get exactlySevenDaysAgo =>
+      currentTime.subtract(const Duration(days: 7));
+}
+
+final class _PendingSession {
+  const _PendingSession();
+
+  final String localId = 'pending-local-001';
+
+  // Use session.currentTime for consistency
+  DateTime get createdAt => TestConstants.session.currentTime;
 }
 
 final class _Citation {

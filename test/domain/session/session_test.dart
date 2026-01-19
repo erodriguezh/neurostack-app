@@ -26,6 +26,24 @@ void main() {
         expect(result, isLeftWith(SessionFailures.timestampInFuture));
       });
 
+      // INV-S4: No timestamps older than 7 days
+      test('create_withTooOldTimestamp_returnsDateTooOld', () {
+        // Act
+        final result = SessionFactory.withTooOldTimestamp();
+
+        // Assert
+        expect(result, isLeftWith(SessionFailures.dateTooOld));
+      });
+
+      // INV-S4: Boundary - exactly 7 days ago should be valid
+      test('create_withExactlySevenDaysAgo_succeeds', () {
+        // Act
+        final result = SessionFactory.withExactlySevenDaysAgo();
+
+        // Assert
+        expect(result, isRight<Session>());
+      });
+
       test('create_withOptionalDuration_succeeds', () {
         // Act
         final result = SessionFactory.withDuration(

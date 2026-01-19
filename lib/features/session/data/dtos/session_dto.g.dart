@@ -7,8 +7,8 @@ part of 'session_dto.dart';
 // **************************************************************************
 
 _SessionDto _$SessionDtoFromJson(Map<String, dynamic> json) => _SessionDto(
-  id: _stringFromJson(json['id']),
-  protocolId: _stringFromJson(json['protocol_id']),
+  id: _requiredStringFromJson(json['id']),
+  protocolId: _requiredStringFromJson(json['protocol_id']),
   userId: json['user_id'] as String,
   completedAt: json['completed_at'] as String,
   durationSeconds: (json['duration_seconds'] as num?)?.toInt(),

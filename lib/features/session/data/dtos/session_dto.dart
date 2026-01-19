@@ -24,8 +24,8 @@ abstract class SessionDto with _$SessionDto {
   const SessionDto._();
 
   const factory SessionDto({
-    @JsonKey(fromJson: _stringFromJson) required String id,
-    @JsonKey(name: 'protocol_id', fromJson: _stringFromJson)
+    @JsonKey(fromJson: _requiredStringFromJson) required String id,
+    @JsonKey(name: 'protocol_id', fromJson: _requiredStringFromJson)
     required String protocolId,
     @JsonKey(name: 'user_id') required String userId,
     @JsonKey(name: 'completed_at') required String completedAt,
@@ -44,6 +44,9 @@ abstract class SessionDto with _$SessionDto {
   /// Returns [Left] with validation failure if:
   /// - Duration validation fails (must be > 0 if specified)
   /// - Date parsing fails
+  ///
+  /// Note: Required field validation (id, protocolId) is done at fromJson time
+  /// via [_requiredStringFromJson] which throws on null/empty values.
   Either<DomainFailure, Session> toDomain() {
     try {
       // Parse duration if present
@@ -64,8 +67,8 @@ abstract class SessionDto with _$SessionDto {
         );
       }
 
-      // Parse date
-      final completedAtDate = DateTime.parse(completedAt);
+      // Parse date (convert to local time for domain consistency)
+      final completedAtDate = DateTime.parse(completedAt).toLocal();
 
       // Reconstitute (not create) to avoid domain events
       return right(
@@ -88,21 +91,32 @@ abstract class SessionDto with _$SessionDto {
   }
 
   /// Creates a DTO from a domain [Session] aggregate.
+  ///
+  /// Stores timestamps in UTC for consistent storage and portability.
   factory SessionDto.fromDomain(Session session, String userId) {
     return SessionDto(
       id: session.id,
       protocolId: session.protocolId,
       userId: userId,
-      completedAt: session.completedAt.toIso8601String(),
+      completedAt: session.completedAt.toUtc().toIso8601String(),
       durationSeconds: session.duration?.inSeconds,
       notes: session.notes,
     );
   }
 }
 
-String _stringFromJson(dynamic raw) {
-  if (raw == null) {
-    return '';
+/// Parses a required string field from JSON.
+///
+/// Throws [FormatException] if the value is not a String or is empty/whitespace.
+/// This ensures corrupt entries are caught at parse time rather than
+/// propagating invalid data to the domain layer.
+String _requiredStringFromJson(dynamic raw) {
+  if (raw is! String) {
+    throw FormatException('Required string field was not a string: $raw');
   }
-  return raw.toString();
+  final trimmed = raw.trim();
+  if (trimmed.isEmpty) {
+    throw const FormatException('Required string field was empty');
+  }
+  return trimmed;
 }

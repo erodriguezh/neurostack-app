@@ -1,3 +1,4 @@
+import 'package:neurostack/features/protocol/domain/entities/protocol.dart';
 import 'package:neurostack/features/user/domain/entities/user.dart';
 
 const _unset = Object();
@@ -40,6 +41,22 @@ class HomeProtocolCardModel {
   final bool isUnavailable;
 }
 
+/// Request to open the log session modal with pre-populated values.
+///
+/// Set in [HomeViewState.logSessionRequest] to trigger the modal from
+/// [HomeView]. Clear after the modal is shown or dismissed.
+///
+/// Holds the full [Protocol] object to avoid lookup in HomeView.
+class LogSessionRequest {
+  const LogSessionRequest({
+    required this.protocol,
+    required this.initialDate,
+  });
+
+  final Protocol protocol;
+  final DateTime initialDate;
+}
+
 class HomeViewState {
   const HomeViewState({
     this.status = HomeStatus.loading,
@@ -54,6 +71,7 @@ class HomeViewState {
     this.errorMessage,
     this.isRefreshing = false,
     this.activeTab = HomeBottomTab.stack,
+    this.logSessionRequest,
   });
 
   final HomeStatus status;
@@ -68,6 +86,7 @@ class HomeViewState {
   final String? errorMessage;
   final bool isRefreshing;
   final HomeBottomTab activeTab;
+  final LogSessionRequest? logSessionRequest;
 
   HomeViewState copyWith({
     HomeStatus? status,
@@ -82,6 +101,7 @@ class HomeViewState {
     Object? errorMessage = _unset,
     bool? isRefreshing,
     HomeBottomTab? activeTab,
+    Object? logSessionRequest = _unset,
   }) {
     return HomeViewState(
       status: status ?? this.status,
@@ -99,6 +119,9 @@ class HomeViewState {
           errorMessage == _unset ? this.errorMessage : errorMessage as String?,
       isRefreshing: isRefreshing ?? this.isRefreshing,
       activeTab: activeTab ?? this.activeTab,
+      logSessionRequest: logSessionRequest == _unset
+          ? this.logSessionRequest
+          : logSessionRequest as LogSessionRequest?,
     );
   }
 }

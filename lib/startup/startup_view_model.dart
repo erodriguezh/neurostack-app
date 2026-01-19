@@ -11,6 +11,7 @@ import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
 import 'package:neurostack/features/auth/domain/auth_state.dart' as auth_state;
 import 'package:neurostack/features/onboarding/data/onboarding_store.dart';
+import 'package:neurostack/features/session/data/services/session_sync_service.dart';
 import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -77,6 +78,11 @@ class StartupViewModel {
         return;
       }
 
+      // Initialize session sync service and trigger startup sync
+      final syncService = locator<SessionSyncService>();
+      syncService.init();
+      unawaited(syncService.sync());
+
       appStateNotifier.value = const AppInitialized();
 
       if (routerService.shouldShowOnboarding()) {
@@ -101,6 +107,9 @@ class StartupViewModel {
   }
 
   void _disposeServices() {
+    try {
+      locator<SessionSyncService>().dispose();
+    } catch (_) {}
     try {
       locator<AuthService>().dispose();
     } catch (_) {}

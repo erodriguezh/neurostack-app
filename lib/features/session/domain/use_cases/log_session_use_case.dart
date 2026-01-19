@@ -77,11 +77,15 @@ class LogSessionUseCase {
             ));
 
     // Step 4: Handle async save with pattern matching
+    // Note: Repository returns Session.reconstitute() (no events), so we raise
+    // the event here after successful persistence. Guard against duplication.
     return switch (sessionDraftResult) {
       Left(:final value) => left(value),
       Right(:final value) => (await _sessionRepository.create(value)).map(
           (session) {
-            session.raiseLoggedEvent();
+            if (!session.hasDomainEvents) {
+              session.raiseLoggedEvent();
+            }
             return session;
           },
         ),

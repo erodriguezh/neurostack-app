@@ -22,11 +22,16 @@ abstract class SessionInsertDto with _$SessionInsertDto {
   factory SessionInsertDto.fromJson(Map<String, dynamic> json) =>
       _$SessionInsertDtoFromJson(json);
 
+  /// Creates an insert DTO from a validated [SessionDraft].
+  ///
+  /// Stores timestamps in UTC for consistent storage and portability.
+  /// This aligns with the UTC policy used in [SessionDto.fromDomain]
+  /// and [PendingSessionDto.fromDomain].
   factory SessionInsertDto.fromDraft(SessionDraft session, String userId) {
     return SessionInsertDto(
       protocolId: session.protocolId,
       userId: userId,
-      completedAt: session.completedAt.toIso8601String(),
+      completedAt: session.completedAt.toUtc().toIso8601String(),
       durationSeconds: session.duration?.inSeconds,
       notes: session.notes,
     );

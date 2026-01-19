@@ -56,6 +56,7 @@
 - [Spec: Progress Screen](./specs/20260108232500_spec_progress_screen.md) - ProgressView, week grid, adherence tracking, CellState, backdate flow, DateTimeRange, weekStart, weekEnd, protocol row
 - [Spec: Session](./specs/20260113151500_spec_session.md) - Session aggregate, SessionDraft, SessionDuration value object, LogSessionUseCase, INV-S2 future timestamp, INV-S3 positive duration, append-only persistence
 - [Spec: Onboarding](./specs/20260103223600_spec_onboarding_screens.md) - OnboardingView, PageView, SharedPreferences, auth integration, orientation lock, existing user migration, EnumPageView, disclaimer checkbox
+- [Spec: Log Session Modal](./specs/20260113180000_spec_log_session_modal.md) - LogSessionModal, offline-first, SessionSyncService, eligibility check, backdate 7 days, haptic feedback, accessibility announcements
 
 ## Investigations
 - [Investigation: Protocol Names Missing](./investigations/20260108223900_investigation_progress_protocol_names.md) - ProgressGrid, layout collapse, nameWidth, narrow screen, responsive, horizontal scroll, widget overflow

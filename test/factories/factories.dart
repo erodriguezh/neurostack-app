@@ -1,5 +1,7 @@
 // Aggregate factories
+export 'pending_session_factory.dart';
 export 'protocol_factory.dart';
+export 'session_draft_factory.dart';
 export 'session_factory.dart';
 export 'user_factory.dart';
 

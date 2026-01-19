@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-9-gdd",
+  "created_at": "2026-01-19T20:29:15.378834Z",
+  "depends_on_epics": [],
+  "id": "fn-9-gdd",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-9-gdd.md",
+  "status": "done",
+  "title": "Phase 8.5: Test factories - PendingSessionFactory",
+  "updated_at": "2026-01-19T20:31:40.495399Z"
+}

@@ -1,0 +1,25 @@
+{
+  "assignee": "erodriguez@greentube.com",
+  "claim_note": "",
+  "claimed_at": "2026-01-17T19:21:59.860715Z",
+  "created_at": "2026-01-17T19:21:25.700804Z",
+  "depends_on": [],
+  "epic": "fn-2-8il",
+  "evidence": {
+    "commits": [
+      "cff265a",
+      "fc041e2"
+    ],
+    "prs": [],
+    "tests": [
+      "flutter analyze",
+      "flutter test"
+    ]
+  },
+  "id": "fn-2-8il.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-2-8il.1.md",
+  "status": "done",
+  "title": "Update HomeViewModel to use SessionLocalDataSource for combined sessions",
+  "updated_at": "2026-01-17T19:48:03.193495Z"
+}

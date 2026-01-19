@@ -14,6 +14,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 
 // Feature data sources
 import 'package:neurostack/features/protocol/data/data_sources/protocol_remote_data_source.dart';
+import 'package:neurostack/features/session/data/data_sources/session_local_data_source.dart';
 import 'package:neurostack/features/session/data/data_sources/session_remote_data_source.dart';
 import 'package:neurostack/features/user/data/data_sources/user_remote_data_source.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
@@ -32,6 +33,12 @@ import 'package:neurostack/features/user/domain/repositories/user_repository.dar
 import 'package:neurostack/features/protocol/data/repositories/protocol_repository_impl.dart';
 import 'package:neurostack/features/session/data/repositories/session_repository_impl.dart';
 import 'package:neurostack/features/user/data/repositories/user_repository_impl.dart';
+
+// Services
+import 'package:neurostack/features/session/data/services/session_sync_service.dart';
+
+// Use cases
+import 'package:neurostack/features/session/domain/use_cases/check_eligibility_use_case.dart';
 
 List<Module> buildModules({required SharedPreferences sharedPreferences}) => [
   Module<SharedPreferences>(builder: () => sharedPreferences, lazy: false),
@@ -88,6 +95,10 @@ List<Module> buildModules({required SharedPreferences sharedPreferences}) => [
     builder: () => ProtocolRemoteDataSource(locator<DataSourceAbstraction>()),
     lazy: true,
   ),
+  Module<SessionLocalDataSource>(
+    builder: () => SessionLocalDataSource(locator<SharedPreferences>()),
+    lazy: true,
+  ),
   Module<SessionRemoteDataSource>(
     builder: () => SessionRemoteDataSource(locator<DataSourceAbstraction>()),
     lazy: true,
@@ -130,6 +141,26 @@ List<Module> buildModules({required SharedPreferences sharedPreferences}) => [
       routerService: locator<RouterService>(),
       connectivityService: locator<ConnectivityService>(),
       appLifecycleService: locator<AppLifecycleService>(),
+    ),
+    lazy: true,
+  ),
+
+  // Services
+  Module<SessionSyncService>(
+    builder: () => SessionSyncService(
+      local: locator<SessionLocalDataSource>(),
+      remote: locator<SessionRemoteDataSource>(),
+      connectivity: locator<ConnectivityService>(),
+      dataSource: locator<DataSourceAbstraction>(),
+      appLifecycle: locator<AppLifecycleService>(),
+    ),
+    lazy: true,
+  ),
+
+  // Use cases
+  Module<CheckEligibilityUseCase>(
+    builder: () => CheckEligibilityUseCase(
+      userRepository: locator<UserRepository>(),
     ),
     lazy: true,
   ),

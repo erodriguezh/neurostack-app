@@ -1,0 +1,25 @@
+{
+  "assignee": "erodriguez@greentube.com",
+  "claim_note": "",
+  "claimed_at": "2026-01-18T19:08:49.953995Z",
+  "created_at": "2026-01-18T19:08:36.273798Z",
+  "depends_on": [],
+  "epic": "fn-5-n2z",
+  "evidence": {
+    "commits": [
+      "9e9988d2b99561021e6d27f881f3c846a87c19c8"
+    ],
+    "prs": [],
+    "tests": [
+      "flutter analyze",
+      "flutter test test/progress/",
+      "flutter test"
+    ]
+  },
+  "id": "fn-5-n2z.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-5-n2z.1.md",
+  "status": "done",
+  "title": "Remove or deprecate backdateSession() method from ProgressViewModel",
+  "updated_at": "2026-01-18T19:20:46.088112Z"
+}

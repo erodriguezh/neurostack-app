@@ -92,7 +92,8 @@ void main() {
 
       final invalidYearCases = [
         (year: 1899, desc: 'before1900'),
-        (year: 2027, desc: 'futureYear'),
+        // Validation allows currentYear + 1, so use +2 to guarantee future
+        (year: DateTime.now().year + 2, desc: 'futureYear'),
       ];
 
       for (final c in invalidYearCases) {

@@ -1,0 +1,24 @@
+{
+  "assignee": "erodriguez@greentube.com",
+  "claim_note": "",
+  "claimed_at": "2026-01-18T20:05:30.365407Z",
+  "created_at": "2026-01-18T20:05:00.673837Z",
+  "depends_on": [],
+  "epic": "fn-6-l31",
+  "evidence": {
+    "commits": [
+      "f7bc2eb09f81f4ae1bdfae2f726eabdff22d240c"
+    ],
+    "prs": [],
+    "tests": [
+      "flutter test",
+      "flutter analyze"
+    ]
+  },
+  "id": "fn-6-l31.3",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-6-l31.3.md",
+  "status": "done",
+  "title": "Add startup sync trigger (Phase 6.3)",
+  "updated_at": "2026-01-18T20:15:09.669911Z"
+}
