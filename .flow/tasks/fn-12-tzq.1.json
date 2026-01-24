@@ -1,0 +1,23 @@
+{
+  "assignee": "erodriguez@greentube.com",
+  "claim_note": "",
+  "claimed_at": "2026-01-21T12:26:28.353115Z",
+  "created_at": "2026-01-21T12:25:46.747632Z",
+  "depends_on": [],
+  "epic": "fn-12-tzq",
+  "evidence": {
+    "commits": [
+      "b94daaf"
+    ],
+    "prs": [],
+    "tests": [
+      "flutter analyze lib/paywall/widgets/trial_expired_modal.dart"
+    ]
+  },
+  "id": "fn-12-tzq.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-12-tzq.1.md",
+  "status": "done",
+  "title": "Create _UpgradeCard widget (Phase 2.1)",
+  "updated_at": "2026-01-21T13:04:17.475093Z"
+}

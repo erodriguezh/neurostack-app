@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-20-7vp",
+  "created_at": "2026-01-22T11:19:47.329095Z",
+  "depends_on_epics": [],
+  "id": "fn-20-7vp",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-20-7vp.md",
+  "status": "open",
+  "title": "Trial Expiration Modal - Phase 5.3: ViewModel tests",
+  "updated_at": "2026-01-22T11:19:47.329375Z"
+}

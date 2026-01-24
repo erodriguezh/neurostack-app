@@ -1,0 +1,27 @@
+{
+  "assignee": "erodriguez@greentube.com",
+  "claim_note": "",
+  "claimed_at": "2026-01-21T14:28:08.625338Z",
+  "created_at": "2026-01-21T14:27:21.694634Z",
+  "depends_on": [],
+  "epic": "fn-14-jz7",
+  "evidence": {
+    "commits": [
+      "8888c00",
+      "a3e858a",
+      "4337602",
+      "48a2801"
+    ],
+    "prs": [],
+    "tests": [
+      "flutter analyze",
+      "flutter test"
+    ]
+  },
+  "id": "fn-14-jz7.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-14-jz7.1.md",
+  "status": "done",
+  "title": "Handle paywall dismiss \u2192 return to modal (Phase 3.2)",
+  "updated_at": "2026-01-21T18:16:16.596410Z"
+}

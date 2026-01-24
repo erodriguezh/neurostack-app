@@ -1,0 +1,23 @@
+{
+  "assignee": "erodriguez@greentube.com",
+  "claim_note": "",
+  "claimed_at": "2026-01-21T13:18:26.826514Z",
+  "created_at": "2026-01-21T13:17:08.828985Z",
+  "depends_on": [],
+  "epic": "fn-12-tzq",
+  "evidence": {
+    "commits": [
+      "c4a211ff8c1a64a641a5ad3e538edcfbbb8e6e68"
+    ],
+    "prs": [],
+    "tests": [
+      "flutter analyze lib/paywall/widgets/trial_expired_modal.dart"
+    ]
+  },
+  "id": "fn-12-tzq.2",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-12-tzq.2.md",
+  "status": "done",
+  "title": "Create _DowngradeCard widget (Phase 2.2)",
+  "updated_at": "2026-01-21T13:33:41.094257Z"
+}

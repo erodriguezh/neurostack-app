@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-23-dm2",
+  "created_at": "2026-01-23T11:38:37.323696Z",
+  "depends_on_epics": [],
+  "id": "fn-23-dm2",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-23-dm2.md",
+  "status": "open",
+  "title": "Phase 6.3: Flutter - Update TrialPeriod domain",
+  "updated_at": "2026-01-23T11:38:37.324048Z"
+}

@@ -28,11 +28,48 @@ void main() {
         // Arrange
         final trial = TrialPeriodFactory.create();
 
-        // Act
-        final expectedEnd = TestConstants.trial.startDate.add(const Duration(days: 7));
+        // Act - use trial.startDate to avoid coupling to factory defaults
+        final expectedEnd = trial.startDate.add(const Duration(days: 7));
 
         // Assert
         expect(trial.endDate, expectedEnd);
+      });
+    });
+
+    group('fromDates', () {
+      test('fromDates_preservesProvidedDates', () {
+        // Arrange - use explicit dates that may not follow 7-day rule
+        // This simulates DB hydration where we trust the stored values
+        final startDate = DateTime(2025, 1, 1, 12, 0, 0);
+        final endDate = DateTime(2025, 1, 8, 12, 0, 0);
+
+        // Act
+        final trial = TrialPeriod.fromDates(
+          startDate: startDate,
+          endDate: endDate,
+        );
+
+        // Assert - both dates should be preserved exactly
+        expect(trial.startDate, startDate);
+        expect(trial.endDate, endDate);
+      });
+
+      test('fromDates_doesNotRecomputeEndDate', () {
+        // Arrange - intentionally use a non-standard end date
+        // to verify fromDates doesn't recompute
+        final startDate = DateTime(2025, 6, 15);
+        final customEndDate = DateTime(2025, 6, 22, 23, 59, 59);
+
+        // Act
+        final trial = TrialPeriod.fromDates(
+          startDate: startDate,
+          endDate: customEndDate,
+        );
+
+        // Assert - endDate should NOT be startDate + 7 days
+        final computedEndDate = startDate.add(const Duration(days: 7));
+        expect(trial.endDate, isNot(equals(computedEndDate)));
+        expect(trial.endDate, customEndDate);
       });
     });
 

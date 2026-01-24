@@ -1,7 +1,7 @@
 ---
 description: Build with rp-cli context builder → chat → implement
 repoprompt_managed: true
-repoprompt_commands_version: 3
+repoprompt_commands_version: 5
 repoprompt_variant: cli
 ---
 
@@ -30,8 +30,8 @@ rp-cli -e '<command>'
 | `manage_selection` | `rp-cli -e 'select add path/'` |
 | `context_builder` | `rp-cli -e 'builder "instructions" --response-type plan'` |
 | `chat_send` | `rp-cli -e 'chat "message" --mode plan'` |
-| `apply_edits` | `rp-cli -e 'edit path/file.swift "old" "new"'` |
-| `file_actions` | `rp-cli -e 'file create path/new.swift'` |
+| `apply_edits` | `rp-cli -e 'call apply_edits {"path":"...","search":"...","replace":"..."}'` |
+| `file_actions` | `rp-cli -e 'call file_actions {"action":"create","path":"..."}'` |
 
 Chain commands with `&&`:
 ```bash
@@ -60,7 +60,9 @@ Skipping `builder` results in shallow implementations that miss architectural pa
 
 ---
 
-## Phase 1: Quick Scan
+## Phase 1: Quick Scan (LIMITED - 2-3 tool calls max)
+
+⚠️ **This phase is intentionally brief.** Do NOT do extensive exploration here—that's what `builder` is for.
 
 Start by getting a lay of the land with the file tree:
 ```bash
@@ -74,6 +76,8 @@ rp-cli -e 'structure RootName/likely/relevant/area/'
 ```
 
 Use what you learn to **reformulate the user's prompt** with added clarity—reference specific modules, patterns, or terminology from the codebase.
+
+**STOP exploring after 2-3 searches.** Your goal is orientation, not deep understanding. `builder` will do the heavy lifting.
 
 ---
 
@@ -89,7 +93,9 @@ rp-cli -e 'builder "<reformulated prompt with codebase context>" --response-type
 - Smart file selection (automatically curated within token budget)
 - Architectural plan grounded in actual code
 - Chat session for follow-up conversation
+- `tab_id` for targeting the same tab in subsequent CLI invocations
 
+**Tab routing:** Each `rp-cli` invocation is a fresh connection. To continue working in the same tab across separate invocations, pass `-t <tab_id>` (the tab ID returned by builder).
 **Trust `builder`** – it explores deeply and selects intelligently. You shouldn't need to add many files afterward.
 
 ---
@@ -104,8 +110,10 @@ Use the chat to:
 - Validate your understanding before implementing
 
 ```bash
-rp-cli -e 'chat "How does X connect to Y in these files? Any edge cases I should watch for?" --mode plan'
+rp-cli -t '<tab_id>' -e 'chat "How does X connect to Y in these files? Any edge cases I should watch for?" --mode plan'
 ```
+
+> **Note:** Pass `-t <tab_id>` to target the same tab across separate CLI invocations.
 
 **The chat excels at:**
 - Revealing architectural patterns across files
@@ -130,8 +138,11 @@ Implement the plan directly. **Do not use `chat` with `mode:"edit"`** – you im
 
 **Primary tools:**
 ```bash
-# Modify existing files (search/replace)
-rp-cli -e 'edit Root/File.swift "old" "new"'
+# Modify existing files (search/replace) - JSON format required
+rp-cli -e 'call apply_edits {"path":"Root/File.swift","search":"old","replace":"new"}'
+
+# Multiline edits
+rp-cli -e 'call apply_edits {"path":"Root/File.swift","search":"old\ntext","replace":"new\ntext"}'
 
 # Create new files
 rp-cli -e 'file create Root/NewFile.swift "content..."'
@@ -142,7 +153,7 @@ rp-cli -e 'read Root/File.swift --start-line 50 --limit 30'
 
 **Ask the chat when stuck:**
 ```bash
-rp-cli -e 'chat "I'\''m implementing X but unsure about Y. What pattern should I follow?" --mode chat'
+rp-cli -t '<tab_id>' -e 'chat "I'\''m implementing X but unsure about Y. What pattern should I follow?" --mode chat'
 ```
 
 ---
@@ -179,6 +190,9 @@ rp-cli -e 'select add Root/large/file.swift:100-200'
 - 🚫 Removing files from selection unnecessarily – prefer adding over removing
 - 🚫 Using `manage_selection` with `op:"clear"` – this undoes `builder`'s work; only remove specific files when over token budget
 - 🚫 Exceeding ~160k tokens – use slices if needed
+- 🚫 **CRITICAL:** Doing extensive exploration (5+ tool calls) before calling `builder` – the quick scan should be 2-3 calls max
+- 🚫 Reading full file contents during Phase 1 – save that for after `builder` builds context
+- 🚫 Convincing yourself you understand enough to skip `builder` – you don't
 
 ---
 

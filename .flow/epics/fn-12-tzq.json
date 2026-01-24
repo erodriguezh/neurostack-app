@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-12-tzq",
+  "created_at": "2026-01-21T12:25:42.259390Z",
+  "depends_on_epics": [],
+  "id": "fn-12-tzq",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-12-tzq.md",
+  "status": "open",
+  "title": "Trial Expiration Modal - Phase 2: Decision Card Widgets",
+  "updated_at": "2026-01-21T12:25:42.259783Z"
+}

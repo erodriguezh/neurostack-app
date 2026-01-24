@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-24-vwc",
+  "created_at": "2026-01-23T13:16:54.113369Z",
+  "depends_on_epics": [],
+  "id": "fn-24-vwc",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-24-vwc.md",
+  "status": "open",
+  "title": "Phase 6.4: Flutter - Update TrialPeriodDto",
+  "updated_at": "2026-01-23T13:16:54.116496Z"
+}

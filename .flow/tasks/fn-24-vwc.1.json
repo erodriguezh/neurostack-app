@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-01-23T13:16:59.634842Z",
+  "depends_on": [],
+  "epic": "fn-24-vwc",
+  "id": "fn-24-vwc.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-24-vwc.1.md",
+  "status": "todo",
+  "title": "Update TrialPeriodDto: add endDate field and update toDomain/fromDomain methods",
+  "updated_at": "2026-01-23T13:16:59.635147Z"
+}

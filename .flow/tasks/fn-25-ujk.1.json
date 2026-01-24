@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-01-23T14:00:07.598213Z",
+  "depends_on": [],
+  "epic": "fn-25-ujk",
+  "id": "fn-25-ujk.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-25-ujk.1.md",
+  "status": "todo",
+  "title": "Update UserDto: add trialEndsAt denormalized field and update fromDomain/toDomain",
+  "updated_at": "2026-01-23T14:00:07.599023Z"
+}

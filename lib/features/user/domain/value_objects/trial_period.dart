@@ -24,22 +24,37 @@ sealed class TrialPeriod with _$TrialPeriod {
   @internal
   const factory TrialPeriod({
     required DateTime startDate,
+    required DateTime endDate,
   }) = _TrialPeriod;
 
   /// Trial duration in days. Enforces **INV-M2**.
   static const trialDurationDays = 7;
 
   /// Creates a trial period starting now.
-  factory TrialPeriod.startNow() => TrialPeriod(startDate: DateTime.now());
+  factory TrialPeriod.startNow() {
+    final start = DateTime.now();
+    return TrialPeriod(
+      startDate: start,
+      endDate: start.add(const Duration(days: trialDurationDays)),
+    );
+  }
 
   /// Creates a trial period with a specific start date.
-  /// Used for reconstitution from persistence.
-  factory TrialPeriod.fromStartDate(DateTime startDate) =>
-      TrialPeriod(startDate: startDate);
+  /// Computes end date as start + 7 days.
+  /// Used for backwards compatibility when only start date is available.
+  factory TrialPeriod.fromStartDate(DateTime startDate) => TrialPeriod(
+        startDate: startDate,
+        endDate: startDate.add(const Duration(days: trialDurationDays)),
+      );
 
-  /// The date when the trial ends (startDate + 7 days).
-  DateTime get endDate =>
-      startDate.add(const Duration(days: trialDurationDays));
+  /// Creates a trial period with explicit dates from database.
+  /// This is the ONLY safe constructor for DB hydration.
+  /// Use [startNow] or [fromStartDate] for creating new trials.
+  factory TrialPeriod.fromDates({
+    required DateTime startDate,
+    required DateTime endDate,
+  }) =>
+      TrialPeriod(startDate: startDate, endDate: endDate);
 
   /// Check if the trial has expired as of [currentTime].
   ///

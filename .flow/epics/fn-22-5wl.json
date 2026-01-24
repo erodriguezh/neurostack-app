@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-22-5wl",
+  "created_at": "2026-01-23T10:33:13.989747Z",
+  "depends_on_epics": [],
+  "id": "fn-22-5wl",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-22-5wl.md",
+  "status": "open",
+  "title": "Phase 6.2: Migration - Cron function + schedule",
+  "updated_at": "2026-01-23T10:33:13.990169Z"
+}

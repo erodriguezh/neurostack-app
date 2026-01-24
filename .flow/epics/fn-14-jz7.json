@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-14-jz7",
+  "created_at": "2026-01-21T14:27:16.547652Z",
+  "depends_on_epics": [],
+  "id": "fn-14-jz7",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-14-jz7.md",
+  "status": "open",
+  "title": "Trial Expiration Modal - Phase 3.2: Paywall dismiss return to modal",
+  "updated_at": "2026-01-21T14:27:16.548011Z"
+}

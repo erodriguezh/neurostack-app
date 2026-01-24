@@ -3,6 +3,7 @@
     "enabled": false
   },
   "planSync": {
+    "crossEpic": false,
     "enabled": false
   },
   "review": {

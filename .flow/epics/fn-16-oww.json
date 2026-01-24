@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-16-oww",
+  "created_at": "2026-01-21T19:05:44.415210Z",
+  "depends_on_epics": [],
+  "id": "fn-16-oww",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-16-oww.md",
+  "status": "open",
+  "title": "Trial Expiration Modal - Phase 4.2: Inject CachedUserStore into HomeView",
+  "updated_at": "2026-01-21T19:05:44.415482Z"
+}

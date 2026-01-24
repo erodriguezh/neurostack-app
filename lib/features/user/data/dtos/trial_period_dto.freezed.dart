@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$TrialPeriodDto {
 
-@JsonKey(name: 'start_date', fromJson: _stringFromJson) String get startDate;
+@JsonKey(name: 'start_date', fromJson: _stringFromJson) String get startDate;@JsonKey(name: 'end_date', fromJson: _nullableStringFromJson) String? get endDate;
 /// Create a copy of TrialPeriodDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $TrialPeriodDtoCopyWith<TrialPeriodDto> get copyWith => _$TrialPeriodDtoCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TrialPeriodDto&&(identical(other.startDate, startDate) || other.startDate == startDate));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TrialPeriodDto&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.endDate, endDate) || other.endDate == endDate));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,startDate);
+int get hashCode => Object.hash(runtimeType,startDate,endDate);
 
 @override
 String toString() {
-  return 'TrialPeriodDto(startDate: $startDate)';
+  return 'TrialPeriodDto(startDate: $startDate, endDate: $endDate)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $TrialPeriodDtoCopyWith<$Res>  {
   factory $TrialPeriodDtoCopyWith(TrialPeriodDto value, $Res Function(TrialPeriodDto) _then) = _$TrialPeriodDtoCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'start_date', fromJson: _stringFromJson) String startDate
+@JsonKey(name: 'start_date', fromJson: _stringFromJson) String startDate,@JsonKey(name: 'end_date', fromJson: _nullableStringFromJson) String? endDate
 });
 
 
@@ -65,10 +65,11 @@ class _$TrialPeriodDtoCopyWithImpl<$Res>
 
 /// Create a copy of TrialPeriodDto
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? startDate = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? startDate = null,Object? endDate = freezed,}) {
   return _then(_self.copyWith(
 startDate: null == startDate ? _self.startDate : startDate // ignore: cast_nullable_to_non_nullable
-as String,
+as String,endDate: freezed == endDate ? _self.endDate : endDate // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -153,10 +154,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'start_date', fromJson: _stringFromJson)  String startDate)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'start_date', fromJson: _stringFromJson)  String startDate, @JsonKey(name: 'end_date', fromJson: _nullableStringFromJson)  String? endDate)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TrialPeriodDto() when $default != null:
-return $default(_that.startDate);case _:
+return $default(_that.startDate,_that.endDate);case _:
   return orElse();
 
 }
@@ -174,10 +175,10 @@ return $default(_that.startDate);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'start_date', fromJson: _stringFromJson)  String startDate)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'start_date', fromJson: _stringFromJson)  String startDate, @JsonKey(name: 'end_date', fromJson: _nullableStringFromJson)  String? endDate)  $default,) {final _that = this;
 switch (_that) {
 case _TrialPeriodDto():
-return $default(_that.startDate);case _:
+return $default(_that.startDate,_that.endDate);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -194,10 +195,10 @@ return $default(_that.startDate);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'start_date', fromJson: _stringFromJson)  String startDate)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'start_date', fromJson: _stringFromJson)  String startDate, @JsonKey(name: 'end_date', fromJson: _nullableStringFromJson)  String? endDate)?  $default,) {final _that = this;
 switch (_that) {
 case _TrialPeriodDto() when $default != null:
-return $default(_that.startDate);case _:
+return $default(_that.startDate,_that.endDate);case _:
   return null;
 
 }
@@ -209,10 +210,11 @@ return $default(_that.startDate);case _:
 @JsonSerializable()
 
 class _TrialPeriodDto extends TrialPeriodDto {
-  const _TrialPeriodDto({@JsonKey(name: 'start_date', fromJson: _stringFromJson) required this.startDate}): super._();
+  const _TrialPeriodDto({@JsonKey(name: 'start_date', fromJson: _stringFromJson) required this.startDate, @JsonKey(name: 'end_date', fromJson: _nullableStringFromJson) this.endDate}): super._();
   factory _TrialPeriodDto.fromJson(Map<String, dynamic> json) => _$TrialPeriodDtoFromJson(json);
 
 @override@JsonKey(name: 'start_date', fromJson: _stringFromJson) final  String startDate;
+@override@JsonKey(name: 'end_date', fromJson: _nullableStringFromJson) final  String? endDate;
 
 /// Create a copy of TrialPeriodDto
 /// with the given fields replaced by the non-null parameter values.
@@ -227,16 +229,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TrialPeriodDto&&(identical(other.startDate, startDate) || other.startDate == startDate));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TrialPeriodDto&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.endDate, endDate) || other.endDate == endDate));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,startDate);
+int get hashCode => Object.hash(runtimeType,startDate,endDate);
 
 @override
 String toString() {
-  return 'TrialPeriodDto(startDate: $startDate)';
+  return 'TrialPeriodDto(startDate: $startDate, endDate: $endDate)';
 }
 
 
@@ -247,7 +249,7 @@ abstract mixin class _$TrialPeriodDtoCopyWith<$Res> implements $TrialPeriodDtoCo
   factory _$TrialPeriodDtoCopyWith(_TrialPeriodDto value, $Res Function(_TrialPeriodDto) _then) = __$TrialPeriodDtoCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'start_date', fromJson: _stringFromJson) String startDate
+@JsonKey(name: 'start_date', fromJson: _stringFromJson) String startDate,@JsonKey(name: 'end_date', fromJson: _nullableStringFromJson) String? endDate
 });
 
 
@@ -264,10 +266,11 @@ class __$TrialPeriodDtoCopyWithImpl<$Res>
 
 /// Create a copy of TrialPeriodDto
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? startDate = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? startDate = null,Object? endDate = freezed,}) {
   return _then(_TrialPeriodDto(
 startDate: null == startDate ? _self.startDate : startDate // ignore: cast_nullable_to_non_nullable
-as String,
+as String,endDate: freezed == endDate ? _self.endDate : endDate // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

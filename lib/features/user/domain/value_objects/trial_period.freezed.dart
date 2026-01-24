@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$TrialPeriod {
 
- DateTime get startDate;
+ DateTime get startDate; DateTime get endDate;
 /// Create a copy of TrialPeriod
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $TrialPeriodCopyWith<TrialPeriod> get copyWith => _$TrialPeriodCopyWithImpl<Tria
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TrialPeriod&&(identical(other.startDate, startDate) || other.startDate == startDate));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TrialPeriod&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.endDate, endDate) || other.endDate == endDate));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,startDate);
+int get hashCode => Object.hash(runtimeType,startDate,endDate);
 
 @override
 String toString() {
-  return 'TrialPeriod(startDate: $startDate)';
+  return 'TrialPeriod(startDate: $startDate, endDate: $endDate)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $TrialPeriodCopyWith<$Res>  {
   factory $TrialPeriodCopyWith(TrialPeriod value, $Res Function(TrialPeriod) _then) = _$TrialPeriodCopyWithImpl;
 @useResult
 $Res call({
- DateTime startDate
+ DateTime startDate, DateTime endDate
 });
 
 
@@ -62,9 +62,10 @@ class _$TrialPeriodCopyWithImpl<$Res>
 
 /// Create a copy of TrialPeriod
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? startDate = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? startDate = null,Object? endDate = null,}) {
   return _then(_self.copyWith(
 startDate: null == startDate ? _self.startDate : startDate // ignore: cast_nullable_to_non_nullable
+as DateTime,endDate: null == endDate ? _self.endDate : endDate // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));
 }
@@ -147,10 +148,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DateTime startDate)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DateTime startDate,  DateTime endDate)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TrialPeriod() when $default != null:
-return $default(_that.startDate);case _:
+return $default(_that.startDate,_that.endDate);case _:
   return orElse();
 
 }
@@ -168,10 +169,10 @@ return $default(_that.startDate);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DateTime startDate)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DateTime startDate,  DateTime endDate)  $default,) {final _that = this;
 switch (_that) {
 case _TrialPeriod():
-return $default(_that.startDate);}
+return $default(_that.startDate,_that.endDate);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -185,10 +186,10 @@ return $default(_that.startDate);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DateTime startDate)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DateTime startDate,  DateTime endDate)?  $default,) {final _that = this;
 switch (_that) {
 case _TrialPeriod() when $default != null:
-return $default(_that.startDate);case _:
+return $default(_that.startDate,_that.endDate);case _:
   return null;
 
 }
@@ -200,10 +201,11 @@ return $default(_that.startDate);case _:
 
 @internal
 class _TrialPeriod extends TrialPeriod {
-  const _TrialPeriod({required this.startDate}): super._();
+  const _TrialPeriod({required this.startDate, required this.endDate}): super._();
   
 
 @override final  DateTime startDate;
+@override final  DateTime endDate;
 
 /// Create a copy of TrialPeriod
 /// with the given fields replaced by the non-null parameter values.
@@ -215,16 +217,16 @@ _$TrialPeriodCopyWith<_TrialPeriod> get copyWith => __$TrialPeriodCopyWithImpl<_
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TrialPeriod&&(identical(other.startDate, startDate) || other.startDate == startDate));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TrialPeriod&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.endDate, endDate) || other.endDate == endDate));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,startDate);
+int get hashCode => Object.hash(runtimeType,startDate,endDate);
 
 @override
 String toString() {
-  return 'TrialPeriod(startDate: $startDate)';
+  return 'TrialPeriod(startDate: $startDate, endDate: $endDate)';
 }
 
 
@@ -235,7 +237,7 @@ abstract mixin class _$TrialPeriodCopyWith<$Res> implements $TrialPeriodCopyWith
   factory _$TrialPeriodCopyWith(_TrialPeriod value, $Res Function(_TrialPeriod) _then) = __$TrialPeriodCopyWithImpl;
 @override @useResult
 $Res call({
- DateTime startDate
+ DateTime startDate, DateTime endDate
 });
 
 
@@ -252,9 +254,10 @@ class __$TrialPeriodCopyWithImpl<$Res>
 
 /// Create a copy of TrialPeriod
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? startDate = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? startDate = null,Object? endDate = null,}) {
   return _then(_TrialPeriod(
 startDate: null == startDate ? _self.startDate : startDate // ignore: cast_nullable_to_non_nullable
+as DateTime,endDate: null == endDate ? _self.endDate : endDate // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));
 }

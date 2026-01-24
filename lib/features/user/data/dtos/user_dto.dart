@@ -35,6 +35,9 @@ abstract class UserDto with _$UserDto {
     )
     required String subscriptionStatus,
     @JsonKey(name: 'trial_period') TrialPeriodDto? trialPeriod,
+    // Denormalized field for SQL queries (cron, analytics). Source of truth is trialPeriod.
+    @JsonKey(name: 'trial_ends_at', fromJson: _nullableDateTimeFromJson)
+    DateTime? trialEndsAt,
     @JsonKey(
       name: 'protocol_ids',
       fromJson: _protocolIdsFromJson,
@@ -122,6 +125,7 @@ abstract class UserDto with _$UserDto {
       trialPeriod: user.trialPeriod != null
           ? TrialPeriodDto.fromDomain(user.trialPeriod!)
           : null,
+      trialEndsAt: user.trialPeriod?.endDate,
       protocolIds: user.activeProtocolIds,
       onboardingCompleted: user.onboardingCompleted,
       createdAt: user.createdAt.toIso8601String(),
@@ -147,4 +151,9 @@ List<dynamic> _protocolIdsToJson(List<String> ids) {
   return ids
       .map<dynamic>((value) => int.tryParse(value) ?? value)
       .toList();
+}
+
+DateTime? _nullableDateTimeFromJson(dynamic raw) {
+  if (raw == null) return null;
+  return DateTime.tryParse(raw.toString());
 }

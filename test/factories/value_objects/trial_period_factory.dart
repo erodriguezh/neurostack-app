@@ -23,4 +23,13 @@ abstract final class TrialPeriodFactory {
     final startDate = asOf.subtract(Duration(days: 7 - days));
     return TrialPeriod.fromStartDate(startDate);
   }
+
+  /// Creates a trial with explicit start and end dates.
+  /// Use for DB hydration testing where endDate is stored, not computed.
+  static TrialPeriod withDates({
+    required DateTime startDate,
+    required DateTime endDate,
+  }) {
+    return TrialPeriod.fromDates(startDate: startDate, endDate: endDate);
+  }
 }

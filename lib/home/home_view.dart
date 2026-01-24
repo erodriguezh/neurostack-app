@@ -8,11 +8,14 @@ import 'package:neurostack/core/utils/internal_notification/toast/toast_event.da
 import 'package:neurostack/core/utils/locator.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
+import 'package:neurostack/features/auth/data/cached_user_store.dart';
 import 'package:neurostack/features/protocol/domain/repositories/protocol_repository.dart';
 import 'package:neurostack/features/session/data/data_sources/session_local_data_source.dart';
 import 'package:neurostack/features/session/domain/repositories/session_repository.dart';
 import 'package:neurostack/features/session/presentation/log_session_modal.dart';
 import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
+import 'package:neurostack/paywall/data/trial_expiration_decision_store.dart';
+import 'package:neurostack/paywall/widgets/trial_expired_modal.dart';
 import 'package:neurostack/home/home_state.dart';
 import 'package:neurostack/home/home_view_model.dart';
 import 'package:neurostack/home/widgets/home_bottom_nav.dart';
@@ -38,6 +41,8 @@ class _HomeViewState extends State<HomeView> {
     sessionRepository: locator<SessionRepository>(),
     sessionLocalDataSource: locator<SessionLocalDataSource>(),
     connectivityService: locator<ConnectivityService>(),
+    cachedUserStore: locator<CachedUserStore>(),
+    trialExpirationDecisionStore: locator<TrialExpirationDecisionStore>(),
   );
 
   bool _showingTrialExpired = false;
@@ -110,7 +115,9 @@ class _HomeViewState extends State<HomeView> {
                         width: 134,
                         height: 5,
                         decoration: BoxDecoration(
-                          color: context.kitColors.white90.withValues(alpha: 0.3),
+                          color: context.kitColors.white90.withValues(
+                            alpha: 0.3,
+                          ),
                           borderRadius: BorderRadius.circular(999),
                         ),
                       ),
@@ -180,7 +187,12 @@ class _HomeViewState extends State<HomeView> {
         slivers.add(
           SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.fromLTRB(spacing.lg, spacing.lg, spacing.lg, 0),
+              padding: EdgeInsets.fromLTRB(
+                spacing.lg,
+                spacing.lg,
+                spacing.lg,
+                0,
+              ),
               child: _StaggeredFadeIn(
                 index: 1,
                 child: HomeHeader(onAdd: _viewModel.onAddProtocol),
@@ -255,6 +267,7 @@ class _HomeViewState extends State<HomeView> {
       _showingTrialExpired = true;
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         await _showTrialExpiredDialog(state);
+        if (!mounted) return;
         _showingTrialExpired = false;
         _viewModel.acknowledgeTrialExpiredModal();
       });
@@ -317,39 +330,47 @@ class _HomeViewState extends State<HomeView> {
   }
 
   Future<void> _showTrialExpiredDialog(HomeViewState state) async {
-    final kitColors = context.kitColors;
-    final stackCount = state.user?.activeProtocolCount ?? 0;
+    while (true) {
+      if (!mounted) return;
 
-    await showDialog<void>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: kitColors.panel,
-          title: const Text('Your Premium Trial Has Ended'),
-          content: Text(
-            stackCount > 2
-                ? 'You currently have $stackCount protocols in your stack.'
-                : 'You can continue on the free tier or upgrade to keep all.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _viewModel.goToPaywall();
-              },
-              child: const Text('Keep All -> Subscribe'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _viewModel.handleUseFreeTier();
-              },
-              child: const Text('Use Free Tier'),
-            ),
-          ],
-        );
-      },
-    );
+      // Use latest protocol count each iteration
+      final currentProtocolCount =
+          _viewModel.state.value.user?.activeProtocolCount ?? 0;
+
+      final choice = await showTrialExpiredModal(
+        context,
+        activeProtocolCount: currentProtocolCount,
+      );
+
+      switch (choice) {
+        case TrialExpiredChoice.keepEverything:
+          await _viewModel.goToPaywall();
+          if (!mounted) return;
+
+          // Refresh state to get updated subscription status after paywall
+          await _viewModel.refresh();
+          if (!mounted) return;
+
+          final user = _viewModel.state.value.user;
+          if (user != null && _viewModel.isTrialOrPremiumExpired(user)) {
+            continue; // Re-show modal
+          }
+          // User subscribed: mark decision resolved and exit loop
+          await _viewModel.markTrialExpiredDecisionResolved();
+          return;
+        case TrialExpiredChoice.continueWithFree:
+          final success = await _viewModel.handleUseFreeTier();
+          if (success) {
+            await _viewModel.markTrialExpiredDecisionResolved();
+          }
+          // If success=false, deactivation modal shown or save failed.
+          // Either way, we exit the loop; user can retry via banner/settings.
+          return;
+        case null:
+          // Modal dismissed without choice (shouldn't happen with barrierDismissible: false)
+          return;
+      }
+    }
   }
 
   Future<void> _showGraceDialog() async {

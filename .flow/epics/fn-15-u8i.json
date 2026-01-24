@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-15-u8i",
+  "created_at": "2026-01-21T18:47:19.863345Z",
+  "depends_on_epics": [],
+  "id": "fn-15-u8i",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-15-u8i.md",
+  "status": "open",
+  "title": "Trial Expiration Modal - Phase 4: ViewModel Free Tier Transition",
+  "updated_at": "2026-01-21T18:47:19.863681Z"
+}

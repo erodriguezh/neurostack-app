@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-21-wbj",
+  "created_at": "2026-01-23T09:18:54.763825Z",
+  "depends_on_epics": [],
+  "id": "fn-21-wbj",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-21-wbj.md",
+  "status": "open",
+  "title": "Phase 6.1: Migration - Add trial expiration columns, CHECK constraint, and update trigger",
+  "updated_at": "2026-01-23T09:18:54.764135Z"
+}

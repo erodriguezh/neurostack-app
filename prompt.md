@@ -1,5 +1,5 @@
 study docs/README.md
-study plan_log_session_modal.md and pick the most important thing to do
+study plan_trial_expiration_cron_job.md and pick the most important thing to do
 
 IMPORTANT:
 - after implementation, anything you'd refactor, simplify, change, etc. if you implemented again, do not move on from this step until the user says yes or not to the proposals

@@ -57,10 +57,16 @@
 - [Spec: Session](./specs/20260113151500_spec_session.md) - Session aggregate, SessionDraft, SessionDuration value object, LogSessionUseCase, INV-S2 future timestamp, INV-S3 positive duration, append-only persistence
 - [Spec: Onboarding](./specs/20260103223600_spec_onboarding_screens.md) - OnboardingView, PageView, SharedPreferences, auth integration, orientation lock, existing user migration, EnumPageView, disclaimer checkbox
 - [Spec: Log Session Modal](./specs/20260113180000_spec_log_session_modal.md) - LogSessionModal, offline-first, SessionSyncService, eligibility check, backdate 7 days, haptic feedback, accessibility announcements
+- [Spec: Trial Expiration Cronjob](./specs/20260122150000_spec_trial_expiration_cronjob.md) - pg_cron, trial_ends_at, trial_expired_at, expire_trials(), idempotent transition, subscription status free, UTC timezone
 
 ## Investigations
 - [Investigation: Protocol Names Missing](./investigations/20260108223900_investigation_progress_protocol_names.md) - ProgressGrid, layout collapse, nameWidth, narrow screen, responsive, horizontal scroll, widget overflow
 - [Investigation: DTO Type Cast](./investigations/20260108214300_investigation_is_as_subtype_string_in_cast.md) - type cast error, int to String, ProtocolDto, SessionDto, Supabase bigint, fromJson, json_serializable
+- [Investigation: Trial Expiration Race Condition](./investigations/20260122180000_investigation_trial_expiration_race_condition.md) - modal repeat, cron gap, SharedPreferences, TrialExpirationDecisionStore, once-only trigger, app restart, decision persistence
+
+## Implementation Plans
+- [Plan: Trial Expiration Modal](../plan_trial_expiration_modal.md) - trial expired modal, TrialExpiredChoice, blocking dialog, upgrade card, downgrade card, CachedUserStore, free tier transition
+- [Plan: Trial Expiration Cronjob](../plan_trial_expiration_cron_job.md) - pg_cron, trial_ends_at, expire_trials(), CHECK constraint, TrialPeriodDto endDate, TrialExpirationDecisionStore, SharedPreferences, race condition fix
 
 ## Changelogs
 - [Changelog: Home Screen](./changelogs/20260106153900_home_screen_changelog.md) - HomeViewModel, HomeViewState, status banner, protocol card, bottom nav, connectivity, route config

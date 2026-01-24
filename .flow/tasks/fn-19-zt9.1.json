@@ -1,0 +1,23 @@
+{
+  "assignee": "erodriguez@greentube.com",
+  "claim_note": "",
+  "claimed_at": "2026-01-21T20:52:02.610333Z",
+  "created_at": "2026-01-21T20:49:53.956888Z",
+  "depends_on": [],
+  "epic": "fn-19-zt9",
+  "evidence": {
+    "commits": [
+      "679c34f38ef5d6176e19ebe3709e7a421dcfc88d"
+    ],
+    "prs": [],
+    "tests": [
+      "flutter test test/paywall/widgets/trial_expired_modal_test.dart"
+    ]
+  },
+  "id": "fn-19-zt9.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-19-zt9.1.md",
+  "status": "done",
+  "title": "Create widget tests for TrialExpiredModal",
+  "updated_at": "2026-01-22T11:12:50.908737Z"
+}

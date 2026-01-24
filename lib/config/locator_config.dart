@@ -22,6 +22,7 @@ import 'package:neurostack/features/auth/data/cached_user_store.dart';
 import 'package:neurostack/features/auth/data/user_bootstrap_service.dart';
 import 'package:neurostack/features/onboarding/data/onboarding_store.dart';
 import 'package:neurostack/features/protocol/data/cached_protocol_store.dart';
+import 'package:neurostack/paywall/data/trial_expiration_decision_store.dart';
 import 'package:neurostack/progress/data/cached_week_progress_store.dart';
 
 // Repository interfaces
@@ -87,6 +88,11 @@ List<Module> buildModules({required SharedPreferences sharedPreferences}) => [
   ),
   Module<OnboardingStore>(
     builder: () => OnboardingStore(locator<SharedPreferences>()),
+    lazy: true,
+  ),
+  Module<TrialExpirationDecisionStore>(
+    builder: () =>
+        SharedPrefsTrialExpirationDecisionStore(locator<SharedPreferences>()),
     lazy: true,
   ),
 

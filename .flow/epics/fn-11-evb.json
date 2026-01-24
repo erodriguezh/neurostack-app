@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-11-evb",
+  "created_at": "2026-01-21T09:27:37.666055Z",
+  "depends_on_epics": [],
+  "id": "fn-11-evb",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-11-evb.md",
+  "status": "open",
+  "title": "Trial Expiration Modal - Phase 1: Create Modal Widget",
+  "updated_at": "2026-01-21T09:27:37.666427Z"
+}

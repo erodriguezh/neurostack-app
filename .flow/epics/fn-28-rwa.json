@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-28-rwa",
+  "created_at": "2026-01-23T19:11:47.315053Z",
+  "depends_on_epics": [],
+  "id": "fn-28-rwa",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-28-rwa.md",
+  "status": "open",
+  "title": "Phase 6.8: Add TrialExpirationDecisionStore (Race Condition Fix)",
+  "updated_at": "2026-01-23T19:11:47.315457Z"
+}
