@@ -41,7 +41,7 @@ class _OfferScreenState extends State<OfferScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           AppPrimaryCta(
-            label: "Continue",
+            label: "Get started",
             onPressed: widget.onNext,
           ),
           SizedBox(height: spacing.sm),
