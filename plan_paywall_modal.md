@@ -68,12 +68,12 @@ const kProductYearly = 'neurostack_yearly';    // $59.99/yr, 7-day trial
 
 ## Phase 0: Manual Setup & Copy Alignment (BLOCKER)
 
-### 0.1 App Store Connect / Google Play Console
+### 0.1 App Store Connect / Google Play Console [DONE]
 - [ ] Create subscription products:
   - `neurostack_monthly` ($7.99/mo, 7-day trial)
   - `neurostack_yearly` ($59.99/yr, 7-day trial)
 
-### 0.2 RevenueCat Dashboard
+### 0.2 RevenueCat Dashboard [DONE]
 - [ ] Create project and add App Store / Play Store apps
 - [ ] Configure products and create Offering
 - [ ] Design paywall in Paywall Builder
@@ -83,7 +83,7 @@ const kProductYearly = 'neurostack_yearly';    // $59.99/yr, 7-day trial
 ### 0.3 Update Onboarding Copy (CRITICAL - contradicts new model)
 - **File:** `lib/features/onboarding/presentation/widgets/screens/offer_screen.dart`
 - **Changes:**
-  - Remove "No credit card required" (RevenueCat trials require payment method)
+  - Replace "No credit card required" (RevenueCat trials require payment method) for something that makes sense to the new payment model strategy and is appealing to a new user.
   - Change "Start my free trial" → "Start free" or "Continue"
   - Add disclaimer if keeping trial language: "7-day trial with subscription (payment method required)"
 
