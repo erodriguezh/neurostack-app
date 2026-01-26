@@ -118,15 +118,15 @@ INV-M1: Free Tier MUST have no time limit
 → Enforcement: No expiration date on free tier
 → Test: User can use free tier indefinitely with 2 protocols
 
-INV-M2: Premium Trial MUST last exactly 7 days
-→ Rationale: Standard trial period, conversion optimization
-→ Enforcement: trialStartDate + 7 days calculation
-→ Test: Trial expires at exactly 168 hours after first launch
+INV-M2: Premium Trial MUST last exactly 7 days from subscription start
+→ Rationale: Standard trial period, conversion optimization (RevenueCat-managed)
+→ Enforcement: RevenueCat SDK manages trial duration from subscription creation
+→ Test: Trial expires at exactly 168 hours after subscription start
 
-INV-M3: Premium Trial MUST NOT require credit card
-→ Rationale: Lower friction, better mobile UX, App Store compliance
-→ Enforcement: No payment info collection during trial
-→ Test: User can start trial without entering payment method
+INV-M3: [DEPRECATED] Premium Trial MUST NOT require credit card
+→ DEPRECATED: RevenueCat manages trials via App Store/Play Store which require payment method
+→ Rationale (historical): Lower friction, better mobile UX, App Store compliance
+→ Replacement: Trials are now managed by RevenueCat; payment method is handled by App Store/Play Store
 
 INV-M4: After trial expiration, user MUST revert to Free Tier automatically
 → Rationale: No surprise charges, ethical conversion
@@ -179,10 +179,10 @@ INV-U2: Premium Trial users CAN activate unlimited protocols
 → Enforcement: Feature flag check
 → Logic: IF subscriptionStatus == 'trial' THEN no protocol limit
 
-INV-U3: Trial MUST auto-activate on first app launch
-→ Rationale: No friction, immediate value demonstration
-→ Enforcement: Onboarding sets trialStartDate
-→ Test: Fresh install = trial active immediately
+INV-U3: [DEPRECATED] Trial MUST auto-activate on first app launch
+→ DEPRECATED: RevenueCat manages trials; new users start as 'free' until they start a subscription
+→ Rationale (historical): No friction, immediate value demonstration
+→ Replacement: New users start with 'free' status; trial begins when subscription with trial period starts (INV-PW6)
 
 INV-U4: Users MUST complete onboarding before tracking Sessions
 → Rationale: Set expectations, legal disclaimer
@@ -219,4 +219,38 @@ INV-B5: Users MUST be able to use Free Tier indefinitely
 → Rationale: Ethical design, App Store guidelines compliance
 → Enforcement: No artificial time limits on free tier
 → Test: User can access free tier 1 year later without changes
+```
+
+### **Paywall Invariants** (RevenueCat Integration)
+
+```sh
+INV-PW1: Paywall dismissal without purchase MUST return to previous screen
+→ Rationale: Non-intrusive UX, user maintains control
+→ Enforcement: Navigator.pop() on dismiss
+→ Test: Dismiss paywall → user returns to screen that triggered it
+
+INV-PW2: Successful purchase MUST update UI immediately via RevenueCat (optimistic)
+→ Rationale: Responsive UX, no waiting for webhook
+→ Enforcement: RevenueCat listener updates local state immediately
+→ Test: Purchase complete → premium UI unlocked within 1 second
+
+INV-PW3: Webhook is source of truth for DB; client uses RevenueCat for UI gating
+→ Rationale: Separation of concerns - DB for server-side auth, SDK for real-time UI
+→ Enforcement: Webhook updates Supabase; Flutter uses RevenueCat CustomerInfo
+→ Test: DB state may lag; UI responds instantly via RevenueCat SDK
+
+INV-PW4: Trial reminder MUST be shown max once per 24h period
+→ Rationale: Non-annoying UX, avoid badgering users
+→ Enforcement: SharedPreferences stores lastTrialReminderShown timestamp
+→ Test: Reminder shown → same reminder blocked for 24 hours
+
+INV-PW5: RevenueCat app_user_id MUST match Supabase auth.uid
+→ Rationale: Identity consistency between payment and auth systems
+→ Enforcement: Set app_user_id on RevenueCat login to auth.uid
+→ Test: RevenueCat customerInfo.appUserId == supabase.auth.currentUser.id
+
+INV-PW6: New users MUST start with 'free' status (not 'trial')
+→ Rationale: Trial only begins when subscription with trial period starts via RevenueCat
+→ Enforcement: Default subscription_status = 'free' in user profile
+→ Test: Fresh install → user.subscriptionStatus == 'free'
 ```
