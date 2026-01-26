@@ -12,15 +12,15 @@
 **Premium Trial** (noun)
 
 - Definition: 7-day period with full access to all protocols and features
-- Properties: Auto-activates on first launch, no credit card required
-- Behavior: Reverts to Free Tier automatically after 7 days if not subscribed
+- Properties: Starts on subscription start (RevenueCat-managed); requires payment method (App Store/Play Store)
+- Behavior: Reverts to Free Tier automatically after 7 days if not converted to paid subscription
 - UI Label: "Premium Trial" or "Trial"
 
 **Trial Status** (enum)
 
 - Definition: Current state of user's trial period
 - Values: `active` (days 1-7), `expired` (day 8+), `converted` (subscribed)
-- Calculation: `trialStartDate + 7 days`
+- Calculation: `subscriptionStartDate + 7 days`
 - UI Label: "X days left in trial"
 
 **Premium Subscription** (noun)
@@ -128,10 +128,10 @@ INV-M3: [DEPRECATED] Premium Trial MUST NOT require credit card
 → Rationale (historical): Lower friction, better mobile UX, App Store compliance
 → Replacement: Trials are now managed by RevenueCat; payment method is handled by App Store/Play Store
 
-INV-M4: After trial expiration, user MUST revert to Free Tier automatically
+INV-M4: After trial expiration without payment, user MUST revert to Free Tier automatically
 → Rationale: No surprise charges, ethical conversion
-→ Enforcement: Background job checks trial status, adjusts protocol limit
-→ Test: On day 8, user with 5 protocols sees paywall when trying to log
+→ Enforcement: RevenueCat webhook updates subscription status; client adjusts protocol limit
+→ Test: On day 8, user with 5 protocols sees paywall when trying to log (if not subscribed)
 
 INV-M5: Free Tier users CANNOT activate more than 2 protocols
 → Rationale: Freemium conversion trigger
@@ -149,13 +149,13 @@ INV-M7: Subscription pricing MUST offer annual discount
 → Test: Annual saves $36.89/year vs monthly
 ```
 
-### **Protocol Invariants**
+### **Protocol Invariants** (INV-PR*)
 
 ```sh
-INV-P1: Every Protocol MUST have at least one Research Citation
-INV-P2: Protocol Target specifications MUST be measurable
-INV-P3: Protocol names MUST NOT include researcher names
-INV-P4: Deleted Protocols MUST preserve historical Session data
+INV-PR1: Every Protocol MUST have at least one Research Citation
+INV-PR2: Protocol Target specifications MUST be measurable
+INV-PR3: Protocol names MUST NOT include researcher names
+INV-PR4: Deleted Protocols MUST preserve historical Session data
 ```
 
 ### **Session Invariants**
@@ -182,7 +182,7 @@ INV-U2: Premium Trial users CAN activate unlimited protocols
 INV-U3: [DEPRECATED] Trial MUST auto-activate on first app launch
 → DEPRECATED: RevenueCat manages trials; new users start as 'free' until they start a subscription
 → Rationale (historical): No friction, immediate value demonstration
-→ Replacement: New users start with 'free' status; trial begins when subscription with trial period starts (INV-PW6)
+→ Replacement: New users start with 'free' status; trial begins when subscription with trial period starts (INV-P6)
 
 INV-U4: Users MUST complete onboarding before tracking Sessions
 → Rationale: Set expectations, legal disclaimer
@@ -221,35 +221,35 @@ INV-B5: Users MUST be able to use Free Tier indefinitely
 → Test: User can access free tier 1 year later without changes
 ```
 
-### **Paywall Invariants** (RevenueCat Integration)
+### **Paywall Invariants** (RevenueCat Integration, INV-P*)
 
 ```sh
-INV-PW1: Paywall dismissal without purchase MUST return to previous screen
+INV-P1: Paywall dismissal without purchase MUST return to previous screen
 → Rationale: Non-intrusive UX, user maintains control
 → Enforcement: Navigator.pop() on dismiss
 → Test: Dismiss paywall → user returns to screen that triggered it
 
-INV-PW2: Successful purchase MUST update UI immediately via RevenueCat (optimistic)
+INV-P2: Successful purchase MUST update local User and UI immediately via RevenueCat (optimistic)
 → Rationale: Responsive UX, no waiting for webhook
 → Enforcement: RevenueCat listener updates local state immediately
 → Test: Purchase complete → premium UI unlocked within 1 second
 
-INV-PW3: Webhook is source of truth for DB; client uses RevenueCat for UI gating
+INV-P3: Webhook is source of truth for DB; client uses RevenueCat for UI gating
 → Rationale: Separation of concerns - DB for server-side auth, SDK for real-time UI
 → Enforcement: Webhook updates Supabase; Flutter uses RevenueCat CustomerInfo
 → Test: DB state may lag; UI responds instantly via RevenueCat SDK
 
-INV-PW4: Trial reminder MUST be shown max once per 24h period
+INV-P4: Trial reminder MUST be shown max once per 24h period
 → Rationale: Non-annoying UX, avoid badgering users
 → Enforcement: SharedPreferences stores lastTrialReminderShown timestamp
 → Test: Reminder shown → same reminder blocked for 24 hours
 
-INV-PW5: RevenueCat app_user_id MUST match Supabase auth.uid
+INV-P5: RevenueCat app_user_id MUST match Supabase auth.uid
 → Rationale: Identity consistency between payment and auth systems
 → Enforcement: Set app_user_id on RevenueCat login to auth.uid
 → Test: RevenueCat customerInfo.appUserId == supabase.auth.currentUser.id
 
-INV-PW6: New users MUST start with 'free' status (not 'trial')
+INV-P6: New users MUST start with 'free' status (not 'trial')
 → Rationale: Trial only begins when subscription with trial period starts via RevenueCat
 → Enforcement: Default subscription_status = 'free' in user profile
 → Test: Fresh install → user.subscriptionStatus == 'free'
