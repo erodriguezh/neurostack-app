@@ -80,7 +80,7 @@ const kProductYearly = 'neurostack_yearly';    // $59.99/yr, 7-day trial
 - [ ] Create entitlement "Neurostack Pro" (exact casing matters)
 - [ ] Note **per-platform** API keys for environment config
 
-### 0.3 Update Onboarding Copy (CRITICAL - contradicts new model)
+### 0.3 Update Onboarding Copy (CRITICAL - contradicts new model) [DONE]
 - **File:** `lib/features/onboarding/presentation/widgets/screens/offer_screen.dart`
 - **Changes:**
   - Replace "No credit card required" (RevenueCat trials require payment method) for something that makes sense to the new payment model strategy and is appealing to a new user.
