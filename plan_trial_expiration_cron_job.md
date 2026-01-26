@@ -14,12 +14,12 @@
     ```sql
     ALTER TABLE public.users
     ADD CONSTRAINT chk_subscription_status
-    CHECK (subscription_status IN ('trial', 'free', 'premiumMonthly', 'premiumAnnual', 'premiumLifetime', 'expired', 'grace'));
+    CHECK (subscription_status IN ('trial', 'free', 'premiumMonthly', 'premiumAnnual', 'expired', 'grace'));
     ```
 - Update comment to match:
     ```sql
     COMMENT ON COLUMN public.users.subscription_status IS
-      'Enum stored as text: trial, free, premiumMonthly, premiumAnnual, premiumLifetime, expired, grace';
+      'Enum stored as text: trial, free, premiumMonthly, premiumAnnual, expired, grace';
     ```
 - Add `trial_ends_at timestamptz NULL` column to `public.users`
     - Ref: `supabase/migrations/20251204192228_initial_schema.sql:103-110` (users table)
