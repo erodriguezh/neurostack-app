@@ -37,9 +37,8 @@ From `plan_paywall_modal.md` Phase 0.4: The app is transitioning from Supabase-m
 - [ ] Document maintains consistent formatting
 
 ## Done summary
-TBD
-
+Updated docs/ubiquitous-language.md with RevenueCat paywall invariants: deprecated INV-U3 and INV-M3, updated INV-M2 for subscription start, renamed Protocol Invariants to INV-PR*, added new Paywall Invariants (INV-P1 through INV-P6), and updated related terms to reflect the new payment model.
 ## Evidence
-- Commits:
+- Commits: 934ea05c10b9c6d6a2ee1cd6ad66e2e2eb9e19ae, c14dbd888da2b23236d8d40c7bf9ce957b46178e
 - Tests:
 - PRs:

@@ -87,7 +87,7 @@ const kProductYearly = 'neurostack_yearly';    // $59.99/yr, 7-day trial
   - Change "Start my free trial" → "Start free" or "Continue"
   - Add disclaimer if keeping trial language: "7-day trial with subscription (payment method required)"
 
-### 0.4 Update Ubiquitous Language
+### 0.4 Update Ubiquitous Language [DONE]
 - **File:** `docs/ubiquitous-language.md`
 - **Changes:**
   - Mark INV-U3 as DEPRECATED: "Trial MUST auto-activate on first app launch"
