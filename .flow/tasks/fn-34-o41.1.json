@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-01-27T20:34:21.582553Z",
+  "depends_on": [],
+  "epic": "fn-34-o41",
+  "id": "fn-34-o41.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-34-o41.1.md",
+  "status": "todo",
+  "title": "Add grace to SubscriptionStatus enum (Phase 1.3)",
+  "updated_at": "2026-01-27T20:34:21.583033Z"
+}

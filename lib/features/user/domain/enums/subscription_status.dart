@@ -39,5 +39,7 @@ enum SubscriptionStatus {
   bool get isFreeOrExpired => this == free || this == expired;
 
   /// True if user has an active premium subscription.
-  bool get isPremium => this == premiumMonthly || this == premiumAnnual;
+  /// Includes grace period (billing issue, payment retry in progress).
+  bool get isPremium =>
+      this == premiumMonthly || this == premiumAnnual || this == grace;
 }
