@@ -106,8 +106,8 @@ const kProductYearly = 'neurostack_yearly';    // $59.99/yr, 7-day trial
 
 This phase ensures the DB creates users correctly BEFORE any Flutter changes.
 
-### 1.1 Update `handle_new_user()` Trigger (CRITICAL)
-- **New File:** `supabase/migrations/YYYYMMDDHHMMSS_revenuecat_new_users_free.sql`
+### 1.1 Update `handle_new_user()` Trigger (CRITICAL) [DONE]
+- **New File:** `supabase/migrations/20260127194643_revenuecat_new_users_free.sql`
 - **Rationale:** Current trigger creates users as `trial`; must change to `free` to match INV-P6
 - **Changes:**
   ```sql
