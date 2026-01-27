@@ -100,11 +100,6 @@ const kProductYearly = 'neurostack_yearly';    // $59.99/yr, 7-day trial
   - Add INV-P5: "`app_user_id` must match Supabase `auth.uid`"
   - Add INV-P6: "New users MUST start with `free` status (not `trial`)"
 
-### 0.5 Update Spec SDK Reference (Doc Alignment)
-- **File:** `docs/specs/20260123220000_spec_paywall_modal.md`
-- **Changes:** Update "SDK Reference" section to match this plan:
-  - Replace single `REVENUECAT_API_KEY` with per-platform keys
-
 ---
 
 ## Phase 1: Backend - Make New Users `free` (BLOCKER)

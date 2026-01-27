@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-32-3ph",
+  "created_at": "2026-01-27T19:43:35.085137Z",
+  "depends_on_epics": [],
+  "id": "fn-32-3ph",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-32-3ph.md",
+  "status": "open",
+  "title": "Paywall Modal - Phase 1.1: Update handle_new_user() Trigger",
+  "updated_at": "2026-01-27T19:43:35.085516Z"
+}
