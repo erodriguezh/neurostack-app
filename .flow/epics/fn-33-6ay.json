@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-33-6ay",
+  "created_at": "2026-01-27T20:21:09.673791Z",
+  "depends_on_epics": [],
+  "id": "fn-33-6ay",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-33-6ay.md",
+  "status": "open",
+  "title": "Paywall Modal - Phase 1.2: Add Webhook Bookkeeping Columns",
+  "updated_at": "2026-01-27T20:21:09.674783Z"
+}
