@@ -152,9 +152,10 @@ This phase ensures the DB creates users correctly BEFORE any Flutter changes.
   ALTER TABLE users ADD COLUMN IF NOT EXISTS rc_last_event_id text NULL;
   ```
 
-### 1.3 Fix Enum Mismatch (CRITICAL)
+### 1.3 Fix Enum Mismatch (CRITICAL) [DONE]
 - **File:** `lib/features/user/domain/enums/subscription_status.dart`
 - **Problem:** DB CHECK constraint includes `grace` but Dart enum doesn't.
+- **Actual:** `grace` enum already existed. Updated `isPremium` getter to include `grace`.
 - **Changes:**
   2. Add `grace` for billing issues:
      ```dart
@@ -168,9 +169,10 @@ This phase ensures the DB creates users correctly BEFORE any Flutter changes.
                            this == grace;  // Still has access during grace
      ```
 
-### 1.4 Update DB CHECK Constraint
-- **New File:** `supabase/migrations/YYYYMMDDHHMMSS_add_subscription_statuses.sql`
-- **Changes:**
+### 1.4 Update DB CHECK Constraint [DONE - Already Exists]
+- **New File:** Not needed - constraint already exists in `20260123092258_trial_expiration_columns.sql`
+- **Note:** Existing CHECK includes `grace` already
+- **Original Changes (not applied):**
   ```sql
   -- Add grace to subscription_status CHECK constraint
   ALTER TABLE users DROP CONSTRAINT IF EXISTS users_subscription_status_check;
