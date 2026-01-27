@@ -141,8 +141,8 @@ This phase ensures the DB creates users correctly BEFORE any Flutter changes.
   $$;
   ```
 
-### 1.2 Add Webhook Bookkeeping Columns (REQUIRED for Phase 9)
-- **New File:** `supabase/migrations/YYYYMMDDHHMMSS_revenuecat_webhook_columns.sql`
+### 1.2 Add Webhook Bookkeeping Columns (REQUIRED for Phase 9) [DONE]
+- **New File:** `supabase/migrations/20260127202238_revenuecat_webhook_columns.sql`
 - **Changes:**
   ```sql
   -- Add columns for webhook idempotency and conflict resolution
