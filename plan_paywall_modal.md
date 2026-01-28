@@ -305,7 +305,7 @@ This phase ensures the DB creates users correctly BEFORE any Flutter changes.
   }
   ```
 
-### 2.5 Create RevenueCatClient Implementations
+### 2.5 Create RevenueCatClient Implementations [DONE]
 - **New File:** `lib/paywall/data/revenuecat_client_mobile.dart`
   - Wraps `purchases_flutter` SDK
   - **CRITICAL:** Store `_currentUserId` set by `logIn()`, cleared by `logOut()`
