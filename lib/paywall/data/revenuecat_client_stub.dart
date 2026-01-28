@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import '../domain/entitlement_snapshot.dart';
 import 'revenuecat_client.dart';
 
@@ -19,8 +17,6 @@ import 'revenuecat_client.dart';
 /// Returning `.none()` on web would incorrectly downgrade premium users who
 /// happen to access the web version.
 class RevenueCatClientStub implements RevenueCatClient {
-  /// Empty stream that never emits.
-  final _emptyController = StreamController<EntitlementSnapshot>.broadcast();
 
   @override
   Future<void> configure(String apiKey) async {
@@ -56,5 +52,6 @@ class RevenueCatClientStub implements RevenueCatClient {
   }
 
   @override
-  Stream<EntitlementSnapshot> get entitlementChanges => _emptyController.stream;
+  Stream<EntitlementSnapshot> get entitlementChanges =>
+      const Stream<EntitlementSnapshot>.empty();
 }

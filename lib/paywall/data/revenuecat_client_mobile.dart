@@ -39,19 +39,38 @@ class RevenueCatClientMobile implements RevenueCatClient {
   Future<void> configure(String apiKey) async {
     await Purchases.configure(PurchasesConfiguration(apiKey));
 
-    // CRITICAL: Setup listener exactly once during configure
+    // CRITICAL: Setup listener exactly once during configure.
+    // Set flag BEFORE calling _setupListener() to prevent concurrent
+    // configure() calls from registering multiple listeners.
     if (!_listenerSetup) {
-      _setupListener();
       _listenerSetup = true;
+      _setupListener();
     }
   }
 
   @override
   Future<void> logIn(String userId) async {
-    // CRITICAL: Set _currentUserId AFTER successful logIn to prevent
-    // listener from emitting snapshots for a failed identification
-    await Purchases.logIn(userId);
-    _currentUserId = userId;
+    // CRITICAL: Clear _currentUserId BEFORE logIn to prevent old-user
+    // emissions during the async SDK call. This handles account switches
+    // (logIn as A, then logIn as B without explicit logOut).
+    final previousUserId = _currentUserId;
+    _currentUserId = null;
+
+    try {
+      await Purchases.logIn(userId);
+      _currentUserId = userId;
+
+      // Emit an immediate snapshot for the new user so UI updates promptly
+      final info = await Purchases.getCustomerInfo();
+      final snapshot = _mapCustomerInfo(info, userId);
+      if (snapshot != null) {
+        _entitlementController.add(snapshot);
+      }
+    } catch (e) {
+      // Restore previous user ID on failure (rollback)
+      _currentUserId = previousUserId;
+      rethrow;
+    }
   }
 
   @override
@@ -64,9 +83,12 @@ class RevenueCatClientMobile implements RevenueCatClient {
 
   @override
   Future<EntitlementSnapshot?> getEntitlementSnapshot() async {
-    // If no user is logged in, we can still get CustomerInfo
-    // but it won't be for an identified user
+    // CRITICAL: Return null if not logged in. Returning a snapshot with
+    // appUserId == null could be mistakenly treated as authoritative.
     final userId = _currentUserId;
+    if (userId == null) {
+      return null;
+    }
 
     try {
       final customerInfo = await Purchases.getCustomerInfo();
@@ -80,6 +102,12 @@ class RevenueCatClientMobile implements RevenueCatClient {
 
   @override
   Future<PaywallOutcome> presentPaywall() async {
+    // CRITICAL: Must be logged in before presenting paywall.
+    // Purchasing as anonymous user can cause entitlement ownership issues.
+    if (_currentUserId == null) {
+      return PaywallOutcome.error;
+    }
+
     try {
       final result = await RevenueCatUI.presentPaywall();
 
@@ -128,11 +156,20 @@ class RevenueCatClientMobile implements RevenueCatClient {
   ///
   /// CRITICAL: Read BOTH active AND all entitlements to detect "trial ended" state.
   /// The `all` collection includes expired entitlements with their lastPeriodType.
+  ///
+  /// Returns null if identifiedUserId is null to prevent returning snapshots
+  /// with appUserId == null that could be mistakenly treated as authoritative.
   EntitlementSnapshot? _mapCustomerInfo(
     CustomerInfo info,
     String? identifiedUserId,
   ) {
-    // CRITICAL: Use the identified user ID we passed to logIn(), NOT originalAppUserId
+    // CRITICAL: Return null if no identified user. Returning a snapshot with
+    // appUserId == null could be mistakenly treated as authoritative elsewhere.
+    if (identifiedUserId == null) {
+      return null;
+    }
+
+    // Use the identified user ID we passed to logIn(), NOT originalAppUserId
     // originalAppUserId is the anonymous/original ID, not the current logged-in user
     final appUserId = identifiedUserId;
 
@@ -179,13 +216,9 @@ class RevenueCatClientMobile implements RevenueCatClient {
       );
     }
 
-    // User has never had this entitlement
-    if (appUserId != null) {
-      return EntitlementSnapshot.none(appUserId: appUserId);
-    }
-
-    // No identified user and no entitlement data - return null (unknown)
-    return null;
+    // User has never had this entitlement - return authoritative "none"
+    // (identifiedUserId is guaranteed non-null by early return above)
+    return EntitlementSnapshot.none(appUserId: appUserId);
   }
 
   /// Maps SDK PeriodType to our domain EntitlementPeriodType.
