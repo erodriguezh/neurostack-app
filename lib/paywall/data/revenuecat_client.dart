@@ -27,7 +27,9 @@ import '../domain/entitlement_snapshot.dart';
 abstract interface class RevenueCatClient {
   /// Configures the RevenueCat SDK with the given API key.
   ///
-  /// Must be called before any other SDK operations.
+  /// **MUST be called before:** [logIn], [logOut], [getEntitlementSnapshot],
+  /// [presentPaywall], [restorePurchases], and [entitlementChanges].
+  ///
   /// Safe to call multiple times - SDK handles idempotency.
   ///
   /// [apiKey] is the platform-specific RevenueCat public API key.
