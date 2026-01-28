@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-38-891",
+  "created_at": "2026-01-28T20:02:18.895965Z",
+  "depends_on_epics": [],
+  "id": "fn-38-891",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-38-891.md",
+  "status": "open",
+  "title": "Paywall Modal - Phase 2.5: Create RevenueCatClient Implementations",
+  "updated_at": "2026-01-28T20:02:18.896726Z"
+}

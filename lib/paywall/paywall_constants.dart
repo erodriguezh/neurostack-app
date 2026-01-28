@@ -1,0 +1,12 @@
+// Canonical constants for RevenueCat integration.
+//
+// These values must match exactly what is configured in:
+// - RevenueCat Dashboard (entitlement ID)
+// - App Store Connect / Google Play Console (product IDs)
+
+/// Entitlement ID (must match RevenueCat dashboard exactly)
+const kNeurostackProEntitlementId = 'Neurostack Pro';
+
+/// Product IDs (must match App Store Connect / Google Play Console)
+const kProductMonthly = 'neurostack_monthly'; // $7.99/mo, 7-day trial
+const kProductYearly = 'neurostack_yearly'; // $59.99/yr, 7-day trial
