@@ -46,7 +46,16 @@ class EntitlementSnapshot {
     required this.originalTransactionId,
     required this.latestPurchaseDate,
     required this.lastPeriodType,
-  });
+  })  : assert(
+          // If user has entitlement, at least one state flag should be true
+          !hasProEntitlement || isTrialPeriod || isInGracePeriod || productId != null,
+          'Active entitlement should have trial, grace, or productId set',
+        ),
+        assert(
+          // If in trial or grace period, must have entitlement
+          (!isTrialPeriod && !isInGracePeriod) || hasProEntitlement,
+          'Trial or grace period requires hasProEntitlement to be true',
+        );
 
   /// Known state: user has NEVER had entitlement.
   ///
@@ -129,6 +138,8 @@ class EntitlementSnapshot {
       'isInGracePeriod: $isInGracePeriod, '
       'productId: $productId, '
       'expirationDate: $expirationDate, '
+      'originalTransactionId: $originalTransactionId, '
+      'latestPurchaseDate: $latestPurchaseDate, '
       'lastPeriodType: $lastPeriodType)';
 }
 
@@ -136,7 +147,7 @@ class EntitlementSnapshot {
 ///
 /// Used to distinguish between trial, intro offer, and normal billing periods.
 enum EntitlementPeriodType {
-  /// Free trial period (7 days, no charge).
+  /// Free trial period (no charge).
   trial,
 
   /// Intro offer (discounted paid period - treated as "paid" for churn UX).
