@@ -191,7 +191,7 @@ This phase ensures the DB creates users correctly BEFORE any Flutter changes.
 - **Command:** `flutter pub add purchases_flutter purchases_ui_flutter`
 - **Actual:** Added `purchases_flutter: ^9.10.7` and `purchases_ui_flutter: ^9.10.7`
 
-### 2.3 Create Internal Models (SDK Types at Boundary)
+### 2.3 Create Internal Models (SDK Types at Boundary) [DONE]
 - **New File:** `lib/paywall/domain/entitlement_snapshot.dart`
 - **Purpose:** App-owned model replacing direct `CustomerInfo` usage
 - **Pattern:** Simple immutable class (use @freezed only if codebase already uses it broadly)

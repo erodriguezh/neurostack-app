@@ -83,9 +83,8 @@ See implementation plan Phase 2.3 in `plan_paywall_modal.md` for full interface 
 - [ ] Unit tests for helper methods
 
 ## Done summary
-TBD
-
+Created EntitlementSnapshot and PaywallOutcome models for RevenueCat integration. The implementation includes the EntitlementSnapshot class with all required fields, none() factory, isForUser() method, wasTrialThatExpired and wasPaidThatExpired getters, plus EntitlementPeriodType and PaywallOutcome enums with comprehensive unit tests (21 tests passing).
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 006e7c368dba184fe9883a1053fb7f3820069bd2
+- Tests: flutter test test/paywall/domain/entitlement_snapshot_test.dart
 - PRs:
