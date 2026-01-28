@@ -276,7 +276,7 @@ This phase ensures the DB creates users correctly BEFORE any Flutter changes.
   enum PaywallOutcome { purchased, cancelled, error }
   ```
 
-### 2.4 Create RevenueCatClient Interface
+### 2.4 Create RevenueCatClient Interface [DONE]
 - **New File:** `lib/paywall/data/revenuecat_client.dart`
 - **Pattern:** Interface for testability (tests use fake, prod uses SDK)
 - **CRITICAL:** Return type must be nullable to distinguish "unknown" from "known none"
