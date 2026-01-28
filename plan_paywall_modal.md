@@ -185,10 +185,11 @@ This phase ensures the DB creates users correctly BEFORE any Flutter changes.
 
 ## Phase 2: SDK Setup & Configuration
 
-### 2.2 Add Dependencies
+### 2.2 Add Dependencies [DONE]
 - **File:** `pubspec.yaml`
 - **Changes:** Add `purchases_flutter: ^8.0.0`, `purchases_ui_flutter: ^8.0.0`
 - **Command:** `flutter pub add purchases_flutter purchases_ui_flutter`
+- **Actual:** Added `purchases_flutter: ^9.10.7` and `purchases_ui_flutter: ^9.10.7` (latest stable versions)
 
 ### 2.3 Create Internal Models (SDK Types at Boundary)
 - **New File:** `lib/paywall/domain/entitlement_snapshot.dart`
