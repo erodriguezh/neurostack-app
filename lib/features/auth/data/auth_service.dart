@@ -83,8 +83,12 @@ class AuthService {
   /// When [forceOnboarding] is true (default), the user will see the
   /// onboarding flow again after re-authenticating.
   Future<void> logout({bool forceOnboarding = true}) async {
-    // Logout from RevenueCat first (best-effort, won't block app sign-out)
-    await _revenueCatService.logout();
+    // Logout from RevenueCat first (best-effort with timeout, won't block app sign-out)
+    try {
+      await _revenueCatService.logout().timeout(const Duration(seconds: 2));
+    } catch (e, st) {
+      _logger.fine('RevenueCat logout skipped: $e', e, st);
+    }
 
     await _dataSource.auth.signOut(scope: supabase.SignOutScope.local);
     await _cachedUserStore.clearUser();
@@ -152,6 +156,12 @@ class AuthService {
         }
         break;
       case supabase.AuthChangeEvent.signedOut:
+        // Clear RevenueCat state (best-effort, fire-and-forget)
+        try {
+          unawaited(_revenueCatService.logout());
+        } catch (_) {
+          // Ignore - RC logout is optional
+        }
         _currentUser = null;
         await _cachedUserStore.clearUser();
         authState.value = const Unauthenticated();
@@ -224,8 +234,14 @@ class AuthService {
     authState.value = AuthenticatedOnline(data.user);
     await _cachedUserStore.saveUser(data.user);
 
-    // Identify user with RevenueCat (non-fatal, logs and returns on failure)
-    await _revenueCatService.identify(data.user.id);
+    // Identify user with RevenueCat (best-effort with timeout, non-fatal)
+    try {
+      await _revenueCatService.identify(data.user.id).timeout(
+        const Duration(seconds: 2),
+      );
+    } catch (e, st) {
+      _logger.fine('RevenueCat identify skipped: $e', e, st);
+    }
 
     _logger.info(
       'Auth success (env=${AppEnvironment.tag}, userId=${data.user.id})',
