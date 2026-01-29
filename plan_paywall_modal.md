@@ -444,7 +444,7 @@ This phase ensures the DB creates users correctly BEFORE any Flutter changes.
 - **Constructor Injection:** Receives `RevenueCatClient` via constructor
 - **CRITICAL:** Use nullable ValueNotifier to distinguish "unknown" from "known none"
 - **Responsibilities:**
-  - Initialize SDK with **platform-appropriate** API key (use `lib/core/utils/app_environment.dart`)
+  - Initialize SDK with API key via `String.fromEnvironment('REVENUECAT_API_KEY')` (loaded from `env/env.json` at build time)
   - Expose `entitlementSnapshot` as `ValueNotifier<EntitlementSnapshot?>` (null = unknown)
   - `identify(userId)` / `logout()` methods - **queue until init() completes** (prevents race)
   - `presentPaywall()` method with **guard against multiple presentations**

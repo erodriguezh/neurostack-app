@@ -7,7 +7,8 @@ import 'package:neurostack/paywall/domain/entitlement_snapshot.dart';
 
 /// Fake implementation of [RevenueCatClient] for testing.
 class FakeRevenueCatClient implements RevenueCatClient {
-  bool configureWasCalled = false;
+  int configureCallCount = 0;
+  bool get configureWasCalled => configureCallCount > 0;
   String? configuredApiKey;
   String? loggedInUserId;
   bool logOutWasCalled = false;
@@ -32,6 +33,12 @@ class FakeRevenueCatClient implements RevenueCatClient {
   /// Whether logIn should throw an error.
   bool logInThrows = false;
 
+  /// Whether getEntitlementSnapshot should throw an error.
+  bool getSnapshotThrows = false;
+
+  /// Completer to block paywall presentation (for testing concurrent access).
+  Completer<PaywallOutcome>? paywallCompleter;
+
   @override
   Future<void> configure(String apiKey) async {
     if (configureDelay != null) {
@@ -41,7 +48,7 @@ class FakeRevenueCatClient implements RevenueCatClient {
       throw Exception('Configure failed');
     }
     configuredApiKey = apiKey;
-    configureWasCalled = true;
+    configureCallCount++;
   }
 
   @override
@@ -60,11 +67,18 @@ class FakeRevenueCatClient implements RevenueCatClient {
 
   @override
   Future<EntitlementSnapshot?> getEntitlementSnapshot() async {
+    if (getSnapshotThrows) {
+      throw Exception('getEntitlementSnapshot failed');
+    }
     return snapshotToReturn;
   }
 
   @override
   Future<PaywallOutcome> presentPaywall() async {
+    // If a completer is set, wait for it (for testing concurrent access)
+    if (paywallCompleter != null) {
+      return paywallCompleter!.future;
+    }
     return paywallOutcome;
   }
 
@@ -116,17 +130,18 @@ void main() {
         await Future.wait([future1, future2]);
 
         // Configure should only be called once
-        expect(fakeClient.configureWasCalled, isTrue);
+        expect(fakeClient.configureCallCount, equals(1));
       });
 
       test('subsequent calls return same future without re-configuring',
           () async {
         await service.init();
-        fakeClient.configureWasCalled = false;
+        final countAfterFirstInit = fakeClient.configureCallCount;
 
         await service.init();
 
-        expect(fakeClient.configureWasCalled, isFalse);
+        // Configure should not be called again
+        expect(fakeClient.configureCallCount, equals(countAfterFirstInit));
       });
 
       test('rethrows error if configure fails', () async {
@@ -177,6 +192,13 @@ void main() {
     });
 
     group('identify()', () {
+      test('throws StateError if init not called', () async {
+        expect(
+          () => service.identify('user-123'),
+          throwsA(isA<StateError>()),
+        );
+      });
+
       test('waits for init to complete', () async {
         fakeClient.configureDelay = const Duration(milliseconds: 50);
         var identifyCompleted = false;
@@ -218,6 +240,13 @@ void main() {
     });
 
     group('logout()', () {
+      test('throws StateError if init not called', () async {
+        expect(
+          () => service.logout(),
+          throwsA(isA<StateError>()),
+        );
+      });
+
       test('waits for init to complete', () async {
         await service.init();
         await service.identify('user-123');
@@ -250,7 +279,12 @@ void main() {
     });
 
     group('presentPaywall()', () {
-      test('returns error if init not completed', () async {
+      test('returns error if init never called', () async {
+        final result = await service.presentPaywall();
+        expect(result, equals(PaywallOutcome.error));
+      });
+
+      test('returns error if init failed', () async {
         fakeClient.configureThrows = true;
 
         try {
@@ -274,27 +308,21 @@ void main() {
         await service.init();
         await service.identify('user-123');
 
-        // Simulate a paywall presentation
-        fakeClient.paywallOutcome = PaywallOutcome.purchased;
+        // Use a completer to block the first paywall presentation
+        final paywallBlocker = Completer<PaywallOutcome>();
+        fakeClient.paywallCompleter = paywallBlocker;
 
-        // Start first paywall presentation
-        final firstResult = service.presentPaywall();
+        // Start first paywall presentation (will block on completer)
+        final firstResultFuture = service.presentPaywall();
 
-        // Start second immediately (while first is still presenting)
-        // Since fake client returns immediately, this tests the guard
-        // In a real scenario, we'd need to delay the first presentation
-
+        // Second call should return cancelled immediately
         final secondResult = await service.presentPaywall();
+        expect(secondResult, equals(PaywallOutcome.cancelled));
 
-        await firstResult;
-
-        // Second call should return cancelled because first is still presenting
-        // Note: This test may be flaky because the fake client returns immediately
-        // In practice, the guard works correctly when presentations take time
-        expect(secondResult, anyOf(
-          equals(PaywallOutcome.cancelled),
-          equals(PaywallOutcome.purchased),
-        ));
+        // Complete the first paywall
+        paywallBlocker.complete(PaywallOutcome.purchased);
+        final firstResult = await firstResultFuture;
+        expect(firstResult, equals(PaywallOutcome.purchased));
       });
 
       test('returns client result on success', () async {
@@ -337,6 +365,15 @@ void main() {
     });
 
     group('refreshEntitlement()', () {
+      test('silently returns if init not called', () async {
+        // Should not throw, just return silently
+        await expectLater(
+          service.refreshEntitlement(),
+          completes,
+        );
+        expect(service.entitlementSnapshot.value, isNull);
+      });
+
       test('updates snapshot with client result', () async {
         await service.init();
         await service.identify('user-123');
@@ -385,11 +422,24 @@ void main() {
         expect(service.entitlementSnapshot.value, equals(snapshot));
       });
 
-      test('swallows exceptions', () async {
+      test('swallows exceptions from getEntitlementSnapshot', () async {
         await service.init();
+        fakeClient.getSnapshotThrows = true;
 
-        // This should not throw even though init was not awaited for identify
-        // The try/catch inside refreshEntitlement should catch any errors
+        // This should not throw - exceptions are swallowed
+        await expectLater(
+          service.refreshEntitlement(),
+          completes,
+        );
+      });
+
+      test('swallows exceptions when init failed', () async {
+        fakeClient.configureThrows = true;
+        try {
+          await service.init();
+        } catch (_) {}
+
+        // This should complete without throwing even though init failed
         await expectLater(
           service.refreshEntitlement(),
           completes,
@@ -398,6 +448,13 @@ void main() {
     });
 
     group('restorePurchases()', () {
+      test('throws StateError if init not called', () async {
+        expect(
+          () => service.restorePurchases(),
+          throwsA(isA<StateError>()),
+        );
+      });
+
       test('does nothing if init failed', () async {
         fakeClient.configureThrows = true;
 

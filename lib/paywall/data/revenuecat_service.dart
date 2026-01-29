@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
@@ -64,6 +63,18 @@ class RevenueCatService {
 
   /// Subscription to client's entitlement changes stream.
   StreamSubscription<EntitlementSnapshot>? _entitlementSubscription;
+
+  /// Ensures init() has been called. Throws [StateError] if not.
+  ///
+  /// This prevents silent deadlocks when callers forget to call init().
+  void _ensureInitStarted() {
+    if (!_initStarted) {
+      throw StateError(
+        'RevenueCatService.init() must be called before using this method. '
+        'Ensure init() is called during app startup.',
+      );
+    }
+  }
 
   /// Initializes the RevenueCat SDK.
   ///
@@ -152,20 +163,33 @@ class RevenueCatService {
   /// Returns the current platform name for logging.
   String get _platformName {
     if (kIsWeb) return 'web';
-    if (Platform.isIOS) return 'iOS';
-    if (Platform.isAndroid) return 'Android';
-    if (Platform.isMacOS) return 'macOS';
-    return 'unknown';
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        return 'iOS';
+      case TargetPlatform.android:
+        return 'Android';
+      case TargetPlatform.macOS:
+        return 'macOS';
+      case TargetPlatform.windows:
+        return 'Windows';
+      case TargetPlatform.linux:
+        return 'Linux';
+      case TargetPlatform.fuchsia:
+        return 'Fuchsia';
+    }
   }
 
   /// Identifies the user with RevenueCat.
   ///
-  /// Queues until [init] completes to prevent race conditions.
+  /// Waits until [init] completes to prevent race conditions.
   /// Seeds initial snapshot after identify via [refreshEntitlement].
+  ///
+  /// Throws [StateError] if [init] has not been called.
   ///
   /// CRITICAL: Must be called after user authenticates. The [userId] should
   /// match the Supabase `auth.uid` to ensure consistency (INV-P5).
   Future<void> identify(String userId) async {
+    _ensureInitStarted();
     await _initCompleter.future; // Wait for SDK to be configured
     await _client.logIn(userId);
     _identifiedUserId = userId;
@@ -177,8 +201,11 @@ class RevenueCatService {
 
   /// Logs out the current user from RevenueCat.
   ///
-  /// Queues until [init] completes. Clears the entitlement snapshot.
+  /// Waits until [init] completes. Clears the entitlement snapshot.
+  ///
+  /// Throws [StateError] if [init] has not been called.
   Future<void> logout() async {
+    _ensureInitStarted();
     await _initCompleter.future;
     _identifiedUserId = null;
     entitlementSnapshot.value = null; // Clear on logout
@@ -189,7 +216,7 @@ class RevenueCatService {
   /// Presents the RevenueCat paywall UI.
   ///
   /// Gates on:
-  /// 1. Init completion (SDK must be configured)
+  /// 1. Init started and completed (SDK must be configured)
   /// 2. User identification (purchasing as anonymous can cause issues)
   /// 3. Not already presenting (prevent duplicate paywall UI)
   ///
@@ -198,13 +225,19 @@ class RevenueCatService {
   /// Returns:
   /// - [PaywallOutcome.purchased] if user completed a purchase
   /// - [PaywallOutcome.cancelled] if user dismissed without purchasing
-  /// - [PaywallOutcome.error] if presentation failed (not identified, SDK error, etc.)
+  /// - [PaywallOutcome.error] if presentation failed (not initialized, not identified, SDK error, etc.)
   Future<PaywallOutcome> presentPaywall() async {
+    // Fail fast if init() was never called
+    if (!_initStarted) {
+      _logger.warning('presentPaywall called but init() was never called');
+      return PaywallOutcome.error;
+    }
+
     // Wait for init (or fail if init failed)
     try {
       await _initCompleter.future;
     } catch (_) {
-      _logger.warning('presentPaywall called but SDK not configured');
+      _logger.warning('presentPaywall called but SDK configuration failed');
       return PaywallOutcome.error; // SDK not configured
     }
 
@@ -237,7 +270,14 @@ class RevenueCatService {
   ///
   /// Gates on init. Swallows all exceptions - safe for lifecycle callbacks.
   /// Never clobbers known state with null (transient failures).
+  ///
+  /// Note: Unlike other methods, this does NOT throw if init() hasn't been called.
+  /// It silently returns to remain safe for lifecycle callbacks (e.g., app resume).
   Future<void> refreshEntitlement() async {
+    if (!_initStarted) {
+      _logger.fine('refreshEntitlement called before init(), ignoring');
+      return;
+    }
     try {
       await _initCompleter.future;
       final newSnapshot = await _client.getEntitlementSnapshot();
@@ -257,11 +297,14 @@ class RevenueCatService {
   ///
   /// This is the #1 subscription correctness issue after launch.
   /// Must be exposed in Settings UI as "Restore Purchases" action.
+  ///
+  /// Throws [StateError] if [init] has not been called.
   Future<void> restorePurchases() async {
+    _ensureInitStarted();
     try {
       await _initCompleter.future;
     } catch (_) {
-      _logger.warning('restorePurchases called but SDK not configured');
+      _logger.warning('restorePurchases called but SDK configuration failed');
       return; // SDK not configured
     }
 
