@@ -602,7 +602,7 @@ This phase ensures the DB creates users correctly BEFORE any Flutter changes.
 
 Single source of truth for UI gating decisions. Prevents duplicate logic across Home/Library.
 
-### 3.1 Create SubscriptionStatusResolver
+### 3.1 Create SubscriptionStatusResolver [DONE]
 - **New File:** `lib/paywall/domain/subscription_status_resolver.dart`
 - **Pattern:** Pure functions, easily testable, uses app-owned `EntitlementSnapshot`
 - **Time pattern:** Keep resolver pure - callers pass `DateTime now` (no Clock injection)
