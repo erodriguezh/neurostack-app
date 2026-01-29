@@ -688,7 +688,7 @@ Single source of truth for UI gating decisions. Prevents duplicate logic across 
   }
   ```
 
-### 3.2 Register in DI
+### 3.2 Register in DI [DONE]
 - **File:** `lib/config/locator_config.dart`
 - **Changes:** Add `Module<SubscriptionStatusResolver>`
 
