@@ -201,16 +201,26 @@ class RevenueCatService {
 
   /// Logs out the current user from RevenueCat.
   ///
-  /// Waits until [init] completes. Clears the entitlement snapshot.
+  /// Always clears local state (snapshot, identified user) regardless of SDK state.
+  /// SDK logout is best-effort - app sign-out should not be blocked by SDK issues.
   ///
   /// Throws [StateError] if [init] has not been called.
   Future<void> logout() async {
     _ensureInitStarted();
-    await _initCompleter.future;
+
+    // CRITICAL: Always clear local state first, regardless of SDK state
+    // This ensures app-level sign-out is never blocked by SDK issues
     _identifiedUserId = null;
-    entitlementSnapshot.value = null; // Clear on logout
-    await _client.logOut();
-    _logger.fine('Logged out');
+    entitlementSnapshot.value = null;
+
+    // SDK logout is best-effort - don't block app sign-out flow
+    try {
+      await _initCompleter.future;
+      await _client.logOut();
+      _logger.fine('Logged out');
+    } catch (e) {
+      _logger.warning('SDK logout failed (state already cleared): $e');
+    }
   }
 
   /// Presents the RevenueCat paywall UI.

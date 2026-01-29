@@ -247,7 +247,24 @@ void main() {
         );
       });
 
-      test('waits for init to complete', () async {
+      test('clears local state even when init failed', () async {
+        fakeClient.configureThrows = true;
+
+        try {
+          await service.init();
+        } catch (_) {}
+
+        // Manually set some state to simulate a partial flow
+        // (In practice this shouldn't happen, but testing the safety)
+        service.entitlementSnapshot.value =
+            EntitlementSnapshot.none(appUserId: 'user-123');
+
+        // Logout should complete without throwing and clear state
+        await expectLater(service.logout(), completes);
+        expect(service.entitlementSnapshot.value, isNull);
+      });
+
+      test('calls client logout on success', () async {
         await service.init();
         await service.identify('user-123');
         await service.logout();
