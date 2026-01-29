@@ -181,12 +181,12 @@ class RevenueCatService {
 
   /// Identifies the user with RevenueCat.
   ///
-  /// Waits until [init] completes to prevent race conditions.
-  /// Seeds initial snapshot after identify via [refreshEntitlement].
+  /// This method is fully non-fatal - it logs and returns on any failure,
+  /// allowing the app to continue without RevenueCat functionality.
   ///
   /// If [init] was never called, throws [StateError].
-  /// If [init] failed (SDK configuration error), logs warning and returns
-  /// without throwing - this allows the app to continue without RevenueCat.
+  /// All other failures (init failed, SDK errors, network errors) are logged
+  /// and the method returns gracefully.
   ///
   /// CRITICAL: Must be called after user authenticates. The [userId] should
   /// match the Supabase `auth.uid` to ensure consistency (INV-P5).
@@ -201,12 +201,18 @@ class RevenueCatService {
       return;
     }
 
-    await _client.logIn(userId);
-    _identifiedUserId = userId;
-    _logger.fine('Identified user: $userId');
+    // Best-effort identify - log and return on any failure
+    try {
+      await _client.logIn(userId);
+      _identifiedUserId = userId;
+      _logger.fine('Identified user: $userId');
 
-    // Seed initial snapshot after identify (don't rely on stream)
-    await refreshEntitlement();
+      // Seed initial snapshot after identify (don't rely on stream)
+      await refreshEntitlement();
+    } catch (e, st) {
+      _logger.warning('identify failed', e, st);
+      // Don't rethrow - RC is optional, app should continue
+    }
   }
 
   /// Logs out the current user from RevenueCat.

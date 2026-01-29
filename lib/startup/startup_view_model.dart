@@ -80,7 +80,7 @@ class StartupViewModel {
       try {
         await revenueCatService.init();
       } catch (e, st) {
-        _logger.warning('RevenueCat init failed: $e', e, st);
+        _logger.warning('RevenueCat init failed', e, st);
         // Continue - app works without RC, just can't show paywall
         // identify() calls will gracefully degrade (log and return)
       }
