@@ -38,7 +38,7 @@ import 'entitlement_snapshot.dart';
 /// ```
 class SubscriptionStatusResolver {
   /// Logger for diagnostic messages.
-  final Logger _logger = Logger('SubscriptionStatusResolver');
+  static final Logger _logger = Logger('SubscriptionStatusResolver');
 
   /// Returns the effective subscription status for UI gating.
   ///
@@ -67,7 +67,7 @@ class SubscriptionStatusResolver {
   /// Requirements:
   /// - Snapshot is present and has an active entitlement
   /// - User is in trial period
-  /// - Expiration is within 24 hours from [now]
+  /// - Expiration is within 24 hours from [now] (but not already expired)
   ///
   /// Callers must pass [now] (e.g., `clock.now()` or `DateTime.now()`) for testability.
   ///
@@ -75,6 +75,7 @@ class SubscriptionStatusResolver {
   /// - Snapshot is null (RC unavailable)
   /// - Not in trial period
   /// - No expiration date set
+  /// - Already expired (negative duration)
   /// - More than 24 hours until expiration
   bool shouldShowTrialReminder({
     required EntitlementSnapshot? snapshot,
@@ -83,13 +84,17 @@ class SubscriptionStatusResolver {
     if (snapshot == null) return false;
     if (!snapshot.hasProEntitlement) return false;
     if (!snapshot.isTrialPeriod) return false;
-    if (snapshot.expirationDate == null) return false;
 
-    final expirationDate = snapshot.expirationDate!;
-    final hoursUntilExpiration = expirationDate.difference(now).inHours;
+    final expirationDate = snapshot.expirationDate;
+    if (expirationDate == null) return false;
 
-    // Show reminder if within 24 hours of expiration (but not already expired)
-    return hoursUntilExpiration >= 0 && hoursUntilExpiration <= 24;
+    final timeUntilExpiration = expirationDate.difference(now);
+
+    // Return false if already expired (negative duration)
+    if (timeUntilExpiration.isNegative) return false;
+
+    // Show reminder if within 24 hours of expiration
+    return timeUntilExpiration <= const Duration(hours: 24);
   }
 
   /// Checks if the trial expired modal should be shown.
@@ -129,8 +134,10 @@ class SubscriptionStatusResolver {
     }
 
     // Secondary: RC's wasTrialThatExpired (if periodType available and RC working)
-    // This catches cases where lastSeenStatus was never persisted (fresh install)
-    if (snapshot?.wasTrialThatExpired == true) {
+    // CRITICAL: Only use this for fresh installs where lastSeenStatus was never persisted.
+    // Without this gate, the modal would show repeatedly after trial churn since
+    // wasTrialThatExpired remains true across app launches.
+    if (lastSeenStatus == null && snapshot?.wasTrialThatExpired == true) {
       return true;
     }
 
