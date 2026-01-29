@@ -38,6 +38,11 @@ import 'package:neurostack/features/user/data/repositories/user_repository_impl.
 // Services
 import 'package:neurostack/features/session/data/services/session_sync_service.dart';
 
+// RevenueCat
+import 'package:neurostack/paywall/data/revenuecat_client.dart';
+import 'package:neurostack/paywall/data/revenuecat_client_factory.dart';
+import 'package:neurostack/paywall/data/revenuecat_service.dart';
+
 // Use cases
 import 'package:neurostack/features/session/domain/use_cases/check_eligibility_use_case.dart';
 
@@ -93,6 +98,16 @@ List<Module> buildModules({required SharedPreferences sharedPreferences}) => [
   Module<TrialExpirationDecisionStore>(
     builder: () =>
         SharedPrefsTrialExpirationDecisionStore(locator<SharedPreferences>()),
+    lazy: true,
+  ),
+
+  // RevenueCat (SINGLETONS - must be app-lifetime to prevent duplicate SDK listeners)
+  Module<RevenueCatClient>(
+    builder: () => createRevenueCatClient(),
+    lazy: true,
+  ),
+  Module<RevenueCatService>(
+    builder: () => RevenueCatService(locator<RevenueCatClient>()),
     lazy: true,
   ),
 

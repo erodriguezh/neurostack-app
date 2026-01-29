@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-40-0z5",
+  "created_at": "2026-01-29T16:50:14.879115Z",
+  "depends_on_epics": [],
+  "id": "fn-40-0z5",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-40-0z5.md",
+  "status": "open",
+  "title": "Phase 2.7: Register RevenueCat services in DI",
+  "updated_at": "2026-01-29T16:50:14.879482Z"
+}
