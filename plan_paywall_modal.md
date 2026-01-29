@@ -438,7 +438,7 @@ This phase ensures the DB creates users correctly BEFORE any Flutter changes.
   }
   ```
 
-### 2.6 Create RevenueCatService
+### 2.6 Create RevenueCatService [DONE]
 - **New File:** `lib/paywall/data/revenuecat_service.dart`
 - **Pattern:** Follow `SessionSyncService` at `lib/features/session/data/services/session_sync_service.dart`
 - **Constructor Injection:** Receives `RevenueCatClient` via constructor
