@@ -577,7 +577,7 @@ This phase ensures the DB creates users correctly BEFORE any Flutter changes.
   }
   ```
 
-### 2.7 Register in DI (SINGLETONS - Not Factories)
+### 2.7 Register in DI (SINGLETONS - Not Factories) [DONE]
 - **File:** `lib/config/locator_config.dart`
 - **Location:** After line 97 (TrialExpirationDecisionStore)
 - **CRITICAL:** Must be singletons to prevent duplicate SDK listeners/configure calls
