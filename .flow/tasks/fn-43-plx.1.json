@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-01-29T20:09:37.329172Z",
+  "depends_on": [],
+  "epic": "fn-43-plx",
+  "id": "fn-43-plx.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-43-plx.1.md",
+  "status": "todo",
+  "title": "Update StartupViewModel to inject RevenueCatService and AppLifecycleService",
+  "updated_at": "2026-01-29T20:09:37.329568Z"
+}
