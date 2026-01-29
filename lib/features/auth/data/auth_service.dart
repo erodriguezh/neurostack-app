@@ -156,12 +156,15 @@ class AuthService {
         }
         break;
       case supabase.AuthChangeEvent.signedOut:
-        // Clear RevenueCat state (best-effort, fire-and-forget)
-        try {
-          unawaited(_revenueCatService.logout());
-        } catch (_) {
-          // Ignore - RC logout is optional
-        }
+        // Clear RevenueCat state (best-effort, fire-and-forget with error handler)
+        unawaited(
+          _revenueCatService
+              .logout()
+              .timeout(const Duration(seconds: 2))
+              .catchError((e, st) {
+                _logger.fine('RevenueCat logout skipped: $e', e, st);
+              }),
+        );
         _currentUser = null;
         await _cachedUserStore.clearUser();
         authState.value = const Unauthenticated();
