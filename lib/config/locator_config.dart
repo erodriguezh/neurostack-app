@@ -42,6 +42,7 @@ import 'package:neurostack/features/session/data/services/session_sync_service.d
 import 'package:neurostack/paywall/data/revenuecat_client.dart';
 import 'package:neurostack/paywall/data/revenuecat_client_factory.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
+import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 
 // Use cases
 import 'package:neurostack/features/session/domain/use_cases/check_eligibility_use_case.dart';
@@ -108,6 +109,12 @@ List<Module> buildModules({required SharedPreferences sharedPreferences}) => [
   ),
   Module<RevenueCatService>(
     builder: () => RevenueCatService(locator<RevenueCatClient>()),
+    lazy: true,
+  ),
+
+  // Subscription resolver (centralized policy for UI gating)
+  Module<SubscriptionStatusResolver>(
+    builder: () => const SubscriptionStatusResolver(),
     lazy: true,
   ),
 
