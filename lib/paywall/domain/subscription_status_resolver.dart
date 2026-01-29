@@ -37,6 +37,11 @@ import 'entitlement_snapshot.dart';
 /// );
 /// ```
 class SubscriptionStatusResolver {
+  /// Creates a [SubscriptionStatusResolver].
+  ///
+  /// This class has no instance state, so it can be instantiated as const.
+  const SubscriptionStatusResolver();
+
   /// Logger for diagnostic messages.
   static final Logger _logger = Logger('SubscriptionStatusResolver');
 
