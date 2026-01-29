@@ -696,7 +696,7 @@ Single source of truth for UI gating decisions. Prevents duplicate logic across 
 
 ## Phase 4: Auth & Startup Integration (Constructor Injection)
 
-### 4.1 Update StartupViewModel Constructor (INIT ORDER CRITICAL)
+### 4.1 Update StartupViewModel Constructor (INIT ORDER CRITICAL) [DONE]
 - **File:** `lib/startup/startup_view_model.dart`
 - **CRITICAL:** Initialize RevenueCat BEFORE Auth to prevent race condition
 - **Problem:** Auth rehydration calls `identify()` - SDK must be configured first
