@@ -169,6 +169,7 @@ List<Module> buildModules({required SharedPreferences sharedPreferences}) => [
       routerService: locator<RouterService>(),
       connectivityService: locator<ConnectivityService>(),
       appLifecycleService: locator<AppLifecycleService>(),
+      revenueCatService: locator<RevenueCatService>(),
     ),
     lazy: true,
   ),

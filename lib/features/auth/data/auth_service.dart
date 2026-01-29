@@ -13,6 +13,7 @@ import '../../../core/utils/data_source/data_source_abstraction.dart';
 import '../../../core/utils/navigation/navigation_intent_store.dart';
 import '../../../core/utils/navigation/route_data.dart';
 import '../../../core/utils/navigation/router_service.dart';
+import '../../../paywall/data/revenuecat_service.dart';
 import '../../user/domain/entities/user.dart';
 import '../domain/auth_state.dart';
 import 'cached_user_store.dart';
@@ -27,13 +28,15 @@ class AuthService {
     required RouterService routerService,
     required ConnectivityService connectivityService,
     required AppLifecycleService appLifecycleService,
+    required RevenueCatService revenueCatService,
   }) : _dataSource = dataSource,
        _userBootstrapService = userBootstrapService,
        _navigationIntentStore = navigationIntentStore,
        _cachedUserStore = cachedUserStore,
        _routerService = routerService,
        _connectivityService = connectivityService,
-       _appLifecycleService = appLifecycleService;
+       _appLifecycleService = appLifecycleService,
+       _revenueCatService = revenueCatService;
 
   final DataSourceAbstraction _dataSource;
   final UserBootstrapService _userBootstrapService;
@@ -42,6 +45,7 @@ class AuthService {
   final RouterService _routerService;
   final ConnectivityService _connectivityService;
   final AppLifecycleService _appLifecycleService;
+  final RevenueCatService _revenueCatService;
   final Logger _logger = Logger('Auth');
 
   final ValueNotifier<AuthState> authState = ValueNotifier<AuthState>(
@@ -79,6 +83,9 @@ class AuthService {
   /// When [forceOnboarding] is true (default), the user will see the
   /// onboarding flow again after re-authenticating.
   Future<void> logout({bool forceOnboarding = true}) async {
+    // Logout from RevenueCat first (best-effort, won't block app sign-out)
+    await _revenueCatService.logout();
+
     await _dataSource.auth.signOut(scope: supabase.SignOutScope.local);
     await _cachedUserStore.clearUser();
     await _navigationIntentStore.clearIntendedRoute();
@@ -216,6 +223,9 @@ class AuthService {
     _currentUser = data.user;
     authState.value = AuthenticatedOnline(data.user);
     await _cachedUserStore.saveUser(data.user);
+
+    // Identify user with RevenueCat (non-fatal, logs and returns on failure)
+    await _revenueCatService.identify(data.user.id);
 
     _logger.info(
       'Auth success (env=${AppEnvironment.tag}, userId=${data.user.id})',
