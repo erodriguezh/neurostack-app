@@ -184,13 +184,23 @@ class RevenueCatService {
   /// Waits until [init] completes to prevent race conditions.
   /// Seeds initial snapshot after identify via [refreshEntitlement].
   ///
-  /// Throws [StateError] if [init] has not been called.
+  /// If [init] was never called, throws [StateError].
+  /// If [init] failed (SDK configuration error), logs warning and returns
+  /// without throwing - this allows the app to continue without RevenueCat.
   ///
   /// CRITICAL: Must be called after user authenticates. The [userId] should
   /// match the Supabase `auth.uid` to ensure consistency (INV-P5).
   Future<void> identify(String userId) async {
     _ensureInitStarted();
-    await _initCompleter.future; // Wait for SDK to be configured
+
+    // Wait for SDK to be configured, but gracefully degrade if init failed
+    try {
+      await _initCompleter.future;
+    } catch (e, st) {
+      _logger.warning('identify skipped: SDK init failed', e, st);
+      return;
+    }
+
     await _client.logIn(userId);
     _identifiedUserId = userId;
     _logger.fine('Identified user: $userId');

@@ -75,14 +75,14 @@ class StartupViewModel {
 
       // CRITICAL: Init RevenueCat FIRST (before auth rehydration triggers identify)
       // Auth rehydration may call identify() - SDK must be configured first.
-      // RevenueCatService.identify() queues until init() completes (see Phase 2.6).
+      // If init() fails, identify() will gracefully degrade (log and return).
       final revenueCatService = locator<RevenueCatService>();
       try {
         await revenueCatService.init();
-      } catch (e) {
-        _logger.warning('RevenueCat init failed: $e');
+      } catch (e, st) {
+        _logger.warning('RevenueCat init failed: $e', e, st);
         // Continue - app works without RC, just can't show paywall
-        // identify() calls will fail gracefully (queued on failed completer)
+        // identify() calls will gracefully degrade (log and return)
       }
 
       final authService = locator<AuthService>();
@@ -111,6 +111,9 @@ class StartupViewModel {
   }
 
   Future<void> retryInitialization() async {
+    // Set state to initializing BEFORE disposing to prevent widgets from
+    // reading disposed notifiers/services during the transition window
+    appStateNotifier.value = const InitializingApp();
     _disposeServices();
     locator.reset();
     await initializeApp();
