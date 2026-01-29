@@ -729,7 +729,7 @@ Single source of truth for UI gating decisions. Prevents duplicate logic across 
   }
   ```
 
-### 4.2 Update AuthService Constructor
+### 4.2 Update AuthService Constructor [DONE]
 - **File:** `lib/features/auth/data/auth_service.dart`
 - **Changes:** Add `RevenueCatService` as constructor parameter (best-effort calls)
   ```dart
@@ -756,7 +756,7 @@ Single source of truth for UI gating decisions. Prevents duplicate logic across 
   }
   ```
 
-### 4.3 Update DI Registration
+### 4.3 Update DI Registration [DONE]
 - **File:** `lib/config/locator_config.dart`
 - **Changes:** Update `AuthService` and `StartupViewModel` registrations to inject `RevenueCatService`
 
