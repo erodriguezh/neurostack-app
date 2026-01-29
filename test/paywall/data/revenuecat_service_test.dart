@@ -274,9 +274,8 @@ void main() {
         await service.init();
         await service.identify('user-123');
 
-        // Simulate a slow paywall presentation
+        // Simulate a paywall presentation
         fakeClient.paywallOutcome = PaywallOutcome.purchased;
-        final completer = Completer<PaywallOutcome>();
 
         // Start first paywall presentation
         final firstResult = service.presentPaywall();
