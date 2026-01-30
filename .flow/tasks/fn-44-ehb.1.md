@@ -38,9 +38,8 @@ Update AuthService to call RevenueCat identify/logout when users authenticate/si
 - [ ] Existing auth tests pass (update mocks if needed)
 
 ## Done summary
-TBD
-
+Injected RevenueCatService into AuthService with identify/logout integration. RC calls use try-catch + 2s timeout for best-effort behavior, and signedOut handler includes fire-and-forget RC logout with proper async error handling.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 60fd5f4, 2541473, 95affd7
+- Tests: flutter analyze, flutter test
 - PRs:
