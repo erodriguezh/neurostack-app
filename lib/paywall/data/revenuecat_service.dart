@@ -287,6 +287,9 @@ class RevenueCatService {
       // Refresh entitlement after paywall closes
       await refreshEntitlement();
       return result;
+    } catch (e, st) {
+      _logger.warning('presentPaywall failed', e, st);
+      return PaywallOutcome.error;
     } finally {
       _isPresenting = false;
     }
@@ -339,9 +342,14 @@ class RevenueCatService {
       return; // Must be identified
     }
 
-    await _client.restorePurchases();
-    await refreshEntitlement();
-    _logger.fine('Purchases restored');
+    try {
+      await _client.restorePurchases();
+      await refreshEntitlement();
+      _logger.fine('Purchases restored');
+    } catch (e, st) {
+      _logger.warning('restorePurchases failed', e, st);
+      // Best-effort - don't crash caller
+    }
   }
 
   /// Disposes the service and cleans up resources.
