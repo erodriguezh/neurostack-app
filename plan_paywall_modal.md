@@ -764,7 +764,7 @@ Single source of truth for UI gating decisions. Prevents duplicate logic across 
 
 ## Phase 5: Paywall Presentation (Navigation Fix)
 
-### 5.1 Update PaywallView (CRITICAL - Navigation Semantics + Error Handling)
+### 5.1 Update PaywallView (CRITICAL - Navigation Semantics + Error Handling) [DONE]
 - **File:** `lib/paywall/paywall_view.dart`
 - **Problem:** Current `navigateToHome()` uses `replaceAll`, breaking modal return flow
 - **Fix:** Paywall must use `back()` when done (RouterService has no `pop(result)`)
@@ -801,7 +801,7 @@ Single source of truth for UI gating decisions. Prevents duplicate logic across 
 - **Caller responsibility:** HomeViewModel/LibraryViewModel should NOT auto-reopen paywall on error.
   Check for error state and require user action to retry.
 
-### 5.2 Update PaywallViewModel
+### 5.2 Update PaywallViewModel [DONE]
 - **File:** `lib/paywall/paywall_view_model.dart`
 - **Changes:**
   - Constructor inject `RevenueCatService`
