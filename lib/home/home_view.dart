@@ -14,7 +14,9 @@ import 'package:neurostack/features/session/data/data_sources/session_local_data
 import 'package:neurostack/features/session/domain/repositories/session_repository.dart';
 import 'package:neurostack/features/session/presentation/log_session_modal.dart';
 import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
+import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:neurostack/paywall/data/trial_expiration_decision_store.dart';
+import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 import 'package:neurostack/paywall/widgets/trial_expired_modal.dart';
 import 'package:neurostack/home/home_state.dart';
 import 'package:neurostack/home/home_view_model.dart';
@@ -41,6 +43,8 @@ class _HomeViewState extends State<HomeView> {
     sessionRepository: locator<SessionRepository>(),
     sessionLocalDataSource: locator<SessionLocalDataSource>(),
     connectivityService: locator<ConnectivityService>(),
+    subscriptionStatusResolver: locator<SubscriptionStatusResolver>(),
+    revenueCatService: locator<RevenueCatService>(),
     cachedUserStore: locator<CachedUserStore>(),
     trialExpirationDecisionStore: locator<TrialExpirationDecisionStore>(),
   );
@@ -352,7 +356,7 @@ class _HomeViewState extends State<HomeView> {
           if (!mounted) return;
 
           final user = _viewModel.state.value.user;
-          if (user != null && _viewModel.isTrialOrPremiumExpired(user)) {
+          if (user != null && await _viewModel.isTrialOrPremiumExpired(user)) {
             continue; // Re-show modal
           }
           // User subscribed: mark decision resolved and exit loop

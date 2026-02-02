@@ -17,6 +17,9 @@ import 'package:neurostack/features/user/domain/entities/user.dart';
 import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
 import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
 import 'package:neurostack/home/home_view_model.dart';
+import 'package:neurostack/paywall/data/revenuecat_service.dart';
+import 'package:neurostack/paywall/domain/entitlement_snapshot.dart';
+import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 
 import '../factories/factories.dart';
 
@@ -40,6 +43,11 @@ class MockConnectivityService extends Mock implements ConnectivityService {}
 
 class MockCachedUserStore extends Mock implements CachedUserStore {}
 
+class MockRevenueCatService extends Mock implements RevenueCatService {}
+
+class MockSubscriptionStatusResolver extends Mock
+    implements SubscriptionStatusResolver {}
+
 void main() {
   late MockNotifyService mockNotifyService;
   late MockRouterService mockRouterService;
@@ -50,6 +58,8 @@ void main() {
   late MockSessionLocalDataSource mockSessionLocalDataSource;
   late MockConnectivityService mockConnectivityService;
   late MockCachedUserStore mockCachedUserStore;
+  late MockRevenueCatService mockRevenueCatService;
+  late SubscriptionStatusResolver subscriptionStatusResolver;
 
   setUpAll(() {
     registerFallbackValue(ToastEventError(message: 'fallback'));
@@ -66,10 +76,17 @@ void main() {
     mockSessionLocalDataSource = MockSessionLocalDataSource();
     mockConnectivityService = MockConnectivityService();
     mockCachedUserStore = MockCachedUserStore();
+    mockRevenueCatService = MockRevenueCatService();
+    // Use real resolver since it's pure functions
+    subscriptionStatusResolver = const SubscriptionStatusResolver();
 
     // Default connectivity setup
     when(() => mockConnectivityService.status)
         .thenReturn(ValueNotifier(NetworkStatus.online));
+
+    // Default RevenueCat setup - null snapshot (RC unavailable, fallback to DB)
+    when(() => mockRevenueCatService.entitlementSnapshot)
+        .thenReturn(ValueNotifier<EntitlementSnapshot?>(null));
   });
 
   HomeViewModel createViewModel() {
@@ -82,6 +99,8 @@ void main() {
       sessionRepository: mockSessionRepository,
       sessionLocalDataSource: mockSessionLocalDataSource,
       connectivityService: mockConnectivityService,
+      subscriptionStatusResolver: subscriptionStatusResolver,
+      revenueCatService: mockRevenueCatService,
       cachedUserStore: mockCachedUserStore,
     );
   }
@@ -347,7 +366,7 @@ void main() {
     });
 
     group('isTrialOrPremiumExpired', () {
-      test('returns true for expired trial', () {
+      test('returns true for expired trial', () async {
         // Arrange - trial started 10 days ago relative to now
         final now = DateTime.now();
         final expiredTrialPeriod = TrialPeriodFactory.create(
@@ -363,13 +382,13 @@ void main() {
         addTearDown(viewModel.dispose);
 
         // Act
-        final result = viewModel.isTrialOrPremiumExpired(user);
+        final result = await viewModel.isTrialOrPremiumExpired(user);
 
         // Assert
         expect(result, isTrue);
       });
 
-      test('returns false for active trial', () {
+      test('returns false for active trial', () async {
         // Arrange - trial started 1 day ago relative to now
         final now = DateTime.now();
         final activeTrialPeriod = TrialPeriodFactory.create(
@@ -385,13 +404,13 @@ void main() {
         addTearDown(viewModel.dispose);
 
         // Act
-        final result = viewModel.isTrialOrPremiumExpired(user);
+        final result = await viewModel.isTrialOrPremiumExpired(user);
 
         // Assert
         expect(result, isFalse);
       });
 
-      test('returns true for expired premium', () {
+      test('returns true for expired premium', () async {
         // Arrange
         final user = UserFactory.create(
           subscriptionStatus: SubscriptionStatus.expired,
@@ -402,13 +421,13 @@ void main() {
         addTearDown(viewModel.dispose);
 
         // Act
-        final result = viewModel.isTrialOrPremiumExpired(user);
+        final result = await viewModel.isTrialOrPremiumExpired(user);
 
         // Assert
         expect(result, isTrue);
       });
 
-      test('returns false for free user', () {
+      test('returns false for free user', () async {
         // Arrange
         final user = UserFactory.create(
           subscriptionStatus: SubscriptionStatus.free,
@@ -419,16 +438,16 @@ void main() {
         addTearDown(viewModel.dispose);
 
         // Act
-        final result = viewModel.isTrialOrPremiumExpired(user);
+        final result = await viewModel.isTrialOrPremiumExpired(user);
 
         // Assert
         expect(result, isFalse);
       });
 
-      test('returns false for free user with expired trialPeriod', () {
+      test('returns false for free user with expired trialPeriod', () async {
         // Arrange - regression test: user who chose free tier should not
         // trigger modal even if they have an old expired trialPeriod.
-        // The VM checks raw subscriptionStatus, not getEffectiveStatus().
+        // The VM now uses resolver with effective status from RC or DB fallback.
         final now = DateTime.now();
         final expiredTrialPeriod = TrialPeriodFactory.create(
           startDate: now.subtract(const Duration(days: 10)),
@@ -443,9 +462,9 @@ void main() {
         addTearDown(viewModel.dispose);
 
         // Act
-        final result = viewModel.isTrialOrPremiumExpired(user);
+        final result = await viewModel.isTrialOrPremiumExpired(user);
 
-        // Assert - should be false because raw status is free, not trial
+        // Assert - should be false because effective status is free, not trial
         expect(result, isFalse);
       });
     });

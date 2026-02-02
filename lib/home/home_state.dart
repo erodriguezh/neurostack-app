@@ -66,6 +66,7 @@ class HomeViewState {
     this.banner,
     this.bannerDismissed = false,
     this.showTrialExpiredModal = false,
+    this.showTrialReminder = false,
     this.showGraceModal = false,
     this.showDeactivationModal = false,
     this.errorMessage,
@@ -81,6 +82,7 @@ class HomeViewState {
   final HomeBannerModel? banner;
   final bool bannerDismissed;
   final bool showTrialExpiredModal;
+  final bool showTrialReminder;
   final bool showGraceModal;
   final bool showDeactivationModal;
   final String? errorMessage;
@@ -96,6 +98,7 @@ class HomeViewState {
     Object? banner = _unset,
     bool? bannerDismissed,
     bool? showTrialExpiredModal,
+    bool? showTrialReminder,
     bool? showGraceModal,
     bool? showDeactivationModal,
     Object? errorMessage = _unset,
@@ -112,6 +115,7 @@ class HomeViewState {
       bannerDismissed: bannerDismissed ?? this.bannerDismissed,
       showTrialExpiredModal:
           showTrialExpiredModal ?? this.showTrialExpiredModal,
+      showTrialReminder: showTrialReminder ?? this.showTrialReminder,
       showGraceModal: showGraceModal ?? this.showGraceModal,
       showDeactivationModal:
           showDeactivationModal ?? this.showDeactivationModal,

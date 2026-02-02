@@ -24,7 +24,9 @@ import 'package:neurostack/features/user/domain/failures/user_failures.dart';
 import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
 import 'package:neurostack/home/home_bottom_tab_coordinator.dart';
 import 'package:neurostack/home/home_state.dart';
+import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:neurostack/paywall/data/trial_expiration_decision_store.dart';
+import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 
 class HomeViewModel {
   final Logger _logger = Logger('Home');
@@ -38,6 +40,8 @@ class HomeViewModel {
     required SessionRepository sessionRepository,
     required SessionLocalDataSource sessionLocalDataSource,
     required ConnectivityService connectivityService,
+    required SubscriptionStatusResolver subscriptionStatusResolver,
+    required RevenueCatService revenueCatService,
     HomeBottomTabCoordinator? tabCoordinator,
     CachedUserStore? cachedUserStore,
     TrialExpirationDecisionStore? trialExpirationDecisionStore,
@@ -49,6 +53,8 @@ class HomeViewModel {
        _sessionRepository = sessionRepository,
        _sessionLocalDataSource = sessionLocalDataSource,
        _connectivityService = connectivityService,
+       _resolver = subscriptionStatusResolver,
+       _revenueCatService = revenueCatService,
        _cachedUserStore = cachedUserStore,
        _trialExpirationDecisionStore = trialExpirationDecisionStore,
        _tabCoordinator =
@@ -65,6 +71,8 @@ class HomeViewModel {
   final SessionRepository _sessionRepository;
   final SessionLocalDataSource _sessionLocalDataSource;
   final ConnectivityService _connectivityService;
+  final SubscriptionStatusResolver _resolver;
+  final RevenueCatService _revenueCatService;
   final CachedUserStore? _cachedUserStore;
   final TrialExpirationDecisionStore? _trialExpirationDecisionStore;
   final HomeBottomTabCoordinator _tabCoordinator;
@@ -76,11 +84,17 @@ class HomeViewModel {
   bool _isLoading = false;
   bool _hasShownExpiredModal = false;
   VoidCallback? _connectivityListener;
+  VoidCallback? _entitlementListener;
 
   Future<void> init() async {
     _connectivityListener ??= _handleConnectivityChange;
     _connectivityService.status.removeListener(_connectivityListener!);
     _connectivityService.status.addListener(_connectivityListener!);
+
+    // Listen to RevenueCat entitlement changes for real-time UI updates
+    _entitlementListener ??= _handleEntitlementChange;
+    _revenueCatService.entitlementSnapshot.removeListener(_entitlementListener!);
+    _revenueCatService.entitlementSnapshot.addListener(_entitlementListener!);
 
     final isOffline =
         _connectivityService.status.value == NetworkStatus.offline;
@@ -254,33 +268,70 @@ class HomeViewModel {
 
   /// Marks the trial expiration decision as resolved for the current user.
   /// Call this after the user makes a choice (subscribe or use free tier).
+  ///
+  /// Also persists the current effective status to prevent re-triggering.
   Future<void> markTrialExpiredDecisionResolved() async {
     final user = state.value.user;
-    if (user?.trialPeriod == null) return;
+    if (user == null) return;
 
-    await _trialExpirationDecisionStore?.markResolved(
-      userId: user!.id,
-      trialStartDate: user.trialPeriod!.startDate,
+    // Persist the current effective status so we don't re-trigger on future launches
+    final snapshot = _revenueCatService.entitlementSnapshot.value;
+    final effectiveStatus = _resolver.resolveEffectiveStatus(
+      user: user,
+      snapshot: snapshot,
     );
+    await _trialExpirationDecisionStore?.saveLastSeenStatus(
+      userId: user.id,
+      status: effectiveStatus,
+    );
+
+    // Legacy: Also mark via old trialPeriod-based key for backward compatibility
+    if (user.trialPeriod != null) {
+      await _trialExpirationDecisionStore?.markResolved(
+        userId: user.id,
+        trialStartDate: user.trialPeriod!.startDate,
+      );
+    }
   }
 
   /// Checks if the expired modal should be shown for the given user.
-  /// Used by both the initial trigger and the paywall-return loop.
-  bool isTrialOrPremiumExpired(User user) {
+  ///
+  /// Uses [SubscriptionStatusResolver.shouldShowTrialExpiredModal] with:
+  /// - Current effective status from resolver (RC or DB fallback)
+  /// - Last-seen status from decision store
+  /// - EntitlementSnapshot for secondary signal
+  ///
+  /// Also includes legacy fallback for users with trialPeriod-based expiration
+  /// when RevenueCat is unavailable (migration support).
+  Future<bool> isTrialOrPremiumExpired(User user) async {
     final now = DateTime.now();
+    final snapshot = _revenueCatService.entitlementSnapshot.value;
 
-    // Trial expired: raw status is trial AND trialPeriod has ended.
-    // We check raw status (not effectiveStatus) so users who chose free tier
-    // don't re-trigger the modal on subsequent app launches.
-    final isTrialExpired =
+    // 1. Load lastSeenStatus
+    final lastSeenStatus = await _trialExpirationDecisionStore?.getLastSeenStatus(user.id);
+
+    // 2. Compute current effective status
+    final currentEffectiveStatus = _resolver.resolveEffectiveStatus(
+      user: user,
+      snapshot: snapshot,
+    );
+
+    // 3. Decide if modal should show using resolver
+    final shouldShow = _resolver.shouldShowTrialExpiredModal(
+      currentEffectiveStatus: currentEffectiveStatus,
+      lastSeenStatus: lastSeenStatus,
+      snapshot: snapshot,
+    );
+
+    // Also check premium expired status directly
+    final isPremiumExpired = currentEffectiveStatus == SubscriptionStatus.expired;
+
+    // Legacy fallback: Check trialPeriod-based expiration when RC is unavailable
+    final isLegacyTrialExpired = snapshot == null &&
         user.subscriptionStatus == SubscriptionStatus.trial &&
         (user.trialPeriod?.isExpired(now) ?? false);
 
-    // Premium expired: RevenueCat subscription lapsed
-    final isPremiumExpired =
-        user.subscriptionStatus == SubscriptionStatus.expired;
-
-    return isTrialExpired || isPremiumExpired;
+    return shouldShow || isPremiumExpired || isLegacyTrialExpired;
   }
 
   Future<void> goToPaywall() {
@@ -334,6 +385,9 @@ class HomeViewModel {
   void dispose() {
     if (_connectivityListener != null) {
       _connectivityService.status.removeListener(_connectivityListener!);
+    }
+    if (_entitlementListener != null) {
+      _revenueCatService.entitlementSnapshot.removeListener(_entitlementListener!);
     }
     state.dispose();
   }
@@ -518,22 +572,64 @@ class HomeViewModel {
     User user,
   ) async {
     if (_hasShownExpiredModal) {
-      return state.copyWith(showTrialExpiredModal: false);
+      return state.copyWith(
+        showTrialExpiredModal: false,
+        showTrialReminder: false,
+      );
     }
 
     final now = DateTime.now();
-    final isTrialExpired =
+    final snapshot = _revenueCatService.entitlementSnapshot.value;
+
+    // 1. Load lastSeenStatus from decision store
+    final lastSeenStatus =
+        await _trialExpirationDecisionStore?.getLastSeenStatus(user.id);
+
+    // 2. Compute currentEffectiveStatus via resolver
+    final currentEffectiveStatus = _resolver.resolveEffectiveStatus(
+      user: user,
+      snapshot: snapshot,
+    );
+
+    // 3. Decide if modal should show using resolver
+    final shouldShowModal = _resolver.shouldShowTrialExpiredModal(
+      currentEffectiveStatus: currentEffectiveStatus,
+      lastSeenStatus: lastSeenStatus,
+      snapshot: snapshot,
+    );
+
+    // Also check premium expired status directly
+    final isPremiumExpired =
+        currentEffectiveStatus == SubscriptionStatus.expired;
+
+    // Legacy fallback: Check trialPeriod-based expiration when RC is unavailable
+    // This handles users who signed up before RC integration
+    final isLegacyTrialExpired = snapshot == null &&
         user.subscriptionStatus == SubscriptionStatus.trial &&
         (user.trialPeriod?.isExpired(now) ?? false);
-    final isPremiumExpired =
-        user.subscriptionStatus == SubscriptionStatus.expired;
 
-    if (!isTrialExpired && !isPremiumExpired) {
-      return state.copyWith(showTrialExpiredModal: false);
+    // Check trial reminder (within 24h of expiration)
+    final showTrialReminder = _resolver.shouldShowTrialReminder(
+      snapshot: snapshot,
+      now: now,
+    );
+
+    // If no modal needed from any source, persist status and exit
+    if (!shouldShowModal && !isPremiumExpired && !isLegacyTrialExpired) {
+      // Persist the current status to prevent re-triggering on next launch
+      await _trialExpirationDecisionStore?.saveLastSeenStatus(
+        userId: user.id,
+        status: currentEffectiveStatus,
+      );
+
+      return state.copyWith(
+        showTrialExpiredModal: false,
+        showTrialReminder: showTrialReminder,
+      );
     }
 
-    // Check if already resolved (persisted across app restarts)
-    if (isTrialExpired && user.trialPeriod != null) {
+    // Check if already resolved via legacy trialPeriod-based key
+    if (user.trialPeriod != null) {
       final alreadyResolved =
           await _trialExpirationDecisionStore?.isResolved(
             userId: user.id,
@@ -541,18 +637,34 @@ class HomeViewModel {
           ) ??
           false;
       if (alreadyResolved) {
-        return state.copyWith(showTrialExpiredModal: false);
+        return state.copyWith(
+          showTrialExpiredModal: false,
+          showTrialReminder: showTrialReminder,
+        );
       }
     }
 
     _hasShownExpiredModal = true;
-    return state.copyWith(showTrialExpiredModal: true);
+    return state.copyWith(
+      showTrialExpiredModal: true,
+      showTrialReminder: false, // Don't show reminder when showing modal
+    );
   }
 
   void _handleConnectivityChange() {
     final isOffline =
         _connectivityService.status.value == NetworkStatus.offline;
     state.value = _applyBanner(state.value.copyWith(isOffline: isOffline));
+  }
+
+  /// Handles entitlement changes from RevenueCat for real-time UI updates.
+  ///
+  /// When entitlement changes (e.g., after purchase, subscription renewal/expiry),
+  /// refresh the home view to reflect the new subscription state.
+  void _handleEntitlementChange() {
+    // Trigger a non-loading refresh to update UI based on new entitlement state
+    _logger.fine('Entitlement changed, refreshing home');
+    refresh();
   }
 
   HomeViewState _applyBanner(HomeViewState next) {
@@ -574,13 +686,21 @@ class HomeViewModel {
     }
 
     final user = next.user!;
-    switch (user.subscriptionStatus) {
+
+    // Use resolver to get effective status (RC or DB fallback)
+    final snapshot = _revenueCatService.entitlementSnapshot.value;
+    final effectiveStatus = _resolver.resolveEffectiveStatus(
+      user: user,
+      snapshot: snapshot,
+    );
+
+    switch (effectiveStatus) {
       case SubscriptionStatus.trial:
-        final trial = user.trialPeriod;
-        if (trial == null) {
-          return null;
-        }
-        if (trial.isExpired(DateTime.now())) {
+        // Check if trial has expired using snapshot expiration date
+        final expirationDate = snapshot?.expirationDate;
+        final now = DateTime.now();
+
+        if (expirationDate != null && expirationDate.isBefore(now)) {
           // Trial has expired: show expired banner (tappable to paywall)
           // to provide a recovery path for users who haven't yet decided.
           return const HomeBannerModel(
@@ -589,14 +709,44 @@ class HomeViewModel {
             isTappable: true,
           );
         }
+
+        // Show trial banner with days remaining
+        if (expirationDate != null) {
+          final daysRemaining = expirationDate.difference(now).inDays;
+          final message = daysRemaining <= 1
+              ? 'Trial expires soon'
+              : 'Trial: $daysRemaining days left';
+          return HomeBannerModel(
+            type: HomeBannerType.trial,
+            message: message,
+            isTappable: true,
+          );
+        }
+
+        // Fallback to legacy trialPeriod if RC not available
+        final trial = user.trialPeriod;
+        if (trial == null) {
+          return const HomeBannerModel(
+            type: HomeBannerType.trial,
+            message: 'Trial active',
+            isTappable: true,
+          );
+        }
+        if (trial.isExpired(now)) {
+          return const HomeBannerModel(
+            type: HomeBannerType.expired,
+            message: 'Trial has ended',
+            isTappable: true,
+          );
+        }
         return HomeBannerModel(
           type: HomeBannerType.trial,
-          message: trial.displayText(DateTime.now()),
+          message: trial.displayText(now),
           isTappable: true,
         );
       case SubscriptionStatus.free:
         final limit =
-            user.subscriptionStatus.protocolLimit ?? user.activeProtocolCount;
+            effectiveStatus.protocolLimit ?? user.activeProtocolCount;
         return HomeBannerModel(
           type: HomeBannerType.free,
           message: '${user.activeProtocolCount}/$limit active',
