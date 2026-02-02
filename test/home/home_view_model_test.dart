@@ -202,16 +202,13 @@ void main() {
 
     group('_maybeTriggerExpiredModal (via init)', () {
       test(
-          'triggers for expired trial (raw status trial + trialPeriod expired)',
+          'does NOT trigger for trial status without RC snapshot (no transition)',
           () async {
-        // Arrange - trial started 10 days ago relative to now, definitely expired
-        final now = DateTime.now();
-        final expiredTrialPeriod = TrialPeriodFactory.create(
-          startDate: now.subtract(const Duration(days: 10)),
-        );
+        // Arrange - trial status without RC snapshot means we can't detect
+        // expiration. Modal only triggers on status transitions or expired status.
         final user = UserFactory.create(
           subscriptionStatus: SubscriptionStatus.trial,
-          trialPeriod: expiredTrialPeriod,
+          trialPeriod: TrialPeriodFactory.expired(),
           onboardingCompleted: true,
         );
 
@@ -240,8 +237,9 @@ void main() {
         // Act
         await viewModel.init();
 
-        // Assert
-        expect(viewModel.state.value.showTrialExpiredModal, isTrue);
+        // Assert - without RC snapshot, effective status is DB status (trial)
+        // Modal does not trigger because there's no detected transition
+        expect(viewModel.state.value.showTrialExpiredModal, isFalse);
       });
 
       test('triggers for premium expiration (expired status)', () async {
@@ -366,15 +364,17 @@ void main() {
     });
 
     group('isTrialOrPremiumExpired', () {
-      test('returns true for expired trial', () async {
-        // Arrange - trial started 10 days ago relative to now
-        final now = DateTime.now();
-        final expiredTrialPeriod = TrialPeriodFactory.create(
-          startDate: now.subtract(const Duration(days: 10)),
-        );
+      // Note: isTrialOrPremiumExpired() is now synchronous and checks
+      // effective status (expired/free) rather than legacy trialPeriod.
+
+      test('returns false for trial status (regardless of trialPeriod)', () {
+        // Arrange - when RC is unavailable, effective status is the DB status.
+        // For trial status, the method returns false since it only checks
+        // for expired/free states. The modal trigger logic is in
+        // _maybeTriggerExpiredModal() which uses status transitions.
         final user = UserFactory.create(
           subscriptionStatus: SubscriptionStatus.trial,
-          trialPeriod: expiredTrialPeriod,
+          trialPeriod: TrialPeriodFactory.expired(),
           onboardingCompleted: true,
         );
 
@@ -382,35 +382,13 @@ void main() {
         addTearDown(viewModel.dispose);
 
         // Act
-        final result = await viewModel.isTrialOrPremiumExpired(user);
+        final result = viewModel.isTrialOrPremiumExpired(user);
 
-        // Assert
-        expect(result, isTrue);
-      });
-
-      test('returns false for active trial', () async {
-        // Arrange - trial started 1 day ago relative to now
-        final now = DateTime.now();
-        final activeTrialPeriod = TrialPeriodFactory.create(
-          startDate: now.subtract(const Duration(days: 1)),
-        );
-        final user = UserFactory.create(
-          subscriptionStatus: SubscriptionStatus.trial,
-          trialPeriod: activeTrialPeriod,
-          onboardingCompleted: true,
-        );
-
-        final viewModel = createViewModel();
-        addTearDown(viewModel.dispose);
-
-        // Act
-        final result = await viewModel.isTrialOrPremiumExpired(user);
-
-        // Assert
+        // Assert - trial is not expired/free, so returns false
         expect(result, isFalse);
       });
 
-      test('returns true for expired premium', () async {
+      test('returns true for expired status', () {
         // Arrange
         final user = UserFactory.create(
           subscriptionStatus: SubscriptionStatus.expired,
@@ -421,14 +399,14 @@ void main() {
         addTearDown(viewModel.dispose);
 
         // Act
-        final result = await viewModel.isTrialOrPremiumExpired(user);
+        final result = viewModel.isTrialOrPremiumExpired(user);
 
         // Assert
         expect(result, isTrue);
       });
 
-      test('returns false for free user', () async {
-        // Arrange
+      test('returns true for free status', () {
+        // Arrange - free users are considered "expired" for paywall purposes
         final user = UserFactory.create(
           subscriptionStatus: SubscriptionStatus.free,
           onboardingCompleted: true,
@@ -438,23 +416,33 @@ void main() {
         addTearDown(viewModel.dispose);
 
         // Act
-        final result = await viewModel.isTrialOrPremiumExpired(user);
+        final result = viewModel.isTrialOrPremiumExpired(user);
+
+        // Assert
+        expect(result, isTrue);
+      });
+
+      test('returns false for premium monthly', () {
+        // Arrange
+        final user = UserFactory.create(
+          subscriptionStatus: SubscriptionStatus.premiumMonthly,
+          onboardingCompleted: true,
+        );
+
+        final viewModel = createViewModel();
+        addTearDown(viewModel.dispose);
+
+        // Act
+        final result = viewModel.isTrialOrPremiumExpired(user);
 
         // Assert
         expect(result, isFalse);
       });
 
-      test('returns false for free user with expired trialPeriod', () async {
-        // Arrange - regression test: user who chose free tier should not
-        // trigger modal even if they have an old expired trialPeriod.
-        // The VM now uses resolver with effective status from RC or DB fallback.
-        final now = DateTime.now();
-        final expiredTrialPeriod = TrialPeriodFactory.create(
-          startDate: now.subtract(const Duration(days: 10)),
-        );
+      test('returns false for premium annual', () {
+        // Arrange
         final user = UserFactory.create(
-          subscriptionStatus: SubscriptionStatus.free,
-          trialPeriod: expiredTrialPeriod,
+          subscriptionStatus: SubscriptionStatus.premiumAnnual,
           onboardingCompleted: true,
         );
 
@@ -462,9 +450,26 @@ void main() {
         addTearDown(viewModel.dispose);
 
         // Act
-        final result = await viewModel.isTrialOrPremiumExpired(user);
+        final result = viewModel.isTrialOrPremiumExpired(user);
 
-        // Assert - should be false because effective status is free, not trial
+        // Assert
+        expect(result, isFalse);
+      });
+
+      test('returns false for grace status', () {
+        // Arrange - grace means billing issue but still has access
+        final user = UserFactory.create(
+          subscriptionStatus: SubscriptionStatus.grace,
+          onboardingCompleted: true,
+        );
+
+        final viewModel = createViewModel();
+        addTearDown(viewModel.dispose);
+
+        // Act
+        final result = viewModel.isTrialOrPremiumExpired(user);
+
+        // Assert
         expect(result, isFalse);
       });
     });

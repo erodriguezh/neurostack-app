@@ -356,7 +356,7 @@ class _HomeViewState extends State<HomeView> {
           if (!mounted) return;
 
           final user = _viewModel.state.value.user;
-          if (user != null && await _viewModel.isTrialOrPremiumExpired(user)) {
+          if (user != null && _viewModel.isTrialOrPremiumExpired(user)) {
             continue; // Re-show modal
           }
           // User subscribed: mark decision resolved and exit loop
