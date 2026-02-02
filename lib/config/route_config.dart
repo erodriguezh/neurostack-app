@@ -2,6 +2,7 @@ import 'package:neurostack/home/home_view.dart';
 import 'package:neurostack/library/library_view.dart';
 import 'package:neurostack/paywall/paywall_view.dart';
 import 'package:neurostack/progress/progress_view.dart';
+import 'package:neurostack/settings/settings_view.dart';
 import 'package:neurostack/core/utils/navigation/route_data.dart';
 import 'package:neurostack/not_found/not_found_view.dart';
 import 'package:neurostack/features/auth/presentation/auth_callback_view.dart';
@@ -30,6 +31,11 @@ final routes = [
     path: '/paywall',
     requiresAuth: true,
     builder: (key, routeData) => const PaywallView(),
+  ),
+  RouteEntry(
+    path: '/settings',
+    requiresAuth: true,
+    builder: (key, routeData) => const SettingsView(),
   ),
   RouteEntry(path: '/auth', builder: (key, routeData) => const AuthView()),
   RouteEntry(

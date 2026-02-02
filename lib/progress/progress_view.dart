@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
 import 'package:neurostack/core/ui/constants/spacing.dart';
 import 'package:neurostack/core/ui/widgets/app_grid_background.dart';
@@ -8,6 +9,7 @@ import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
 import 'package:neurostack/core/utils/internal_notification/notify_service.dart';
 import 'package:neurostack/core/utils/internal_notification/toast/toast_event.dart';
 import 'package:neurostack/core/utils/locator.dart';
+import 'package:neurostack/core/utils/navigation/route_data.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
 import 'package:neurostack/features/auth/data/cached_user_store.dart';
@@ -183,26 +185,42 @@ class _ProgressViewState extends State<ProgressView>
         SliverToBoxAdapter(
           child: Padding(
             padding: EdgeInsets.fromLTRB(spacing.lg, spacing.lg, spacing.lg, 0),
-            child: Column(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'This Week',
-                  style: context.theme.textTheme.headlineLarge?.copyWith(
-                    fontSize: 32,
-                    fontStyle: FontStyle.italic,
-                    letterSpacing: -0.8,
-                    color: context.kitColors.white90,
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'This Week',
+                      style: context.theme.textTheme.headlineLarge?.copyWith(
+                        fontSize: 32,
+                        fontStyle: FontStyle.italic,
+                        letterSpacing: -0.8,
+                        color: context.kitColors.white90,
+                      ),
+                    ),
+                    SizedBox(height: spacing.xs),
+                    Text(
+                      _formatWeekRange(context, state.weekRange),
+                      style: context.theme.textTheme.bodyMedium?.copyWith(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w300,
+                        color: context.kitColors.white40,
+                      ),
+                    ),
+                  ],
                 ),
-                SizedBox(height: spacing.xs),
-                Text(
-                  _formatWeekRange(context, state.weekRange),
-                  style: context.theme.textTheme.bodyMedium?.copyWith(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w300,
+                IconButton(
+                  icon: Icon(
+                    LucideIcons.settings,
                     color: context.kitColors.white40,
+                    size: 20,
                   ),
+                  onPressed: () {
+                    locator<RouterService>().goTo(Path(name: '/settings'));
+                  },
                 ),
               ],
             ),
