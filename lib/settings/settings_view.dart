@@ -108,19 +108,23 @@ class _SettingsViewState extends State<SettingsView> {
   Future<void> _handleRestorePurchases(BuildContext context) async {
     // Capture messenger before async gap
     final messenger = ScaffoldMessenger.of(context);
-    final success = await _viewModel.restorePurchases();
+    final result = await _viewModel.restorePurchases();
     if (!mounted) return;
 
-    if (success) {
-      messenger.showSnackBar(
-        const SnackBar(content: Text('Purchases restored successfully')),
-      );
-    } else {
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text('Unable to restore purchases. Try again later.'),
-        ),
-      );
+    switch (result) {
+      case RestoreResult.success:
+        messenger.showSnackBar(
+          const SnackBar(content: Text('Purchases restored successfully')),
+        );
+      case RestoreResult.failure:
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text('Unable to restore purchases. Try again later.'),
+          ),
+        );
+      case RestoreResult.alreadyInProgress:
+        // Ignore - first request will complete and show feedback
+        break;
     }
   }
 }

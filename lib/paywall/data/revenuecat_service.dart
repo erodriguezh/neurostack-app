@@ -327,28 +327,36 @@ class RevenueCatService {
   /// This is the #1 subscription correctness issue after launch.
   /// Must be exposed in Settings UI as "Restore Purchases" action.
   ///
+  /// Returns `true` if restore completed successfully, `false` otherwise.
+  /// Common failure reasons:
+  /// - init() was never called (throws [StateError])
+  /// - SDK configuration failed
+  /// - User not identified
+  /// - SDK restore operation failed
+  ///
   /// Throws [StateError] if [init] has not been called.
-  Future<void> restorePurchases() async {
+  Future<bool> restorePurchases() async {
     _ensureInitStarted();
     try {
       await _initCompleter.future;
     } catch (_) {
       _logger.warning('restorePurchases called but SDK configuration failed');
-      return; // SDK not configured
+      return false; // SDK not configured
     }
 
     if (_identifiedUserId == null) {
       _logger.warning('restorePurchases called but no user identified');
-      return; // Must be identified
+      return false; // Must be identified
     }
 
     try {
       await _client.restorePurchases();
       await refreshEntitlement();
       _logger.fine('Purchases restored');
+      return true;
     } catch (e, st) {
       _logger.warning('restorePurchases failed', e, st);
-      // Best-effort - don't crash caller
+      return false;
     }
   }
 

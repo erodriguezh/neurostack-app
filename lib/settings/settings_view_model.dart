@@ -1,6 +1,18 @@
 import 'package:flutter/foundation.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
 
+/// Result of a restore purchases operation.
+enum RestoreResult {
+  /// Restore completed successfully.
+  success,
+
+  /// Restore failed (SDK error, not configured, not identified, etc.).
+  failure,
+
+  /// Restore is already in progress - request was ignored.
+  alreadyInProgress,
+}
+
 /// ViewModel for SettingsView.
 ///
 /// Handles restore purchases functionality by delegating to [RevenueCatService].
@@ -19,17 +31,22 @@ class SettingsViewModel {
   /// - App reinstall
   /// - Family sharing setup
   ///
-  /// Returns true if restore completed without errors, false otherwise.
-  /// The caller should show appropriate feedback via SnackBar.
-  Future<bool> restorePurchases() async {
-    if (isRestoring.value) return false;
+  /// Returns [RestoreResult] indicating the outcome:
+  /// - [RestoreResult.success] - restore completed successfully
+  /// - [RestoreResult.failure] - restore failed (show error message)
+  /// - [RestoreResult.alreadyInProgress] - ignore (no feedback needed)
+  Future<RestoreResult> restorePurchases() async {
+    // If already restoring, return "in progress" so caller can ignore
+    // (no SnackBar needed since first request will complete and show feedback)
+    if (isRestoring.value) return RestoreResult.alreadyInProgress;
 
     isRestoring.value = true;
     try {
-      await _revenueCatService.restorePurchases();
-      return true;
+      final success = await _revenueCatService.restorePurchases();
+      return success ? RestoreResult.success : RestoreResult.failure;
     } catch (e) {
-      return false;
+      // StateError from _ensureInitStarted() or other unexpected errors
+      return RestoreResult.failure;
     } finally {
       isRestoring.value = false;
     }
