@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-46-1b8",
+  "created_at": "2026-02-02T12:02:58.845755Z",
+  "depends_on_epics": [],
+  "id": "fn-46-1b8",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-46-1b8.md",
+  "status": "open",
+  "title": "Phase 5.3: Add Restore Purchases Entry Point",
+  "updated_at": "2026-02-02T12:02:58.846362Z"
+}

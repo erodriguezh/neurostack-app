@@ -808,7 +808,7 @@ Single source of truth for UI gating decisions. Prevents duplicate logic across 
   - Add `presentPaywall()` method that delegates to service
   - Remove `navigateToHome()` - view handles navigation
 
-### 5.3 Add Restore Purchases Entry Point (CRITICAL for Launch)
+### 5.3 Add Restore Purchases Entry Point (CRITICAL for Launch) [DONE]
 - **File:** Settings view (e.g., `lib/settings/settings_view.dart`)
 - **Rationale:** #1 subscription correctness issue after launch - users reinstall/change devices
 - **Changes:**
