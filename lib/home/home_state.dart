@@ -66,6 +66,7 @@ class HomeViewState {
     this.banner,
     this.bannerDismissed = false,
     this.showTrialExpiredModal = false,
+    this.isTrialExpiration = true,
     this.showTrialReminder = false,
     this.showGraceModal = false,
     this.showDeactivationModal = false,
@@ -82,6 +83,11 @@ class HomeViewState {
   final HomeBannerModel? banner;
   final bool bannerDismissed;
   final bool showTrialExpiredModal;
+
+  /// Whether the expiration modal is for trial (true) or paid subscription (false).
+  ///
+  /// Only relevant when [showTrialExpiredModal] is true.
+  final bool isTrialExpiration;
   final bool showTrialReminder;
   final bool showGraceModal;
   final bool showDeactivationModal;
@@ -98,6 +104,7 @@ class HomeViewState {
     Object? banner = _unset,
     bool? bannerDismissed,
     bool? showTrialExpiredModal,
+    bool? isTrialExpiration,
     bool? showTrialReminder,
     bool? showGraceModal,
     bool? showDeactivationModal,
@@ -115,6 +122,7 @@ class HomeViewState {
       bannerDismissed: bannerDismissed ?? this.bannerDismissed,
       showTrialExpiredModal:
           showTrialExpiredModal ?? this.showTrialExpiredModal,
+      isTrialExpiration: isTrialExpiration ?? this.isTrialExpiration,
       showTrialReminder: showTrialReminder ?? this.showTrialReminder,
       showGraceModal: showGraceModal ?? this.showGraceModal,
       showDeactivationModal:

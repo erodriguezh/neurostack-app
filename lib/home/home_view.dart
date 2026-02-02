@@ -344,6 +344,7 @@ class _HomeViewState extends State<HomeView> {
       final choice = await showTrialExpiredModal(
         context,
         activeProtocolCount: currentProtocolCount,
+        isTrialExpiration: state.isTrialExpiration,
       );
 
       switch (choice) {

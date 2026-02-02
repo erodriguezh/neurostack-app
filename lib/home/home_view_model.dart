@@ -594,9 +594,15 @@ class HomeViewModel {
       );
     }
 
+    // Determine if this is a trial expiration or paid subscription lapse
+    // Trial expiration: detected via resolver's shouldShowTrialExpiredModal
+    // Paid expiration: detected via isPremiumExpired (status == expired)
+    final isTrialExpiration = shouldShowModal && !isPremiumExpired;
+
     _hasShownExpiredModal = true;
     return state.copyWith(
       showTrialExpiredModal: true,
+      isTrialExpiration: isTrialExpiration,
       showTrialReminder: false, // Don't show reminder when showing modal
     );
   }

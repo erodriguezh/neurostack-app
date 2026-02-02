@@ -24,9 +24,12 @@ enum TrialExpiredChoice {
 /// Parameters:
 /// - [context]: The build context for showing the dialog.
 /// - [activeProtocolCount]: The number of active protocols the user has.
+/// - [isTrialExpiration]: If true, shows "trial has ended" messaging.
+///   If false, shows "subscription has lapsed" messaging for paid users.
 Future<TrialExpiredChoice?> showTrialExpiredModal(
   BuildContext context, {
   required int activeProtocolCount,
+  bool isTrialExpiration = true,
 }) async {
   return showDialog<TrialExpiredChoice>(
     context: context,
@@ -37,13 +40,14 @@ Future<TrialExpiredChoice?> showTrialExpiredModal(
         filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
         child: TrialExpiredModal(
           activeProtocolCount: activeProtocolCount,
+          isTrialExpiration: isTrialExpiration,
         ),
       );
     },
   );
 }
 
-/// A blocking modal shown when the user's trial has expired.
+/// A blocking modal shown when the user's trial or subscription has expired.
 ///
 /// Displays two options:
 /// - "Keep Everything" - subscribe to premium
@@ -52,10 +56,16 @@ class TrialExpiredModal extends StatefulWidget {
   const TrialExpiredModal({
     super.key,
     required this.activeProtocolCount,
+    this.isTrialExpiration = true,
   });
 
   /// The number of active protocols the user currently has.
   final int activeProtocolCount;
+
+  /// Whether this is a trial expiration (true) or paid subscription lapse (false).
+  ///
+  /// Controls the headline text shown to the user.
+  final bool isTrialExpiration;
 
   @override
   State<TrialExpiredModal> createState() => _TrialExpiredModalState();
@@ -137,7 +147,9 @@ class _TrialExpiredModalState extends State<TrialExpiredModal>
                     SizedBox(height: spacing.xl),
                     // Headline
                     Text(
-                      'Your Premium Trial Has Ended',
+                      widget.isTrialExpiration
+                          ? 'Your Premium Trial Has Ended'
+                          : 'Your Subscription Has Lapsed',
                       textAlign: TextAlign.center,
                       style: GoogleFonts.newsreader(
                         fontSize: 28,
