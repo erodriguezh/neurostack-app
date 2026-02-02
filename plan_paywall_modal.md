@@ -844,7 +844,7 @@ Single source of truth for UI gating decisions. Prevents duplicate logic across 
 
 ## Phase 6: Home/Library Gating Updates
 
-### 6.1 Update HomeViewModel
+### 6.1 Update HomeViewModel [DONE]
 - **File:** `lib/home/home_view_model.dart`
 - **Changes:**
   - Constructor inject `SubscriptionStatusResolver` and `RevenueCatService`
@@ -874,7 +874,7 @@ Single source of truth for UI gating decisions. Prevents duplicate logic across 
   }
   ```
 
-### 6.3 Update HomeViewState
+### 6.3 Update HomeViewState [DONE]
 - **File:** `lib/home/home_state.dart`
 - **Changes:** Add `showTrialReminder: bool` field
 
@@ -892,7 +892,7 @@ Single source of truth for UI gating decisions. Prevents duplicate logic across 
 
 ## Phase 7: Trial Expiration Decision Store (Re-keying)
 
-### 7.0 Add Status Transition Tracking (CRITICAL for Modal Detection)
+### 7.0 Add Status Transition Tracking (CRITICAL for Modal Detection) [DONE]
 - **File:** `lib/paywall/data/trial_expiration_decision_store.dart`
 - **Rationale:** RC's `entitlements.all.periodType` may be null/missing on some platforms
 - **Pattern:** Track status transitions client-side as primary detection, not SDK metadata
