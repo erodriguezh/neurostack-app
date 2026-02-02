@@ -274,8 +274,9 @@ void main() {
         // Act
         await viewModel.init();
 
-        // Assert
+        // Assert - modal shows with paid-lapse messaging (not trial messaging)
         expect(viewModel.state.value.showTrialExpiredModal, isTrue);
+        expect(viewModel.state.value.isTrialExpiration, isFalse);
       });
 
       test('does NOT trigger for active trial', () async {
