@@ -17,6 +17,7 @@ import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:neurostack/paywall/data/trial_expiration_decision_store.dart';
 import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 import 'package:neurostack/paywall/widgets/trial_expired_modal.dart';
+import 'package:neurostack/paywall/widgets/trial_reminder_alert.dart';
 import 'package:neurostack/home/home_state.dart';
 import 'package:neurostack/home/home_view_model.dart';
 import 'package:neurostack/home/widgets/home_bottom_nav.dart';
@@ -159,6 +160,20 @@ class _HomeViewState extends State<HomeView> {
         ),
       );
       slivers.add(SliverToBoxAdapter(child: SizedBox(height: spacing.md)));
+    }
+
+    if (state.showTrialReminder) {
+      slivers.add(
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.only(bottom: spacing.md),
+            child: TrialReminderAlert(
+              onUpgrade: _viewModel.goToPaywall,
+              onDismiss: _viewModel.dismissTrialReminder,
+            ),
+          ),
+        ),
+      );
     }
 
     switch (state.status) {

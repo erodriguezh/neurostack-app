@@ -236,6 +236,10 @@ class HomeViewModel {
     state.value = state.value.copyWith(showTrialExpiredModal: false);
   }
 
+  void dismissTrialReminder() {
+    state.value = state.value.copyWith(showTrialReminder: false);
+  }
+
   void acknowledgeGraceModal() {
     state.value = state.value.copyWith(showGraceModal: false);
   }
