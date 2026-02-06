@@ -853,7 +853,7 @@ Single source of truth for UI gating decisions. Prevents duplicate logic across 
   - Replace `isTrialOrPremiumExpired()` with `_resolver.shouldShowTrialExpiredModal()`
   - Add `showTrialReminder` state from `_resolver.shouldShowTrialReminder()`
 
-### 6.2 Remove Subscription Status DB Writes (CRITICAL)
+### 6.2 Remove Subscription Status DB Writes (CRITICAL) [DONE]
 - **File:** `lib/home/home_view_model.dart`
 - **Problem:** `handleUseFreeTier()` currently writes `SubscriptionStatus.free` to Supabase, conflicting with "webhook is DB writer" principle
 - **Changes:**
