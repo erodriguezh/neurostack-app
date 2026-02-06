@@ -51,7 +51,7 @@ class TrialReminderAlert extends StatelessWidget {
                     SizedBox(width: spacing.sm),
                     Expanded(
                       child: Text(
-                        'Trial expires tomorrow',
+                        'Your trial ends soon',
                         style: context.theme.textTheme.bodySmall?.copyWith(
                           fontSize: 13,
                           color: accent,

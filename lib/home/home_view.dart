@@ -166,9 +166,12 @@ class _HomeViewState extends State<HomeView> {
       slivers.add(
         SliverToBoxAdapter(
           child: Padding(
-            padding: EdgeInsets.only(bottom: spacing.md),
+            padding: EdgeInsets.only(
+              top: state.banner == null ? spacing.sm : 0,
+              bottom: spacing.md,
+            ),
             child: TrialReminderAlert(
-              onUpgrade: _viewModel.goToPaywall,
+              onUpgrade: () => _viewModel.goToPaywall(),
               onDismiss: _viewModel.dismissTrialReminder,
             ),
           ),
