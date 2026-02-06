@@ -878,9 +878,15 @@ Single source of truth for UI gating decisions. Prevents duplicate logic across 
 - **File:** `lib/home/home_state.dart`
 - **Changes:** Add `showTrialReminder: bool` field
 
-### 6.4 Update HomeView
+### 6.4 Update HomeView [DONE]
 - **File:** `lib/home/home_view.dart`
 - **Changes:** Show TrialReminderAlert when `state.showTrialReminder`
+- **Actual:**
+  - Created `lib/paywall/widgets/trial_reminder_alert.dart` — amber dismissible banner with "Your trial ends soon" + "Upgrade Now" button
+  - Added `dismissTrialReminder()` to `HomeViewModel`
+  - Wired alert into `_buildSlivers()` between status banner and header
+  - Extracted shared `DismissButton` to `lib/core/ui/widgets/dismiss_button.dart` (de-duped from `HomeStatusBanner`)
+  - Review fixes: wrapped `goToPaywall()` in closure, added conditional top padding, updated copy for `<24h` window accuracy
 
 ### 6.5 Update LibraryViewModel
 - **File:** `lib/library/library_view_model.dart`
