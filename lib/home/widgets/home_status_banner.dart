@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
 import 'package:neurostack/core/ui/constants/kit_colors.dart';
+import 'package:neurostack/core/ui/widgets/dismiss_button.dart';
 import 'package:neurostack/home/home_state.dart';
 
 class HomeStatusBanner extends StatelessWidget {
@@ -68,7 +69,7 @@ class HomeStatusBanner extends StatelessWidget {
                           ),
                         if (banner.isDismissible && onDismiss != null) ...[
                           SizedBox(width: spacing.xs),
-                          _DismissButton(onTap: onDismiss),
+                          DismissButton(onTap: onDismiss),
                         ],
                       ],
                     ),
@@ -133,31 +134,6 @@ class HomeStatusBanner extends StatelessWidget {
       HomeBannerType.grace => kitColors.info,
       HomeBannerType.offline => kitColors.white70,
     };
-  }
-}
-
-class _DismissButton extends StatelessWidget {
-  const _DismissButton({required this.onTap});
-
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final kitColors = context.kitColors;
-    return SizedBox(
-      width: 24,
-      height: 24,
-      child: IconButton(
-        onPressed: onTap,
-        padding: EdgeInsets.zero,
-        iconSize: 14,
-        constraints: const BoxConstraints(),
-        icon: Icon(
-          LucideIcons.x,
-          color: kitColors.white60,
-        ),
-      ),
-    );
   }
 }
 

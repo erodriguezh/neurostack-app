@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
+import 'package:neurostack/core/ui/widgets/dismiss_button.dart';
 
 /// A dismissible banner shown when the user's trial is about to expire.
 ///
@@ -59,7 +60,7 @@ class TrialReminderAlert extends StatelessWidget {
                     ),
                     _UpgradeButton(onTap: onUpgrade),
                     SizedBox(width: spacing.xs),
-                    _DismissButton(onTap: onDismiss),
+                    DismissButton(onTap: onDismiss),
                   ],
                 ),
               ),
@@ -114,27 +115,3 @@ class _UpgradeButton extends StatelessWidget {
   }
 }
 
-class _DismissButton extends StatelessWidget {
-  const _DismissButton({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final kitColors = context.kitColors;
-    return SizedBox(
-      width: 24,
-      height: 24,
-      child: IconButton(
-        onPressed: onTap,
-        padding: EdgeInsets.zero,
-        iconSize: 14,
-        constraints: const BoxConstraints(),
-        icon: Icon(
-          LucideIcons.x,
-          color: kitColors.white60,
-        ),
-      ),
-    );
-  }
-}
