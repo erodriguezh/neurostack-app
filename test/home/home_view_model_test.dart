@@ -7,13 +7,11 @@ import 'package:neurostack/core/utils/internal_notification/notify_service.dart'
 import 'package:neurostack/core/utils/internal_notification/toast/toast_event.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
-import 'package:neurostack/features/auth/data/cached_user_store.dart';
 import 'package:neurostack/features/auth/domain/auth_state.dart';
 import 'package:neurostack/features/protocol/domain/repositories/protocol_repository.dart';
 import 'package:neurostack/features/session/data/data_sources/session_local_data_source.dart';
 import 'package:neurostack/features/session/domain/entities/session.dart';
 import 'package:neurostack/features/session/domain/repositories/session_repository.dart';
-import 'package:neurostack/features/user/domain/entities/user.dart';
 import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
 import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
 import 'package:neurostack/home/home_view_model.dart';
@@ -41,8 +39,6 @@ class MockSessionLocalDataSource extends Mock
 
 class MockConnectivityService extends Mock implements ConnectivityService {}
 
-class MockCachedUserStore extends Mock implements CachedUserStore {}
-
 class MockRevenueCatService extends Mock implements RevenueCatService {}
 
 class MockSubscriptionStatusResolver extends Mock
@@ -57,7 +53,6 @@ void main() {
   late MockSessionRepository mockSessionRepository;
   late MockSessionLocalDataSource mockSessionLocalDataSource;
   late MockConnectivityService mockConnectivityService;
-  late MockCachedUserStore mockCachedUserStore;
   late MockRevenueCatService mockRevenueCatService;
   late SubscriptionStatusResolver subscriptionStatusResolver;
 
@@ -75,7 +70,6 @@ void main() {
     mockSessionRepository = MockSessionRepository();
     mockSessionLocalDataSource = MockSessionLocalDataSource();
     mockConnectivityService = MockConnectivityService();
-    mockCachedUserStore = MockCachedUserStore();
     mockRevenueCatService = MockRevenueCatService();
     // Use real resolver since it's pure functions
     subscriptionStatusResolver = const SubscriptionStatusResolver();
@@ -101,14 +95,13 @@ void main() {
       connectivityService: mockConnectivityService,
       subscriptionStatusResolver: subscriptionStatusResolver,
       revenueCatService: mockRevenueCatService,
-      cachedUserStore: mockCachedUserStore,
     );
   }
 
   group('HomeViewModel', () {
     group('handleUseFreeTier', () {
       test(
-          'with 2 protocols - status becomes free, cache updated, and refresh called',
+          'with 2 protocols - returns true, refreshes, does NOT write to DB',
           () async {
         // Arrange
         final user = UserFactory.create(
@@ -118,19 +111,11 @@ void main() {
           onboardingCompleted: true,
         );
 
-        final updatedUser =
-            user.updateSubscriptionStatus(SubscriptionStatus.free);
-
-        when(() => mockUserRepository.save(any()))
-            .thenAnswer((_) async => right(unit));
-        when(() => mockCachedUserStore.saveUser(any()))
-            .thenAnswer((_) async {});
-
         // Setup auth state for refresh
         when(() => mockAuthService.authState)
             .thenReturn(ValueNotifier(AuthenticatedOnline(user)));
         when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(updatedUser));
+            .thenAnswer((_) async => right(user));
         when(() => mockSessionRepository.list(
               from: any(named: 'from'),
               to: any(named: 'to'),
@@ -153,29 +138,19 @@ void main() {
         viewModel.state.value = viewModel.state.value.copyWith(user: user);
 
         // Act
-        await viewModel.handleUseFreeTier();
+        final result = await viewModel.handleUseFreeTier();
 
-        // Assert - verify save with correct status
-        verify(
-          () => mockUserRepository.save(
-            any(
-              that: predicate<User>(
-                (u) => u.subscriptionStatus == SubscriptionStatus.free,
-              ),
-            ),
-          ),
-        ).called(1);
-        verify(() => mockCachedUserStore.saveUser(any())).called(1);
+        // Assert - returns true (success)
+        expect(result, isTrue);
+
+        // Assert - does NOT write subscription status to DB
+        // (webhook is the only DB writer for subscription state)
+        verifyNever(() => mockUserRepository.save(any()));
+
         expect(viewModel.state.value.showDeactivationModal, isFalse);
 
-        // Assert - verify refresh was called (getById invoked)
+        // Assert - refresh was called (getById invoked)
         verify(() => mockUserRepository.getById(any())).called(1);
-
-        // Assert - verify state was updated with refreshed user
-        expect(
-          viewModel.state.value.user?.subscriptionStatus,
-          SubscriptionStatus.free,
-        );
       });
 
       test('with 3 protocols - triggers deactivation modal', () async {

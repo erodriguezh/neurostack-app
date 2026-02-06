@@ -11,7 +11,6 @@ import 'package:neurostack/core/utils/internal_notification/toast/toast_event.da
 import 'package:neurostack/core/utils/navigation/route_data.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
-import 'package:neurostack/features/auth/data/cached_user_store.dart';
 import 'package:neurostack/features/auth/domain/auth_state.dart';
 import 'package:neurostack/features/protocol/domain/entities/protocol.dart';
 import 'package:neurostack/features/protocol/domain/repositories/protocol_repository.dart';
@@ -43,7 +42,6 @@ class HomeViewModel {
     required SubscriptionStatusResolver subscriptionStatusResolver,
     required RevenueCatService revenueCatService,
     HomeBottomTabCoordinator? tabCoordinator,
-    CachedUserStore? cachedUserStore,
     TrialExpirationDecisionStore? trialExpirationDecisionStore,
   }) : _notifyService = notifyService,
        _routerService = routerService,
@@ -55,7 +53,6 @@ class HomeViewModel {
        _connectivityService = connectivityService,
        _resolver = subscriptionStatusResolver,
        _revenueCatService = revenueCatService,
-       _cachedUserStore = cachedUserStore,
        _trialExpirationDecisionStore = trialExpirationDecisionStore,
        _tabCoordinator =
            tabCoordinator ??
@@ -73,7 +70,6 @@ class HomeViewModel {
   final ConnectivityService _connectivityService;
   final SubscriptionStatusResolver _resolver;
   final RevenueCatService _revenueCatService;
-  final CachedUserStore? _cachedUserStore;
   final TrialExpirationDecisionStore? _trialExpirationDecisionStore;
   final HomeBottomTabCoordinator _tabCoordinator;
 
@@ -216,7 +212,10 @@ class HomeViewModel {
   }
 
   /// Attempts to transition the user to free tier.
-  /// Returns true if successful, false if deactivation is required or save failed.
+  /// Returns true if successful, false if deactivation is required.
+  ///
+  /// Does NOT write subscription_status to Supabase — the webhook is the
+  /// only DB writer for subscription state (Design Principle #3).
   Future<bool> handleUseFreeTier() async {
     final user = state.value.user;
     if (user == null) {
@@ -228,26 +227,9 @@ class HomeViewModel {
       return false;
     }
 
-    // ≤2 protocols: transition to free tier
-    final updatedUser = user.updateSubscriptionStatus(SubscriptionStatus.free);
-
-    final saveResult = await _userRepository.save(updatedUser);
-    var success = false;
-    await saveResult.fold(
-      (failure) async {
-        _notifyService.setToastEvent(ToastEventError(message: failure.message));
-      },
-      (_) async {
-        success = true;
-        try {
-          await _cachedUserStore?.saveUser(updatedUser);
-        } catch (e) {
-          _logger.fine('Cached user save failed: $e');
-        }
-        await refresh();
-      },
-    );
-    return success;
+    // ≤2 protocols: accept free tier locally and refresh
+    await refresh();
+    return true;
   }
 
   void acknowledgeTrialExpiredModal() {

@@ -8,7 +8,6 @@ import 'package:neurostack/core/utils/internal_notification/toast/toast_event.da
 import 'package:neurostack/core/utils/locator.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
-import 'package:neurostack/features/auth/data/cached_user_store.dart';
 import 'package:neurostack/features/protocol/domain/repositories/protocol_repository.dart';
 import 'package:neurostack/features/session/data/data_sources/session_local_data_source.dart';
 import 'package:neurostack/features/session/domain/repositories/session_repository.dart';
@@ -45,7 +44,6 @@ class _HomeViewState extends State<HomeView> {
     connectivityService: locator<ConnectivityService>(),
     subscriptionStatusResolver: locator<SubscriptionStatusResolver>(),
     revenueCatService: locator<RevenueCatService>(),
-    cachedUserStore: locator<CachedUserStore>(),
     trialExpirationDecisionStore: locator<TrialExpirationDecisionStore>(),
   );
 
