@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:logging/logging.dart';
+import 'package:neurostack/core/abstractions/connectivity_listener_mixin.dart';
+import 'package:neurostack/core/abstractions/entitlement_listener_mixin.dart';
 import 'package:neurostack/core/failures/domain_failure.dart';
 import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
 import 'package:neurostack/core/utils/internal_notification/notify_service.dart';
@@ -26,9 +28,11 @@ import 'package:neurostack/home/home_state.dart';
 import 'package:neurostack/library/library_state.dart';
 import 'package:neurostack/library/library_stats.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
+import 'package:neurostack/paywall/domain/entitlement_snapshot.dart';
 import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 
-class LibraryViewModel {
+class LibraryViewModel
+    with EntitlementListenerMixin, ConnectivityListenerMixin {
   final Logger _logger = Logger('Library');
 
   LibraryViewModel({
@@ -79,21 +83,70 @@ class LibraryViewModel {
 
   bool _isLoading = false;
   bool _isDisposed = false;
-  VoidCallback? _connectivityListener;
-  VoidCallback? _entitlementListener;
   User? _cachedUser;
   List<Protocol> _cachedProtocols = const [];
   String? _cachedProtocolsUserId;
 
-  Future<void> init() async {
-    _connectivityListener ??= _handleConnectivityChange;
-    _connectivityService.status.removeListener(_connectivityListener!);
-    _connectivityService.status.addListener(_connectivityListener!);
+  // --- Mixin wiring ---
 
-    // Listen to RevenueCat entitlement changes for real-time UI updates
-    _entitlementListener ??= _handleEntitlementChange;
-    _revenueCatService.entitlementSnapshot.removeListener(_entitlementListener!);
-    _revenueCatService.entitlementSnapshot.addListener(_entitlementListener!);
+  @override
+  RevenueCatService get entitlementListenerService => _revenueCatService;
+
+  @override
+  ConnectivityService get connectivityListenerService => _connectivityService;
+
+  @override
+  void onEntitlementChanged() {
+    _logger.fine('Entitlement changed, refreshing library');
+    refresh();
+  }
+
+  @override
+  void onConnectivityChanged() {
+    final isOffline =
+        _connectivityService.status.value == NetworkStatus.offline;
+    final current = state.value;
+
+    if (current.isOffline == isOffline) {
+      return;
+    }
+
+    if (isOffline) {
+      if (_cachedUser != null &&
+          _cachedProtocols.isNotEmpty &&
+          _cachedProtocolsUserId == _cachedUser!.id) {
+        final snapshot = _revenueCatService.entitlementSnapshot.value;
+        final cards = _buildCards(
+          _cachedUser!,
+          _cachedProtocols,
+          snapshot: snapshot,
+          isOffline: true,
+        );
+        final sections = _buildSections(cards);
+        state.value = current.copyWith(
+          isOffline: true,
+          cards: cards,
+          sections: sections,
+        );
+        return;
+      }
+
+      state.value = current.copyWith(isOffline: true);
+      return;
+    }
+
+    state.value = current.copyWith(isOffline: false);
+    _loadLibrary(
+      showLoading: current.cards.isEmpty,
+      preferCacheWhenOffline: false,
+    );
+  }
+
+  // --- Public API ---
+
+  Future<void> init() async {
+    initConnectivityListener();
+    initEntitlementListener();
 
     final isOffline =
         _connectivityService.status.value == NetworkStatus.offline;
@@ -275,14 +328,12 @@ class LibraryViewModel {
 
   void dispose() {
     _isDisposed = true;
-    if (_connectivityListener != null) {
-      _connectivityService.status.removeListener(_connectivityListener!);
-    }
-    if (_entitlementListener != null) {
-      _revenueCatService.entitlementSnapshot.removeListener(_entitlementListener!);
-    }
+    disposeConnectivityListener();
+    disposeEntitlementListener();
     state.dispose();
   }
+
+  // --- Private helpers ---
 
   Future<void> _loadLibrary({
     required bool showLoading,
@@ -362,9 +413,11 @@ class LibraryViewModel {
     String? highlightProtocolId,
   }) {
     final isOffline = state.value.isOffline;
+    final snapshot = _revenueCatService.entitlementSnapshot.value;
     final cards = _buildCards(
       user,
       protocols,
+      snapshot: snapshot,
       isOffline: isOffline,
       highlightProtocolId: highlightProtocolId,
     );
@@ -386,13 +439,17 @@ class LibraryViewModel {
     );
   }
 
+  /// Builds library protocol cards from the given data.
+  ///
+  /// Pure function: receives the entitlement [snapshot] as a parameter
+  /// instead of reading it from the service, making it easier to test.
   List<LibraryProtocolCardModel> _buildCards(
     User user,
     List<Protocol> protocols, {
+    required EntitlementSnapshot? snapshot,
     required bool isOffline,
     String? highlightProtocolId,
   }) {
-    final snapshot = _revenueCatService.entitlementSnapshot.value;
     final effectiveStatus = _resolver.resolveEffectiveStatus(
       user: user,
       snapshot: snapshot,
@@ -524,7 +581,6 @@ class LibraryViewModel {
     });
   }
 
-
   String? _resolveUserId() {
     final authState = _authService.authState.value;
     if (authState is AuthenticatedOnline) {
@@ -559,53 +615,6 @@ class LibraryViewModel {
       return null;
     }
     return cachedUser;
-  }
-
-  /// Handles entitlement changes from RevenueCat for real-time UI updates.
-  ///
-  /// When entitlement changes (e.g., after purchase, subscription renewal/expiry),
-  /// refresh the library view to reflect the new subscription state (locked/unlocked cards).
-  void _handleEntitlementChange() {
-    _logger.fine('Entitlement changed, refreshing library');
-    refresh();
-  }
-
-  void _handleConnectivityChange() {
-    final isOffline =
-        _connectivityService.status.value == NetworkStatus.offline;
-    final current = state.value;
-
-    if (current.isOffline == isOffline) {
-      return;
-    }
-
-    if (isOffline) {
-      if (_cachedUser != null &&
-          _cachedProtocols.isNotEmpty &&
-          _cachedProtocolsUserId == _cachedUser!.id) {
-        final cards = _buildCards(
-          _cachedUser!,
-          _cachedProtocols,
-          isOffline: true,
-        );
-        final sections = _buildSections(cards);
-        state.value = current.copyWith(
-          isOffline: true,
-          cards: cards,
-          sections: sections,
-        );
-        return;
-      }
-
-      state.value = current.copyWith(isOffline: true);
-      return;
-    }
-
-    state.value = current.copyWith(isOffline: false);
-    _loadLibrary(
-      showLoading: current.cards.isEmpty,
-      preferCacheWhenOffline: false,
-    );
   }
 
   String _failureMessage<T>(Either<DomainFailure, T> result) {

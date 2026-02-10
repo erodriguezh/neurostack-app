@@ -902,6 +902,19 @@ Single source of truth for UI gating decisions. Prevents duplicate logic across 
   - Updated `LibraryView` to pass `subscriptionStatusResolver` and `revenueCatService` from locator
   - No DI registration changes needed (resolver and service already registered as singletons)
 
+### 6.5.1 Refactor: Extract shared patterns, purify _buildCards, add tests [DONE]
+- **Files:**
+  - `lib/core/abstractions/entitlement_listener_mixin.dart` (new)
+  - `lib/core/abstractions/connectivity_listener_mixin.dart` (new)
+  - `lib/library/library_view_model.dart` (refactored)
+  - `lib/home/home_view_model.dart` (refactored)
+  - `test/library/library_view_model_test.dart` (new, 11 tests)
+- **Changes:**
+  - Extracted `EntitlementListenerMixin` to de-duplicate entitlement listener setup/teardown between Home and Library view models
+  - Extracted `ConnectivityListenerMixin` to de-duplicate connectivity listener setup/teardown between Home and Library view models
+  - Purified `_buildCards` in LibraryViewModel: receives `EntitlementSnapshot?` as parameter instead of reading `_revenueCatService.entitlementSnapshot.value` directly
+  - Added 11 LibraryViewModel unit tests covering: resolver-based locking (free, premium, trial, expired, RC override), entitlement change triggers refresh, connectivity changes (offline, online reload, no-op), init states (loaded, empty)
+
 ---
 
 ## Phase 7: Trial Expiration Decision Store (Re-keying)

@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:logging/logging.dart';
+import 'package:neurostack/core/abstractions/connectivity_listener_mixin.dart';
+import 'package:neurostack/core/abstractions/entitlement_listener_mixin.dart';
 import 'package:neurostack/core/failures/domain_failure.dart';
 import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
 import 'package:neurostack/core/utils/date_time_extensions.dart';
@@ -27,7 +29,8 @@ import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:neurostack/paywall/data/trial_expiration_decision_store.dart';
 import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 
-class HomeViewModel {
+class HomeViewModel
+    with EntitlementListenerMixin, ConnectivityListenerMixin {
   final Logger _logger = Logger('Home');
 
   HomeViewModel({
@@ -79,18 +82,33 @@ class HomeViewModel {
 
   bool _isLoading = false;
   bool _hasShownExpiredModal = false;
-  VoidCallback? _connectivityListener;
-  VoidCallback? _entitlementListener;
+
+  // --- Mixin wiring ---
+
+  @override
+  RevenueCatService get entitlementListenerService => _revenueCatService;
+
+  @override
+  ConnectivityService get connectivityListenerService => _connectivityService;
+
+  @override
+  void onEntitlementChanged() {
+    _logger.fine('Entitlement changed, refreshing home');
+    refresh();
+  }
+
+  @override
+  void onConnectivityChanged() {
+    final isOffline =
+        _connectivityService.status.value == NetworkStatus.offline;
+    state.value = _applyBanner(state.value.copyWith(isOffline: isOffline));
+  }
+
+  // --- Public API ---
 
   Future<void> init() async {
-    _connectivityListener ??= _handleConnectivityChange;
-    _connectivityService.status.removeListener(_connectivityListener!);
-    _connectivityService.status.addListener(_connectivityListener!);
-
-    // Listen to RevenueCat entitlement changes for real-time UI updates
-    _entitlementListener ??= _handleEntitlementChange;
-    _revenueCatService.entitlementSnapshot.removeListener(_entitlementListener!);
-    _revenueCatService.entitlementSnapshot.addListener(_entitlementListener!);
+    initConnectivityListener();
+    initEntitlementListener();
 
     final isOffline =
         _connectivityService.status.value == NetworkStatus.offline;
@@ -341,12 +359,8 @@ class HomeViewModel {
   }
 
   void dispose() {
-    if (_connectivityListener != null) {
-      _connectivityService.status.removeListener(_connectivityListener!);
-    }
-    if (_entitlementListener != null) {
-      _revenueCatService.entitlementSnapshot.removeListener(_entitlementListener!);
-    }
+    disposeConnectivityListener();
+    disposeEntitlementListener();
     state.dispose();
   }
 
@@ -591,22 +605,6 @@ class HomeViewModel {
       isTrialExpiration: isTrialExpiration,
       showTrialReminder: false, // Don't show reminder when showing modal
     );
-  }
-
-  void _handleConnectivityChange() {
-    final isOffline =
-        _connectivityService.status.value == NetworkStatus.offline;
-    state.value = _applyBanner(state.value.copyWith(isOffline: isOffline));
-  }
-
-  /// Handles entitlement changes from RevenueCat for real-time UI updates.
-  ///
-  /// When entitlement changes (e.g., after purchase, subscription renewal/expiry),
-  /// refresh the home view to reflect the new subscription state.
-  void _handleEntitlementChange() {
-    // Trigger a non-loading refresh to update UI based on new entitlement state
-    _logger.fine('Entitlement changed, refreshing home');
-    refresh();
   }
 
   HomeViewState _applyBanner(HomeViewState next) {

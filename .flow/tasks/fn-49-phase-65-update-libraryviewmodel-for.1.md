@@ -12,9 +12,8 @@ Update LibraryViewModel to constructor-inject SubscriptionStatusResolver and Rev
 - [ ] flutter test passes
 
 ## Done summary
-TBD
-
+Updated LibraryViewModel to use SubscriptionStatusResolver and RevenueCatService for protocol locking, replacing user.getEffectiveStatus() with resolver.resolveEffectiveStatus(). Added entitlement snapshot listener for real-time UI updates.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 0c7e5e9, 7222fd6
+- Tests: flutter analyze, flutter test
 - PRs:
