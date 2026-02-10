@@ -343,8 +343,9 @@ void main() {
         );
         expect(cardBeforeChange.status, LibraryCardStatus.locked);
 
-        // Clear loading state by verifying getById was called once
+        // Verify init called getById once, then clear for clean assertion
         verify(() => mockUserRepository.getById(any())).called(1);
+        clearInteractions(mockUserRepository);
 
         // Act: entitlement changes to premium
         final premiumSnapshot = EntitlementSnapshot(
@@ -363,7 +364,7 @@ void main() {
         // Allow async refresh to complete
         await pumpEventQueue();
 
-        // Assert - getById called again (refresh triggered)
+        // Assert - getById called once more (refresh triggered by entitlement change)
         verify(() => mockUserRepository.getById(any())).called(1);
 
         // After refresh with premium snapshot: protocol-3 should be available
@@ -442,6 +443,7 @@ void main() {
         await viewModel.init();
 
         verify(() => mockUserRepository.getById(any())).called(1);
+        clearInteractions(mockUserRepository);
 
         // Go offline
         connectivityNotifier.value = NetworkStatus.offline;
@@ -453,7 +455,7 @@ void main() {
         // Allow async reload to complete
         await pumpEventQueue();
 
-        // Assert - reload triggered (getById called again)
+        // Assert - reload triggered (getById called once more)
         verify(() => mockUserRepository.getById(any())).called(1);
         expect(viewModel.state.value.isOffline, isFalse);
       });
