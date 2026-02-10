@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-49-phase-65-update-libraryviewmodel-for",
+  "created_at": "2026-02-10T16:42:44.147376Z",
+  "depends_on_epics": [],
+  "id": "fn-49-phase-65-update-libraryviewmodel-for",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-49-phase-65-update-libraryviewmodel-for.md",
+  "status": "open",
+  "title": "Phase 6.5: Update LibraryViewModel for RevenueCat",
+  "updated_at": "2026-02-10T16:42:44.147990Z"
+}

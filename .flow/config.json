@@ -7,6 +7,6 @@
     "enabled": false
   },
   "review": {
-    "backend": null
+    "backend": "rp"
   }
 }

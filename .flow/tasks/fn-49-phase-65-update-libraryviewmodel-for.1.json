@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-02-10T16:42:49.846495Z",
+  "depends_on": [],
+  "epic": "fn-49-phase-65-update-libraryviewmodel-for",
+  "id": "fn-49-phase-65-update-libraryviewmodel-for.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-49-phase-65-update-libraryviewmodel-for.1.md",
+  "status": "todo",
+  "title": "Update LibraryViewModel to use SubscriptionStatusResolver and RevenueCatService",
+  "updated_at": "2026-02-10T16:42:49.846901Z"
+}

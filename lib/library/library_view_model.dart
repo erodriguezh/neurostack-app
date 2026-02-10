@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:logging/logging.dart';
 import 'package:neurostack/core/failures/domain_failure.dart';
 import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
 import 'package:neurostack/core/utils/internal_notification/notify_service.dart';
@@ -24,8 +25,12 @@ import 'package:neurostack/home/home_bottom_tab_coordinator.dart';
 import 'package:neurostack/home/home_state.dart';
 import 'package:neurostack/library/library_state.dart';
 import 'package:neurostack/library/library_stats.dart';
+import 'package:neurostack/paywall/data/revenuecat_service.dart';
+import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 
 class LibraryViewModel {
+  final Logger _logger = Logger('Library');
+
   LibraryViewModel({
     required NotifyService notifyService,
     required RouterService routerService,
@@ -34,6 +39,8 @@ class LibraryViewModel {
     required ProtocolRepository protocolRepository,
     required SessionRepository sessionRepository,
     required ConnectivityService connectivityService,
+    required SubscriptionStatusResolver subscriptionStatusResolver,
+    required RevenueCatService revenueCatService,
     CachedUserStore? cachedUserStore,
     CachedProtocolStore? cachedProtocolStore,
     HomeBottomTabCoordinator? tabCoordinator,
@@ -44,6 +51,8 @@ class LibraryViewModel {
         _protocolRepository = protocolRepository,
         _sessionRepository = sessionRepository,
         _connectivityService = connectivityService,
+        _resolver = subscriptionStatusResolver,
+        _revenueCatService = revenueCatService,
         _cachedUserStore = cachedUserStore,
         _cachedProtocolStore = cachedProtocolStore,
         _tabCoordinator = tabCoordinator ??
@@ -58,6 +67,8 @@ class LibraryViewModel {
   final ProtocolRepository _protocolRepository;
   final SessionRepository _sessionRepository;
   final ConnectivityService _connectivityService;
+  final SubscriptionStatusResolver _resolver;
+  final RevenueCatService _revenueCatService;
   final CachedUserStore? _cachedUserStore;
   final CachedProtocolStore? _cachedProtocolStore;
   final HomeBottomTabCoordinator _tabCoordinator;
@@ -69,6 +80,7 @@ class LibraryViewModel {
   bool _isLoading = false;
   bool _isDisposed = false;
   VoidCallback? _connectivityListener;
+  VoidCallback? _entitlementListener;
   User? _cachedUser;
   List<Protocol> _cachedProtocols = const [];
   String? _cachedProtocolsUserId;
@@ -77,6 +89,11 @@ class LibraryViewModel {
     _connectivityListener ??= _handleConnectivityChange;
     _connectivityService.status.removeListener(_connectivityListener!);
     _connectivityService.status.addListener(_connectivityListener!);
+
+    // Listen to RevenueCat entitlement changes for real-time UI updates
+    _entitlementListener ??= _handleEntitlementChange;
+    _revenueCatService.entitlementSnapshot.removeListener(_entitlementListener!);
+    _revenueCatService.entitlementSnapshot.addListener(_entitlementListener!);
 
     final isOffline =
         _connectivityService.status.value == NetworkStatus.offline;
@@ -261,6 +278,9 @@ class LibraryViewModel {
     if (_connectivityListener != null) {
       _connectivityService.status.removeListener(_connectivityListener!);
     }
+    if (_entitlementListener != null) {
+      _revenueCatService.entitlementSnapshot.removeListener(_entitlementListener!);
+    }
     state.dispose();
   }
 
@@ -372,7 +392,11 @@ class LibraryViewModel {
     required bool isOffline,
     String? highlightProtocolId,
   }) {
-    final effectiveStatus = user.getEffectiveStatus(DateTime.now());
+    final snapshot = _revenueCatService.entitlementSnapshot.value;
+    final effectiveStatus = _resolver.resolveEffectiveStatus(
+      user: user,
+      snapshot: snapshot,
+    );
     final sorted = List<Protocol>.from(protocols)
       ..sort((a, b) {
         final categoryCompare =
@@ -535,6 +559,15 @@ class LibraryViewModel {
       return null;
     }
     return cachedUser;
+  }
+
+  /// Handles entitlement changes from RevenueCat for real-time UI updates.
+  ///
+  /// When entitlement changes (e.g., after purchase, subscription renewal/expiry),
+  /// refresh the library view to reflect the new subscription state (locked/unlocked cards).
+  void _handleEntitlementChange() {
+    _logger.fine('Entitlement changed, refreshing library');
+    refresh();
   }
 
   void _handleConnectivityChange() {

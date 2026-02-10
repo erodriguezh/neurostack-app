@@ -817,7 +817,7 @@ Single source of truth for UI gating decisions. Prevents duplicate logic across 
   - Show loading indicator during restore
   - Show success/failure feedback
   ```dart
-  ListTile(
+  ListTile(cla
     leading: const Icon(Icons.restore),
     title: const Text('Restore Purchases'),
     onTap: () async {
