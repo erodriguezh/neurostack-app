@@ -15,6 +15,7 @@ import 'package:neurostack/features/session/presentation/log_session_modal.dart'
 import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:neurostack/paywall/data/trial_expiration_decision_store.dart';
+import 'package:neurostack/paywall/data/trial_reminder_service.dart';
 import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 import 'package:neurostack/paywall/widgets/trial_expired_modal.dart';
 import 'package:neurostack/paywall/widgets/trial_reminder_alert.dart';
@@ -46,6 +47,7 @@ class _HomeViewState extends State<HomeView> {
     subscriptionStatusResolver: locator<SubscriptionStatusResolver>(),
     revenueCatService: locator<RevenueCatService>(),
     trialExpirationDecisionStore: locator<TrialExpirationDecisionStore>(),
+    trialReminderService: locator<TrialReminderService>(),
   );
 
   bool _showingTrialExpired = false;
