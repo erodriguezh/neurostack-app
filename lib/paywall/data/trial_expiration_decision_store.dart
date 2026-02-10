@@ -118,7 +118,7 @@ class SharedPrefsTrialExpirationDecisionStore
   }) {
     final txnId = snapshot.originalTransactionId;
     if (txnId != null) {
-      return '$_subExpKeyPrefix:$userId:$entitlementId:$txnId';
+      return '$_subExpKeyPrefix:$userId:$entitlementId:txn:$txnId';
     }
 
     final purchaseDate = snapshot.latestPurchaseDate;

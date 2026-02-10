@@ -208,7 +208,7 @@ void main() {
 
         // Verify the stored value is the decision name
         const expectedKey =
-            'sub_exp_resolved:$userId:$entitlementId:txn-persist';
+            'sub_exp_resolved:$userId:$entitlementId:txn:txn-persist';
         expect(prefs.getString(expectedKey), equals('upgrade'));
       });
 
@@ -229,7 +229,7 @@ void main() {
 
           // Key should use originalTransactionId
           const expectedKey =
-              'sub_exp_resolved:$userId:$entitlementId:txn-001';
+              'sub_exp_resolved:$userId:$entitlementId:txn:txn-001';
           expect(prefs.getString(expectedKey), isNotNull);
         });
 
