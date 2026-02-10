@@ -26,7 +26,9 @@ import 'package:neurostack/features/user/domain/repositories/user_repository.dar
 import 'package:neurostack/home/home_bottom_tab_coordinator.dart';
 import 'package:neurostack/home/home_state.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
+import 'package:neurostack/paywall/domain/entitlement_snapshot.dart';
 import 'package:neurostack/paywall/data/trial_expiration_decision_store.dart';
+import 'package:neurostack/paywall/data/trial_reminder_service.dart';
 import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 
 class HomeViewModel
@@ -46,6 +48,7 @@ class HomeViewModel
     required RevenueCatService revenueCatService,
     HomeBottomTabCoordinator? tabCoordinator,
     TrialExpirationDecisionStore? trialExpirationDecisionStore,
+    TrialReminderService? trialReminderService,
   }) : _notifyService = notifyService,
        _routerService = routerService,
        _authService = authService,
@@ -57,6 +60,7 @@ class HomeViewModel
        _resolver = subscriptionStatusResolver,
        _revenueCatService = revenueCatService,
        _trialExpirationDecisionStore = trialExpirationDecisionStore,
+       _trialReminderService = trialReminderService,
        _tabCoordinator =
            tabCoordinator ??
            HomeBottomTabCoordinator(
@@ -74,6 +78,7 @@ class HomeViewModel
   final SubscriptionStatusResolver _resolver;
   final RevenueCatService _revenueCatService;
   final TrialExpirationDecisionStore? _trialExpirationDecisionStore;
+  final TrialReminderService? _trialReminderService;
   final HomeBottomTabCoordinator _tabCoordinator;
 
   final ValueNotifier<HomeViewState> state = ValueNotifier(
@@ -574,8 +579,9 @@ class HomeViewModel
     final isPremiumExpired =
         currentEffectiveStatus == SubscriptionStatus.expired;
 
-    // Check trial reminder (within 24h of expiration)
-    final showTrialReminder = _resolver.shouldShowTrialReminder(
+    // Check trial reminder (within 24h of expiration + once-per-day throttle)
+    final showTrialReminder = await _shouldShowTrialReminder(
+      userId: user.id,
       snapshot: snapshot,
       now: now,
     );
@@ -587,6 +593,14 @@ class HomeViewModel
         userId: user.id,
         status: currentEffectiveStatus,
       );
+
+      // Mark reminder shown so the 24h throttle takes effect
+      if (showTrialReminder) {
+        await _trialReminderService?.markReminderShown(
+          userId: user.id,
+          now: now,
+        );
+      }
 
       return state.copyWith(
         showTrialExpiredModal: false,
@@ -605,6 +619,25 @@ class HomeViewModel
       isTrialExpiration: isTrialExpiration,
       showTrialReminder: false, // Don't show reminder when showing modal
     );
+  }
+
+  /// Delegates to [TrialReminderService] if available, otherwise falls back
+  /// to the raw resolver check (no throttle).
+  Future<bool> _shouldShowTrialReminder({
+    required String userId,
+    required EntitlementSnapshot? snapshot,
+    required DateTime now,
+  }) async {
+    final service = _trialReminderService;
+    if (service != null) {
+      return service.shouldShowTrialReminder(
+        userId: userId,
+        snapshot: snapshot,
+        now: now,
+      );
+    }
+    // Fallback: no throttle, raw resolver check
+    return _resolver.shouldShowTrialReminder(snapshot: snapshot, now: now);
   }
 
   HomeViewState _applyBanner(HomeViewState next) {

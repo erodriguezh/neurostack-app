@@ -23,6 +23,7 @@ import 'package:neurostack/features/auth/data/user_bootstrap_service.dart';
 import 'package:neurostack/features/onboarding/data/onboarding_store.dart';
 import 'package:neurostack/features/protocol/data/cached_protocol_store.dart';
 import 'package:neurostack/paywall/data/trial_expiration_decision_store.dart';
+import 'package:neurostack/paywall/data/trial_reminder_service.dart';
 import 'package:neurostack/progress/data/cached_week_progress_store.dart';
 
 // Repository interfaces
@@ -115,6 +116,15 @@ List<Module> buildModules({required SharedPreferences sharedPreferences}) => [
   // Subscription resolver (centralized policy for UI gating)
   Module<SubscriptionStatusResolver>(
     builder: () => const SubscriptionStatusResolver(),
+    lazy: true,
+  ),
+
+  // Trial reminder throttle (once per 24h per user)
+  Module<TrialReminderService>(
+    builder: () => TrialReminderService(
+      sharedPreferences: locator<SharedPreferences>(),
+      resolver: locator<SubscriptionStatusResolver>(),
+    ),
     lazy: true,
   ),
 
