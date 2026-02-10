@@ -151,6 +151,21 @@ void main() {
         expect(result, isFalse);
       });
 
+      test('returns false when snapshot belongs to a different user', () async {
+        final now = DateTime(2025, 6, 15, 12, 0, 0);
+        final expiresAt = now.add(const Duration(hours: 12));
+        // Snapshot belongs to user-other, but we query for user-1
+        final snapshot = trialSnapshot(expiresAt: expiresAt, userId: 'user-other');
+
+        final result = await service.shouldShowTrialReminder(
+          userId: 'user-1',
+          snapshot: snapshot,
+          now: now,
+        );
+
+        expect(result, isFalse);
+      });
+
       test('returns false when not in trial period', () async {
         final now = DateTime(2025, 6, 15, 12, 0, 0);
         final expiresAt = now.add(const Duration(hours: 12));
@@ -232,7 +247,8 @@ void main() {
       test('handles corrupted stored timestamp gracefully', () async {
         final now = DateTime(2025, 6, 15, 12, 0, 0);
         final expiresAt = now.add(const Duration(hours: 12));
-        final snapshot = trialSnapshot(expiresAt: expiresAt);
+        final snapshot =
+            trialSnapshot(expiresAt: expiresAt, userId: 'user-corrupt');
 
         // Manually corrupt the stored value
         await prefs.setString(

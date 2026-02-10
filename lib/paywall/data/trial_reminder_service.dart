@@ -54,6 +54,9 @@ class TrialReminderService {
     required EntitlementSnapshot? snapshot,
     required DateTime now,
   }) async {
+    // Guard: snapshot must belong to current user (Design Principle #10)
+    if (snapshot == null || !snapshot.isForUser(userId)) return false;
+
     // Delegate to resolver for the expiration-window check
     final inExpirationWindow = _resolver.shouldShowTrialReminder(
       snapshot: snapshot,

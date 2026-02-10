@@ -556,7 +556,11 @@ class HomeViewModel
     }
 
     final now = DateTime.now();
-    final snapshot = _revenueCatService.entitlementSnapshot.value;
+    final rawSnapshot = _revenueCatService.entitlementSnapshot.value;
+    // Scope snapshot to current user (Design Principle #10)
+    final snapshot = (rawSnapshot != null && rawSnapshot.isForUser(user.id))
+        ? rawSnapshot
+        : null;
 
     // 1. Load lastSeenStatus from decision store
     final lastSeenStatus =
@@ -579,12 +583,25 @@ class HomeViewModel
     final isPremiumExpired =
         currentEffectiveStatus == SubscriptionStatus.expired;
 
-    // Check trial reminder (within 24h of expiration + once-per-day throttle)
-    final showTrialReminder = await _shouldShowTrialReminder(
-      userId: user.id,
-      snapshot: snapshot,
-      now: now,
-    );
+    // Check trial reminder (within 24h of expiration + once-per-day throttle).
+    // If reminder is already visible (sticky), keep it until user dismisses.
+    final bool showTrialReminder;
+    if (state.showTrialReminder) {
+      showTrialReminder = true; // Sticky: keep showing until dismissed
+    } else {
+      showTrialReminder = await _shouldShowTrialReminder(
+        userId: user.id,
+        snapshot: snapshot,
+        now: now,
+      );
+      // Mark reminder shown on first display so the 24h throttle takes effect
+      if (showTrialReminder) {
+        await _trialReminderService?.markReminderShown(
+          userId: user.id,
+          now: now,
+        );
+      }
+    }
 
     // If no modal needed, persist status and exit
     if (!shouldShowModal && !isPremiumExpired) {
@@ -593,14 +610,6 @@ class HomeViewModel
         userId: user.id,
         status: currentEffectiveStatus,
       );
-
-      // Mark reminder shown so the 24h throttle takes effect
-      if (showTrialReminder) {
-        await _trialReminderService?.markReminderShown(
-          userId: user.id,
-          now: now,
-        );
-      }
 
       return state.copyWith(
         showTrialExpiredModal: false,
@@ -661,7 +670,11 @@ class HomeViewModel
     final user = next.user!;
 
     // Use resolver to get effective status (RC or DB fallback)
-    final snapshot = _revenueCatService.entitlementSnapshot.value;
+    final rawSnapshot = _revenueCatService.entitlementSnapshot.value;
+    // Scope snapshot to current user (Design Principle #10)
+    final snapshot = (rawSnapshot != null && rawSnapshot.isForUser(user.id))
+        ? rawSnapshot
+        : null;
     final effectiveStatus = _resolver.resolveEffectiveStatus(
       user: user,
       snapshot: snapshot,
