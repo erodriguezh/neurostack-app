@@ -17,9 +17,8 @@ Four refactoring items approved by user after Phase 6.5 implementation:
 - [ ] flutter test passes (all existing + new tests)
 
 ## Done summary
-TBD
-
+Extracted EntitlementListenerMixin and ConnectivityListenerMixin to de-duplicate listener setup/teardown between HomeViewModel and LibraryViewModel. Purified LibraryViewModel._buildCards by passing EntitlementSnapshot as parameter. Added 11 LibraryViewModel unit tests covering resolver-based locking, entitlement change triggers, and connectivity changes.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 181b449, d32f792, 4b99a7f
+- Tests: flutter analyze, flutter test
 - PRs:
