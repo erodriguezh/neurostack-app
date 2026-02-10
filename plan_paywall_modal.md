@@ -888,11 +888,19 @@ Single source of truth for UI gating decisions. Prevents duplicate logic across 
   - Extracted shared `DismissButton` to `lib/core/ui/widgets/dismiss_button.dart` (de-duped from `HomeStatusBanner`)
   - Review fixes: wrapped `goToPaywall()` in closure, added conditional top padding, updated copy for `<24h` window accuracy
 
-### 6.5 Update LibraryViewModel
+### 6.5 Update LibraryViewModel [DONE]
 - **File:** `lib/library/library_view_model.dart`
 - **Changes:**
   - Constructor inject `SubscriptionStatusResolver` and `RevenueCatService`
   - Use `_resolver.resolveEffectiveStatus()` for protocol locking
+- **Actual:**
+  - Added `SubscriptionStatusResolver` and `RevenueCatService` as required constructor params
+  - Replaced `user.getEffectiveStatus(DateTime.now())` with `_resolver.resolveEffectiveStatus(user:, snapshot:)` in `_buildCards()`
+  - Added `_entitlementListener` to listen to `revenueCatService.entitlementSnapshot` for real-time UI updates (locked/unlocked cards)
+  - Added `_handleEntitlementChange()` method (triggers non-loading refresh, matching HomeViewModel pattern)
+  - Updated `dispose()` to remove entitlement listener
+  - Updated `LibraryView` to pass `subscriptionStatusResolver` and `revenueCatService` from locator
+  - No DI registration changes needed (resolver and service already registered as singletons)
 
 ---
 
