@@ -1,12 +1,26 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
+import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:neurostack/startup/startup_view_model.dart';
 
 /// Service for managing app lifecycle state and restart functionality.
 ///
 /// Exposes a [lifecycle] ValueNotifier that other services (e.g., SessionSyncService)
 /// can listen to for app lifecycle changes like `resumed`.
+///
+/// When the app resumes, refreshes the RevenueCat entitlement snapshot to catch
+/// subscription changes made outside the app (e.g., via App Store settings).
 class AppLifecycleService {
+  AppLifecycleService({required RevenueCatService revenueCatService})
+      : _revenueCatService = revenueCatService {
+    _lifecycleListener = _handleLifecycleChange;
+    lifecycle.addListener(_lifecycleListener!);
+  }
+
+  final RevenueCatService _revenueCatService;
   StartupViewModel? _startupViewModel;
+  VoidCallback? _lifecycleListener;
 
   /// Notifies listeners of app lifecycle state changes.
   ///
@@ -27,8 +41,18 @@ class AppLifecycleService {
     await _startupViewModel?.retryInitialization();
   }
 
-  /// Disposes the lifecycle notifier.
+  void _handleLifecycleChange() {
+    if (lifecycle.value == AppLifecycleState.resumed) {
+      unawaited(_revenueCatService.refreshEntitlement());
+    }
+  }
+
+  /// Disposes the lifecycle notifier and removes internal listeners.
   void dispose() {
+    if (_lifecycleListener != null) {
+      lifecycle.removeListener(_lifecycleListener!);
+      _lifecycleListener = null;
+    }
     lifecycle.dispose();
   }
 }

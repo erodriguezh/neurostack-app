@@ -55,8 +55,22 @@ List<Module> buildModules({required SharedPreferences sharedPreferences}) => [
     lazy: false,
   ),
   Module<NotifyService>(builder: () => NotifyService(), lazy: false),
+
+  // RevenueCat (SINGLETONS - must be app-lifetime to prevent duplicate SDK listeners)
+  // Registered before AppLifecycleService which depends on RevenueCatService.
+  Module<RevenueCatClient>(
+    builder: () => createRevenueCatClient(),
+    lazy: true,
+  ),
+  Module<RevenueCatService>(
+    builder: () => RevenueCatService(locator<RevenueCatClient>()),
+    lazy: true,
+  ),
+
   Module<AppLifecycleService>(
-    builder: () => AppLifecycleService(),
+    builder: () => AppLifecycleService(
+      revenueCatService: locator<RevenueCatService>(),
+    ),
     lazy: false,
   ),
   Module<ConnectivityService>(
@@ -100,16 +114,6 @@ List<Module> buildModules({required SharedPreferences sharedPreferences}) => [
   Module<TrialExpirationDecisionStore>(
     builder: () =>
         SharedPrefsTrialExpirationDecisionStore(locator<SharedPreferences>()),
-    lazy: true,
-  ),
-
-  // RevenueCat (SINGLETONS - must be app-lifetime to prevent duplicate SDK listeners)
-  Module<RevenueCatClient>(
-    builder: () => createRevenueCatClient(),
-    lazy: true,
-  ),
-  Module<RevenueCatService>(
-    builder: () => RevenueCatService(locator<RevenueCatClient>()),
     lazy: true,
   ),
 

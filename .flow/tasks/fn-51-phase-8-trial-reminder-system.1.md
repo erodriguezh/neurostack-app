@@ -35,9 +35,8 @@ Finally, wire it into HomeViewModel so `showTrialReminder` respects the once-per
 - [ ] `flutter test` passes
 
 ## Done summary
-TBD
-
+Created TrialReminderService with once-per-day SharedPreferences throttle (key: trialReminder:lastShownAt:<userId>), registered in DI, and wired into HomeViewModel and HomeView. Added user-scoping guards (Design Principle #10) and sticky reminder behavior. 14 unit tests covering throttle, user isolation, edge cases.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 750d681, eb2e77d, 3ad2203
+- Tests: flutter analyze, flutter test
 - PRs:
