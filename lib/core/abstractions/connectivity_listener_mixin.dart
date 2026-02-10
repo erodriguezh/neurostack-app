@@ -28,6 +28,7 @@ mixin ConnectivityListenerMixin {
   void disposeConnectivityListener() {
     if (_connectivityListener != null) {
       connectivityListenerService.status.removeListener(_connectivityListener!);
+      _connectivityListener = null;
     }
   }
 

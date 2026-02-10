@@ -31,6 +31,7 @@ mixin EntitlementListenerMixin {
     if (_entitlementListener != null) {
       entitlementListenerService.entitlementSnapshot
           .removeListener(_entitlementListener!);
+      _entitlementListener = null;
     }
   }
 

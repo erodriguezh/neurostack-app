@@ -361,7 +361,7 @@ void main() {
         entitlementNotifier.value = premiumSnapshot;
 
         // Allow async refresh to complete
-        await Future<void>.delayed(Duration.zero);
+        await pumpEventQueue();
 
         // Assert - getById called again (refresh triggered)
         verify(() => mockUserRepository.getById(any())).called(1);
@@ -451,7 +451,7 @@ void main() {
         connectivityNotifier.value = NetworkStatus.online;
 
         // Allow async reload to complete
-        await Future<void>.delayed(Duration.zero);
+        await pumpEventQueue();
 
         // Assert - reload triggered (getById called again)
         verify(() => mockUserRepository.getById(any())).called(1);
@@ -488,12 +488,15 @@ void main() {
 
         verify(() => mockUserRepository.getById(any())).called(1);
 
+        // Clear recorded interactions so we can assert no new calls
+        clearInteractions(mockUserRepository);
+
         // Act: fire connectivity event with same status (online -> online)
         // This happens when, e.g., wifi switches to cellular
         connectivityNotifier.notifyListeners();
 
         // Allow any potential async work
-        await Future<void>.delayed(Duration.zero);
+        await pumpEventQueue();
 
         // Assert - no additional getById call (no reload triggered)
         verifyNever(() => mockUserRepository.getById(any()));
