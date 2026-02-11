@@ -16,17 +16,16 @@ Approach: Add a lifecycle listener in `AppLifecycleService` (constructor-inject 
 - Modified: `lib/startup/startup_view_model.dart` (if DI wiring affected)
 
 ## Acceptance
-- [ ] AppLifecycleService listens for `AppLifecycleState.resumed` and calls `RevenueCatService.refreshEntitlement()`
-- [ ] Constructor injection of RevenueCatService into AppLifecycleService
-- [ ] DI registration updated
-- [ ] Existing tests pass
-- [ ] `flutter analyze` passes
-- [ ] `flutter test` passes
+- [x] AppLifecycleService listens for `AppLifecycleState.resumed` and calls `RevenueCatService.refreshEntitlement()`
+- [x] Constructor injection of RevenueCatService into AppLifecycleService
+- [x] DI registration updated
+- [x] Existing tests pass
+- [x] `flutter analyze` passes
+- [x] `flutter test` passes
 
 ## Done summary
-TBD
-
+- Task completed
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 4f16829
+- Tests: flutter analyze, flutter test
 - PRs:
