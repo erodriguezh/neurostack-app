@@ -36,6 +36,12 @@ class FakeRevenueCatClient implements RevenueCatClient {
   /// Whether getEntitlementSnapshot should throw an error.
   bool getSnapshotThrows = false;
 
+  /// Call counter for getEntitlementSnapshot.
+  int getEntitlementSnapshotCallCount = 0;
+
+  /// Completer to block getEntitlementSnapshot (for testing in-flight races).
+  Completer<EntitlementSnapshot?>? getSnapshotCompleter;
+
   /// Completer to block paywall presentation (for testing concurrent access).
   Completer<PaywallOutcome>? paywallCompleter;
 
@@ -67,8 +73,12 @@ class FakeRevenueCatClient implements RevenueCatClient {
 
   @override
   Future<EntitlementSnapshot?> getEntitlementSnapshot() async {
+    getEntitlementSnapshotCallCount++;
     if (getSnapshotThrows) {
       throw Exception('getEntitlementSnapshot failed');
+    }
+    if (getSnapshotCompleter != null) {
+      return getSnapshotCompleter!.future;
     }
     return snapshotToReturn;
   }
@@ -391,6 +401,35 @@ void main() {
         expect(service.entitlementSnapshot.value, isNull);
       });
 
+      test('silently returns if no user identified', () async {
+        await service.init();
+
+        final snapshot = EntitlementSnapshot.none(appUserId: 'user-123');
+        fakeClient.snapshotToReturn = snapshot;
+
+        await service.refreshEntitlement();
+
+        // Snapshot should remain null - no identified user
+        expect(service.entitlementSnapshot.value, isNull);
+      });
+
+      test('ignores snapshot for wrong user', () async {
+        await service.init();
+        await service.identify('user-123');
+
+        // Clear the snapshot set by identify
+        service.entitlementSnapshot.value = null;
+
+        // Return a snapshot for a different user
+        fakeClient.snapshotToReturn =
+            EntitlementSnapshot.none(appUserId: 'other-user');
+
+        await service.refreshEntitlement();
+
+        // Snapshot should remain null - wrong user
+        expect(service.entitlementSnapshot.value, isNull);
+      });
+
       test('updates snapshot with client result', () async {
         await service.init();
         await service.identify('user-123');
@@ -448,6 +487,62 @@ void main() {
           service.refreshEntitlement(),
           completes,
         );
+      });
+
+      test('does not call client after logout (no churn)', () async {
+        await service.init();
+        await service.identify('user-123');
+        await service.logout();
+
+        fakeClient.snapshotToReturn = const EntitlementSnapshot(
+          appUserId: 'user-123',
+          hasProEntitlement: true,
+          isTrialPeriod: false,
+          isInGracePeriod: false,
+          productId: 'neurostack_monthly',
+          expirationDate: null,
+          originalTransactionId: null,
+          latestPurchaseDate: null,
+          lastPeriodType: EntitlementPeriodType.normal,
+        );
+
+        final callsBefore = fakeClient.getEntitlementSnapshotCallCount;
+        await service.refreshEntitlement();
+
+        // Should not have called getEntitlementSnapshot at all
+        expect(fakeClient.getEntitlementSnapshotCallCount, equals(callsBefore));
+        // Snapshot should remain null (cleared by logout)
+        expect(service.entitlementSnapshot.value, isNull);
+      });
+
+      test('ignores in-flight result if logout happens mid-refresh', () async {
+        await service.init();
+        await service.identify('user-123');
+
+        fakeClient.getSnapshotCompleter = Completer<EntitlementSnapshot?>();
+
+        final refreshFuture = service.refreshEntitlement();
+
+        // Logout while refresh is in-flight
+        await service.logout();
+
+        // Complete the in-flight snapshot fetch
+        fakeClient.getSnapshotCompleter!.complete(const EntitlementSnapshot(
+          appUserId: 'user-123',
+          hasProEntitlement: true,
+          isTrialPeriod: false,
+          isInGracePeriod: false,
+          productId: 'neurostack_monthly',
+          expirationDate: null,
+          originalTransactionId: null,
+          latestPurchaseDate: null,
+          lastPeriodType: EntitlementPeriodType.normal,
+        ));
+
+        await refreshFuture;
+
+        // Snapshot should remain null (logout cleared it, in-flight ignored)
+        expect(service.entitlementSnapshot.value, isNull);
       });
 
       test('swallows exceptions when init failed', () async {

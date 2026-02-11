@@ -307,10 +307,17 @@ class RevenueCatService {
       _logger.fine('refreshEntitlement called before init(), ignoring');
       return;
     }
+    if (_identifiedUserId == null) {
+      _logger.fine('refreshEntitlement: no identified user, ignoring');
+      return;
+    }
     try {
       await _initCompleter.future;
       final newSnapshot = await _client.getEntitlementSnapshot();
-      _updateSnapshotIfBetter(newSnapshot); // Only update if non-null
+      // Only accept snapshots belonging to the identified user
+      if (newSnapshot != null && newSnapshot.appUserId == _identifiedUserId) {
+        _updateSnapshotIfBetter(newSnapshot);
+      }
     } catch (e) {
       // Swallow exceptions - lifecycle refresh must never crash/spam errors
       _logger.fine('refreshEntitlement failed: $e');
