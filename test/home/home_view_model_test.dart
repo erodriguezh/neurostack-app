@@ -16,6 +16,7 @@ import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
 import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
 import 'package:neurostack/home/home_view_model.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
+import 'package:neurostack/paywall/data/trial_reminder_service.dart';
 import 'package:neurostack/paywall/domain/entitlement_snapshot.dart';
 import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 
@@ -41,6 +42,8 @@ class MockConnectivityService extends Mock implements ConnectivityService {}
 
 class MockRevenueCatService extends Mock implements RevenueCatService {}
 
+class MockTrialReminderService extends Mock implements TrialReminderService {}
+
 class MockSubscriptionStatusResolver extends Mock
     implements SubscriptionStatusResolver {}
 
@@ -54,6 +57,7 @@ void main() {
   late MockSessionLocalDataSource mockSessionLocalDataSource;
   late MockConnectivityService mockConnectivityService;
   late MockRevenueCatService mockRevenueCatService;
+  late MockTrialReminderService mockTrialReminderService;
   late SubscriptionStatusResolver subscriptionStatusResolver;
 
   setUpAll(() {
@@ -71,6 +75,7 @@ void main() {
     mockSessionLocalDataSource = MockSessionLocalDataSource();
     mockConnectivityService = MockConnectivityService();
     mockRevenueCatService = MockRevenueCatService();
+    mockTrialReminderService = MockTrialReminderService();
     // Use real resolver since it's pure functions
     subscriptionStatusResolver = const SubscriptionStatusResolver();
 
@@ -81,6 +86,17 @@ void main() {
     // Default RevenueCat setup - null snapshot (RC unavailable, fallback to DB)
     when(() => mockRevenueCatService.entitlementSnapshot)
         .thenReturn(ValueNotifier<EntitlementSnapshot?>(null));
+
+    // Default trial reminder setup - never show reminder
+    when(() => mockTrialReminderService.shouldShowTrialReminder(
+          userId: any(named: 'userId'),
+          snapshot: any(named: 'snapshot'),
+          now: any(named: 'now'),
+        )).thenAnswer((_) async => false);
+    when(() => mockTrialReminderService.markReminderShown(
+          userId: any(named: 'userId'),
+          now: any(named: 'now'),
+        )).thenAnswer((_) async {});
   });
 
   HomeViewModel createViewModel() {
@@ -95,6 +111,7 @@ void main() {
       connectivityService: mockConnectivityService,
       subscriptionStatusResolver: subscriptionStatusResolver,
       revenueCatService: mockRevenueCatService,
+      trialReminderService: mockTrialReminderService,
     );
   }
 

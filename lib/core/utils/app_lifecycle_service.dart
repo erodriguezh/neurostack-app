@@ -13,14 +13,10 @@ import 'package:neurostack/startup/startup_view_model.dart';
 /// subscription changes made outside the app (e.g., via App Store settings).
 class AppLifecycleService {
   AppLifecycleService({required RevenueCatService revenueCatService})
-      : _revenueCatService = revenueCatService {
-    _lifecycleListener = _handleLifecycleChange;
-    lifecycle.addListener(_lifecycleListener!);
-  }
+      : _revenueCatService = revenueCatService;
 
   final RevenueCatService _revenueCatService;
   StartupViewModel? _startupViewModel;
-  VoidCallback? _lifecycleListener;
 
   /// Notifies listeners of app lifecycle state changes.
   ///
@@ -35,24 +31,21 @@ class AppLifecycleService {
   /// Updates the lifecycle notifier with the current app state.
   ///
   /// Called by the lifecycle observer widget in main.dart.
-  void setLifecycleState(AppLifecycleState state) => lifecycle.value = state;
+  /// Also triggers RevenueCat entitlement refresh on resume to catch
+  /// subscription changes made outside the app.
+  void setLifecycleState(AppLifecycleState state) {
+    lifecycle.value = state;
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_revenueCatService.refreshEntitlement());
+    }
+  }
 
   Future<void> restartApp() async {
     await _startupViewModel?.retryInitialization();
   }
 
-  void _handleLifecycleChange() {
-    if (lifecycle.value == AppLifecycleState.resumed) {
-      unawaited(_revenueCatService.refreshEntitlement());
-    }
-  }
-
-  /// Disposes the lifecycle notifier and removes internal listeners.
+  /// Disposes the lifecycle notifier.
   void dispose() {
-    if (_lifecycleListener != null) {
-      lifecycle.removeListener(_lifecycleListener!);
-      _lifecycleListener = null;
-    }
     lifecycle.dispose();
   }
 }

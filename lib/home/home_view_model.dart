@@ -46,9 +46,9 @@ class HomeViewModel
     required ConnectivityService connectivityService,
     required SubscriptionStatusResolver subscriptionStatusResolver,
     required RevenueCatService revenueCatService,
+    required TrialReminderService trialReminderService,
     HomeBottomTabCoordinator? tabCoordinator,
     TrialExpirationDecisionStore? trialExpirationDecisionStore,
-    TrialReminderService? trialReminderService,
   }) : _notifyService = notifyService,
        _routerService = routerService,
        _authService = authService,
@@ -59,8 +59,8 @@ class HomeViewModel
        _connectivityService = connectivityService,
        _resolver = subscriptionStatusResolver,
        _revenueCatService = revenueCatService,
-       _trialExpirationDecisionStore = trialExpirationDecisionStore,
        _trialReminderService = trialReminderService,
+       _trialExpirationDecisionStore = trialExpirationDecisionStore,
        _tabCoordinator =
            tabCoordinator ??
            HomeBottomTabCoordinator(
@@ -77,8 +77,8 @@ class HomeViewModel
   final ConnectivityService _connectivityService;
   final SubscriptionStatusResolver _resolver;
   final RevenueCatService _revenueCatService;
+  final TrialReminderService _trialReminderService;
   final TrialExpirationDecisionStore? _trialExpirationDecisionStore;
-  final TrialReminderService? _trialReminderService;
   final HomeBottomTabCoordinator _tabCoordinator;
 
   final ValueNotifier<HomeViewState> state = ValueNotifier(
@@ -596,7 +596,7 @@ class HomeViewModel
       );
       // Mark reminder shown on first display so the 24h throttle takes effect
       if (showTrialReminder) {
-        await _trialReminderService?.markReminderShown(
+        await _trialReminderService.markReminderShown(
           userId: user.id,
           now: now,
         );
@@ -630,23 +630,16 @@ class HomeViewModel
     );
   }
 
-  /// Delegates to [TrialReminderService] if available, otherwise falls back
-  /// to the raw resolver check (no throttle).
   Future<bool> _shouldShowTrialReminder({
     required String userId,
     required EntitlementSnapshot? snapshot,
     required DateTime now,
-  }) async {
-    final service = _trialReminderService;
-    if (service != null) {
-      return service.shouldShowTrialReminder(
-        userId: userId,
-        snapshot: snapshot,
-        now: now,
-      );
-    }
-    // Fallback: no throttle, raw resolver check
-    return _resolver.shouldShowTrialReminder(snapshot: snapshot, now: now);
+  }) {
+    return _trialReminderService.shouldShowTrialReminder(
+      userId: userId,
+      snapshot: snapshot,
+      now: now,
+    );
   }
 
   HomeViewState _applyBanner(HomeViewState next) {
