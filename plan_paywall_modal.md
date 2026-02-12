@@ -1063,9 +1063,9 @@ Single source of truth for UI gating decisions. Prevents duplicate logic across 
 
 ---
 
-## Phase 9: Webhook Edge Function (DB Writer)
+## Phase 9: Webhook Edge Function (DB Writer) [DONE]
 
-### 9.1 Create Edge Function
+### 9.1 Create Edge Function [DONE]
 - **New File:** `supabase/functions/revenuecat-webhook/index.ts`
 - **CRITICAL:** This is the ONLY writer of subscription status to Supabase
 - **Signature Verification (CRITICAL):**
@@ -1090,8 +1090,8 @@ Single source of truth for UI gating decisions. Prevents duplicate logic across 
   - **CRITICAL:** Edge Function MUST use `SUPABASE_SERVICE_ROLE_KEY` (stored as function secret)
   - RPC is NOT callable by `anon`/`authenticated` - prevents privilege escalation from clients
 
-### 9.1.1 Create SECURITY DEFINER Function
-- **New File:** `supabase/migrations/YYYYMMDDHHMMSS_revenuecat_webhook_rpc.sql`
+### 9.1.1 Create SECURITY DEFINER Function [DONE]
+- **New File:** `supabase/migrations/20260212192846_revenuecat_webhook_rpc.sql`
 - **Changes:**
   ```sql
   -- Secure RPC for webhook to update subscription status
@@ -1160,7 +1160,7 @@ Single source of truth for UI gating decisions. Prevents duplicate logic across 
      ```
   5. Return 200 OK even if no rows updated (idempotent)
 
-### 9.2 Status Mapping (Canonical)
+### 9.2 Status Mapping (Canonical) [DONE]
 | RevenueCat State | App SubscriptionStatus | Notes |
 |------------------|------------------------|-------|
 | No entitlement (never had) | `free` | New user default |
@@ -1175,7 +1175,7 @@ Single source of truth for UI gating decisions. Prevents duplicate logic across 
 - `expired` = was a paying subscriber, now lapsed (show "resubscribe" messaging)
 - `free` = never paid or explicitly chose free tier (show "upgrade" messaging)
 
-### 9.3 Disable JWT Verification (CRITICAL)
+### 9.3 Disable JWT Verification (CRITICAL) [DONE]
 - **New File:** `supabase/functions/revenuecat-webhook/config.toml`
 - **CRITICAL:** RevenueCat won't send a Supabase JWT - must disable verification
 - **Note:** Use the exact Supabase Functions config format for your CLI version
@@ -1186,17 +1186,17 @@ Single source of truth for UI gating decisions. Prevents duplicate logic across 
   ```
 - **Alternative:** Set via deploy command: `supabase functions deploy revenuecat-webhook --no-verify-jwt`
 
-### 9.4 Add Secrets
+### 9.4 Add Secrets [MANUAL - TODO]
 - **Commands:**
   ```sh
   supabase secrets set REVENUECAT_WEBHOOK_SECRET=xxx
   supabase secrets set SUPABASE_SERVICE_ROLE_KEY=xxx  # CRITICAL for RPC call
   ```
 
-### 9.5 Deploy Function
+### 9.5 Deploy Function [MANUAL - TODO]
 - **Command:** `supabase functions deploy revenuecat-webhook`
 
-### 9.6 Configure Webhook in RevenueCat
+### 9.6 Configure Webhook in RevenueCat [MANUAL - TODO]
 - [ ] Add webhook URL: `https://<project>.supabase.co/functions/v1/revenuecat-webhook`
 - [ ] Set shared secret
 - [ ] Enable ALL relevant lifecycle events with explicit handling:
@@ -1215,7 +1215,7 @@ Single source of truth for UI gating decisions. Prevents duplicate logic across 
 
 **CRITICAL:** CANCELLATION does NOT mean entitlement ended. User is still premium until EXPIRATION.
 
-### 9.7 TRANSFER Event Handling (CRITICAL)
+### 9.7 TRANSFER Event Handling (CRITICAL) [DONE]
 - **Problem:** TRANSFER moves entitlement between app_user_ids. "No change" leaves wrong user premium.
 - **CRITICAL REQUIREMENT:** Field names in example are illustrative - implement against exact RevenueCat webhook JSON schema.
   - Add fixture JSON file: `test/fixtures/revenuecat_transfer_event.json`
@@ -1291,7 +1291,7 @@ Single source of truth for UI gating decisions. Prevents duplicate logic across 
   }
   ```
 
-### 9.8 Trial vs Paid Expiration Rule (CRITICAL)
+### 9.8 Trial vs Paid Expiration Rule (CRITICAL) [DONE]
 - **Problem:** EXPIRATION event doesn't inherently distinguish trial vs paid
 - **Solution:** Use payload fields to determine:
   ```typescript
