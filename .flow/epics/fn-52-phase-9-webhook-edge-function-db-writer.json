@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-52-phase-9-webhook-edge-function-db-writer",
+  "created_at": "2026-02-12T19:24:00.820965Z",
+  "depends_on_epics": [],
+  "id": "fn-52-phase-9-webhook-edge-function-db-writer",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-52-phase-9-webhook-edge-function-db-writer.md",
+  "status": "open",
+  "title": "Phase 9: Webhook Edge Function (DB Writer)",
+  "updated_at": "2026-02-12T19:24:00.821415Z"
+}
