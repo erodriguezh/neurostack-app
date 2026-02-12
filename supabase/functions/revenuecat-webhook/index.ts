@@ -106,14 +106,32 @@ function determineStatusFromProduct(
  * Determine status for EXPIRATION events.
  * Trial expired -> 'free' (never converted, show "upgrade" UX)
  * Paid expired  -> 'expired' (lapsed subscriber, show "resubscribe" UX)
+ *
+ * When period_type is missing (schema drift), falls back to querying the
+ * user's current DB status: was 'trial' -> 'free', else -> 'expired'.
  */
-function determineExpiredStatus(
+async function determineExpiredStatus(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
   periodType: string | null | undefined,
-): SubscriptionStatus {
-  if (periodType === "TRIAL") {
-    return "free";
+): Promise<SubscriptionStatus> {
+  if (periodType === "TRIAL") return "free";
+  if (periodType) return "expired";
+
+  // Fallback: period_type missing -> check last known DB status
+  const { data, error } = await supabase
+    .from("users")
+    .select("subscription_status")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error(
+      `EXPIRATION fallback lookup failed user=${userId}: ${error.message}`,
+    );
+    return "expired"; // safe default for unknown
   }
-  return "expired";
+  return data?.subscription_status === "trial" ? "free" : "expired";
 }
 
 // ---------------------------------------------------------------------------
@@ -134,7 +152,7 @@ interface RevenueCatEvent {
   product_id?: string;
   new_product_id?: string;
   period_type?: string;
-  event_timestamp_ms: number;
+  event_timestamp_ms: number | string;
   expiration_at_ms?: number;
   environment?: string;
   store?: string;
@@ -235,9 +253,12 @@ async function handleTransfer(
       .eq("id", fromUuid)
       .single();
 
-    const wasPaying = ["premiumMonthly", "premiumAnnual", "grace"].includes(
-      fromUser?.subscription_status,
-    );
+    const wasPaying = [
+      "premiumMonthly",
+      "premiumAnnual",
+      "premiumLifetime",
+      "grace",
+    ].includes(fromUser?.subscription_status);
     const revokeStatus: SubscriptionStatus = wasPaying ? "expired" : "free";
 
     await callApplyEvent(
@@ -290,7 +311,9 @@ Deno.serve(async (req: Request) => {
   }
 
   const authHeader = req.headers.get("authorization");
-  if (!authHeader || authHeader !== `Bearer ${webhookSecret}`) {
+  // Accept either "Bearer <secret>" or raw "<secret>" (common RevenueCat misconfig)
+  const expectedBearer = `Bearer ${webhookSecret}`;
+  if (!authHeader || (authHeader !== expectedBearer && authHeader !== webhookSecret)) {
     return unauthorized("invalid_authorization");
   }
 
@@ -316,8 +339,21 @@ Deno.serve(async (req: Request) => {
     return badRequest("missing_event_fields");
   }
 
-  // Convert event_timestamp_ms to ISO string for the RPC
-  const occurredAt = new Date(event.event_timestamp_ms).toISOString();
+  // Validate and convert event_timestamp_ms to ISO string for the RPC
+  const rawTimestamp = event.event_timestamp_ms;
+  const eventTimestampMs =
+    typeof rawTimestamp === "number"
+      ? rawTimestamp
+      : typeof rawTimestamp === "string"
+        ? Number(rawTimestamp)
+        : NaN;
+  if (!Number.isFinite(eventTimestampMs)) {
+    console.warn(
+      `Invalid event_timestamp_ms for event=${event.id} type=${event.type}`,
+    );
+    return okIgnored("invalid_event_timestamp_ms");
+  }
+  const occurredAt = new Date(eventTimestampMs).toISOString();
 
   console.log(
     `Processing ${event.type} event=${event.id} user=${event.app_user_id ?? "N/A"} env=${event.environment ?? "unknown"}`,
@@ -399,7 +435,11 @@ Deno.serve(async (req: Request) => {
     }
 
     case "EXPIRATION": {
-      const status = determineExpiredStatus(event.period_type);
+      const status = await determineExpiredStatus(
+        supabase,
+        userId,
+        event.period_type,
+      );
       await callApplyEvent(supabase, userId, event.id, occurredAt, status);
       return ok();
     }
