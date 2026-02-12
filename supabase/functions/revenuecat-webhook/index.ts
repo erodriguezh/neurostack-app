@@ -105,11 +105,16 @@ function determineStatusFromProduct(
 
 /**
  * Determine status for EXPIRATION events.
- * Trial expired -> 'free' (never converted, show "upgrade" UX)
- * Paid expired  -> 'expired' (lapsed subscriber, show "resubscribe" UX)
+ *
+ * When period_type is present:
+ *   TRIAL -> 'free' (never converted, show "upgrade" UX)
+ *   any other -> 'expired' (lapsed subscriber, show "resubscribe" UX)
  *
  * When period_type is missing (schema drift), falls back to querying the
- * user's current DB status: was 'trial' -> 'free', else -> 'expired'.
+ * user's current DB status:
+ *   was 'trial' -> 'free'
+ *   was premium/grace -> 'expired'
+ *   was free/null/unknown -> 'free' (never paid or safe default)
  */
 async function determineExpiredStatus(
   supabase: ReturnType<typeof createClient>,

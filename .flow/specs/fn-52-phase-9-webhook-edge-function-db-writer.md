@@ -8,7 +8,7 @@ Create the RevenueCat webhook Edge Function - the ONLY writer of subscription st
 ## Scope
 - SQL migration: `apply_revenuecat_event()` SECURITY DEFINER RPC function
 - Edge Function: `supabase/functions/revenuecat-webhook/index.ts`
-- HMAC signature verification, UUID validation, status mapping, event handling
+- Authorization header verification (shared secret), UUID validation, status mapping, event handling
 
 ## Approach
 1. Create SECURITY DEFINER RPC migration (monotonicity + idempotency)
@@ -22,7 +22,7 @@ Create the RevenueCat webhook Edge Function - the ONLY writer of subscription st
 ## Acceptance
 - [ ] `apply_revenuecat_event()` migration applied successfully
 - [ ] Edge Function handles all RevenueCat events per Phase 9.2 table
-- [ ] HMAC signature verification over raw body
+- [ ] Authorization header verification (RevenueCat does not support HMAC; uses configurable shared secret in Authorization header per RC docs)
 - [ ] UUID validation for app_user_id
 - [ ] TRANSFER updates both users
 - [ ] Trial vs paid expiration distinction
