@@ -261,11 +261,18 @@ async function handleTransfer(
     // Query current status to determine correct revoke status:
     //   premium*/grace -> 'expired' (was paying, show "resubscribe" UX)
     //   trial/free/unknown -> 'free' (never paid or safe default)
-    const { data: fromUser } = await supabase
+    const { data: fromUser, error: fromError } = await supabase
       .from("users")
       .select("subscription_status")
       .eq("id", fromUuid)
-      .single();
+      .maybeSingle();
+
+    if (fromError) {
+      console.error(
+        `TRANSFER: failed to query from-user=${fromUuid}: ${fromError.message}`,
+      );
+      // Default to 'free' on lookup failure (safe: doesn't grant unearned "expired" UX)
+    }
 
     const wasPaying = [
       "premiumMonthly",
@@ -318,6 +325,11 @@ Deno.serve(async (req: Request) => {
   // -------------------------------------------------------------------------
   // 1. Authorization verification
   // -------------------------------------------------------------------------
+  // NOTE: The plan spec references HMAC signature verification, but RevenueCat
+  // does NOT support HMAC body signing. RevenueCat sends a configurable
+  // Authorization header (set in the RC dashboard). This is the standard and
+  // only supported verification mechanism per RevenueCat docs:
+  // https://www.revenuecat.com/docs/integrations/webhooks
   const webhookSecret = Deno.env.get("REVENUECAT_WEBHOOK_SECRET");
   if (!webhookSecret) {
     console.error("REVENUECAT_WEBHOOK_SECRET not configured");
