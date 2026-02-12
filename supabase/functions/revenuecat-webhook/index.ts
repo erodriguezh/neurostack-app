@@ -35,6 +35,7 @@ type SubscriptionStatus =
   | "trial"
   | "premiumMonthly"
   | "premiumAnnual"
+  | "premiumLifetime"
   | "expired"
   | "grace";
 
@@ -131,7 +132,20 @@ async function determineExpiredStatus(
     );
     return "expired"; // safe default for unknown
   }
-  return data?.subscription_status === "trial" ? "free" : "expired";
+
+  // Deterministic mapping based on last known status:
+  //   trial -> 'free' (never converted)
+  //   premium*/grace -> 'expired' (was paying, show "resubscribe" UX)
+  //   free/null/unknown -> 'free' (never paid or safe default)
+  const last = data?.subscription_status;
+  if (last === "trial") return "free";
+  const wasPaying = [
+    "premiumMonthly",
+    "premiumAnnual",
+    "premiumLifetime",
+    "grace",
+  ].includes(last);
+  return wasPaying ? "expired" : "free";
 }
 
 // ---------------------------------------------------------------------------
@@ -353,7 +367,14 @@ Deno.serve(async (req: Request) => {
     );
     return okIgnored("invalid_event_timestamp_ms");
   }
-  const occurredAt = new Date(eventTimestampMs).toISOString();
+  const occurredDate = new Date(eventTimestampMs);
+  if (Number.isNaN(occurredDate.getTime())) {
+    console.warn(
+      `Out-of-range event_timestamp_ms=${eventTimestampMs} for event=${event.id}`,
+    );
+    return okIgnored("invalid_event_timestamp_ms");
+  }
+  const occurredAt = occurredDate.toISOString();
 
   console.log(
     `Processing ${event.type} event=${event.id} user=${event.app_user_id ?? "N/A"} env=${event.environment ?? "unknown"}`,
