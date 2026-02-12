@@ -7,9 +7,8 @@ TBD
 - [ ] TBD
 
 ## Done summary
-TBD
-
+Created apply_revenuecat_event() SECURITY DEFINER RPC migration for webhook subscription status updates. The function enforces monotonicity (timestamp-based), idempotency (event_id dedup), NULL argument guards, status validation aligned with DB CHECK constraint, and is restricted to service_role only.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: a3da6c3, 3313510, 4ce49d8
+- Tests: flutter analyze, flutter test
 - PRs:
