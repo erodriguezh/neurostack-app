@@ -34,9 +34,17 @@ AS $$
 BEGIN
   -- Guard against NULL arguments (prevents silent no-ops that break
   -- idempotency/monotonicity semantics)
-  IF p_user_id IS NULL OR p_event_id IS NULL
-     OR p_occurred_at IS NULL OR p_subscription_status IS NULL THEN
-    RAISE EXCEPTION 'apply_revenuecat_event: null argument';
+  IF p_user_id IS NULL THEN
+    RAISE EXCEPTION 'apply_revenuecat_event: p_user_id is NULL';
+  END IF;
+  IF p_event_id IS NULL THEN
+    RAISE EXCEPTION 'apply_revenuecat_event: p_event_id is NULL';
+  END IF;
+  IF p_occurred_at IS NULL THEN
+    RAISE EXCEPTION 'apply_revenuecat_event: p_occurred_at is NULL';
+  END IF;
+  IF p_subscription_status IS NULL THEN
+    RAISE EXCEPTION 'apply_revenuecat_event: p_subscription_status is NULL';
   END IF;
 
   -- Validate status before attempting update (prevents retry storms on bad data)
@@ -49,8 +57,9 @@ BEGIN
 
   -- Atomic conditional update with monotonicity + idempotency
   -- 1. Skip if same event already processed (idempotency via rc_last_event_id)
-  -- 2. Only apply if newer than last update (monotonicity via subscription_updated_at)
-  -- 3. Tie-break: same timestamp with different event_id = last arrival wins
+  -- 2. Only apply if newer-or-equal timestamp (monotonicity via subscription_updated_at)
+  --    Tie-break: same timestamp with different event_id = last arrival wins
+  --    (condition 1 already guarantees it is a different event)
   UPDATE public.users
   SET
     subscription_status = p_subscription_status,
@@ -59,12 +68,7 @@ BEGIN
     rc_last_event_id = p_event_id
   WHERE id = p_user_id
     AND rc_last_event_id IS DISTINCT FROM p_event_id
-    AND (
-      subscription_updated_at IS NULL
-      OR p_occurred_at > subscription_updated_at
-      OR (p_occurred_at = subscription_updated_at
-          AND rc_last_event_id IS DISTINCT FROM p_event_id)
-    );
+    AND (subscription_updated_at IS NULL OR p_occurred_at >= subscription_updated_at);
 END;
 $$;
 
