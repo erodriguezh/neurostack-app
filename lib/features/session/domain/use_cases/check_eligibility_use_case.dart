@@ -8,12 +8,10 @@ class CheckEligibilityParams {
   const CheckEligibilityParams({
     required this.userId,
     required this.protocolId,
-    required this.currentTime,
   });
 
   final String userId;
   final String protocolId;
-  final DateTime currentTime;
 }
 
 /// Use case for checking if a user can log a session.
@@ -44,10 +42,7 @@ class CheckEligibilityUseCase {
     final userResult = await _userRepository.getById(params.userId);
 
     return userResult.flatMap(
-      (user) => user.canLogSession(
-        params.protocolId,
-        currentTime: params.currentTime,
-      ),
+      (user) => user.canLogSession(params.protocolId),
     );
   }
 }

@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-02-13T19:07:24.339442Z",
+  "depends_on": [],
+  "epic": "fn-54-phase-102-update-user-entity",
+  "id": "fn-54-phase-102-update-user-entity.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-54-phase-102-update-user-entity.1.md",
+  "status": "todo",
+  "title": "Update User Entity: rename createWithTrial\u2192create, remove currentTime param, cascade to callers",
+  "updated_at": "2026-02-13T19:07:24.339863Z"
+}

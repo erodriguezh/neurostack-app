@@ -29,7 +29,6 @@ void main() {
     validParams = CheckEligibilityParams(
       userId: TestConstants.user.id,
       protocolId: TestConstants.session.protocolId,
-      currentTime: TestConstants.session.currentTime,
     );
   });
 
@@ -107,7 +106,6 @@ void main() {
           final paramsWithStackProtocol = CheckEligibilityParams(
             userId: validParams.userId,
             protocolId: protocolIdInStack,
-            currentTime: validParams.currentTime,
           );
 
           // Act

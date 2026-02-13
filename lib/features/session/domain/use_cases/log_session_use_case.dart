@@ -64,10 +64,7 @@ class LogSessionUseCase {
 
     // Steps 2-3: Chain sync validations with flatMap
     final sessionDraftResult = userResult
-        .flatMap((user) => user.canLogSession(
-              params.protocolId,
-              currentTime: params.currentTime,
-            ))
+        .flatMap((user) => user.canLogSession(params.protocolId))
         .flatMap((_) => SessionDraft.create(
               protocolId: params.protocolId,
               completedAt: params.completedAt,

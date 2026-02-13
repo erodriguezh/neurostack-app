@@ -107,12 +107,8 @@ void main() {
             .thenAnswer((_) async => right(unit));
         viewModel = createViewModel();
 
-        final before = DateTime.now();
-
         // Act
         await viewModel!.init();
-
-        final after = DateTime.now();
 
         // Assert - capture and verify params
         final captured = verify(() => mockCheckEligibility.execute(captureAny()))
@@ -121,18 +117,6 @@ void main() {
 
         expect(captured.userId, TestConstants.user.id);
         expect(captured.protocolId, viewModel!.protocol.id);
-
-        // Verify currentTime is within the expected window
-        expect(
-          captured.currentTime.isAfter(before) ||
-              captured.currentTime.isAtSameMomentAs(before),
-          isTrue,
-        );
-        expect(
-          captured.currentTime.isBefore(after) ||
-              captured.currentTime.isAtSameMomentAs(after),
-          isTrue,
-        );
       });
 
       test('init_whenTooManyProtocols_setsLogSessionIneligibleState', () async {

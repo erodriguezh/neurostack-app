@@ -4,25 +4,23 @@ import 'package:neurostack/features/user/domain/entities/user.dart';
 import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
 import 'package:neurostack/features/user/domain/events/user_events.dart';
 import 'package:neurostack/features/user/domain/failures/user_failures.dart';
-import '../../constants/test_constants.dart';
 import '../../factories/factories.dart';
 import '../../matchers/either_matchers.dart';
 
 void main() {
   group('User', () {
-    group('createWithTrial', () {
-      // INV-U3: Trial MUST auto-activate on first app launch
-      test('createWithTrial_always_setsTrialStatusAndRaisesEvents', () {
+    group('create', () {
+      // INV-P6: New users MUST start with free status
+      test('create_always_setsFreeStatusAndRaisesUserCreatedEvent', () {
         // Act
-        final user = UserFactory.createWithTrial();
+        final user = UserFactory.createDefault();
 
         // Assert
-        expect(user.subscriptionStatus, SubscriptionStatus.trial);
-        expect(user.trialPeriod, isNotNull);
+        expect(user.subscriptionStatus, SubscriptionStatus.free);
+        expect(user.trialPeriod, isNull);
         expect(user.hasDomainEvents, true);
-        expect(user.domainEvents.length, 2);
+        expect(user.domainEvents.length, 1);
         expect(user.domainEvents[0], isA<UserCreatedEvent>());
-        expect(user.domainEvents[1], isA<TrialStartedEvent>());
       });
     });
 
@@ -30,13 +28,9 @@ void main() {
       test('activateProtocol_whenUnderLimit_succeeds', () {
         // Arrange
         final user = UserFactory.createFreeUnderLimit();
-        final currentTime = TestConstants.trial.activeCheckTime;
 
         // Act
-        final result = user.activateProtocol(
-          'protocol-2',
-          currentTime: currentTime,
-        );
+        final result = user.activateProtocol('protocol-2');
 
         // Assert
         expect(result, isRight<User>());
@@ -55,13 +49,9 @@ void main() {
             stack: StackFactory.fromIds(['protocol-1']),
             onboardingCompleted: true,
           );
-          final currentTime = TestConstants.trial.activeCheckTime;
 
           // Act
-          final result = user.activateProtocol(
-            'protocol-1',
-            currentTime: currentTime,
-          );
+          final result = user.activateProtocol('protocol-1');
 
           // Assert
           expect(result, isLeftWith(UserFailures.protocolAlreadyActive));
@@ -76,13 +66,9 @@ void main() {
           stack: StackFactory.fromIds(['protocol-1']),
           onboardingCompleted: true,
         );
-        final currentTime = TestConstants.trial.activeCheckTime;
 
         // Act - add second (should succeed)
-        final result1 = user.activateProtocol(
-          'protocol-2',
-          currentTime: currentTime,
-        );
+        final result1 = user.activateProtocol('protocol-2');
 
         // Assert - first activation succeeds
         expect(result1, isRight<User>());
@@ -92,10 +78,7 @@ void main() {
         );
 
         // Act - add third (should fail at boundary)
-        final result2 = userAtLimit.activateProtocol(
-          'protocol-3',
-          currentTime: currentTime,
-        );
+        final result2 = userAtLimit.activateProtocol('protocol-3');
 
         // Assert - second activation fails with specific error
         expect(result2, isLeftWith(UserFailures.protocolLimitReached));
@@ -110,10 +93,9 @@ void main() {
           stack: StackFactory.fromIds(['p-1', 'p-2', 'p-3', 'p-4', 'p-5']),
           onboardingCompleted: true,
         );
-        final currentTime = TestConstants.trial.activeCheckTime;
 
         // Act - add 6th protocol
-        final result = user.activateProtocol('p-6', currentTime: currentTime);
+        final result = user.activateProtocol('p-6');
 
         // Assert - should succeed (no limit on trial)
         expect(result, isRight<User>());
@@ -132,13 +114,9 @@ void main() {
             stack: StackFactory.atFreeCapacity(),
             onboardingCompleted: true,
           );
-          final currentTime = TestConstants.trial.expiredCheckTime;
 
           // Act - try to add 3rd protocol
-          final result = user.activateProtocol(
-            'protocol-3',
-            currentTime: currentTime,
-          );
+          final result = user.activateProtocol('protocol-3');
 
           // Assert - succeeds because entity no longer checks trialPeriod
           expect(result, isRight<User>());
@@ -152,13 +130,9 @@ void main() {
             List.generate(10, (i) => 'protocol-$i'),
           ),
         );
-        final currentTime = TestConstants.trial.activeCheckTime;
 
         // Act - add 11th protocol
-        final result = user.activateProtocol(
-          'protocol-10',
-          currentTime: currentTime,
-        );
+        final result = user.activateProtocol('protocol-10');
 
         // Assert - should succeed (no limit on premium)
         expect(result, isRight<User>());
@@ -171,13 +145,9 @@ void main() {
             List.generate(10, (i) => 'protocol-$i'),
           ),
         );
-        final currentTime = TestConstants.trial.activeCheckTime;
 
         // Act - add 11th protocol
-        final result = user.activateProtocol(
-          'protocol-10',
-          currentTime: currentTime,
-        );
+        final result = user.activateProtocol('protocol-10');
 
         // Assert - should succeed (no limit on premium)
         expect(result, isRight<User>());
@@ -229,13 +199,9 @@ void main() {
             stack: StackFactory.fromIds(['protocol-1']),
             onboardingCompleted: false,
           );
-          final currentTime = TestConstants.trial.activeCheckTime;
 
           // Act
-          final result = user.canLogSession(
-            'protocol-1',
-            currentTime: currentTime,
-          );
+          final result = user.canLogSession('protocol-1');
 
           // Assert
           expect(result, isLeftWith(UserFailures.onboardingNotCompleted));
@@ -250,13 +216,9 @@ void main() {
             stack: StackFactory.fromIds(['protocol-1']),
             onboardingCompleted: true,
           );
-          final currentTime = TestConstants.trial.activeCheckTime;
 
           // Act
-          final result = user.canLogSession(
-            'protocol-2',
-            currentTime: currentTime,
-          );
+          final result = user.canLogSession('protocol-2');
 
           // Assert
           expect(result, isLeftWith(UserFailures.protocolNotInStack));
@@ -271,13 +233,9 @@ void main() {
         () {
           // Arrange - expired trial with 3 protocols
           final user = UserFactory.createExpiredTrialOverLimit();
-          final currentTime = TestConstants.trial.expiredCheckTime;
 
           // Act - try to log session for any protocol
-          final result = user.canLogSession(
-            StackFactory.protocol1,
-            currentTime: currentTime,
-          );
+          final result = user.canLogSession(StackFactory.protocol1);
 
           // Assert - succeeds; entity no longer checks trialPeriod for gating
           expect(result, isRight<Unit>());
@@ -292,13 +250,9 @@ void main() {
           stack: StackFactory.atFreeCapacity(),
           onboardingCompleted: true,
         );
-        final currentTime = TestConstants.trial.expiredCheckTime;
 
         // Act
-        final result = user.canLogSession(
-          'protocol-1',
-          currentTime: currentTime,
-        );
+        final result = user.canLogSession('protocol-1');
 
         // Assert - should succeed (trial status means unlimited)
         expect(result, isRight<Unit>());
@@ -311,13 +265,9 @@ void main() {
           stack: StackFactory.fromIds(['protocol-1']),
           onboardingCompleted: true,
         );
-        final currentTime = TestConstants.trial.activeCheckTime;
 
         // Act
-        final result = user.canLogSession(
-          'protocol-1',
-          currentTime: currentTime,
-        );
+        final result = user.canLogSession('protocol-1');
 
         // Assert
         expect(result, isRight<Unit>());
@@ -408,14 +358,12 @@ void main() {
     });
 
     group('getEffectiveStatus', () {
-      // INV-M4: Auto-downgrade
       test('getEffectiveStatus_whenTrialActive_returnsTrial', () {
         // Arrange
         final user = UserFactory.createActiveTrial();
-        final currentTime = TestConstants.trial.activeCheckTime;
 
         // Act
-        final status = user.getEffectiveStatus(currentTime);
+        final status = user.getEffectiveStatus();
 
         // Assert
         expect(status, SubscriptionStatus.trial);
@@ -430,10 +378,9 @@ void main() {
           subscriptionStatus: SubscriptionStatus.trial,
           trialPeriod: TrialPeriodFactory.expired(),
         );
-        final currentTime = TestConstants.trial.expiredCheckTime;
 
         // Act
-        final status = user.getEffectiveStatus(currentTime);
+        final status = user.getEffectiveStatus();
 
         // Assert - returns stored status, not free
         expect(status, SubscriptionStatus.trial);
@@ -442,10 +389,9 @@ void main() {
       test('getEffectiveStatus_whenPremiumMonthly_returnsPremiumMonthly', () {
         // Arrange
         final user = UserFactory.createPremiumMonthly();
-        final currentTime = TestConstants.trial.activeCheckTime;
 
         // Act
-        final status = user.getEffectiveStatus(currentTime);
+        final status = user.getEffectiveStatus();
 
         // Assert
         expect(status, SubscriptionStatus.premiumMonthly);
@@ -457,10 +403,9 @@ void main() {
           subscriptionStatus: SubscriptionStatus.free,
           trialPeriod: null,
         );
-        final currentTime = TestConstants.trial.activeCheckTime;
 
         // Act
-        final status = user.getEffectiveStatus(currentTime);
+        final status = user.getEffectiveStatus();
 
         // Assert
         expect(status, SubscriptionStatus.free);
@@ -475,13 +420,9 @@ void main() {
           stack: StackFactory.empty(),
           onboardingCompleted: true,
         );
-        final currentTime = TestConstants.trial.activeCheckTime;
 
         // Act
-        final result = user.activateProtocol(
-          'protocol-123',
-          currentTime: currentTime,
-        );
+        final result = user.activateProtocol('protocol-123');
 
         // Assert
         final updated = result.getOrElse(
@@ -491,7 +432,7 @@ void main() {
         final event = updated.domainEvents
             .whereType<ProtocolActivatedEvent>()
             .first;
-        expect(event.userId, TestConstants.user.id);
+        expect(event.userId, user.id);
         expect(event.protocolId, 'protocol-123');
       });
 
@@ -515,7 +456,7 @@ void main() {
           final event = updated.domainEvents
               .whereType<ProtocolDeactivatedEvent>()
               .first;
-          expect(event.userId, TestConstants.user.id);
+          expect(event.userId, user.id);
           expect(event.protocolId, 'protocol-123');
         },
       );
@@ -537,7 +478,7 @@ void main() {
           final event = updated.domainEvents
               .whereType<OnboardingCompletedEvent>()
               .first;
-          expect(event.userId, TestConstants.user.id);
+          expect(event.userId, user.id);
         },
       );
 
@@ -562,7 +503,7 @@ void main() {
           final event = upgraded.domainEvents
               .whereType<SubscriptionUpgradedEvent>()
               .first;
-          expect(event.userId, TestConstants.user.id);
+          expect(event.userId, user.id);
           expect(event.newStatus, SubscriptionStatus.premiumMonthly);
         },
       );

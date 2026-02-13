@@ -171,10 +171,7 @@ class HomeViewModel
     }
 
     final now = DateTime.now();
-    final result = user.canLogSession(
-      protocolId,
-      currentTime: now,
-    );
+    final result = user.canLogSession(protocolId);
 
     if (result.isLeft()) {
       final failure = result.getLeft().getOrElse(

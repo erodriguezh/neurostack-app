@@ -7,12 +7,12 @@ import 'value_objects/stack_factory.dart';
 import 'value_objects/trial_period_factory.dart';
 
 abstract final class UserFactory {
-  /// Creates a User with trial auto-activated (default state).
-  static User createWithTrial({
+  /// Creates a User with free status (default state for new users).
+  static User createDefault({
     String? id,
     DateTime? createdAt,
   }) {
-    return User.createWithTrial(
+    return User.create(
       id: id ?? TestConstants.user.id,
       createdAt: createdAt ?? TestConstants.user.createdAt,
     );

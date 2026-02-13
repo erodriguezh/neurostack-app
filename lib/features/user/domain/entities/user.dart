@@ -17,12 +17,12 @@ import '../value_objects/trial_period.dart';
 /// - **INV-U2**: Trial/Premium users CAN activate unlimited protocols,
 ///              based on the stored [subscriptionStatus]. Time-based
 ///              expiry is handled externally.
-/// - **INV-U3**: Trial MUST auto-activate on first app launch
 /// - **INV-U4**: Users MUST complete onboarding before tracking Sessions
 /// - **INV-M1**: Free Tier MUST have no time limit
 /// - **INV-M5**: Free Tier users CANNOT activate more than 2 protocols
 /// - **INV-B2**: Paywall MUST trigger when Free Tier user tries 3rd protocol
 /// - **INV-B5**: Users MUST be able to use Free Tier indefinitely
+/// - **INV-P6**: New users MUST start with `free` status (not `trial`)
 ///
 /// Note: Time-based trial invariants (**INV-U5**, **INV-M2**, **INV-M4**) are
 /// enforced by [SubscriptionStatusResolver] / RevenueCat entitlements.
@@ -70,36 +70,32 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
   /// Previously this method checked `trialPeriod.isExpired()` to auto-downgrade
   /// trial -> free (INV-M4). That responsibility now lives in
   /// [SubscriptionStatusResolver] which uses RevenueCat entitlements.
-  ///
-  /// The [currentTime] parameter is retained for API compatibility with callers
-  /// such as [activateProtocol] and [canLogSession]; it is no longer used.
-  SubscriptionStatus getEffectiveStatus(DateTime currentTime) {
+  SubscriptionStatus getEffectiveStatus() {
     return subscriptionStatus;
   }
 
-  /// Creates a new User with trial auto-activated.
+  /// Creates a new User with free subscription status.
   ///
-  /// Enforces **INV-U3**: Trial MUST auto-activate on first app launch.
+  /// Enforces **INV-P6**: New users MUST start with `free` status.
+  /// Trial activation is now managed by RevenueCat, not auto-activated
+  /// on first app launch (INV-U3 is deprecated).
   ///
   /// This is the primary factory for new users.
-  static User createWithTrial({
+  static User create({
     required String id,
     DateTime? createdAt,
-    DateTime? trialStartDate,
   }) {
     final effectiveCreatedAt = createdAt ?? DateTime.now();
-    final effectiveTrialStart = trialStartDate ?? effectiveCreatedAt;
     final user = User._(
       id: id,
-      subscriptionStatus: SubscriptionStatus.trial,
-      trialPeriod: TrialPeriod.fromStartDate(effectiveTrialStart),
+      subscriptionStatus: SubscriptionStatus.free,
+      trialPeriod: null,
       stack: Stack.empty(),
       onboardingCompleted: false,
       createdAt: effectiveCreatedAt,
     );
 
     user.raiseDomainEvent(UserCreatedEvent(userId: id));
-    user.raiseDomainEvent(TrialStartedEvent(userId: id));
 
     return user;
   }
@@ -130,21 +126,16 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
   /// - **INV-U2**: Trial/Premium has unlimited protocols
   /// - **INV-M5/B2**: Shows paywall when free tier user tries 3rd protocol
   ///
-  /// - [currentTime]: Retained for API compatibility; not used for gating.
-  ///
   /// Returns [Left] with:
   /// - [UserFailures.protocolAlreadyActive] if already in stack
   /// - [UserFailures.protocolLimitReached] if at limit
-  Either<DomainFailure, User> activateProtocol(
-    String protocolId, {
-    required DateTime currentTime,
-  }) {
+  Either<DomainFailure, User> activateProtocol(String protocolId) {
     // Check if already active
     if (_stack.contains(protocolId)) {
       return left(UserFailures.protocolAlreadyActive);
     }
 
-    final effectiveStatus = getEffectiveStatus(currentTime);
+    final effectiveStatus = getEffectiveStatus();
     final limit = effectiveStatus.protocolLimit;
 
     // INV-U1, INV-M5, INV-B2: Check protocol limit
@@ -208,13 +199,9 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
   /// [SubscriptionStatusResolver], not this entity.
   ///
   /// - [protocolId]: Protocol to log session for.
-  /// - [currentTime]: Retained for API compatibility; not used for gating.
   ///
   /// Returns [Left] with appropriate failure if cannot log.
-  Either<DomainFailure, Unit> canLogSession(
-    String protocolId, {
-    required DateTime currentTime,
-  }) {
+  Either<DomainFailure, Unit> canLogSession(String protocolId) {
     // INV-U4: Must complete onboarding
     if (!onboardingCompleted) {
       return left(UserFailures.onboardingNotCompleted);
@@ -225,7 +212,7 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
       return left(UserFailures.protocolNotInStack);
     }
 
-    final effectiveStatus = getEffectiveStatus(currentTime);
+    final effectiveStatus = getEffectiveStatus();
     final limit = effectiveStatus.protocolLimit;
 
     // Protocol count exceeds limit for current subscription tier

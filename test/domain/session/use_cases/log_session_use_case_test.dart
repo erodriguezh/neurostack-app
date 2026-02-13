@@ -175,7 +175,7 @@ void main() {
             userId: validParams.userId,
             protocolId: StackFactory.protocol1,
             completedAt: validParams.completedAt,
-            currentTime: validParams.currentTime,
+            currentTime: validParams.currentTime, // Still needed for SessionDraft
           );
 
           // Act

@@ -101,7 +101,6 @@ class LogSessionViewModel {
       CheckEligibilityParams(
         userId: _userId,
         protocolId: _protocol.id,
-        currentTime: DateTime.now(),
       ),
     );
 

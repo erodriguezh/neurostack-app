@@ -58,10 +58,9 @@ class UserBootstrapService {
         'User record missing (env=${AppEnvironment.tag}, userId=$userId). Attempting recovery upsert.',
       );
       final createdAt = _resolveAuthCreatedAt(authCreatedAt);
-      final newUser = User.createWithTrial(
+      final newUser = User.create(
         id: userId,
         createdAt: createdAt,
-        trialStartDate: createdAt,
       );
       final dto = UserDto.fromDomain(newUser);
 

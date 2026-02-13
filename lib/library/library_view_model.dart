@@ -176,10 +176,7 @@ class LibraryViewModel
       return;
     }
 
-    final result = user.canLogSession(
-      protocolId,
-      currentTime: DateTime.now(),
-    );
+    final result = user.canLogSession(protocolId);
 
     if (result.isLeft()) {
       final failure = result.getLeft().getOrElse(
@@ -208,10 +205,7 @@ class LibraryViewModel
       return;
     }
 
-    final result = user.activateProtocol(
-      protocolId,
-      currentTime: DateTime.now(),
-    );
+    final result = user.activateProtocol(protocolId);
 
     if (result.isLeft()) {
       final failure = result.getLeft().getOrElse(
