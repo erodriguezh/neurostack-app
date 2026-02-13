@@ -1339,16 +1339,11 @@ Only proceed after webhook + UI gating are stable.
 
 ## Phase 11: Database Cleanup (AFTER Phase 10)
 
-### 11.1 Remove pg_cron Job
-- **New File:** `supabase/migrations/YYYYMMDDHHMMSS_remove_expire_trials_cron.sql`
-- **IMPORTANT:** Verify exact job name from `20260123113429_trial_expiration_cron.sql` before writing this migration
-- **Changes:**
-  ```sql
-  -- Remove trial expiration cron job (RevenueCat manages trials now)
-  -- NOTE: Verify job name matches what was scheduled in the original migration
-  SELECT cron.unschedule('expire-trials');
-  DROP FUNCTION IF EXISTS expire_trials();
-  ```
+### 11.1 Remove pg_cron Job -- DONE
+- **New File:** `supabase/migrations/20260213194806_remove_expire_trials_cron.sql`
+- Unscheduled both cron jobs (`neurostack-expire-trials-morning`, `neurostack-expire-trials-evening`) using idempotent DO block with jobid lookup
+- Dropped `expire_trials()` function
+- Applied via Supabase MCP
 
 ### 11.2 Update handle_new_user() Before Dropping Columns (CRITICAL)
 - **New File:** `supabase/migrations/YYYYMMDDHHMMSS_update_handle_new_user_no_trial.sql`

@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-02-13T19:46:56.119852Z",
+  "depends_on": [],
+  "epic": "fn-56-phase-111-remove-pg-cron-job",
+  "id": "fn-56-phase-111-remove-pg-cron-job.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-56-phase-111-remove-pg-cron-job.1.md",
+  "status": "todo",
+  "title": "Create migration to remove expire_trials cron jobs and function",
+  "updated_at": "2026-02-13T19:46:56.120330Z"
+}

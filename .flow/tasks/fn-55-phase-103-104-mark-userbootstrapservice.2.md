@@ -7,9 +7,8 @@ TBD
 - [ ] TBD
 
 ## Done summary
-TBD
-
+Removed the trialEndsAt field entirely from UserDto, stopping serialization of trial_ends_at before the DB column is dropped. Updated tests to verify toJson omits the field and fromJson tolerates the legacy column.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 5644a22, a1ea30d
+- Tests: flutter test, flutter analyze
 - PRs:
