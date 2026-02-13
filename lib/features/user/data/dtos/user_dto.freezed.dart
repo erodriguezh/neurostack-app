@@ -15,8 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UserDto {
 
-@JsonKey(fromJson: _stringFromJson) String get id;@JsonKey(name: 'subscription_status', fromJson: _stringFromJson) String get subscriptionStatus;@JsonKey(name: 'trial_period') TrialPeriodDto? get trialPeriod;// Denormalized field for SQL queries (cron, analytics). Source of truth is trialPeriod.
-@JsonKey(name: 'trial_ends_at', fromJson: _nullableDateTimeFromJson) DateTime? get trialEndsAt;@JsonKey(name: 'protocol_ids', fromJson: _protocolIdsFromJson, toJson: _protocolIdsToJson) List<String> get protocolIds;@JsonKey(name: 'onboarding_completed') bool get onboardingCompleted;@JsonKey(name: 'created_at', fromJson: _stringFromJson) String get createdAt;
+@JsonKey(fromJson: _stringFromJson) String get id;@JsonKey(name: 'subscription_status', fromJson: _stringFromJson) String get subscriptionStatus;@JsonKey(name: 'trial_period') TrialPeriodDto? get trialPeriod;@JsonKey(name: 'protocol_ids', fromJson: _protocolIdsFromJson, toJson: _protocolIdsToJson) List<String> get protocolIds;@JsonKey(name: 'onboarding_completed') bool get onboardingCompleted;@JsonKey(name: 'created_at', fromJson: _stringFromJson) String get createdAt;
 /// Create a copy of UserDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -29,16 +28,16 @@ $UserDtoCopyWith<UserDto> get copyWith => _$UserDtoCopyWithImpl<UserDto>(this as
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserDto&&(identical(other.id, id) || other.id == id)&&(identical(other.subscriptionStatus, subscriptionStatus) || other.subscriptionStatus == subscriptionStatus)&&(identical(other.trialPeriod, trialPeriod) || other.trialPeriod == trialPeriod)&&(identical(other.trialEndsAt, trialEndsAt) || other.trialEndsAt == trialEndsAt)&&const DeepCollectionEquality().equals(other.protocolIds, protocolIds)&&(identical(other.onboardingCompleted, onboardingCompleted) || other.onboardingCompleted == onboardingCompleted)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserDto&&(identical(other.id, id) || other.id == id)&&(identical(other.subscriptionStatus, subscriptionStatus) || other.subscriptionStatus == subscriptionStatus)&&(identical(other.trialPeriod, trialPeriod) || other.trialPeriod == trialPeriod)&&const DeepCollectionEquality().equals(other.protocolIds, protocolIds)&&(identical(other.onboardingCompleted, onboardingCompleted) || other.onboardingCompleted == onboardingCompleted)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,subscriptionStatus,trialPeriod,trialEndsAt,const DeepCollectionEquality().hash(protocolIds),onboardingCompleted,createdAt);
+int get hashCode => Object.hash(runtimeType,id,subscriptionStatus,trialPeriod,const DeepCollectionEquality().hash(protocolIds),onboardingCompleted,createdAt);
 
 @override
 String toString() {
-  return 'UserDto(id: $id, subscriptionStatus: $subscriptionStatus, trialPeriod: $trialPeriod, trialEndsAt: $trialEndsAt, protocolIds: $protocolIds, onboardingCompleted: $onboardingCompleted, createdAt: $createdAt)';
+  return 'UserDto(id: $id, subscriptionStatus: $subscriptionStatus, trialPeriod: $trialPeriod, protocolIds: $protocolIds, onboardingCompleted: $onboardingCompleted, createdAt: $createdAt)';
 }
 
 
@@ -49,7 +48,7 @@ abstract mixin class $UserDtoCopyWith<$Res>  {
   factory $UserDtoCopyWith(UserDto value, $Res Function(UserDto) _then) = _$UserDtoCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(fromJson: _stringFromJson) String id,@JsonKey(name: 'subscription_status', fromJson: _stringFromJson) String subscriptionStatus,@JsonKey(name: 'trial_period') TrialPeriodDto? trialPeriod,@JsonKey(name: 'trial_ends_at', fromJson: _nullableDateTimeFromJson) DateTime? trialEndsAt,@JsonKey(name: 'protocol_ids', fromJson: _protocolIdsFromJson, toJson: _protocolIdsToJson) List<String> protocolIds,@JsonKey(name: 'onboarding_completed') bool onboardingCompleted,@JsonKey(name: 'created_at', fromJson: _stringFromJson) String createdAt
+@JsonKey(fromJson: _stringFromJson) String id,@JsonKey(name: 'subscription_status', fromJson: _stringFromJson) String subscriptionStatus,@JsonKey(name: 'trial_period') TrialPeriodDto? trialPeriod,@JsonKey(name: 'protocol_ids', fromJson: _protocolIdsFromJson, toJson: _protocolIdsToJson) List<String> protocolIds,@JsonKey(name: 'onboarding_completed') bool onboardingCompleted,@JsonKey(name: 'created_at', fromJson: _stringFromJson) String createdAt
 });
 
 
@@ -66,13 +65,12 @@ class _$UserDtoCopyWithImpl<$Res>
 
 /// Create a copy of UserDto
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? subscriptionStatus = null,Object? trialPeriod = freezed,Object? trialEndsAt = freezed,Object? protocolIds = null,Object? onboardingCompleted = null,Object? createdAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? subscriptionStatus = null,Object? trialPeriod = freezed,Object? protocolIds = null,Object? onboardingCompleted = null,Object? createdAt = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,subscriptionStatus: null == subscriptionStatus ? _self.subscriptionStatus : subscriptionStatus // ignore: cast_nullable_to_non_nullable
 as String,trialPeriod: freezed == trialPeriod ? _self.trialPeriod : trialPeriod // ignore: cast_nullable_to_non_nullable
-as TrialPeriodDto?,trialEndsAt: freezed == trialEndsAt ? _self.trialEndsAt : trialEndsAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,protocolIds: null == protocolIds ? _self.protocolIds : protocolIds // ignore: cast_nullable_to_non_nullable
+as TrialPeriodDto?,protocolIds: null == protocolIds ? _self.protocolIds : protocolIds // ignore: cast_nullable_to_non_nullable
 as List<String>,onboardingCompleted: null == onboardingCompleted ? _self.onboardingCompleted : onboardingCompleted // ignore: cast_nullable_to_non_nullable
 as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as String,
@@ -172,10 +170,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(fromJson: _stringFromJson)  String id, @JsonKey(name: 'subscription_status', fromJson: _stringFromJson)  String subscriptionStatus, @JsonKey(name: 'trial_period')  TrialPeriodDto? trialPeriod, @JsonKey(name: 'trial_ends_at', fromJson: _nullableDateTimeFromJson)  DateTime? trialEndsAt, @JsonKey(name: 'protocol_ids', fromJson: _protocolIdsFromJson, toJson: _protocolIdsToJson)  List<String> protocolIds, @JsonKey(name: 'onboarding_completed')  bool onboardingCompleted, @JsonKey(name: 'created_at', fromJson: _stringFromJson)  String createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(fromJson: _stringFromJson)  String id, @JsonKey(name: 'subscription_status', fromJson: _stringFromJson)  String subscriptionStatus, @JsonKey(name: 'trial_period')  TrialPeriodDto? trialPeriod, @JsonKey(name: 'protocol_ids', fromJson: _protocolIdsFromJson, toJson: _protocolIdsToJson)  List<String> protocolIds, @JsonKey(name: 'onboarding_completed')  bool onboardingCompleted, @JsonKey(name: 'created_at', fromJson: _stringFromJson)  String createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserDto() when $default != null:
-return $default(_that.id,_that.subscriptionStatus,_that.trialPeriod,_that.trialEndsAt,_that.protocolIds,_that.onboardingCompleted,_that.createdAt);case _:
+return $default(_that.id,_that.subscriptionStatus,_that.trialPeriod,_that.protocolIds,_that.onboardingCompleted,_that.createdAt);case _:
   return orElse();
 
 }
@@ -193,10 +191,10 @@ return $default(_that.id,_that.subscriptionStatus,_that.trialPeriod,_that.trialE
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(fromJson: _stringFromJson)  String id, @JsonKey(name: 'subscription_status', fromJson: _stringFromJson)  String subscriptionStatus, @JsonKey(name: 'trial_period')  TrialPeriodDto? trialPeriod, @JsonKey(name: 'trial_ends_at', fromJson: _nullableDateTimeFromJson)  DateTime? trialEndsAt, @JsonKey(name: 'protocol_ids', fromJson: _protocolIdsFromJson, toJson: _protocolIdsToJson)  List<String> protocolIds, @JsonKey(name: 'onboarding_completed')  bool onboardingCompleted, @JsonKey(name: 'created_at', fromJson: _stringFromJson)  String createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(fromJson: _stringFromJson)  String id, @JsonKey(name: 'subscription_status', fromJson: _stringFromJson)  String subscriptionStatus, @JsonKey(name: 'trial_period')  TrialPeriodDto? trialPeriod, @JsonKey(name: 'protocol_ids', fromJson: _protocolIdsFromJson, toJson: _protocolIdsToJson)  List<String> protocolIds, @JsonKey(name: 'onboarding_completed')  bool onboardingCompleted, @JsonKey(name: 'created_at', fromJson: _stringFromJson)  String createdAt)  $default,) {final _that = this;
 switch (_that) {
 case _UserDto():
-return $default(_that.id,_that.subscriptionStatus,_that.trialPeriod,_that.trialEndsAt,_that.protocolIds,_that.onboardingCompleted,_that.createdAt);case _:
+return $default(_that.id,_that.subscriptionStatus,_that.trialPeriod,_that.protocolIds,_that.onboardingCompleted,_that.createdAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -213,10 +211,10 @@ return $default(_that.id,_that.subscriptionStatus,_that.trialPeriod,_that.trialE
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(fromJson: _stringFromJson)  String id, @JsonKey(name: 'subscription_status', fromJson: _stringFromJson)  String subscriptionStatus, @JsonKey(name: 'trial_period')  TrialPeriodDto? trialPeriod, @JsonKey(name: 'trial_ends_at', fromJson: _nullableDateTimeFromJson)  DateTime? trialEndsAt, @JsonKey(name: 'protocol_ids', fromJson: _protocolIdsFromJson, toJson: _protocolIdsToJson)  List<String> protocolIds, @JsonKey(name: 'onboarding_completed')  bool onboardingCompleted, @JsonKey(name: 'created_at', fromJson: _stringFromJson)  String createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(fromJson: _stringFromJson)  String id, @JsonKey(name: 'subscription_status', fromJson: _stringFromJson)  String subscriptionStatus, @JsonKey(name: 'trial_period')  TrialPeriodDto? trialPeriod, @JsonKey(name: 'protocol_ids', fromJson: _protocolIdsFromJson, toJson: _protocolIdsToJson)  List<String> protocolIds, @JsonKey(name: 'onboarding_completed')  bool onboardingCompleted, @JsonKey(name: 'created_at', fromJson: _stringFromJson)  String createdAt)?  $default,) {final _that = this;
 switch (_that) {
 case _UserDto() when $default != null:
-return $default(_that.id,_that.subscriptionStatus,_that.trialPeriod,_that.trialEndsAt,_that.protocolIds,_that.onboardingCompleted,_that.createdAt);case _:
+return $default(_that.id,_that.subscriptionStatus,_that.trialPeriod,_that.protocolIds,_that.onboardingCompleted,_that.createdAt);case _:
   return null;
 
 }
@@ -228,14 +226,12 @@ return $default(_that.id,_that.subscriptionStatus,_that.trialPeriod,_that.trialE
 @JsonSerializable()
 
 class _UserDto extends UserDto {
-  const _UserDto({@JsonKey(fromJson: _stringFromJson) required this.id, @JsonKey(name: 'subscription_status', fromJson: _stringFromJson) required this.subscriptionStatus, @JsonKey(name: 'trial_period') this.trialPeriod, @JsonKey(name: 'trial_ends_at', fromJson: _nullableDateTimeFromJson) this.trialEndsAt, @JsonKey(name: 'protocol_ids', fromJson: _protocolIdsFromJson, toJson: _protocolIdsToJson) required final  List<String> protocolIds, @JsonKey(name: 'onboarding_completed') required this.onboardingCompleted, @JsonKey(name: 'created_at', fromJson: _stringFromJson) required this.createdAt}): _protocolIds = protocolIds,super._();
+  const _UserDto({@JsonKey(fromJson: _stringFromJson) required this.id, @JsonKey(name: 'subscription_status', fromJson: _stringFromJson) required this.subscriptionStatus, @JsonKey(name: 'trial_period') this.trialPeriod, @JsonKey(name: 'protocol_ids', fromJson: _protocolIdsFromJson, toJson: _protocolIdsToJson) required final  List<String> protocolIds, @JsonKey(name: 'onboarding_completed') required this.onboardingCompleted, @JsonKey(name: 'created_at', fromJson: _stringFromJson) required this.createdAt}): _protocolIds = protocolIds,super._();
   factory _UserDto.fromJson(Map<String, dynamic> json) => _$UserDtoFromJson(json);
 
 @override@JsonKey(fromJson: _stringFromJson) final  String id;
 @override@JsonKey(name: 'subscription_status', fromJson: _stringFromJson) final  String subscriptionStatus;
 @override@JsonKey(name: 'trial_period') final  TrialPeriodDto? trialPeriod;
-// Denormalized field for SQL queries (cron, analytics). Source of truth is trialPeriod.
-@override@JsonKey(name: 'trial_ends_at', fromJson: _nullableDateTimeFromJson) final  DateTime? trialEndsAt;
  final  List<String> _protocolIds;
 @override@JsonKey(name: 'protocol_ids', fromJson: _protocolIdsFromJson, toJson: _protocolIdsToJson) List<String> get protocolIds {
   if (_protocolIds is EqualUnmodifiableListView) return _protocolIds;
@@ -259,16 +255,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserDto&&(identical(other.id, id) || other.id == id)&&(identical(other.subscriptionStatus, subscriptionStatus) || other.subscriptionStatus == subscriptionStatus)&&(identical(other.trialPeriod, trialPeriod) || other.trialPeriod == trialPeriod)&&(identical(other.trialEndsAt, trialEndsAt) || other.trialEndsAt == trialEndsAt)&&const DeepCollectionEquality().equals(other._protocolIds, _protocolIds)&&(identical(other.onboardingCompleted, onboardingCompleted) || other.onboardingCompleted == onboardingCompleted)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserDto&&(identical(other.id, id) || other.id == id)&&(identical(other.subscriptionStatus, subscriptionStatus) || other.subscriptionStatus == subscriptionStatus)&&(identical(other.trialPeriod, trialPeriod) || other.trialPeriod == trialPeriod)&&const DeepCollectionEquality().equals(other._protocolIds, _protocolIds)&&(identical(other.onboardingCompleted, onboardingCompleted) || other.onboardingCompleted == onboardingCompleted)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,subscriptionStatus,trialPeriod,trialEndsAt,const DeepCollectionEquality().hash(_protocolIds),onboardingCompleted,createdAt);
+int get hashCode => Object.hash(runtimeType,id,subscriptionStatus,trialPeriod,const DeepCollectionEquality().hash(_protocolIds),onboardingCompleted,createdAt);
 
 @override
 String toString() {
-  return 'UserDto(id: $id, subscriptionStatus: $subscriptionStatus, trialPeriod: $trialPeriod, trialEndsAt: $trialEndsAt, protocolIds: $protocolIds, onboardingCompleted: $onboardingCompleted, createdAt: $createdAt)';
+  return 'UserDto(id: $id, subscriptionStatus: $subscriptionStatus, trialPeriod: $trialPeriod, protocolIds: $protocolIds, onboardingCompleted: $onboardingCompleted, createdAt: $createdAt)';
 }
 
 
@@ -279,7 +275,7 @@ abstract mixin class _$UserDtoCopyWith<$Res> implements $UserDtoCopyWith<$Res> {
   factory _$UserDtoCopyWith(_UserDto value, $Res Function(_UserDto) _then) = __$UserDtoCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(fromJson: _stringFromJson) String id,@JsonKey(name: 'subscription_status', fromJson: _stringFromJson) String subscriptionStatus,@JsonKey(name: 'trial_period') TrialPeriodDto? trialPeriod,@JsonKey(name: 'trial_ends_at', fromJson: _nullableDateTimeFromJson) DateTime? trialEndsAt,@JsonKey(name: 'protocol_ids', fromJson: _protocolIdsFromJson, toJson: _protocolIdsToJson) List<String> protocolIds,@JsonKey(name: 'onboarding_completed') bool onboardingCompleted,@JsonKey(name: 'created_at', fromJson: _stringFromJson) String createdAt
+@JsonKey(fromJson: _stringFromJson) String id,@JsonKey(name: 'subscription_status', fromJson: _stringFromJson) String subscriptionStatus,@JsonKey(name: 'trial_period') TrialPeriodDto? trialPeriod,@JsonKey(name: 'protocol_ids', fromJson: _protocolIdsFromJson, toJson: _protocolIdsToJson) List<String> protocolIds,@JsonKey(name: 'onboarding_completed') bool onboardingCompleted,@JsonKey(name: 'created_at', fromJson: _stringFromJson) String createdAt
 });
 
 
@@ -296,13 +292,12 @@ class __$UserDtoCopyWithImpl<$Res>
 
 /// Create a copy of UserDto
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? subscriptionStatus = null,Object? trialPeriod = freezed,Object? trialEndsAt = freezed,Object? protocolIds = null,Object? onboardingCompleted = null,Object? createdAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? subscriptionStatus = null,Object? trialPeriod = freezed,Object? protocolIds = null,Object? onboardingCompleted = null,Object? createdAt = null,}) {
   return _then(_UserDto(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,subscriptionStatus: null == subscriptionStatus ? _self.subscriptionStatus : subscriptionStatus // ignore: cast_nullable_to_non_nullable
 as String,trialPeriod: freezed == trialPeriod ? _self.trialPeriod : trialPeriod // ignore: cast_nullable_to_non_nullable
-as TrialPeriodDto?,trialEndsAt: freezed == trialEndsAt ? _self.trialEndsAt : trialEndsAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,protocolIds: null == protocolIds ? _self._protocolIds : protocolIds // ignore: cast_nullable_to_non_nullable
+as TrialPeriodDto?,protocolIds: null == protocolIds ? _self._protocolIds : protocolIds // ignore: cast_nullable_to_non_nullable
 as List<String>,onboardingCompleted: null == onboardingCompleted ? _self.onboardingCompleted : onboardingCompleted // ignore: cast_nullable_to_non_nullable
 as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as String,

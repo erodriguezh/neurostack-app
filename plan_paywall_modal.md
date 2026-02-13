@@ -1327,16 +1327,9 @@ Only proceed after webhook + UI gating are stable.
 - **File:** `lib/features/user/domain/entities/user.dart`
 - **Changes:** Renamed `createWithTrial()` to `create()` with `subscriptionStatus: free` (INV-P6). Removed `currentTime` parameter from `getEffectiveStatus()`, `activateProtocol()`, and `canLogSession()`. Cascaded to all callers: HomeViewModel, LibraryViewModel, LogSessionViewModel, CheckEligibilityUseCase (+params), LogSessionUseCase. Updated UserBootstrapService to use `User.create()`. Updated UserFactory.createWithTrial() to createDefault(). Updated all tests.
 
-### 10.3 Update UserBootstrapService
+### 10.3 Update UserBootstrapService [DONE]
 - **File:** `lib/features/auth/data/user_bootstrap_service.dart`
-- **Changes:**
-  ```dart
-  // Before
-  final newUser = User.createWithTrial(id: userId, createdAt: authCreatedAt);
-
-  // After
-  final newUser = User.create(id: userId, createdAt: authCreatedAt);
-  ```
+- **Actual:** Already completed as part of Phase 10.2. Code at line 61 already uses `User.create(id: userId, createdAt: createdAt)`.
 
 ### 10.4 Update UserDto (BEFORE Dropping Columns)
 - **File:** `lib/features/user/data/dtos/user_dto.dart`

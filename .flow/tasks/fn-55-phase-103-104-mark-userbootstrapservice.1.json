@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-02-13T19:36:37.863692Z",
+  "depends_on": [],
+  "epic": "fn-55-phase-103-104-mark-userbootstrapservice",
+  "id": "fn-55-phase-103-104-mark-userbootstrapservice.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-55-phase-103-104-mark-userbootstrapservice.1.md",
+  "status": "todo",
+  "title": "Update plan_paywall_modal.md to mark Phase 10.3 as done",
+  "updated_at": "2026-02-13T19:36:37.864389Z"
+}
