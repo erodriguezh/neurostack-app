@@ -1323,12 +1323,9 @@ Only proceed after webhook + UI gating are stable.
 - **Files:** All files that reference `user.trialPeriod`
 - **Changes:** Simplified `getEffectiveStatus()` to return `subscriptionStatus` directly (removed `trialPeriod.isExpired()` check). Updated tests in user_test, check_eligibility_use_case_test, log_session_use_case_test. Updated docstrings on User class, data source, and repository.
 
-### 10.2 Update User Entity
+### 10.2 Update User Entity [DONE]
 - **File:** `lib/features/user/domain/entities/user.dart`
-- **Changes:**
-  - Rename `createWithTrial()` → `create()` with `subscriptionStatus: free`
-  - Make `trialPeriod` parameter optional/nullable
-  - Remove `currentTime` parameter from `getEffectiveStatus()` (now unused after Phase 10.1 simplified it to return `subscriptionStatus` directly). This cascades to `activateProtocol()` and `canLogSession()` which pass `currentTime` through — update their signatures and all callers accordingly.
+- **Changes:** Renamed `createWithTrial()` to `create()` with `subscriptionStatus: free` (INV-P6). Removed `currentTime` parameter from `getEffectiveStatus()`, `activateProtocol()`, and `canLogSession()`. Cascaded to all callers: HomeViewModel, LibraryViewModel, LogSessionViewModel, CheckEligibilityUseCase (+params), LogSessionUseCase. Updated UserBootstrapService to use `User.create()`. Updated UserFactory.createWithTrial() to createDefault(). Updated all tests.
 
 ### 10.3 Update UserBootstrapService
 - **File:** `lib/features/auth/data/user_bootstrap_service.dart`
