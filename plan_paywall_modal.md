@@ -1319,16 +1319,16 @@ Single source of truth for UI gating decisions. Prevents duplicate logic across 
 
 Only proceed after webhook + UI gating are stable.
 
-### 10.1 Stop Using TrialPeriod for Gating
+### 10.1 Stop Using TrialPeriod for Gating [DONE]
 - **Files:** All files that reference `user.trialPeriod`
-- **Changes:** Remove usage, rely on `SubscriptionStatusResolver`
+- **Changes:** Simplified `getEffectiveStatus()` to return `subscriptionStatus` directly (removed `trialPeriod.isExpired()` check). Updated tests in user_test, check_eligibility_use_case_test, log_session_use_case_test. Updated docstrings on User class, data source, and repository.
 
 ### 10.2 Update User Entity
 - **File:** `lib/features/user/domain/entities/user.dart`
 - **Changes:**
   - Rename `createWithTrial()` → `create()` with `subscriptionStatus: free`
   - Make `trialPeriod` parameter optional/nullable
-  - Simplify `getEffectiveStatus()` - no Supabase trial logic
+  - Remove `currentTime` parameter from `getEffectiveStatus()` (now unused after Phase 10.1 simplified it to return `subscriptionStatus` directly). This cascades to `activateProtocol()` and `canLogSession()` which pass `currentTime` through — update their signatures and all callers accordingly.
 
 ### 10.3 Update UserBootstrapService
 - **File:** `lib/features/auth/data/user_bootstrap_service.dart`
