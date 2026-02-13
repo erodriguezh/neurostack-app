@@ -13,7 +13,7 @@ void main() {
       // INV-P6: New users MUST start with free status
       test('create_always_setsFreeStatusAndRaisesUserCreatedEvent', () {
         // Act
-        final user = UserFactory.createDefault();
+        final user = UserFactory.createNew();
 
         // Assert
         expect(user.subscriptionStatus, SubscriptionStatus.free);
@@ -355,61 +355,6 @@ void main() {
           expect(result, isLeftWith(UserFailures.invalidSubscriptionUpgrade));
         },
       );
-    });
-
-    group('getEffectiveStatus', () {
-      test('getEffectiveStatus_whenTrialActive_returnsTrial', () {
-        // Arrange
-        final user = UserFactory.createActiveTrial();
-
-        // Act
-        final status = user.getEffectiveStatus();
-
-        // Assert
-        expect(status, SubscriptionStatus.trial);
-      });
-
-      // getEffectiveStatus no longer checks trialPeriod; it returns
-      // subscriptionStatus directly. Trial expiration gating is now handled
-      // by SubscriptionStatusResolver.
-      test('getEffectiveStatus_whenTrialExpired_returnsTrialUnchanged', () {
-        // Arrange
-        final user = UserFactory.create(
-          subscriptionStatus: SubscriptionStatus.trial,
-          trialPeriod: TrialPeriodFactory.expired(),
-        );
-
-        // Act
-        final status = user.getEffectiveStatus();
-
-        // Assert - returns stored status, not free
-        expect(status, SubscriptionStatus.trial);
-      });
-
-      test('getEffectiveStatus_whenPremiumMonthly_returnsPremiumMonthly', () {
-        // Arrange
-        final user = UserFactory.createPremiumMonthly();
-
-        // Act
-        final status = user.getEffectiveStatus();
-
-        // Assert
-        expect(status, SubscriptionStatus.premiumMonthly);
-      });
-
-      test('getEffectiveStatus_whenFree_returnsFree', () {
-        // Arrange
-        final user = UserFactory.create(
-          subscriptionStatus: SubscriptionStatus.free,
-          trialPeriod: null,
-        );
-
-        // Act
-        final status = user.getEffectiveStatus();
-
-        // Assert
-        expect(status, SubscriptionStatus.free);
-      });
     });
 
     group('domain events', () {

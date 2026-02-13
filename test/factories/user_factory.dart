@@ -7,8 +7,8 @@ import 'value_objects/stack_factory.dart';
 import 'value_objects/trial_period_factory.dart';
 
 abstract final class UserFactory {
-  /// Creates a User with free status (default state for new users).
-  static User createDefault({
+  /// Creates a new User via `User.create()` (free status, INV-P6).
+  static User createNew({
     String? id,
     DateTime? createdAt,
   }) {

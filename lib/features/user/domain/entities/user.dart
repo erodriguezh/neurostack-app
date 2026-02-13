@@ -44,7 +44,7 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
   /// Current subscription status as persisted.
   ///
   /// Gating decisions are handled by [SubscriptionStatusResolver] using
-  /// RevenueCat entitlements; [getEffectiveStatus] simply returns this value.
+  /// RevenueCat entitlements. Internal methods use this field directly.
   final SubscriptionStatus subscriptionStatus;
 
   /// Trial period details. Null if never had trial or after conversion.
@@ -64,15 +64,6 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
 
   /// Number of active protocols.
   int get activeProtocolCount => _stack.count;
-
-  /// Returns the persisted [subscriptionStatus] without modification.
-  ///
-  /// Previously this method checked `trialPeriod.isExpired()` to auto-downgrade
-  /// trial -> free (INV-M4). That responsibility now lives in
-  /// [SubscriptionStatusResolver] which uses RevenueCat entitlements.
-  SubscriptionStatus getEffectiveStatus() {
-    return subscriptionStatus;
-  }
 
   /// Creates a new User with free subscription status.
   ///
@@ -135,8 +126,7 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
       return left(UserFailures.protocolAlreadyActive);
     }
 
-    final effectiveStatus = getEffectiveStatus();
-    final limit = effectiveStatus.protocolLimit;
+    final limit = subscriptionStatus.protocolLimit;
 
     // INV-U1, INV-M5, INV-B2: Check protocol limit
     if (limit != null && _stack.count >= limit) {
@@ -212,8 +202,7 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
       return left(UserFailures.protocolNotInStack);
     }
 
-    final effectiveStatus = getEffectiveStatus();
-    final limit = effectiveStatus.protocolLimit;
+    final limit = subscriptionStatus.protocolLimit;
 
     // Protocol count exceeds limit for current subscription tier
     if (limit != null && _stack.count > limit) {
