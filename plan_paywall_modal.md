@@ -1331,13 +1331,9 @@ Only proceed after webhook + UI gating are stable.
 - **File:** `lib/features/auth/data/user_bootstrap_service.dart`
 - **Actual:** Already completed as part of Phase 10.2. Code at line 61 already uses `User.create(id: userId, createdAt: createdAt)`.
 
-### 10.4 Update UserDto (BEFORE Dropping Columns)
+### 10.4 Update UserDto (BEFORE Dropping Columns) [DONE]
 - **File:** `lib/features/user/data/dtos/user_dto.dart`
-- **CRITICAL:** Stop serializing trial columns BEFORE dropping them from DB
-- **Changes:**
-  - Remove `trial_ends_at` from `toJson()` output
-  - Add `@JsonKey(includeIfNull: false)` to trial fields
-  - Or remove fields entirely
+- **Actual:** Removed `trialEndsAt` field entirely from UserDto freezed class. `toJson()` no longer emits `trial_ends_at`. `fromJson()` gracefully ignores the legacy column if still present in DB responses. Removed `_nullableDateTimeFromJson` helper. Tests updated to verify omission and backward compatibility.
 
 ---
 
