@@ -7,9 +7,8 @@ TBD
 - [ ] TBD
 
 ## Done summary
-TBD
-
+Deleted the TrialPeriod value object, TrialPeriodDto, and all related tests/factories. Removed the trialPeriod field from User entity and UserDto, updated all test files that referenced it, and regenerated freezed/json_serializable code.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 68d425f403e754afa153989454b7d22bfc46b698
+- Tests: flutter analyze, flutter test
 - PRs:
