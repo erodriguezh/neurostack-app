@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-58-phase-113-drop-trial-columns",
+  "created_at": "2026-02-13T20:13:30.353514Z",
+  "depends_on_epics": [],
+  "id": "fn-58-phase-113-drop-trial-columns",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-58-phase-113-drop-trial-columns.md",
+  "status": "open",
+  "title": "Phase 11.3: Drop Trial Columns",
+  "updated_at": "2026-02-13T20:13:30.353837Z"
+}

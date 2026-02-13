@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-02-13T20:13:35.375427Z",
+  "depends_on": [],
+  "epic": "fn-58-phase-113-drop-trial-columns",
+  "id": "fn-58-phase-113-drop-trial-columns.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-58-phase-113-drop-trial-columns.1.md",
+  "status": "todo",
+  "title": "Create migration to drop trial_ends_at, trial_expired_at, trial_period columns",
+  "updated_at": "2026-02-13T20:13:35.375826Z"
+}

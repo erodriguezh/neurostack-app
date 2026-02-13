@@ -1379,16 +1379,13 @@ Only proceed after webhook + UI gating are stable.
   $$;
   ```
 
-### 11.3 Drop Trial Columns (LAST)
-- **New File:** `supabase/migrations/YYYYMMDDHHMMSS_remove_trial_columns.sql`
+### 11.3 Drop Trial Columns (LAST) -- DONE
+- **New File:** `supabase/migrations/20260213201742_remove_trial_columns.sql`
 - **Prerequisite:** Phase 11.2 completed, UserDto no longer serializes these columns
 - **Changes:**
-  ```sql
-  -- Remove trial columns (RevenueCat is source of truth)
-  ALTER TABLE users DROP COLUMN IF EXISTS trial_ends_at;
-  ALTER TABLE users DROP COLUMN IF EXISTS trial_expired_at;
-  ALTER TABLE users DROP COLUMN IF EXISTS trial_period;
-  ```
+  - Dropped `idx_users_trial_expiration` partial index
+  - Dropped `trial_ends_at`, `trial_expired_at`, `trial_period` columns using `IF EXISTS` for idempotency
+- Applied via Supabase MCP
 - **Post-migration consideration:** After this migration is applied, consider squashing the trial-related migration history (`20260123092258_trial_expiration_columns.sql`, `20260123113429_trial_expiration_cron.sql`, `20260213194806_remove_expire_trials_cron.sql`, and this migration) into a single no-op for cleaner bootstrapping of new environments. Only do this if no production databases depend on the intermediate migration steps.
 
 ### 11.4 Delete TrialPeriod Value Object (OPTIONAL - After All Usage Removed)
