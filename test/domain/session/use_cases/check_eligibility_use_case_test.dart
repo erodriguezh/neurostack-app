@@ -90,28 +90,33 @@ void main() {
         expect(result, isLeftWith(UserFailures.protocolNotInStack));
       });
 
-      test('whenExpiredTrialOverLimit_returnsTooManyActiveProtocols',
-          () async {
-        // Arrange
-        final expiredTrialUser = UserFactory.createExpiredTrialOverLimit();
+      // Trial expiration gating is now handled by SubscriptionStatusResolver,
+      // not the User entity. An expired trial user with >2 protocols is still
+      // treated as trial (unlimited) by the entity.
+      test(
+        'whenExpiredTrialOverLimit_succeedsBecauseEntityNoLongerGatesOnTrialExpiry',
+        () async {
+          // Arrange
+          final expiredTrialUser = UserFactory.createExpiredTrialOverLimit();
 
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(expiredTrialUser));
+          when(() => mockUserRepository.getById(any()))
+              .thenAnswer((_) async => right(expiredTrialUser));
 
-        // Derive protocol from user's stack to avoid coupling to factory internals
-        final protocolIdInStack = expiredTrialUser.activeProtocolIds.first;
-        final paramsWithStackProtocol = CheckEligibilityParams(
-          userId: validParams.userId,
-          protocolId: protocolIdInStack,
-          currentTime: validParams.currentTime,
-        );
+          // Derive protocol from user's stack to avoid coupling to factory internals
+          final protocolIdInStack = expiredTrialUser.activeProtocolIds.first;
+          final paramsWithStackProtocol = CheckEligibilityParams(
+            userId: validParams.userId,
+            protocolId: protocolIdInStack,
+            currentTime: validParams.currentTime,
+          );
 
-        // Act
-        final result = await useCase.execute(paramsWithStackProtocol);
+          // Act
+          final result = await useCase.execute(paramsWithStackProtocol);
 
-        // Assert
-        expect(result, isLeftWith(UserFailures.tooManyActiveProtocols));
-      });
+          // Assert - succeeds; entity no longer checks trialPeriod for gating
+          expect(result, isRight<Unit>());
+        },
+      );
 
       test('whenEligible_returnsUnit', () async {
         // Arrange

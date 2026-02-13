@@ -36,7 +36,10 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
   @override
   final String id;
 
-  /// Current subscription status (may need time-based adjustment via _getEffectiveStatus).
+  /// Current subscription status as persisted.
+  ///
+  /// Gating decisions are handled by [SubscriptionStatusResolver] using
+  /// RevenueCat entitlements; [getEffectiveStatus] simply returns this value.
   final SubscriptionStatus subscriptionStatus;
 
   /// Trial period details. Null if never had trial or after conversion.
@@ -57,18 +60,15 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
   /// Number of active protocols.
   int get activeProtocolCount => _stack.count;
 
-  /// Gets the effective subscription status accounting for trial expiration.
+  /// Returns the persisted [subscriptionStatus] without modification.
   ///
-  /// Enforces **INV-M4**: Auto-downgrade expired trial to free tier.
+  /// Previously this method checked `trialPeriod.isExpired()` to auto-downgrade
+  /// trial -> free (INV-M4). That responsibility now lives in
+  /// [SubscriptionStatusResolver] which uses RevenueCat entitlements.
   ///
-  /// - [currentTime]: Current time for trial expiration check.
+  /// The [currentTime] parameter is retained for API compatibility with callers
+  /// such as [activateProtocol] and [canLogSession]; it is no longer used.
   SubscriptionStatus getEffectiveStatus(DateTime currentTime) {
-    // INV-M4: If trial has expired, treat as free tier
-    if (subscriptionStatus == SubscriptionStatus.trial) {
-      if (trialPeriod != null && trialPeriod!.isExpired(currentTime)) {
-        return SubscriptionStatus.free;
-      }
-    }
     return subscriptionStatus;
   }
 

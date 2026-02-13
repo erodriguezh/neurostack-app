@@ -153,29 +153,39 @@ void main() {
         verifyNever(() => mockSessionRepository.create(any()));
       });
 
-      test('whenExpiredTrialOverLimit_returnsTooManyActiveProtocols',
-          () async {
-        // Arrange
-        final expiredTrialUser = UserFactory.createExpiredTrialOverLimit();
+      // Trial expiration gating is now handled by SubscriptionStatusResolver,
+      // not the User entity. An expired trial user with >2 protocols is still
+      // treated as trial (unlimited) by the entity, so canLogSession succeeds
+      // and the session is created.
+      test(
+        'whenExpiredTrialOverLimit_succeedsBecauseEntityNoLongerGatesOnTrialExpiry',
+        () async {
+          // Arrange
+          final expiredTrialUser = UserFactory.createExpiredTrialOverLimit();
 
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(expiredTrialUser));
+          when(() => mockUserRepository.getById(any()))
+              .thenAnswer((_) async => right(expiredTrialUser));
 
-        // Use protocol from the expired user's stack
-        final paramsWithStackProtocol = LogSessionParams(
-          userId: validParams.userId,
-          protocolId: StackFactory.protocol1, // Protocol that exists in stack
-          completedAt: validParams.completedAt,
-          currentTime: validParams.currentTime,
-        );
+          final createdSession = SessionFactory.reconstitute();
+          when(() => mockSessionRepository.create(any()))
+              .thenAnswer((_) async => right(createdSession));
 
-        // Act
-        final result = await useCase.execute(paramsWithStackProtocol);
+          // Use protocol from the expired user's stack
+          final paramsWithStackProtocol = LogSessionParams(
+            userId: validParams.userId,
+            protocolId: StackFactory.protocol1,
+            completedAt: validParams.completedAt,
+            currentTime: validParams.currentTime,
+          );
 
-        // Assert
-        expect(result, isLeftWith(UserFailures.tooManyActiveProtocols));
-        verifyNever(() => mockSessionRepository.create(any()));
-      });
+          // Act
+          final result = await useCase.execute(paramsWithStackProtocol);
+
+          // Assert - succeeds; entity no longer checks trialPeriod for gating
+          expect(result, isRight<Session>());
+          verify(() => mockSessionRepository.create(any())).called(1);
+        },
+      );
 
       test('whenTimestampInFuture_returnsTimestampInFuture', () async {
         // Arrange

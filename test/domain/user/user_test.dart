@@ -119,26 +119,31 @@ void main() {
         expect(result, isRight<User>());
       });
 
-      // INV-M4: Expired trial treated as free
-      test('activateProtocol_whenTrialExpired_respectsFreeTierLimit', () {
-        // Arrange - expired trial with 2 protocols
-        final user = UserFactory.create(
-          subscriptionStatus: SubscriptionStatus.trial,
-          trialPeriod: TrialPeriodFactory.expired(),
-          stack: StackFactory.atFreeCapacity(),
-          onboardingCompleted: true,
-        );
-        final currentTime = TestConstants.trial.expiredCheckTime;
+      // Trial expiration gating is now handled by SubscriptionStatusResolver,
+      // not the User entity. A user with subscriptionStatus == trial is treated
+      // as trial regardless of trialPeriod expiry.
+      test(
+        'activateProtocol_whenTrialExpiredButStatusStillTrial_allowsUnlimited',
+        () {
+          // Arrange - expired trial with 2 protocols
+          final user = UserFactory.create(
+            subscriptionStatus: SubscriptionStatus.trial,
+            trialPeriod: TrialPeriodFactory.expired(),
+            stack: StackFactory.atFreeCapacity(),
+            onboardingCompleted: true,
+          );
+          final currentTime = TestConstants.trial.expiredCheckTime;
 
-        // Act - try to add 3rd protocol
-        final result = user.activateProtocol(
-          'protocol-3',
-          currentTime: currentTime,
-        );
+          // Act - try to add 3rd protocol
+          final result = user.activateProtocol(
+            'protocol-3',
+            currentTime: currentTime,
+          );
 
-        // Assert - should fail with limit reached
-        expect(result, isLeftWith(UserFailures.protocolLimitReached));
-      });
+          // Assert - succeeds because entity no longer checks trialPeriod
+          expect(result, isRight<User>());
+        },
+      );
 
       test('activateProtocol_whenPremiumMonthly_allowsUnlimitedProtocols', () {
         // Arrange - premium with 10 protocols
@@ -258,9 +263,11 @@ void main() {
         },
       );
 
-      // INV-U5: Expired trial with >2 protocols blocked
+      // Trial expiration gating is now handled by SubscriptionStatusResolver.
+      // The User entity treats trial status as unlimited regardless of
+      // trialPeriod expiry.
       test(
-        'canLogSession_whenExpiredTrialOverLimit_returnsTooManyActiveProtocols',
+        'canLogSession_whenExpiredTrialOverLimit_succeedsBecauseEntityNoLongerGates',
         () {
           // Arrange - expired trial with 3 protocols
           final user = UserFactory.createExpiredTrialOverLimit();
@@ -272,8 +279,8 @@ void main() {
             currentTime: currentTime,
           );
 
-          // Assert - should fail (must deactivate or upgrade)
-          expect(result, isLeftWith(UserFailures.tooManyActiveProtocols));
+          // Assert - succeeds; entity no longer checks trialPeriod for gating
+          expect(result, isRight<Unit>());
         },
       );
 
@@ -293,7 +300,7 @@ void main() {
           currentTime: currentTime,
         );
 
-        // Assert - should succeed (at limit, not over)
+        // Assert - should succeed (trial status means unlimited)
         expect(result, isRight<Unit>());
       });
 
@@ -414,7 +421,10 @@ void main() {
         expect(status, SubscriptionStatus.trial);
       });
 
-      test('getEffectiveStatus_whenTrialExpired_returnsFree', () {
+      // getEffectiveStatus no longer checks trialPeriod; it returns
+      // subscriptionStatus directly. Trial expiration gating is now handled
+      // by SubscriptionStatusResolver.
+      test('getEffectiveStatus_whenTrialExpired_returnsTrialUnchanged', () {
         // Arrange
         final user = UserFactory.create(
           subscriptionStatus: SubscriptionStatus.trial,
@@ -425,8 +435,8 @@ void main() {
         // Act
         final status = user.getEffectiveStatus(currentTime);
 
-        // Assert
-        expect(status, SubscriptionStatus.free);
+        // Assert - returns stored status, not free
+        expect(status, SubscriptionStatus.trial);
       });
 
       test('getEffectiveStatus_whenPremiumMonthly_returnsPremiumMonthly', () {
