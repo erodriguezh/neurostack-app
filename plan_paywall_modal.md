@@ -1345,8 +1345,10 @@ Only proceed after webhook + UI gating are stable.
 - Dropped `expire_trials()` function
 - Applied via Supabase MCP
 
-### 11.2 Update handle_new_user() Before Dropping Columns (CRITICAL)
-- **New File:** `supabase/migrations/YYYYMMDDHHMMSS_update_handle_new_user_no_trial.sql`
+### 11.2 Update handle_new_user() Before Dropping Columns (CRITICAL) -- DONE
+- **New File:** `supabase/migrations/20260213200443_update_handle_new_user_no_trial.sql`
+- Removed `trial_period` and `trial_ends_at` from the INSERT statement in `handle_new_user()` trigger
+- Applied via Supabase MCP
 - **CRITICAL:** Must run BEFORE dropping columns or trigger will fail
 - **Changes:**
   ```sql
@@ -1387,6 +1389,7 @@ Only proceed after webhook + UI gating are stable.
   ALTER TABLE users DROP COLUMN IF EXISTS trial_expired_at;
   ALTER TABLE users DROP COLUMN IF EXISTS trial_period;
   ```
+- **Post-migration consideration:** After this migration is applied, consider squashing the trial-related migration history (`20260123092258_trial_expiration_columns.sql`, `20260123113429_trial_expiration_cron.sql`, `20260213194806_remove_expire_trials_cron.sql`, and this migration) into a single no-op for cleaner bootstrapping of new environments. Only do this if no production databases depend on the intermediate migration steps.
 
 ### 11.4 Delete TrialPeriod Value Object (OPTIONAL - After All Usage Removed)
 - **File:** `lib/features/user/domain/value_objects/trial_period.dart`

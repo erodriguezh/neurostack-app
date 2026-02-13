@@ -7,9 +7,8 @@ TBD
 - [ ] TBD
 
 ## Done summary
-TBD
-
+Created migration to remove the two pg_cron trial expiration jobs (neurostack-expire-trials-morning, neurostack-expire-trials-evening) and drop the expire_trials() function. RevenueCat now manages trial expiration. Applied to remote Supabase via MCP.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 3438fd6d5c79b075e293921018385c24fecd5c49
+- Tests: flutter analyze, flutter test
 - PRs:

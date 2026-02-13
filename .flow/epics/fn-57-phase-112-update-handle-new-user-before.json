@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-57-phase-112-update-handle-new-user-before",
+  "created_at": "2026-02-13T20:03:20.736567Z",
+  "depends_on_epics": [],
+  "id": "fn-57-phase-112-update-handle-new-user-before",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-57-phase-112-update-handle-new-user-before.md",
+  "status": "open",
+  "title": "Phase 11.2: Update handle_new_user() Before Dropping Columns",
+  "updated_at": "2026-02-13T20:03:20.736824Z"
+}
