@@ -55,9 +55,13 @@ class LogSessionUseCase {
   ///
   /// Returns [Session] on success, [DomainFailure] if:
   /// - User not found (from UserRepository)
-  /// - User cannot log session (INV-U4: onboarding, INV-U5: trial expired)
+  /// - User cannot log session (INV-U4: onboarding, protocol/stack invariants)
   /// - Session validation fails (INV-S2: timestamp in future)
   /// - Create operation fails (from SessionRepository)
+  ///
+  /// Note: Time-based trial expiration (INV-U5) is enforced by
+  /// [SubscriptionStatusResolver] / RevenueCat. This use case relies on the
+  /// User's current [subscriptionStatus] as the source of truth.
   Future<Either<DomainFailure, Session>> execute(LogSessionParams params) async {
     // Step 1: Load user (async)
     final userResult = await _userRepository.getById(params.userId);

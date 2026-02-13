@@ -18,7 +18,11 @@ class CheckEligibilityParams {
 ///
 /// Gates the Log Session modal by validating:
 /// - User exists and is loaded
-/// - User.canLogSession() passes (INV-U4: onboarding, INV-U5: trial limits)
+/// - User.canLogSession() passes (INV-U4: onboarding, protocol stack invariants)
+///
+/// Note: Time-based trial expiration (INV-U5) is enforced by
+/// [SubscriptionStatusResolver] / RevenueCat. This use case trusts the
+/// persisted [subscriptionStatus] on the User.
 ///
 /// This use case exists to pre-validate eligibility before opening the modal,
 /// avoiding a poor UX where the user fills out a form only to be rejected.
@@ -35,7 +39,7 @@ class CheckEligibilityUseCase {
   /// - User not found (from UserRepository)
   /// - Onboarding not completed (INV-U4)
   /// - Protocol not in stack
-  /// - Too many active protocols for expired trial (INV-U5)
+  /// - Too many active protocols for the current subscription tier
   Future<Either<DomainFailure, Unit>> execute(
     CheckEligibilityParams params,
   ) async {
