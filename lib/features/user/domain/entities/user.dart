@@ -9,20 +9,25 @@ import '../failures/user_failures.dart';
 import '../value_objects/stack.dart';
 import '../value_objects/trial_period.dart';
 
-/// User Aggregate Root - Manages user's stack, subscription, and trial state.
+/// User Aggregate Root - Manages user's stack, persisted subscription status,
+/// and onboarding state.
 ///
-/// This is the most complex aggregate, enforcing:
+/// This aggregate enforces:
 /// - **INV-U1**: Free Tier users CANNOT activate more than 2 protocols
-/// - **INV-U2**: Premium Trial users CAN activate unlimited protocols
+/// - **INV-U2**: Trial/Premium users CAN activate unlimited protocols,
+///              based on the stored [subscriptionStatus]. Time-based
+///              expiry is handled externally.
 /// - **INV-U3**: Trial MUST auto-activate on first app launch
 /// - **INV-U4**: Users MUST complete onboarding before tracking Sessions
-/// - **INV-U5**: Expired trial users with >2 active protocols CANNOT log new sessions
 /// - **INV-M1**: Free Tier MUST have no time limit
-/// - **INV-M2**: Premium Trial MUST last exactly 7 days
-/// - **INV-M4**: After trial expiration, user MUST revert to Free Tier automatically
 /// - **INV-M5**: Free Tier users CANNOT activate more than 2 protocols
 /// - **INV-B2**: Paywall MUST trigger when Free Tier user tries 3rd protocol
 /// - **INV-B5**: Users MUST be able to use Free Tier indefinitely
+///
+/// Note: Time-based trial invariants (**INV-U5**, **INV-M2**, **INV-M4**) are
+/// enforced by [SubscriptionStatusResolver] / RevenueCat entitlements.
+/// This entity treats [subscriptionStatus] as the source of truth and
+/// does not inspect [trialPeriod] for gating.
 class User with EntityMixin<String>, AggregateRootMixin<String> {
   User._({
     required this.id,
@@ -125,7 +130,7 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
   /// - **INV-U2**: Trial/Premium has unlimited protocols
   /// - **INV-M5/B2**: Shows paywall when free tier user tries 3rd protocol
   ///
-  /// - [currentTime]: For trial expiration check.
+  /// - [currentTime]: Retained for API compatibility; not used for gating.
   ///
   /// Returns [Left] with:
   /// - [UserFailures.protocolAlreadyActive] if already in stack
@@ -197,10 +202,13 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
   ///
   /// Enforces:
   /// - **INV-U4**: Must complete onboarding first
-  /// - **INV-U5**: Expired trial with >2 protocols cannot log
+  /// - Protocol limit based on stored [subscriptionStatus]
+  ///
+  /// Note: **INV-U5** (expired trial gating) is now enforced by
+  /// [SubscriptionStatusResolver], not this entity.
   ///
   /// - [protocolId]: Protocol to log session for.
-  /// - [currentTime]: For trial expiration check.
+  /// - [currentTime]: Retained for API compatibility; not used for gating.
   ///
   /// Returns [Left] with appropriate failure if cannot log.
   Either<DomainFailure, Unit> canLogSession(
@@ -220,7 +228,7 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
     final effectiveStatus = getEffectiveStatus(currentTime);
     final limit = effectiveStatus.protocolLimit;
 
-    // INV-U5: Expired trial with >2 protocols cannot log
+    // Protocol count exceeds limit for current subscription tier
     if (limit != null && _stack.count > limit) {
       return left(UserFailures.tooManyActiveProtocols);
     }
