@@ -12,4 +12,3 @@ export 'value_objects/research_citation_factory.dart';
 export 'value_objects/session_duration_factory.dart';
 export 'value_objects/stack_factory.dart';
 export 'value_objects/target_factory.dart';
-export 'value_objects/trial_period_factory.dart';

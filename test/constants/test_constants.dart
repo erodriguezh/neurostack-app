@@ -7,7 +7,6 @@ abstract final class TestConstants {
   static const pendingSession = _PendingSession();
   static const citation = _Citation();
   static const subscription = _Subscription();
-  static const trial = _Trial();
   static const dto = _Dto();
   static const postgrest = _Postgrest();
 }
@@ -17,18 +16,6 @@ final class _Subscription {
 
   final int freeProtocolLimit = 2; // INV-U1, INV-M5
   // Cross-reference: User.activateProtocol checks this limit
-}
-
-final class _Trial {
-  const _Trial();
-
-  final int durationDays = 7; // INV-M2
-  // Cross-reference: TrialPeriod.trialDurationDays
-
-  DateTime get startDate => DateTime(2025, 1, 1, 10, 0);
-  DateTime get endDate => startDate.add(Duration(days: durationDays));
-  DateTime get expiredCheckTime => endDate.add(const Duration(hours: 1));
-  DateTime get activeCheckTime => startDate.add(const Duration(days: 3));
 }
 
 final class _User {

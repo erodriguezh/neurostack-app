@@ -183,7 +183,7 @@ void main() {
         // Arrange: trial user with 2 active protocols
         final user = UserFactory.create(
           subscriptionStatus: SubscriptionStatus.trial,
-          trialPeriod: TrialPeriodFactory.create(),
+
           stack: StackFactory.atFreeCapacity(),
           onboardingCompleted: true,
         );
@@ -510,7 +510,7 @@ void main() {
         // Arrange
         final user = UserFactory.create(
           subscriptionStatus: SubscriptionStatus.trial,
-          trialPeriod: TrialPeriodFactory.create(),
+
           onboardingCompleted: true,
         );
 
@@ -542,7 +542,7 @@ void main() {
         // Arrange
         final user = UserFactory.create(
           subscriptionStatus: SubscriptionStatus.trial,
-          trialPeriod: TrialPeriodFactory.create(),
+
           onboardingCompleted: true,
         );
 

@@ -12,7 +12,6 @@ import 'package:neurostack/features/user/domain/value_objects/stack.dart';
 import '../../../constants/test_constants.dart';
 import '../../../factories/user_factory.dart';
 import '../../../factories/value_objects/stack_factory.dart';
-import '../../../factories/value_objects/trial_period_factory.dart';
 import '../../../matchers/either_matchers.dart';
 
 class MockUserRepository extends Mock implements UserRepository {}
@@ -57,7 +56,7 @@ void main() {
           onboardingCompleted: false,
           stack: StackFactory.withProtocol(TestConstants.session.protocolId),
           subscriptionStatus: SubscriptionStatus.trial,
-          trialPeriod: TrialPeriodFactory.create(),
+
         );
 
         when(() => mockUserRepository.getById(any()))
@@ -76,7 +75,7 @@ void main() {
           onboardingCompleted: true,
           stack: Stack.empty(),
           subscriptionStatus: SubscriptionStatus.trial,
-          trialPeriod: TrialPeriodFactory.create(),
+
         );
 
         when(() => mockUserRepository.getById(any()))
@@ -111,7 +110,7 @@ void main() {
           // Act
           final result = await useCase.execute(paramsWithStackProtocol);
 
-          // Assert - succeeds; entity no longer checks trialPeriod for gating
+          // Assert - succeeds; trial status has no protocol limit
           expect(result, isRight<Unit>());
         },
       );
@@ -122,7 +121,7 @@ void main() {
           onboardingCompleted: true,
           stack: StackFactory.withProtocol(TestConstants.session.protocolId),
           subscriptionStatus: SubscriptionStatus.trial,
-          trialPeriod: TrialPeriodFactory.create(),
+
         );
 
         when(() => mockUserRepository.getById(any()))

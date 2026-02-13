@@ -7,7 +7,6 @@ import '../enums/subscription_status.dart';
 import '../events/user_events.dart';
 import '../failures/user_failures.dart';
 import '../value_objects/stack.dart';
-import '../value_objects/trial_period.dart';
 
 /// User Aggregate Root - Manages user's stack, persisted subscription status,
 /// and onboarding state.
@@ -26,13 +25,11 @@ import '../value_objects/trial_period.dart';
 ///
 /// Note: Time-based trial invariants (**INV-U5**, **INV-M2**, **INV-M4**) are
 /// enforced by [SubscriptionStatusResolver] / RevenueCat entitlements.
-/// This entity treats [subscriptionStatus] as the source of truth and
-/// does not inspect [trialPeriod] for gating.
+/// This entity treats [subscriptionStatus] as the source of truth.
 class User with EntityMixin<String>, AggregateRootMixin<String> {
   User._({
     required this.id,
     required this.subscriptionStatus,
-    required this.trialPeriod,
     required Stack stack,
     required this.onboardingCompleted,
     required this.createdAt,
@@ -46,9 +43,6 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
   /// Gating decisions are handled by [SubscriptionStatusResolver] using
   /// RevenueCat entitlements. Internal methods use this field directly.
   final SubscriptionStatus subscriptionStatus;
-
-  /// Trial period details. Null if never had trial or after conversion.
-  final TrialPeriod? trialPeriod;
 
   /// User's active protocol collection.
   final Stack _stack;
@@ -80,7 +74,6 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
     final user = User._(
       id: id,
       subscriptionStatus: SubscriptionStatus.free,
-      trialPeriod: null,
       stack: Stack.empty(),
       onboardingCompleted: false,
       createdAt: effectiveCreatedAt,
@@ -95,7 +88,6 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
   factory User.reconstitute({
     required String id,
     required SubscriptionStatus subscriptionStatus,
-    required TrialPeriod? trialPeriod,
     required Stack stack,
     required bool onboardingCompleted,
     required DateTime createdAt,
@@ -103,7 +95,6 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
     return User._(
       id: id,
       subscriptionStatus: subscriptionStatus,
-      trialPeriod: trialPeriod,
       stack: stack,
       onboardingCompleted: onboardingCompleted,
       createdAt: createdAt,
@@ -136,7 +127,6 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
     final updated = User._(
       id: id,
       subscriptionStatus: subscriptionStatus,
-      trialPeriod: trialPeriod,
       stack: _stack.add(protocolId),
       onboardingCompleted: onboardingCompleted,
       createdAt: createdAt,
@@ -163,7 +153,6 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
     final updated = User._(
       id: id,
       subscriptionStatus: subscriptionStatus,
-      trialPeriod: trialPeriod,
       stack: _stack.remove(protocolId),
       onboardingCompleted: onboardingCompleted,
       createdAt: createdAt,
@@ -225,7 +214,6 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
     final updated = User._(
       id: id,
       subscriptionStatus: subscriptionStatus,
-      trialPeriod: trialPeriod,
       stack: _stack,
       onboardingCompleted: true,
       createdAt: createdAt,
@@ -249,7 +237,6 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
     final updated = User._(
       id: id,
       subscriptionStatus: newStatus,
-      trialPeriod: trialPeriod,
       stack: _stack,
       onboardingCompleted: onboardingCompleted,
       createdAt: createdAt,
@@ -272,7 +259,6 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
     return User._(
       id: id,
       subscriptionStatus: newStatus,
-      trialPeriod: trialPeriod,
       stack: _stack,
       onboardingCompleted: onboardingCompleted,
       createdAt: createdAt,

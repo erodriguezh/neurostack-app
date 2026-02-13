@@ -17,7 +17,6 @@ import '../../../constants/test_constants.dart';
 import '../../../factories/session_factory.dart';
 import '../../../factories/user_factory.dart';
 import '../../../factories/value_objects/stack_factory.dart';
-import '../../../factories/value_objects/trial_period_factory.dart';
 import '../../../matchers/either_matchers.dart';
 
 // Mocks
@@ -70,7 +69,7 @@ void main() {
           onboardingCompleted: true,
           stack: StackFactory.withProtocol(TestConstants.session.protocolId),
           subscriptionStatus: SubscriptionStatus.trial,
-          trialPeriod: TrialPeriodFactory.create(),
+
         );
 
         when(() => mockUserRepository.getById(any()))
@@ -119,7 +118,7 @@ void main() {
           onboardingCompleted: false,
           stack: StackFactory.withProtocol(TestConstants.session.protocolId),
           subscriptionStatus: SubscriptionStatus.trial,
-          trialPeriod: TrialPeriodFactory.create(),
+
         );
 
         when(() => mockUserRepository.getById(any()))
@@ -139,7 +138,7 @@ void main() {
           onboardingCompleted: true,
           stack: Stack.empty(),
           subscriptionStatus: SubscriptionStatus.trial,
-          trialPeriod: TrialPeriodFactory.create(),
+
         );
 
         when(() => mockUserRepository.getById(any()))
@@ -181,7 +180,7 @@ void main() {
           // Act
           final result = await useCase.execute(paramsWithStackProtocol);
 
-          // Assert - succeeds; entity no longer checks trialPeriod for gating
+          // Assert - succeeds; trial status has no protocol limit
           expect(result, isRight<Session>());
           verify(() => mockSessionRepository.create(any())).called(1);
         },
@@ -193,7 +192,7 @@ void main() {
           onboardingCompleted: true,
           stack: StackFactory.withProtocol(TestConstants.session.protocolId),
           subscriptionStatus: SubscriptionStatus.trial,
-          trialPeriod: TrialPeriodFactory.create(),
+
         );
 
         when(() => mockUserRepository.getById(any()))
@@ -220,7 +219,7 @@ void main() {
           onboardingCompleted: true,
           stack: StackFactory.withProtocol(TestConstants.session.protocolId),
           subscriptionStatus: SubscriptionStatus.trial,
-          trialPeriod: TrialPeriodFactory.create(),
+
         );
 
         const saveFailure = DomainFailure(
@@ -247,7 +246,7 @@ void main() {
           onboardingCompleted: true,
           stack: Stack.empty(),
           subscriptionStatus: SubscriptionStatus.trial,
-          trialPeriod: TrialPeriodFactory.create(),
+
         );
 
         when(() => mockUserRepository.getById(any()))

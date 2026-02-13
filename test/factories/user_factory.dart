@@ -1,10 +1,8 @@
 import 'package:neurostack/features/user/domain/entities/user.dart';
 import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
 import 'package:neurostack/features/user/domain/value_objects/stack.dart';
-import 'package:neurostack/features/user/domain/value_objects/trial_period.dart';
 import '../constants/test_constants.dart';
 import 'value_objects/stack_factory.dart';
-import 'value_objects/trial_period_factory.dart';
 
 abstract final class UserFactory {
   /// Creates a new User via `User.create()` (free status, INV-P6).
@@ -23,7 +21,6 @@ abstract final class UserFactory {
   static User create({
     String? id,
     SubscriptionStatus subscriptionStatus = SubscriptionStatus.trial,
-    TrialPeriod? trialPeriod,
     Stack? stack,
     bool onboardingCompleted = false,
     DateTime? createdAt,
@@ -31,7 +28,6 @@ abstract final class UserFactory {
     return User.reconstitute(
       id: id ?? TestConstants.user.id,
       subscriptionStatus: subscriptionStatus,
-      trialPeriod: trialPeriod,
       stack: stack ?? Stack.empty(),
       onboardingCompleted: onboardingCompleted,
       createdAt: createdAt ?? TestConstants.user.createdAt,
@@ -44,7 +40,6 @@ abstract final class UserFactory {
     return User.reconstitute(
       id: TestConstants.user.id,
       subscriptionStatus: SubscriptionStatus.free,
-      trialPeriod: null,
       stack: StackFactory.atFreeCapacity(),
       onboardingCompleted: true,
       createdAt: TestConstants.user.createdAt,
@@ -57,7 +52,6 @@ abstract final class UserFactory {
     return User.reconstitute(
       id: TestConstants.user.id,
       subscriptionStatus: SubscriptionStatus.free,
-      trialPeriod: null,
       stack: StackFactory.underFreeLimit(),
       onboardingCompleted: true,
       createdAt: TestConstants.user.createdAt,
@@ -70,7 +64,6 @@ abstract final class UserFactory {
     return User.reconstitute(
       id: TestConstants.user.id,
       subscriptionStatus: SubscriptionStatus.trial,
-      trialPeriod: TrialPeriodFactory.expired(),
       stack: StackFactory.overFreeCapacity(),
       onboardingCompleted: true,
       createdAt: TestConstants.user.createdAt,
@@ -82,7 +75,6 @@ abstract final class UserFactory {
     return User.reconstitute(
       id: TestConstants.user.id,
       subscriptionStatus: SubscriptionStatus.premiumMonthly,
-      trialPeriod: null,
       stack: stack ?? Stack.empty(),
       onboardingCompleted: true,
       createdAt: TestConstants.user.createdAt,
@@ -94,7 +86,6 @@ abstract final class UserFactory {
     return User.reconstitute(
       id: TestConstants.user.id,
       subscriptionStatus: SubscriptionStatus.premiumAnnual,
-      trialPeriod: null,
       stack: stack ?? Stack.empty(),
       onboardingCompleted: true,
       createdAt: TestConstants.user.createdAt,
@@ -106,7 +97,6 @@ abstract final class UserFactory {
     return User.reconstitute(
       id: TestConstants.user.id,
       subscriptionStatus: SubscriptionStatus.trial,
-      trialPeriod: TrialPeriodFactory.create(),
       stack: stack ?? Stack.empty(),
       onboardingCompleted: true,
       createdAt: TestConstants.user.createdAt,

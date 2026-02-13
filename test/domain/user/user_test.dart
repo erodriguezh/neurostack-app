@@ -17,7 +17,6 @@ void main() {
 
         // Assert
         expect(user.subscriptionStatus, SubscriptionStatus.free);
-        expect(user.trialPeriod, isNull);
         expect(user.hasDomainEvents, true);
         expect(user.domainEvents.length, 1);
         expect(user.domainEvents[0], isA<UserCreatedEvent>());
@@ -89,7 +88,6 @@ void main() {
         // Arrange - active trial with 5 protocols already
         final user = UserFactory.create(
           subscriptionStatus: SubscriptionStatus.trial,
-          trialPeriod: TrialPeriodFactory.create(),
           stack: StackFactory.fromIds(['p-1', 'p-2', 'p-3', 'p-4', 'p-5']),
           onboardingCompleted: true,
         );
@@ -103,14 +101,13 @@ void main() {
 
       // Trial expiration gating is now handled by SubscriptionStatusResolver,
       // not the User entity. A user with subscriptionStatus == trial is treated
-      // as trial regardless of trialPeriod expiry.
+      // as trial (unlimited protocols).
       test(
-        'activateProtocol_whenTrialExpiredButStatusStillTrial_allowsUnlimited',
+        'activateProtocol_whenTrialStatus_allowsUnlimited',
         () {
-          // Arrange - expired trial with 2 protocols
+          // Arrange - trial status with 2 protocols
           final user = UserFactory.create(
             subscriptionStatus: SubscriptionStatus.trial,
-            trialPeriod: TrialPeriodFactory.expired(),
             stack: StackFactory.atFreeCapacity(),
             onboardingCompleted: true,
           );
@@ -118,7 +115,7 @@ void main() {
           // Act - try to add 3rd protocol
           final result = user.activateProtocol('protocol-3');
 
-          // Assert - succeeds because entity no longer checks trialPeriod
+          // Assert - succeeds because trial status has no protocol limit
           expect(result, isRight<User>());
         },
       );
@@ -226,27 +223,25 @@ void main() {
       );
 
       // Trial expiration gating is now handled by SubscriptionStatusResolver.
-      // The User entity treats trial status as unlimited regardless of
-      // trialPeriod expiry.
+      // The User entity treats trial status as unlimited.
       test(
-        'canLogSession_whenExpiredTrialOverLimit_succeedsBecauseEntityNoLongerGates',
+        'canLogSession_whenTrialOverLimit_succeedsBecauseTrialIsUnlimited',
         () {
-          // Arrange - expired trial with 3 protocols
+          // Arrange - trial with 3 protocols
           final user = UserFactory.createExpiredTrialOverLimit();
 
           // Act - try to log session for any protocol
           final result = user.canLogSession(StackFactory.protocol1);
 
-          // Assert - succeeds; entity no longer checks trialPeriod for gating
+          // Assert - succeeds; trial status has no protocol limit
           expect(result, isRight<Unit>());
         },
       );
 
-      test('canLogSession_whenExpiredTrialAtLimit_succeeds', () {
-        // Arrange - expired trial with exactly 2 protocols
+      test('canLogSession_whenTrialAtFreeCapacity_succeeds', () {
+        // Arrange - trial with exactly 2 protocols
         final user = UserFactory.create(
           subscriptionStatus: SubscriptionStatus.trial,
-          trialPeriod: TrialPeriodFactory.expired(),
           stack: StackFactory.atFreeCapacity(),
           onboardingCompleted: true,
         );

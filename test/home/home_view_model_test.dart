@@ -123,7 +123,6 @@ void main() {
         // Arrange
         final user = UserFactory.create(
           subscriptionStatus: SubscriptionStatus.trial,
-          trialPeriod: TrialPeriodFactory.expired(),
           stack: StackFactory.atFreeCapacity(), // 2 protocols
           onboardingCompleted: true,
         );
@@ -174,7 +173,6 @@ void main() {
         // Arrange
         final user = UserFactory.create(
           subscriptionStatus: SubscriptionStatus.trial,
-          trialPeriod: TrialPeriodFactory.expired(),
           stack: StackFactory.overFreeCapacity(), // 3 protocols
           onboardingCompleted: true,
         );
@@ -200,7 +198,6 @@ void main() {
         // expiration. Modal only triggers on status transitions or expired status.
         final user = UserFactory.create(
           subscriptionStatus: SubscriptionStatus.trial,
-          trialPeriod: TrialPeriodFactory.expired(),
           onboardingCompleted: true,
         );
 
@@ -272,14 +269,9 @@ void main() {
       });
 
       test('does NOT trigger for active trial', () async {
-        // Arrange - trial started 1 day ago relative to now, 6 days remaining
-        final now = DateTime.now();
-        final activeTrialPeriod = TrialPeriodFactory.create(
-          startDate: now.subtract(const Duration(days: 1)),
-        );
+        // Arrange - user with trial status
         final user = UserFactory.create(
           subscriptionStatus: SubscriptionStatus.trial,
-          trialPeriod: activeTrialPeriod,
           onboardingCompleted: true,
         );
 
@@ -312,17 +304,11 @@ void main() {
         expect(viewModel.state.value.showTrialExpiredModal, isFalse);
       });
 
-      test('does NOT trigger for free user with expired trialPeriod', () async {
-        // Arrange - user who chose free tier (status=free) but still has
-        // the old expired trialPeriod. Modal should NOT re-trigger.
-        // This is a critical regression test for the modal not re-appearing.
-        final now = DateTime.now();
-        final expiredTrialPeriod = TrialPeriodFactory.create(
-          startDate: now.subtract(const Duration(days: 10)),
-        );
+      test('does NOT trigger for free user', () async {
+        // Arrange - user who chose free tier (status=free).
+        // Modal should NOT trigger for free users.
         final user = UserFactory.create(
           subscriptionStatus: SubscriptionStatus.free,
-          trialPeriod: expiredTrialPeriod,
           onboardingCompleted: true,
         );
 
@@ -357,17 +343,15 @@ void main() {
     });
 
     group('isTrialOrPremiumExpired', () {
-      // Note: isTrialOrPremiumExpired() is now synchronous and checks
-      // effective status (expired/free) rather than legacy trialPeriod.
+      // Note: isTrialOrPremiumExpired() is synchronous and checks
+      // effective status (expired/free).
 
-      test('returns false for trial status (regardless of trialPeriod)', () {
+      test('returns false for trial status', () {
         // Arrange - when RC is unavailable, effective status is the DB status.
         // For trial status, the method returns false since it only checks
-        // for expired/free states. The modal trigger logic is in
-        // _maybeTriggerExpiredModal() which uses status transitions.
+        // for expired/free states.
         final user = UserFactory.create(
           subscriptionStatus: SubscriptionStatus.trial,
-          trialPeriod: TrialPeriodFactory.expired(),
           onboardingCompleted: true,
         );
 

@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-59-phase-114-delete-trialperiod-value",
+  "created_at": "2026-02-13T20:28:10.958972Z",
+  "depends_on_epics": [],
+  "id": "fn-59-phase-114-delete-trialperiod-value",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-59-phase-114-delete-trialperiod-value.md",
+  "status": "open",
+  "title": "Phase 11.4: Delete TrialPeriod Value Object",
+  "updated_at": "2026-02-13T20:28:16.701256Z"
+}

@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-02-13T20:28:21.471269Z",
+  "depends_on": [],
+  "epic": "fn-59-phase-114-delete-trialperiod-value",
+  "id": "fn-59-phase-114-delete-trialperiod-value.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-59-phase-114-delete-trialperiod-value.1.md",
+  "status": "todo",
+  "title": "Delete TrialPeriod value object file and all related tests",
+  "updated_at": "2026-02-13T20:28:21.471732Z"
+}
