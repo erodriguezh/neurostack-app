@@ -4,6 +4,8 @@ import 'package:neurostack/paywall/domain/entitlement_snapshot.dart';
 import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../factories/entitlement_snapshot_factory.dart';
+
 void main() {
   late SharedPreferences prefs;
   late SubscriptionStatusResolver resolver;
@@ -25,16 +27,9 @@ void main() {
     required DateTime expiresAt,
     String userId = 'user-1',
   }) {
-    return EntitlementSnapshot(
-      appUserId: userId,
-      hasProEntitlement: true,
-      isTrialPeriod: true,
-      isInGracePeriod: false,
-      productId: 'neurostack_monthly',
+    return EntitlementSnapshotFactory.activeTrial(
+      userId: userId,
       expirationDate: expiresAt,
-      originalTransactionId: null,
-      latestPurchaseDate: null,
-      lastPeriodType: EntitlementPeriodType.trial,
     );
   }
 
@@ -171,16 +166,9 @@ void main() {
         final expiresAt = now.add(const Duration(hours: 12));
 
         // Active paid subscription, not trial
-        final snapshot = EntitlementSnapshot(
-          appUserId: 'user-1',
-          hasProEntitlement: true,
-          isTrialPeriod: false,
-          isInGracePeriod: false,
-          productId: 'neurostack_monthly',
+        final snapshot = EntitlementSnapshotFactory.activePaidMonthly(
+          userId: 'user-1',
           expirationDate: expiresAt,
-          originalTransactionId: null,
-          latestPurchaseDate: null,
-          lastPeriodType: EntitlementPeriodType.normal,
         );
 
         final result = await service.shouldShowTrialReminder(

@@ -1401,28 +1401,32 @@ Only proceed after webhook + UI gating are stable.
 
 ## Phase 12: Testing
 
-### 12.1 Unit Tests
-- **New File:** `test/paywall/data/revenuecat_service_test.dart`
+### 12.1 Unit Tests [DONE]
+- **File:** `test/paywall/data/revenuecat_service_test.dart` (~35 tests, 679 lines)
   - SDK initialization with per-platform keys
   - Guard against multiple presentations
   - Customer identification flow
   - Entitlement listener updates ValueNotifier
-- **New File:** `test/paywall/domain/subscription_status_resolver_test.dart`
-  - EntitlementSnapshot → SubscriptionStatus mapping
-  - `shouldShowTrialReminder()` timing logic
-  - `shouldShowTrialExpiredModal()` detection
-  - Offline fallback behavior (uses User.subscriptionStatus)
-- **New File:** `test/paywall/data/trial_reminder_service_test.dart`
+- **File:** `test/paywall/domain/subscription_status_resolver_test.dart` (44 tests, 673 lines) ← NEW
+  - EntitlementSnapshot → SubscriptionStatus mapping (11 tests)
+  - `resolveEffectiveStatus()` with RC/DB fallback (8 tests)
+  - `shouldShowTrialReminder()` timing logic (9 tests)
+  - `shouldShowTrialExpiredModal()` detection (14 tests + 2 edge cases)
+- **File:** `test/paywall/data/trial_reminder_service_test.dart` (~12 tests, 285 lines)
   - Reminder timing logic
   - Once-per-day enforcement
-- **New File:** `test/paywall/domain/entitlement_snapshot_test.dart`
+- **File:** `test/paywall/domain/entitlement_snapshot_test.dart` (~20 tests, 288 lines)
   - Decision key generation with fallback hierarchy
+- **Refactoring:** Extracted `test/factories/entitlement_snapshot_factory.dart` (144 lines)
+  - 7 factory methods: `activeTrial`, `activePaidMonthly`, `activePaidYearly`, `gracePeriod`, `expiredTrial`, `expiredPaid`, `expiredIntro`
+  - Added to barrel export `test/factories/factories.dart`
+  - Updated `trial_reminder_service_test.dart` to use factory
 
-### 12.2 Widget Tests
-- **New File:** `test/paywall/widgets/trial_reminder_alert_test.dart`
-  - Alert renders correctly
-  - Upgrade button navigates to paywall
-  - Dismiss works
+### 12.2 Widget Tests [DONE]
+- **New File:** `test/paywall/widgets/trial_reminder_alert_test.dart` (7 tests, 156 lines)
+  - Rendering: "Your trial ends soon" text, "Upgrade Now" button, clock icon, DismissButton
+  - Interactions: Upgrade tap fires onUpgrade (not onDismiss), dismiss tap fires onDismiss (not onUpgrade)
+  - Layout: All key elements are descendants of TrialReminderAlert
 
 ### 12.3 Integration Tests
 - Sandbox purchase flow
