@@ -101,9 +101,12 @@ class _TrialExpiredModalState extends State<TrialExpiredModal>
     final kitColors = context.kitColors;
     final spacing = context.spacing;
 
-    // ignore: deprecated_member_use
-    return WillPopScope(
-      onWillPop: () async => false, // Block system back, allow programmatic pop
+    // PopScope with canPop: false blocks system back (Android back button,
+    // escape key) while allowing programmatic Navigator.pop() from buttons.
+    // Navigator.pop() bypasses PopScope entirely -- only system-initiated
+    // pops and Navigator.maybePop() respect the canPop flag.
+    return PopScope(
+      canPop: false,
       child: Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: EdgeInsets.zero,
@@ -180,15 +183,15 @@ class _TrialExpiredModalState extends State<TrialExpiredModal>
                       SizedBox(height: spacing.xxl),
                       // Decision cards
                       _UpgradeCard(
-                        onTap: () => Navigator.of(
-                          context,
-                        ).pop(TrialExpiredChoice.keepEverything),
+                        onTap: () => Navigator.of(context).pop(
+                          TrialExpiredChoice.keepEverything,
+                        ),
                       ),
                       SizedBox(height: spacing.md),
                       _DowngradeCard(
-                        onTap: () => Navigator.of(
-                          context,
-                        ).pop(TrialExpiredChoice.continueWithFree),
+                        onTap: () => Navigator.of(context).pop(
+                          TrialExpiredChoice.continueWithFree,
+                        ),
                       ),
                     ],
                   ),

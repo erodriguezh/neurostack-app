@@ -63,9 +63,8 @@ Mechanical cleanup pass: remove dead code, fix a dependency placement error, upd
 - [ ] `flutter analyze` reports 0 issues
 - [ ] `flutter test` all pass
 ## Done summary
-TBD
-
+Mechanical cleanup: removed 12-line commented-out platform key block from revenuecat_service.dart (replaced with 1-line comment), moved mocktail from dependencies to dev_dependencies, annotated all stale INV-U3 references with DEPRECATED across lib/ and docs/, and added DEPRECATED headers to obsolete trial expiration cronjob spec and race condition investigation docs.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: d5167e54915ffab3f18b79b445f483a7560237d8
+- Tests: flutter analyze, flutter test, dart fix --apply --code=unused_import, orphan check (find lib test -name *.freezed.dart / *.g.dart)
 - PRs:

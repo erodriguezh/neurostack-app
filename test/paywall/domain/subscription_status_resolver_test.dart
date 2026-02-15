@@ -300,6 +300,75 @@ void main() {
       // Snapshot has null appUserId → isForUser returns false → fallback to DB
       expect(result, equals(SubscriptionStatus.premiumAnnual));
     });
+
+    group('regression: mismatched user/snapshot scoping', () {
+      test('mismatchedUserAndSnapshot_ignoresSnapshotState', () {
+        // Regression guard: If RevenueCatService's user-filtering invariant
+        // ever breaks, a snapshot for user-b could leak into user-a's session.
+        // SubscriptionStatusResolver MUST treat mismatched snapshots as null-
+        // equivalent (fallback to DB status).
+        final user = UserFactory.create(
+          id: 'user-a',
+          subscriptionStatus: SubscriptionStatus.free,
+        );
+        final snapshot = EntitlementSnapshotFactory.activePaidMonthly(
+          userId: 'user-b',
+        );
+
+        final result = resolver.resolveEffectiveStatus(
+          user: user,
+          snapshot: snapshot,
+        );
+
+        // MUST return DB status (free), NOT the snapshot's premiumMonthly
+        expect(result, equals(SubscriptionStatus.free));
+      });
+
+      test(
+        'mismatchedSnapshot_doesNotPromoteFreeUserToPremium',
+        () {
+          // Ensures a free user cannot gain premium access from another
+          // user's active subscription snapshot.
+          final user = UserFactory.create(
+            id: 'user-a',
+            subscriptionStatus: SubscriptionStatus.free,
+          );
+          final snapshot = EntitlementSnapshotFactory.activePaidYearly(
+            userId: 'user-b',
+          );
+
+          final result = resolver.resolveEffectiveStatus(
+            user: user,
+            snapshot: snapshot,
+          );
+
+          expect(result, isNot(equals(SubscriptionStatus.premiumAnnual)));
+          expect(result, equals(SubscriptionStatus.free));
+        },
+      );
+
+      test(
+        'mismatchedSnapshot_trialSnapshotDoesNotAffectDifferentUser',
+        () {
+          // Ensures a premium user doesn't get downgraded to trial
+          // because of another user's trial snapshot.
+          final user = UserFactory.create(
+            id: 'user-a',
+            subscriptionStatus: SubscriptionStatus.premiumMonthly,
+          );
+          final snapshot = EntitlementSnapshotFactory.activeTrial(
+            userId: 'user-b',
+          );
+
+          final result = resolver.resolveEffectiveStatus(
+            user: user,
+            snapshot: snapshot,
+          );
+
+          expect(result, equals(SubscriptionStatus.premiumMonthly));
+        },
+      );
+    });
   });
 
   // ---------------------------------------------------------------------------

@@ -19,43 +19,30 @@ Fix two production code pattern issues: migrate ALL deprecated `WillPopScope` us
 
 1. **Search the ENTIRE repo** with `rg WillPopScope lib/ test/` and migrate ALL occurrences. The known instance is at `lib/paywall/widgets/trial_expired_modal.dart:104-106`.
 
-2. **The migrated implementation MUST use a guarded-pop pattern:**
+2. **The migrated implementation uses the simple `PopScope(canPop: false)` pattern:**
 
-   Key facts about `PopScope`:
-   - `PopScope(canPop: false)` blocks ALL pops — both system back AND programmatic `Navigator.pop()`.
-   - `onPopInvokedWithResult` is called for ALL pop attempts (system + programmatic). It does NOT distinguish the source of the pop.
-   - To preserve WillPopScope semantics (block system back, allow button pops), you MUST use a local state guard.
+   Key facts about `PopScope` (corrected during implementation):
+   - `PopScope(canPop: false)` blocks only **system-initiated** pops (Android back button, escape key, `maybePop()`).
+   - `Navigator.pop()` **bypasses `PopScope` entirely** — it always succeeds regardless of `canPop`.
+   - Therefore, no guarded-pop pattern or state flag is needed. The simple approach works:
 
-   **Required pattern:**
+   **Implemented pattern:**
 
-   a. Add a `_allowNextPop` boolean state variable to the modal's State class (or equivalent stateful wrapper), initialized to `false`.
-
-   b. Create a `_popWithChoice(TrialExpiredChoice choice)` method that:
-      - Sets `_allowNextPop = true` via `setState`
-      - Calls `Navigator.of(context).maybePop(choice)` (NOT `pop()` — `maybePop` respects `PopScope` and will re-check `canPop`)
-
-   c. Wrap the dialog content with `PopScope`:
+   a. Wrap the dialog content with `PopScope(canPop: false)`:
       ```dart
       PopScope(
-        canPop: _allowNextPop,
-        onPopInvokedWithResult: (didPop, result) {
-          if (didPop) {
-            // Pop succeeded (our guarded pop). Reset flag.
-            _allowNextPop = false;
-            return;
-          }
-          // Pop was blocked (system back). Do nothing.
-        },
+        canPop: false,
         child: Dialog(...)
       )
       ```
 
-   d. Wire both buttons to use `_popWithChoice` instead of `Navigator.of(context).pop(result)`.
+   b. Buttons continue to use `Navigator.of(context).pop(result)` directly.
 
    This ensures:
    - System back (Android back / escape) → `canPop` is `false` → pop blocked
-   - Button tap → `_allowNextPop = true` → `maybePop(result)` → `canPop` is `true` → pop succeeds with result
-   - After the pop, flag resets to `false`
+   - Button tap → `Navigator.pop(result)` → bypasses `PopScope` → pop succeeds with result
+
+   > **Note:** The original spec prescribed a guarded-pop pattern with `_allowNextPop` state flag and `maybePop()`, based on the incorrect premise that `PopScope(canPop: false)` blocks `Navigator.pop()`. This was corrected during implementation.
 
 3. **Remove the `// ignore: deprecated_member_use` comment.**
 
@@ -105,7 +92,7 @@ Fix two production code pattern issues: migrate ALL deprecated `WillPopScope` us
 
 ## Key context
 
-- **PopScope API (Flutter 3.12+):** `PopScope(canPop: bool, onPopInvokedWithResult: callback)` replaced `WillPopScope`. `onPopInvokedWithResult(bool didPop, Object? result)` tells you whether the route popped and what result was passed — it does NOT tell you the source (system vs programmatic). The guarded-pop pattern is the correct way to distinguish.
+- **PopScope API (Flutter 3.12+):** `PopScope(canPop: bool, onPopInvokedWithResult: callback)` replaced `WillPopScope`. Key insight: `Navigator.pop()` bypasses `PopScope` entirely — only system-initiated pops (back button, escape, `maybePop()`) respect `canPop`. For blocking modals where buttons use `Navigator.pop(result)`, simply `PopScope(canPop: false)` suffices.
 - The `showDialog` call for trial-expired modal uses `barrierDismissible: false` — this only prevents barrier-tap dismissal, NOT system back.
 - Check `onboarding_view.dart` for the repo's existing `PopScope` pattern — follow it for consistency.
 - If `RevenueCatService` invariants ever change (e.g., snapshot set without user filtering), snapshot scoping should be reintroduced in a shared helper (e.g., in `EntitlementListenerMixin`).
@@ -114,7 +101,7 @@ Fix two production code pattern issues: migrate ALL deprecated `WillPopScope` us
 ## Acceptance
 - [ ] `rg WillPopScope lib/ test/` returns 0 matches
 - [ ] No `// ignore: deprecated_member_use` suppress for WillPopScope
-- [ ] Trial-expired modal uses guarded-pop pattern with `_allowNextPop` state flag (or equivalent)
+- [ ] Trial-expired modal uses `PopScope(canPop: false)` with direct `Navigator.pop(result)` from buttons
 - [ ] Trial-expired modal blocks system-back dismissal (verified by widget test)
 - [ ] "Keep Everything" button pops modal with `TrialExpiredChoice.keepEverything` (verified by widget test)
 - [ ] "Continue with Free" button pops modal with `TrialExpiredChoice.continueWithFree` (verified by widget test)

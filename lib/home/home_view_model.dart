@@ -533,14 +533,14 @@ class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
     return loggedToday;
   }
 
-  /// Scopes the current entitlement snapshot to [user].
-  ///
-  /// Returns `null` if the snapshot belongs to a different user
-  /// (Design Principle #10).
-  EntitlementSnapshot? _scopedSnapshot(User user) {
-    final raw = _revenueCatService.entitlementSnapshot.value;
-    return (raw != null && raw.isForUser(user.id)) ? raw : null;
-  }
+  // NOTE: Snapshot scoping (`_scopedSnapshot`) was intentionally removed.
+  // Cross-user safety is guaranteed by two independent invariants:
+  //   1. RevenueCatService only sets entitlementSnapshot.value when
+  //      snapshot.appUserId == _identifiedUserId (see its doc comment).
+  //   2. SubscriptionStatusResolver.resolveEffectiveStatus checks
+  //      snapshot.isForUser(user.id) internally and falls back to DB.
+  // If either invariant changes, snapshot scoping should be reintroduced
+  // (e.g., in EntitlementListenerMixin).
 
   Future<HomeViewState> _maybeTriggerExpiredModal(
     HomeViewState state,
@@ -554,7 +554,7 @@ class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
     }
 
     final now = DateTime.now();
-    final snapshot = _scopedSnapshot(user);
+    final snapshot = _revenueCatService.entitlementSnapshot.value;
 
     // 1. Load lastSeenStatus from decision store
     final lastSeenStatus = await _trialExpirationDecisionStore
@@ -657,7 +657,7 @@ class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
     final user = next.user!;
 
     // Use resolver to get effective status (RC or DB fallback)
-    final snapshot = _scopedSnapshot(user);
+    final snapshot = _revenueCatService.entitlementSnapshot.value;
     final effectiveStatus = _resolver.resolveEffectiveStatus(
       user: user,
       snapshot: snapshot,

@@ -2,8 +2,8 @@
 ///
 /// Determines protocol limits and feature access.
 enum SubscriptionStatus {
-  /// 7-day trial with full access. Activated via RevenueCat subscription
-  /// (INV-U3 DEPRECATED -- trial no longer auto-activates on first launch).
+  /// 7-day trial with full access. Activated via RevenueCat subscription.
+  /// INV-U3 (DEPRECATED) — trial no longer auto-activates on first launch.
   trial(protocolLimit: null, canAccessPremium: true),
 
   /// Free tier with 2 protocol limit. No time limit (INV-M1, INV-B5).

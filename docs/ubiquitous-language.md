@@ -179,7 +179,7 @@ INV-U2: Premium Trial users CAN activate unlimited protocols
 → Enforcement: Feature flag check
 → Logic: IF subscriptionStatus == 'trial' THEN no protocol limit
 
-INV-U3: [DEPRECATED] Trial MUST auto-activate on first app launch
+INV-U3: (DEPRECATED) Trial MUST auto-activate on first app launch
 → DEPRECATED: RevenueCat manages trials; new users start as 'free' until they start a subscription
 → Rationale (historical): No friction, immediate value demonstration
 → Replacement: New users start with 'free' status; trial begins when subscription with trial period starts (INV-P6)

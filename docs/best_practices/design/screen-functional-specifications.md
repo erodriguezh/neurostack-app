@@ -159,14 +159,15 @@ user.fold(
 
 ```dart
 // On "Get Started":
-final user = User.create(id: generateUUID()); // INV-U3 (DEPRECATED) — trial now via RevenueCat
-final completed = user.completeOnboarding();           // INV-U4
+final user = User.create(id: generateUUID()); // INV-P6 — new users start as free
+final completed = user.completeOnboarding();  // INV-U4
 await userRepository.save(completed.getOrThrow());
 go('/home');
 ```
 
 ### Invariants
-- **INV-U3** (DEPRECATED): Trial activation now managed by RevenueCat, not `createWithTrial()`
+- **INV-P6**: New users start with `free` status; trial activation managed by RevenueCat
+- **INV-U3** (DEPRECATED): Trial auto-activation removed; see INV-P6
 - **INV-U4**: `completeOnboarding()` gates main app
 - **INV-B4**: Legal disclaimer shown
 

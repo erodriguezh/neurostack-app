@@ -68,7 +68,7 @@ Full migration to RevenueCat for subscription and trial management. RevenueCat m
 
 | Code | Old Rule | Reason |
 |------|----------|--------|
-| INV-U3 | Trial MUST auto-activate on first app launch | Trial now starts on subscription, not registration |
+| INV-U3 (DEPRECATED) | Trial MUST auto-activate on first app launch | Trial now starts on subscription, not registration |
 | INV-M3 | Premium Trial MUST NOT require credit card | RevenueCat trials require payment method |
 
 ### Modified Invariants

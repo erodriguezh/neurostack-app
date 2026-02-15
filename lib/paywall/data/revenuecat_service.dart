@@ -44,6 +44,13 @@ class RevenueCatService {
   ///
   /// - `null` = unknown (RC unavailable, not yet initialized, or logged out)
   /// - [EntitlementSnapshot] = known state (may be `.none()` = no entitlement)
+  ///
+  /// **Invariant:** When non-null, always corresponds to the currently
+  /// identified userId ([_identifiedUserId]). Cleared on [logout].
+  /// This invariant is enforced by:
+  /// - The entitlement listener filtering `snapshot.appUserId == _identifiedUserId`
+  /// - [refreshEntitlement] filtering by `_identifiedUserId`
+  /// - [logout] setting value to `null`
   final ValueNotifier<EntitlementSnapshot?> entitlementSnapshot;
 
   /// Logger for debugging.

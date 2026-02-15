@@ -52,12 +52,11 @@ Tasks 1, 2, and 3 target mostly disjoint file sets and CAN run in parallel with 
 
 ## Key Context
 
-- **WillPopScope → PopScope: requires a guarded-pop pattern.** The trial-expired modal blocks system-back while allowing programmatic `Navigator.pop(result)` from buttons. Key facts about `PopScope`:
-  - `PopScope(canPop: false)` blocks ALL pops — both system back AND programmatic `Navigator.pop()`. The buttons would break.
-  - `onPopInvokedWithResult` is called for ALL pop attempts (system + programmatic). It does NOT distinguish the source of the pop.
-  - To preserve the WillPopScope semantics (block system back, allow button pops), you MUST use a local state guard: the button sets a flag (e.g., `_allowNextPop = true`), calls `Navigator.of(context).maybePop(result)`, and `PopScope` reads `canPop` dynamically from that flag. After the pop succeeds (`didPop == true`), reset the flag.
+- **WillPopScope → PopScope: simple `canPop: false` suffices.** The trial-expired modal blocks system-back while allowing programmatic `Navigator.pop(result)` from buttons. Key facts about `PopScope` (corrected during task 3 implementation):
+  - `Navigator.pop()` **bypasses `PopScope` entirely** — it always succeeds regardless of `canPop`. Only system-initiated pops (back button, escape, `maybePop()`) respect `canPop`.
+  - Therefore, `PopScope(canPop: false)` + direct `Navigator.pop(result)` from buttons is the correct, simple pattern. No state flag or guarded-pop pattern needed.
   - `barrierDismissible: false` on `showDialog` does NOT block system back — only barrier taps. A `PopScope` wrapper is REQUIRED.
-  - See `onboarding_view.dart` for the repo's existing PopScope pattern. See `lib/paywall/widgets/trial_expired_modal.dart:104-106` for the current WillPopScope usage.
+  - See `onboarding_view.dart` for the repo's existing PopScope pattern.
 - **Conditional imports are fragile.** `RevenueCatClientStub` is loaded via conditional import for web. Do NOT touch the import chain in `revenuecat_client_factory.dart`.
 - **`EntitlementSnapshotFactory` adoption:** Only migrate tests where the factory covers the scenario AND the test does not assert on fields the factory hardcodes (especially `expirationDate` relative to `now`, `latestPurchaseDate`, and `originalTransactionId`). When the factory covers the scenario but the test asserts on specific field values, use the factory with explicit parameters to preserve the exact values. Tests in `entitlement_snapshot_test.dart` deliberately construct edge-case snapshots and should keep inline constructors.
 - **Snapshot scoping removal safety** relies on two independent invariants: (1) `RevenueCatService` only sets `entitlementSnapshot.value` when `snapshot.appUserId == _identifiedUserId`, and (2) `SubscriptionStatusResolver.resolveEffectiveStatus()` checks `snapshot.isForUser(user.id)` internally. Both invariants must be enforced with tests. If either regresses, cross-user subscription state leaks could occur. After removing `_scopedSnapshot`, add regression tests verifying mismatched user/snapshot combinations are handled safely.

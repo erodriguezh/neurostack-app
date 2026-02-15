@@ -63,7 +63,7 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
   ///
   /// Enforces **INV-P6**: New users MUST start with `free` status.
   /// Trial activation is now managed by RevenueCat, not auto-activated
-  /// on first app launch (INV-U3 is deprecated).
+  /// on first app launch. INV-U3 (DEPRECATED).
   ///
   /// This is the primary factory for new users.
   static User create({

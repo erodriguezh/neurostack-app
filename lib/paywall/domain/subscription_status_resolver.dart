@@ -125,6 +125,9 @@ class SubscriptionStatusResolver {
   /// - [currentEffectiveStatus]: From [resolveEffectiveStatus], NOT raw DB status.
   /// - [lastSeenStatus]: From decision store. Null if never persisted.
   /// - [snapshot]: Optional secondary signal for trial expiration detection.
+  ///   Must already be scoped to the current user. Caller is responsible for
+  ///   ensuring [snapshot.appUserId] matches the UI user. See
+  ///   [RevenueCatService.entitlementSnapshot] invariants.
   bool shouldShowTrialExpiredModal({
     required SubscriptionStatus currentEffectiveStatus,
     required SubscriptionStatus? lastSeenStatus,
