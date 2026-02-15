@@ -31,8 +31,8 @@ class TrialReminderService {
   TrialReminderService({
     required SharedPreferences sharedPreferences,
     required SubscriptionStatusResolver resolver,
-  })  : _prefs = sharedPreferences,
-        _resolver = resolver;
+  }) : _prefs = sharedPreferences,
+       _resolver = resolver;
 
   final SharedPreferences _prefs;
   final SubscriptionStatusResolver _resolver;

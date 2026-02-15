@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
+import 'package:neurostack/core/models/home_bottom_tab.dart';
 import 'package:neurostack/core/ui/constants/spacing.dart';
 import 'package:neurostack/core/ui/widgets/app_grid_background.dart';
 import 'package:neurostack/core/ui/widgets/error_state_view.dart';
@@ -132,7 +133,9 @@ class _ProgressViewState extends State<ProgressView>
                         width: 134,
                         height: 5,
                         decoration: BoxDecoration(
-                          color: context.kitColors.white90.withValues(alpha: 0.3),
+                          color: context.kitColors.white90.withValues(
+                            alpha: 0.3,
+                          ),
                           borderRadius: BorderRadius.circular(999),
                         ),
                       ),
@@ -307,14 +310,16 @@ class _ProgressViewState extends State<ProgressView>
     }
 
     // Resolve Protocol: try cache first, then repository fallback
-    final cachedProtocols =
-        await locator<CachedProtocolStore>().loadProtocols(userId);
+    final cachedProtocols = await locator<CachedProtocolStore>().loadProtocols(
+      userId,
+    );
     var protocol = cachedProtocols.firstWhereOrNull((p) => p.id == protocolId);
 
     // Fallback to repository if not in cache (e.g., cache cleared, first run)
     if (protocol == null) {
-      final repoResult =
-          await locator<ProtocolRepository>().getById(protocolId);
+      final repoResult = await locator<ProtocolRepository>().getById(
+        protocolId,
+      );
       protocol = repoResult.fold((_) => null, (p) => p);
     }
 

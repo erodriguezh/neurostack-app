@@ -45,12 +45,14 @@ void main() {
     subscriptionStatusResolver = const SubscriptionStatusResolver();
 
     // Default connectivity setup
-    when(() => mockConnectivityService.status)
-        .thenReturn(ValueNotifier(NetworkStatus.online));
+    when(
+      () => mockConnectivityService.status,
+    ).thenReturn(ValueNotifier(NetworkStatus.online));
 
     // Default RevenueCat setup - null snapshot (RC unavailable, fallback to DB)
-    when(() => mockRevenueCatService.entitlementSnapshot)
-        .thenReturn(ValueNotifier<EntitlementSnapshot?>(null));
+    when(
+      () => mockRevenueCatService.entitlementSnapshot,
+    ).thenReturn(ValueNotifier<EntitlementSnapshot?>(null));
   });
 
   LibraryViewModel createViewModel() {
@@ -90,12 +92,15 @@ void main() {
           category: protocol.Category.exercise,
         );
 
-        when(() => mockAuthService.authState)
-            .thenReturn(ValueNotifier(AuthenticatedOnline(user)));
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(user));
-        when(() => mockProtocolRepository.list(activeOnly: true))
-            .thenAnswer((_) async => right([protocol1, protocol2, protocol3]));
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+        when(
+          () => mockUserRepository.getById(any()),
+        ).thenAnswer((_) async => right(user));
+        when(
+          () => mockProtocolRepository.list(activeOnly: true),
+        ).thenAnswer((_) async => right([protocol1, protocol2, protocol3]));
 
         final viewModel = createViewModel();
         addTearDown(viewModel.dispose);
@@ -107,9 +112,15 @@ void main() {
         final cards = viewModel.state.value.cards;
         expect(cards, hasLength(3));
 
-        final card1 = cards.firstWhere((c) => c.protocolId == StackFactory.protocol1);
-        final card2 = cards.firstWhere((c) => c.protocolId == StackFactory.protocol2);
-        final card3 = cards.firstWhere((c) => c.protocolId == StackFactory.protocol3);
+        final card1 = cards.firstWhere(
+          (c) => c.protocolId == StackFactory.protocol1,
+        );
+        final card2 = cards.firstWhere(
+          (c) => c.protocolId == StackFactory.protocol2,
+        );
+        final card3 = cards.firstWhere(
+          (c) => c.protocolId == StackFactory.protocol3,
+        );
 
         expect(card1.status, LibraryCardStatus.inStack);
         expect(card2.status, LibraryCardStatus.inStack);
@@ -137,12 +148,15 @@ void main() {
           category: protocol.Category.exercise,
         );
 
-        when(() => mockAuthService.authState)
-            .thenReturn(ValueNotifier(AuthenticatedOnline(user)));
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(user));
-        when(() => mockProtocolRepository.list(activeOnly: true))
-            .thenAnswer((_) async => right([protocol1, protocol2, protocol3]));
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+        when(
+          () => mockUserRepository.getById(any()),
+        ).thenAnswer((_) async => right(user));
+        when(
+          () => mockProtocolRepository.list(activeOnly: true),
+        ).thenAnswer((_) async => right([protocol1, protocol2, protocol3]));
 
         final viewModel = createViewModel();
         addTearDown(viewModel.dispose);
@@ -152,7 +166,9 @@ void main() {
 
         // Assert - all non-active protocols are available, not locked
         final cards = viewModel.state.value.cards;
-        final card3 = cards.firstWhere((c) => c.protocolId == StackFactory.protocol3);
+        final card3 = cards.firstWhere(
+          (c) => c.protocolId == StackFactory.protocol3,
+        );
         expect(card3.status, LibraryCardStatus.available);
       });
 
@@ -174,12 +190,15 @@ void main() {
           category: protocol.Category.exercise,
         );
 
-        when(() => mockAuthService.authState)
-            .thenReturn(ValueNotifier(AuthenticatedOnline(user)));
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(user));
-        when(() => mockProtocolRepository.list(activeOnly: true))
-            .thenAnswer((_) async => right([protocol1, protocol3]));
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+        when(
+          () => mockUserRepository.getById(any()),
+        ).thenAnswer((_) async => right(user));
+        when(
+          () => mockProtocolRepository.list(activeOnly: true),
+        ).thenAnswer((_) async => right([protocol1, protocol3]));
 
         final viewModel = createViewModel();
         addTearDown(viewModel.dispose);
@@ -189,7 +208,9 @@ void main() {
 
         // Assert
         final cards = viewModel.state.value.cards;
-        final card3 = cards.firstWhere((c) => c.protocolId == StackFactory.protocol3);
+        final card3 = cards.firstWhere(
+          (c) => c.protocolId == StackFactory.protocol3,
+        );
         expect(card3.status, LibraryCardStatus.available);
       });
 
@@ -214,19 +235,23 @@ void main() {
           lastPeriodType: EntitlementPeriodType.normal,
         );
 
-        when(() => mockRevenueCatService.entitlementSnapshot)
-            .thenReturn(ValueNotifier<EntitlementSnapshot?>(snapshot));
-        when(() => mockAuthService.authState)
-            .thenReturn(ValueNotifier(AuthenticatedOnline(user)));
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(user));
+        when(
+          () => mockRevenueCatService.entitlementSnapshot,
+        ).thenReturn(ValueNotifier<EntitlementSnapshot?>(snapshot));
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+        when(
+          () => mockUserRepository.getById(any()),
+        ).thenAnswer((_) async => right(user));
 
         final protocol3 = ProtocolFactory.reconstitute(
           id: StackFactory.protocol3,
           category: protocol.Category.exercise,
         );
-        when(() => mockProtocolRepository.list(activeOnly: true))
-            .thenAnswer((_) async => right([protocol3]));
+        when(
+          () => mockProtocolRepository.list(activeOnly: true),
+        ).thenAnswer((_) async => right([protocol3]));
 
         final viewModel = createViewModel();
         addTearDown(viewModel.dispose);
@@ -236,7 +261,9 @@ void main() {
 
         // Assert - RC says premium, so protocol should be available (not locked)
         final cards = viewModel.state.value.cards;
-        final card3 = cards.firstWhere((c) => c.protocolId == StackFactory.protocol3);
+        final card3 = cards.firstWhere(
+          (c) => c.protocolId == StackFactory.protocol3,
+        );
         expect(card3.status, LibraryCardStatus.available);
       });
 
@@ -261,12 +288,15 @@ void main() {
           category: protocol.Category.exercise,
         );
 
-        when(() => mockAuthService.authState)
-            .thenReturn(ValueNotifier(AuthenticatedOnline(user)));
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(user));
-        when(() => mockProtocolRepository.list(activeOnly: true))
-            .thenAnswer((_) async => right([protocol1, protocol2, protocol3]));
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+        when(
+          () => mockUserRepository.getById(any()),
+        ).thenAnswer((_) async => right(user));
+        when(
+          () => mockProtocolRepository.list(activeOnly: true),
+        ).thenAnswer((_) async => right([protocol1, protocol2, protocol3]));
 
         final viewModel = createViewModel();
         addTearDown(viewModel.dispose);
@@ -276,7 +306,9 @@ void main() {
 
         // Assert - expired has limit of 2, so protocol-3 is locked
         final cards = viewModel.state.value.cards;
-        final card3 = cards.firstWhere((c) => c.protocolId == StackFactory.protocol3);
+        final card3 = cards.firstWhere(
+          (c) => c.protocolId == StackFactory.protocol3,
+        );
         expect(card3.status, LibraryCardStatus.locked);
       });
     });
@@ -291,12 +323,15 @@ void main() {
         );
 
         final entitlementNotifier = ValueNotifier<EntitlementSnapshot?>(null);
-        when(() => mockRevenueCatService.entitlementSnapshot)
-            .thenReturn(entitlementNotifier);
-        when(() => mockAuthService.authState)
-            .thenReturn(ValueNotifier(AuthenticatedOnline(user)));
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(user));
+        when(
+          () => mockRevenueCatService.entitlementSnapshot,
+        ).thenReturn(entitlementNotifier);
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+        when(
+          () => mockUserRepository.getById(any()),
+        ).thenAnswer((_) async => right(user));
 
         final protocol1 = ProtocolFactory.reconstitute(
           id: StackFactory.protocol1,
@@ -306,8 +341,9 @@ void main() {
           id: StackFactory.protocol3,
           category: protocol.Category.exercise,
         );
-        when(() => mockProtocolRepository.list(activeOnly: true))
-            .thenAnswer((_) async => right([protocol1, protocol3]));
+        when(
+          () => mockProtocolRepository.list(activeOnly: true),
+        ).thenAnswer((_) async => right([protocol1, protocol3]));
 
         final viewModel = createViewModel();
         addTearDown(viewModel.dispose);
@@ -357,8 +393,9 @@ void main() {
       test('going offline updates state', () async {
         // Arrange
         final connectivityNotifier = ValueNotifier(NetworkStatus.online);
-        when(() => mockConnectivityService.status)
-            .thenReturn(connectivityNotifier);
+        when(
+          () => mockConnectivityService.status,
+        ).thenReturn(connectivityNotifier);
 
         final user = UserFactory.create(
           subscriptionStatus: SubscriptionStatus.free,
@@ -366,17 +403,20 @@ void main() {
           onboardingCompleted: true,
         );
 
-        when(() => mockAuthService.authState)
-            .thenReturn(ValueNotifier(AuthenticatedOnline(user)));
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(user));
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+        when(
+          () => mockUserRepository.getById(any()),
+        ).thenAnswer((_) async => right(user));
 
         final protocol1 = ProtocolFactory.reconstitute(
           id: StackFactory.protocol1,
           category: protocol.Category.exercise,
         );
-        when(() => mockProtocolRepository.list(activeOnly: true))
-            .thenAnswer((_) async => right([protocol1]));
+        when(
+          () => mockProtocolRepository.list(activeOnly: true),
+        ).thenAnswer((_) async => right([protocol1]));
 
         final viewModel = createViewModel();
         addTearDown(viewModel.dispose);
@@ -394,8 +434,9 @@ void main() {
       test('going online from offline triggers reload', () async {
         // Arrange: start online, load, then go offline, then go online
         final connectivityNotifier = ValueNotifier(NetworkStatus.online);
-        when(() => mockConnectivityService.status)
-            .thenReturn(connectivityNotifier);
+        when(
+          () => mockConnectivityService.status,
+        ).thenReturn(connectivityNotifier);
 
         final user = UserFactory.create(
           subscriptionStatus: SubscriptionStatus.free,
@@ -403,17 +444,20 @@ void main() {
           onboardingCompleted: true,
         );
 
-        when(() => mockAuthService.authState)
-            .thenReturn(ValueNotifier(AuthenticatedOnline(user)));
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(user));
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+        when(
+          () => mockUserRepository.getById(any()),
+        ).thenAnswer((_) async => right(user));
 
         final protocol1 = ProtocolFactory.reconstitute(
           id: StackFactory.protocol1,
           category: protocol.Category.exercise,
         );
-        when(() => mockProtocolRepository.list(activeOnly: true))
-            .thenAnswer((_) async => right([protocol1]));
+        when(
+          () => mockProtocolRepository.list(activeOnly: true),
+        ).thenAnswer((_) async => right([protocol1]));
 
         final viewModel = createViewModel();
         addTearDown(viewModel.dispose);
@@ -440,8 +484,9 @@ void main() {
       test('no-op when connectivity status unchanged', () async {
         // Arrange
         final connectivityNotifier = ValueNotifier(NetworkStatus.online);
-        when(() => mockConnectivityService.status)
-            .thenReturn(connectivityNotifier);
+        when(
+          () => mockConnectivityService.status,
+        ).thenReturn(connectivityNotifier);
 
         final user = UserFactory.create(
           subscriptionStatus: SubscriptionStatus.free,
@@ -449,17 +494,20 @@ void main() {
           onboardingCompleted: true,
         );
 
-        when(() => mockAuthService.authState)
-            .thenReturn(ValueNotifier(AuthenticatedOnline(user)));
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(user));
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+        when(
+          () => mockUserRepository.getById(any()),
+        ).thenAnswer((_) async => right(user));
 
         final protocol1 = ProtocolFactory.reconstitute(
           id: StackFactory.protocol1,
           category: protocol.Category.exercise,
         );
-        when(() => mockProtocolRepository.list(activeOnly: true))
-            .thenAnswer((_) async => right([protocol1]));
+        when(
+          () => mockProtocolRepository.list(activeOnly: true),
+        ).thenAnswer((_) async => right([protocol1]));
 
         final viewModel = createViewModel();
         addTearDown(viewModel.dispose);
@@ -496,12 +544,15 @@ void main() {
           category: protocol.Category.exercise,
         );
 
-        when(() => mockAuthService.authState)
-            .thenReturn(ValueNotifier(AuthenticatedOnline(user)));
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(user));
-        when(() => mockProtocolRepository.list(activeOnly: true))
-            .thenAnswer((_) async => right([protocol1]));
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+        when(
+          () => mockUserRepository.getById(any()),
+        ).thenAnswer((_) async => right(user));
+        when(
+          () => mockProtocolRepository.list(activeOnly: true),
+        ).thenAnswer((_) async => right([protocol1]));
 
         final viewModel = createViewModel();
         addTearDown(viewModel.dispose);
@@ -523,12 +574,15 @@ void main() {
           onboardingCompleted: true,
         );
 
-        when(() => mockAuthService.authState)
-            .thenReturn(ValueNotifier(AuthenticatedOnline(user)));
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(user));
-        when(() => mockProtocolRepository.list(activeOnly: true))
-            .thenAnswer((_) async => right([]));
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+        when(
+          () => mockUserRepository.getById(any()),
+        ).thenAnswer((_) async => right(user));
+        when(
+          () => mockProtocolRepository.list(activeOnly: true),
+        ).thenAnswer((_) async => right([]));
 
         final viewModel = createViewModel();
         addTearDown(viewModel.dispose);

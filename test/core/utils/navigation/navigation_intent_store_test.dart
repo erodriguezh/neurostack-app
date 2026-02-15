@@ -38,15 +38,18 @@ void main() {
       },
     );
 
-    test('saveIntendedRouteIfEligible_withOverwriteFalse_keepsExisting', () async {
-      await store.saveIntendedRoute('/details?prev=true');
-      await store.saveIntendedRouteIfEligible(
-        '/details?new=true',
-        overwrite: false,
-      );
+    test(
+      'saveIntendedRouteIfEligible_withOverwriteFalse_keepsExisting',
+      () async {
+        await store.saveIntendedRoute('/details?prev=true');
+        await store.saveIntendedRouteIfEligible(
+          '/details?new=true',
+          overwrite: false,
+        );
 
-      expect(store.getIntendedRoute(), '/details?prev=true');
-    });
+        expect(store.getIntendedRoute(), '/details?prev=true');
+      },
+    );
 
     test('consumeIntendedRoute_withExisting_clearsAndReturns', () async {
       await store.saveIntendedRoute('/details?from=link');

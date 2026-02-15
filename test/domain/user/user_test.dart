@@ -369,7 +369,6 @@ void main() {
           expect(event.userId, user.id);
         },
       );
-
     });
 
     group('activeProtocolIds', () {

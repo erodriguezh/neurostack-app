@@ -20,17 +20,20 @@ mixin EntitlementListenerMixin {
   /// Sets up the entitlement listener. Safe to call multiple times.
   void initEntitlementListener() {
     _entitlementListener ??= onEntitlementChanged;
-    entitlementListenerService.entitlementSnapshot
-        .removeListener(_entitlementListener!);
-    entitlementListenerService.entitlementSnapshot
-        .addListener(_entitlementListener!);
+    entitlementListenerService.entitlementSnapshot.removeListener(
+      _entitlementListener!,
+    );
+    entitlementListenerService.entitlementSnapshot.addListener(
+      _entitlementListener!,
+    );
   }
 
   /// Removes the entitlement listener. Safe to call if not initialized.
   void disposeEntitlementListener() {
     if (_entitlementListener != null) {
-      entitlementListenerService.entitlementSnapshot
-          .removeListener(_entitlementListener!);
+      entitlementListenerService.entitlementSnapshot.removeListener(
+        _entitlementListener!,
+      );
       _entitlementListener = null;
     }
   }

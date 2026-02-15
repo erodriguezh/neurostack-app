@@ -21,7 +21,7 @@ class ProgressGrid extends StatelessWidget {
   final int todayIndex;
   final bool isOffline;
   final void Function(String protocolId, String protocolName, DateTime day)
-      onTapMissedCell;
+  onTapMissedCell;
 
   static const _dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
@@ -216,10 +216,10 @@ class ProgressGrid extends StatelessWidget {
             isOffline: isOffline,
             onTap: row.cells[i].state == CellState.notDone && !isOffline
                 ? () => onTapMissedCell(
-                      row.protocolId,
-                      row.protocolName,
-                      row.cells[i].date,
-                    )
+                    row.protocolId,
+                    row.protocolName,
+                    row.cells[i].date,
+                  )
                 : null,
           ),
         ],

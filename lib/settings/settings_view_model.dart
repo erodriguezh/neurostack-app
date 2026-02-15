@@ -18,7 +18,7 @@ enum RestoreResult {
 /// Handles restore purchases functionality by delegating to [RevenueCatService].
 class SettingsViewModel {
   SettingsViewModel({required RevenueCatService revenueCatService})
-      : _revenueCatService = revenueCatService;
+    : _revenueCatService = revenueCatService;
 
   final RevenueCatService _revenueCatService;
 

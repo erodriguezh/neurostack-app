@@ -36,7 +36,7 @@ import 'revenuecat_client.dart';
 /// - Refreshes entitlement after paywall closes
 class RevenueCatService {
   RevenueCatService(this._client)
-      : entitlementSnapshot = ValueNotifier<EntitlementSnapshot?>(null);
+    : entitlementSnapshot = ValueNotifier<EntitlementSnapshot?>(null);
 
   final RevenueCatClient _client;
 

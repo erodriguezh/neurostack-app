@@ -14,9 +14,9 @@ class AuthViewModel {
     required NavigationIntentStore navigationIntentStore,
     required RouterService routerService,
     required NotifyService notifyService,
-  })  : _navigationIntentStore = navigationIntentStore,
-        _routerService = routerService,
-        _notifyService = notifyService;
+  }) : _navigationIntentStore = navigationIntentStore,
+       _routerService = routerService,
+       _notifyService = notifyService;
 
   final NavigationIntentStore _navigationIntentStore;
   final RouterService _routerService;

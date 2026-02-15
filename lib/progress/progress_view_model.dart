@@ -37,19 +37,20 @@ class ProgressViewModel {
     CachedUserStore? cachedUserStore,
     CachedWeekProgressStore? cachedWeekProgressStore,
     HomeBottomTabCoordinator? tabCoordinator,
-  })  : _notifyService = notifyService,
-        _authService = authService,
-        _userRepository = userRepository,
-        _protocolRepository = protocolRepository,
-        _sessionRepository = sessionRepository,
-        _sessionLocalDataSource = sessionLocalDataSource,
-        _connectivityService = connectivityService,
-        _cachedUserStore = cachedUserStore,
-        _cachedWeekProgressStore = cachedWeekProgressStore,
-        _tabCoordinator = tabCoordinator ??
-            HomeBottomTabCoordinator(
-              routerService: routerService,
-            );
+  }) : _notifyService = notifyService,
+       _authService = authService,
+       _userRepository = userRepository,
+       _protocolRepository = protocolRepository,
+       _sessionRepository = sessionRepository,
+       _sessionLocalDataSource = sessionLocalDataSource,
+       _connectivityService = connectivityService,
+       _cachedUserStore = cachedUserStore,
+       _cachedWeekProgressStore = cachedWeekProgressStore,
+       _tabCoordinator =
+           tabCoordinator ??
+           HomeBottomTabCoordinator(
+             routerService: routerService,
+           );
 
   final NotifyService _notifyService;
   final AuthService _authService;
@@ -271,8 +272,7 @@ class ProgressViewModel {
     }
 
     final user = userResult.getOrElse((_) => throw StateError('Unreachable'));
-    final isOnline =
-        _connectivityService.status.value == NetworkStatus.online;
+    final isOnline = _connectivityService.status.value == NetworkStatus.online;
 
     // If online, fetch from remote and upsert to local cache (best-effort)
     // Remote sync failure is non-fatal: we fall back to cached + pending sessions
@@ -411,8 +411,10 @@ class ProgressViewModel {
 
     final rows = <ProtocolRow>[];
     for (final protocolId in orderedIds) {
-      final protocolName = protocolNamesById[protocolId] ?? 'Protocol unavailable';
-      final completedDays = completedDaysByProtocolId[protocolId] ?? <DateTime>{};
+      final protocolName =
+          protocolNamesById[protocolId] ?? 'Protocol unavailable';
+      final completedDays =
+          completedDaysByProtocolId[protocolId] ?? <DateTime>{};
       final cells = List<DayCell>.generate(7, (index) {
         final day = _startOfDay(weekStart.add(Duration(days: index)));
         final state = computeCellState(
@@ -502,11 +504,11 @@ class ProgressViewModel {
     String fallbackMessage,
   ) {
     return result.getLeft().getOrElse(
-          () => DomainFailure(
-            code: 'Progress.UnexpectedError',
-            message: fallbackMessage,
-          ),
-        );
+      () => DomainFailure(
+        code: 'Progress.UnexpectedError',
+        message: fallbackMessage,
+      ),
+    );
   }
 
   void _handleConnectivityChange() {

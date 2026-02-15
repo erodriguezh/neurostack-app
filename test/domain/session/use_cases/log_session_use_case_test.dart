@@ -28,13 +28,14 @@ void main() {
 
   setUpAll(() {
     // Register fallback values for mocktail
-    final draft = SessionDraft.create(
-      protocolId: TestConstants.session.protocolId,
-      completedAt: TestConstants.session.validCompletedAt,
-      currentTime: TestConstants.session.currentTime,
-    ).getOrElse(
-      (l) => throw Exception('Factory produced invalid SessionDraft: $l'),
-    );
+    final draft =
+        SessionDraft.create(
+          protocolId: TestConstants.session.protocolId,
+          completedAt: TestConstants.session.validCompletedAt,
+          currentTime: TestConstants.session.currentTime,
+        ).getOrElse(
+          (l) => throw Exception('Factory produced invalid SessionDraft: $l'),
+        );
     registerFallbackValue(draft);
   });
 
@@ -63,14 +64,15 @@ void main() {
           onboardingCompleted: true,
           stack: StackFactory.withProtocol(TestConstants.session.protocolId),
           subscriptionStatus: SubscriptionStatus.trial,
-
         );
 
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(validUser));
+        when(
+          () => mockUserRepository.getById(any()),
+        ).thenAnswer((_) async => right(validUser));
         final createdSession = SessionFactory.reconstitute();
-        when(() => mockSessionRepository.create(any()))
-            .thenAnswer((_) async => right(createdSession));
+        when(
+          () => mockSessionRepository.create(any()),
+        ).thenAnswer((_) async => right(createdSession));
 
         // Act
         final result = await useCase.execute(validParams);
@@ -94,8 +96,9 @@ void main() {
           code: 'User.NotFound',
           message: 'User not found',
         );
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => left(userNotFoundFailure));
+        when(
+          () => mockUserRepository.getById(any()),
+        ).thenAnswer((_) async => left(userNotFoundFailure));
 
         // Act
         final result = await useCase.execute(validParams);
@@ -105,26 +108,28 @@ void main() {
         verifyNever(() => mockSessionRepository.create(any()));
       });
 
-      test('whenOnboardingNotCompleted_returnsOnboardingNotCompleted',
-          () async {
-        // Arrange
-        final userWithoutOnboarding = UserFactory.create(
-          onboardingCompleted: false,
-          stack: StackFactory.withProtocol(TestConstants.session.protocolId),
-          subscriptionStatus: SubscriptionStatus.trial,
+      test(
+        'whenOnboardingNotCompleted_returnsOnboardingNotCompleted',
+        () async {
+          // Arrange
+          final userWithoutOnboarding = UserFactory.create(
+            onboardingCompleted: false,
+            stack: StackFactory.withProtocol(TestConstants.session.protocolId),
+            subscriptionStatus: SubscriptionStatus.trial,
+          );
 
-        );
+          when(
+            () => mockUserRepository.getById(any()),
+          ).thenAnswer((_) async => right(userWithoutOnboarding));
 
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(userWithoutOnboarding));
+          // Act
+          final result = await useCase.execute(validParams);
 
-        // Act
-        final result = await useCase.execute(validParams);
-
-        // Assert
-        expect(result, isLeftWith(UserFailures.onboardingNotCompleted));
-        verifyNever(() => mockSessionRepository.create(any()));
-      });
+          // Assert
+          expect(result, isLeftWith(UserFailures.onboardingNotCompleted));
+          verifyNever(() => mockSessionRepository.create(any()));
+        },
+      );
 
       test('whenProtocolNotInStack_returnsProtocolNotInStack', () async {
         // Arrange
@@ -132,11 +137,11 @@ void main() {
           onboardingCompleted: true,
           stack: Stack.empty(),
           subscriptionStatus: SubscriptionStatus.trial,
-
         );
 
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(userWithoutProtocol));
+        when(
+          () => mockUserRepository.getById(any()),
+        ).thenAnswer((_) async => right(userWithoutProtocol));
 
         // Act
         final result = await useCase.execute(validParams);
@@ -156,19 +161,22 @@ void main() {
           // Arrange
           final expiredTrialUser = UserFactory.createExpiredTrialOverLimit();
 
-          when(() => mockUserRepository.getById(any()))
-              .thenAnswer((_) async => right(expiredTrialUser));
+          when(
+            () => mockUserRepository.getById(any()),
+          ).thenAnswer((_) async => right(expiredTrialUser));
 
           final createdSession = SessionFactory.reconstitute();
-          when(() => mockSessionRepository.create(any()))
-              .thenAnswer((_) async => right(createdSession));
+          when(
+            () => mockSessionRepository.create(any()),
+          ).thenAnswer((_) async => right(createdSession));
 
           // Use protocol from the expired user's stack
           final paramsWithStackProtocol = LogSessionParams(
             userId: validParams.userId,
             protocolId: StackFactory.protocol1,
             completedAt: validParams.completedAt,
-            currentTime: validParams.currentTime, // Still needed for SessionDraft
+            currentTime:
+                validParams.currentTime, // Still needed for SessionDraft
           );
 
           // Act
@@ -186,11 +194,11 @@ void main() {
           onboardingCompleted: true,
           stack: StackFactory.withProtocol(TestConstants.session.protocolId),
           subscriptionStatus: SubscriptionStatus.trial,
-
         );
 
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(validUser));
+        when(
+          () => mockUserRepository.getById(any()),
+        ).thenAnswer((_) async => right(validUser));
 
         final futureParams = LogSessionParams(
           userId: validParams.userId,
@@ -213,7 +221,6 @@ void main() {
           onboardingCompleted: true,
           stack: StackFactory.withProtocol(TestConstants.session.protocolId),
           subscriptionStatus: SubscriptionStatus.trial,
-
         );
 
         const saveFailure = DomainFailure(
@@ -221,10 +228,12 @@ void main() {
           message: 'Failed to save session',
         );
 
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(validUser));
-        when(() => mockSessionRepository.create(any()))
-            .thenAnswer((_) async => left(saveFailure));
+        when(
+          () => mockUserRepository.getById(any()),
+        ).thenAnswer((_) async => right(validUser));
+        when(
+          () => mockSessionRepository.create(any()),
+        ).thenAnswer((_) async => left(saveFailure));
 
         // Act
         final result = await useCase.execute(validParams);
@@ -240,11 +249,11 @@ void main() {
           onboardingCompleted: true,
           stack: Stack.empty(),
           subscriptionStatus: SubscriptionStatus.trial,
-
         );
 
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(userWithoutProtocol));
+        when(
+          () => mockUserRepository.getById(any()),
+        ).thenAnswer((_) async => right(userWithoutProtocol));
 
         // Act
         await useCase.execute(validParams);

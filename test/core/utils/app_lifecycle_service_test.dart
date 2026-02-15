@@ -13,8 +13,9 @@ void main() {
 
     setUp(() {
       mockRevenueCatService = MockRevenueCatService();
-      when(() => mockRevenueCatService.refreshEntitlement())
-          .thenAnswer((_) async {});
+      when(
+        () => mockRevenueCatService.refreshEntitlement(),
+      ).thenAnswer((_) async {});
       service = AppLifecycleService(
         revenueCatService: mockRevenueCatService,
       );
@@ -64,17 +65,13 @@ void main() {
     });
 
     group('RevenueCat refresh on resume', () {
-      test(
-          'calls refreshEntitlement when lifecycle changes to resumed',
-          () {
+      test('calls refreshEntitlement when lifecycle changes to resumed', () {
         service.setLifecycleState(AppLifecycleState.resumed);
 
         verify(() => mockRevenueCatService.refreshEntitlement()).called(1);
       });
 
-      test(
-          'does not call refreshEntitlement for non-resumed states',
-          () {
+      test('does not call refreshEntitlement for non-resumed states', () {
         service.setLifecycleState(AppLifecycleState.paused);
         service.setLifecycleState(AppLifecycleState.inactive);
         service.setLifecycleState(AppLifecycleState.detached);
@@ -82,9 +79,7 @@ void main() {
         verifyNever(() => mockRevenueCatService.refreshEntitlement());
       });
 
-      test(
-          'calls refreshEntitlement each time app resumes',
-          () {
+      test('calls refreshEntitlement each time app resumes', () {
         service.setLifecycleState(AppLifecycleState.paused);
         service.setLifecycleState(AppLifecycleState.resumed);
         service.setLifecycleState(AppLifecycleState.paused);
@@ -106,9 +101,7 @@ void main() {
         );
       });
 
-      test(
-          'does not call refreshEntitlement after dispose',
-          () {
+      test('does not call refreshEntitlement after dispose', () {
         disposed = true;
         service.dispose();
 

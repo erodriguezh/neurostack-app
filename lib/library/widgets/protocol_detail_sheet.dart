@@ -136,7 +136,6 @@ class _ProtocolDetailSheetState extends State<ProtocolDetailSheet> {
       },
     );
   }
-
 }
 
 class _CategoryRow extends StatelessWidget {

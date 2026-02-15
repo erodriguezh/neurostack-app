@@ -17,7 +17,6 @@ import 'revenuecat_client.dart';
 /// Returning `.none()` on web would incorrectly downgrade premium users who
 /// happen to access the web version.
 class RevenueCatClientStub implements RevenueCatClient {
-
   @override
   Future<void> configure(String apiKey) async {
     // No-op: RC not available on web

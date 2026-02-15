@@ -59,15 +59,16 @@ class _SplashScreenState extends State<SplashScreen>
       curve: CustomCurves.easeOut,
     );
 
-    _logoSlide = Tween<Offset>(
-      begin: const Offset(0, -10),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _entranceController,
-        curve: CustomCurves.easeOut,
-      ),
-    );
+    _logoSlide =
+        Tween<Offset>(
+          begin: const Offset(0, -10),
+          end: Offset.zero,
+        ).animate(
+          CurvedAnimation(
+            parent: _entranceController,
+            curve: CustomCurves.easeOut,
+          ),
+        );
 
     // Shader time animation (continuous ticker)
     _shaderTimeController = AnimationController(

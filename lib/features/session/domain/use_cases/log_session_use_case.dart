@@ -45,8 +45,8 @@ class LogSessionUseCase {
   const LogSessionUseCase({
     required UserRepository userRepository,
     required SessionRepository sessionRepository,
-  })  : _userRepository = userRepository,
-        _sessionRepository = sessionRepository;
+  }) : _userRepository = userRepository,
+       _sessionRepository = sessionRepository;
 
   final UserRepository _userRepository;
   final SessionRepository _sessionRepository;
@@ -62,20 +62,24 @@ class LogSessionUseCase {
   /// Note: Time-based trial expiration (INV-U5) is enforced by
   /// [SubscriptionStatusResolver] / RevenueCat. This use case relies on the
   /// User's current [subscriptionStatus] as the source of truth.
-  Future<Either<DomainFailure, Session>> execute(LogSessionParams params) async {
+  Future<Either<DomainFailure, Session>> execute(
+    LogSessionParams params,
+  ) async {
     // Step 1: Load user (async)
     final userResult = await _userRepository.getById(params.userId);
 
     // Steps 2-3: Chain sync validations with flatMap
     final sessionDraftResult = userResult
         .flatMap((user) => user.canLogSession(params.protocolId))
-        .flatMap((_) => SessionDraft.create(
-              protocolId: params.protocolId,
-              completedAt: params.completedAt,
-              currentTime: params.currentTime,
-              duration: params.duration,
-              notes: params.notes,
-            ));
+        .flatMap(
+          (_) => SessionDraft.create(
+            protocolId: params.protocolId,
+            completedAt: params.completedAt,
+            currentTime: params.currentTime,
+            duration: params.duration,
+            notes: params.notes,
+          ),
+        );
 
     // Step 4: Handle async save with pattern matching
     // Note: Repository returns Session.reconstitute() (no events), so we raise
@@ -83,13 +87,13 @@ class LogSessionUseCase {
     return switch (sessionDraftResult) {
       Left(:final value) => left(value),
       Right(:final value) => (await _sessionRepository.create(value)).map(
-          (session) {
-            if (!session.hasDomainEvents) {
-              session.raiseLoggedEvent();
-            }
-            return session;
-          },
-        ),
+        (session) {
+          if (!session.hasDomainEvents) {
+            session.raiseLoggedEvent();
+          }
+          return session;
+        },
+      ),
     };
   }
 }

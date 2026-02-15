@@ -30,11 +30,17 @@ sealed class ProtocolName with _$ProtocolName {
   /// - "The Huberman Protocol"
   static final _researcherPatterns = [
     // Possessive form: "Huberman's Protocol", "Sinclair's Method"
-    RegExp(r"\b[A-Z][a-z]+[''']s\s+(Protocol|Method|Routine|Stack|Plan)", caseSensitive: false),
+    RegExp(
+      r"\b[A-Z][a-z]+[''']s\s+(Protocol|Method|Routine|Stack|Plan)",
+      caseSensitive: false,
+    ),
     // Doctor prefix: "Dr. Sinclair", "Dr Huberman"
     RegExp(r'\bDr\.?\s+[A-Z][a-z]+', caseSensitive: false),
     // "The [Name] Protocol/Method"
-    RegExp(r'\bThe\s+[A-Z][a-z]+\s+(Protocol|Method|Routine)', caseSensitive: false),
+    RegExp(
+      r'\bThe\s+[A-Z][a-z]+\s+(Protocol|Method|Routine)',
+      caseSensitive: false,
+    ),
   ];
 
   /// Creates a ProtocolName value object with validation.

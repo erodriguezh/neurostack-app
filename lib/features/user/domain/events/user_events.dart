@@ -49,4 +49,3 @@ class OnboardingCompletedEvent extends DomainEvent {
   @override
   String toString() => 'OnboardingCompletedEvent(userId: $userId)';
 }
-

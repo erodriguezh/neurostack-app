@@ -24,11 +24,11 @@ class SessionSyncService {
     required ConnectivityService connectivity,
     required DataSourceAbstraction dataSource,
     required AppLifecycleService appLifecycle,
-  })  : _local = local,
-        _remote = remote,
-        _connectivity = connectivity,
-        _dataSource = dataSource,
-        _appLifecycle = appLifecycle;
+  }) : _local = local,
+       _remote = remote,
+       _connectivity = connectivity,
+       _dataSource = dataSource,
+       _appLifecycle = appLifecycle;
 
   final SessionLocalDataSource _local;
   final SessionRemoteDataSource _remote;
@@ -124,7 +124,9 @@ class SessionSyncService {
       return;
     }
 
-    _logger.info('Syncing ${pending.length} pending session(s) for user $userId');
+    _logger.info(
+      'Syncing ${pending.length} pending session(s) for user $userId',
+    );
 
     for (final session in pending) {
       // Bail early if we go offline mid-loop
@@ -172,7 +174,9 @@ class SessionSyncService {
                 st,
               );
             }
-            _logger.fine('Synced session ${session.localId} -> ${syncedSession.id}');
+            _logger.fine(
+              'Synced session ${session.localId} -> ${syncedSession.id}',
+            );
           },
         );
       } catch (e, st) {

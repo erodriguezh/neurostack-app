@@ -43,7 +43,9 @@ class UserBootstrapService {
     final fetchResult = await _userRepository.getById(userId);
     if (fetchResult.isRight()) {
       _hasRemoteUserRecord = true;
-      final user = fetchResult.getOrElse((_) => throw StateError('Unreachable'));
+      final user = fetchResult.getOrElse(
+        (_) => throw StateError('Unreachable'),
+      );
       return right(UserBootstrapResult(user: user, didRecoverUpsert: false));
     }
 
@@ -85,7 +87,9 @@ class UserBootstrapService {
       final retryResult = await _userRepository.getById(userId);
       if (retryResult.isRight()) {
         _hasRemoteUserRecord = true;
-        final user = retryResult.getOrElse((_) => throw StateError('Unreachable'));
+        final user = retryResult.getOrElse(
+          (_) => throw StateError('Unreachable'),
+        );
         return right(UserBootstrapResult(user: user, didRecoverUpsert: true));
       }
       final retryFailure = retryResult.getLeft().getOrElse(

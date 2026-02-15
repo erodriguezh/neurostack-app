@@ -118,12 +118,14 @@ void main() {
         expect(snapshot.wasTrialThatExpired, isFalse);
       });
 
-      test('returns false when lastPeriodType is null (never had entitlement)',
-          () {
-        final snapshot = EntitlementSnapshot.none(appUserId: 'user-123');
+      test(
+        'returns false when lastPeriodType is null (never had entitlement)',
+        () {
+          final snapshot = EntitlementSnapshot.none(appUserId: 'user-123');
 
-        expect(snapshot.wasTrialThatExpired, isFalse);
-      });
+          expect(snapshot.wasTrialThatExpired, isFalse);
+        },
+      );
     });
 
     group('wasPaidThatExpired', () {
@@ -192,12 +194,14 @@ void main() {
         expect(snapshot.wasPaidThatExpired, isFalse);
       });
 
-      test('returns false when lastPeriodType is null (never had entitlement)',
-          () {
-        final snapshot = EntitlementSnapshot.none(appUserId: 'user-123');
+      test(
+        'returns false when lastPeriodType is null (never had entitlement)',
+        () {
+          final snapshot = EntitlementSnapshot.none(appUserId: 'user-123');
 
-        expect(snapshot.wasPaidThatExpired, isFalse);
-      });
+          expect(snapshot.wasPaidThatExpired, isFalse);
+        },
+      );
     });
 
     group('equality', () {
@@ -260,11 +264,14 @@ void main() {
 
   group('EntitlementPeriodType', () {
     test('has trial, intro, and normal values', () {
-      expect(EntitlementPeriodType.values, containsAll([
-        EntitlementPeriodType.trial,
-        EntitlementPeriodType.intro,
-        EntitlementPeriodType.normal,
-      ]));
+      expect(
+        EntitlementPeriodType.values,
+        containsAll([
+          EntitlementPeriodType.trial,
+          EntitlementPeriodType.intro,
+          EntitlementPeriodType.normal,
+        ]),
+      );
     });
 
     test('has exactly 3 values', () {
@@ -274,11 +281,14 @@ void main() {
 
   group('PaywallOutcome', () {
     test('has purchased, cancelled, and error values', () {
-      expect(PaywallOutcome.values, containsAll([
-        PaywallOutcome.purchased,
-        PaywallOutcome.cancelled,
-        PaywallOutcome.error,
-      ]));
+      expect(
+        PaywallOutcome.values,
+        containsAll([
+          PaywallOutcome.purchased,
+          PaywallOutcome.cancelled,
+          PaywallOutcome.error,
+        ]),
+      );
     });
 
     test('has exactly 3 values', () {

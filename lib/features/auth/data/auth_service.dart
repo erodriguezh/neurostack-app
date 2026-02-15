@@ -239,9 +239,11 @@ class AuthService {
 
     // Identify user with RevenueCat (best-effort with timeout, non-fatal)
     try {
-      await _revenueCatService.identify(data.user.id).timeout(
-        const Duration(seconds: 2),
-      );
+      await _revenueCatService
+          .identify(data.user.id)
+          .timeout(
+            const Duration(seconds: 2),
+          );
     } catch (e, st) {
       _logger.fine('RevenueCat identify skipped: $e', e, st);
     }

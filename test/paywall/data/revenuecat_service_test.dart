@@ -43,16 +43,18 @@ void main() {
         expect(fakeClient.configureCallCount, equals(1));
       });
 
-      test('subsequent calls return same future without re-configuring',
-          () async {
-        await service.init();
-        final countAfterFirstInit = fakeClient.configureCallCount;
+      test(
+        'subsequent calls return same future without re-configuring',
+        () async {
+          await service.init();
+          final countAfterFirstInit = fakeClient.configureCallCount;
 
-        await service.init();
+          await service.init();
 
-        // Configure should not be called again
-        expect(fakeClient.configureCallCount, equals(countAfterFirstInit));
-      });
+          // Configure should not be called again
+          expect(fakeClient.configureCallCount, equals(countAfterFirstInit));
+        },
+      );
 
       test('rethrows error if configure fails', () async {
         fakeClient.configureThrows = true;
@@ -138,8 +140,7 @@ void main() {
       });
 
       test('calls refreshEntitlement after identify', () async {
-        final snapshot =
-            EntitlementSnapshot.none(appUserId: 'user-123');
+        final snapshot = EntitlementSnapshot.none(appUserId: 'user-123');
         fakeClient.snapshotToReturn = snapshot;
 
         await service.init();
@@ -166,8 +167,9 @@ void main() {
 
         // Manually set some state to simulate a partial flow
         // (In practice this shouldn't happen, but testing the safety)
-        service.entitlementSnapshot.value =
-            EntitlementSnapshot.none(appUserId: 'user-123');
+        service.entitlementSnapshot.value = EntitlementSnapshot.none(
+          appUserId: 'user-123',
+        );
 
         // Logout should complete without throwing and clear state
         await expectLater(service.logout(), completes);
@@ -266,8 +268,7 @@ void main() {
         await service.init();
         await service.identify('user-123');
 
-        final initialSnapshot =
-            EntitlementSnapshot.none(appUserId: 'user-123');
+        final initialSnapshot = EntitlementSnapshot.none(appUserId: 'user-123');
         fakeClient.snapshotToReturn = initialSnapshot;
         await service.refreshEntitlement();
 
@@ -321,8 +322,9 @@ void main() {
         service.entitlementSnapshot.value = null;
 
         // Return a snapshot for a different user
-        fakeClient.snapshotToReturn =
-            EntitlementSnapshot.none(appUserId: 'other-user');
+        fakeClient.snapshotToReturn = EntitlementSnapshot.none(
+          appUserId: 'other-user',
+        );
 
         await service.refreshEntitlement();
 
@@ -427,17 +429,19 @@ void main() {
         await service.logout();
 
         // Complete the in-flight snapshot fetch
-        fakeClient.getSnapshotCompleter!.complete(const EntitlementSnapshot(
-          appUserId: 'user-123',
-          hasProEntitlement: true,
-          isTrialPeriod: false,
-          isInGracePeriod: false,
-          productId: 'neurostack_monthly',
-          expirationDate: null,
-          originalTransactionId: null,
-          latestPurchaseDate: null,
-          lastPeriodType: EntitlementPeriodType.normal,
-        ));
+        fakeClient.getSnapshotCompleter!.complete(
+          const EntitlementSnapshot(
+            appUserId: 'user-123',
+            hasProEntitlement: true,
+            isTrialPeriod: false,
+            isInGracePeriod: false,
+            productId: 'neurostack_monthly',
+            expirationDate: null,
+            originalTransactionId: null,
+            latestPurchaseDate: null,
+            lastPeriodType: EntitlementPeriodType.normal,
+          ),
+        );
 
         await refreshFuture;
 
@@ -521,8 +525,9 @@ void main() {
         service.entitlementSnapshot.value = null;
 
         // Emit a snapshot for a different user
-        final wrongUserSnapshot =
-            EntitlementSnapshot.none(appUserId: 'other-user');
+        final wrongUserSnapshot = EntitlementSnapshot.none(
+          appUserId: 'other-user',
+        );
         fakeClient.simulateEntitlementChange(wrongUserSnapshot);
 
         // Allow stream event to propagate

@@ -120,7 +120,5 @@ List<String> _protocolIdsFromJson(dynamic raw) {
 }
 
 List<dynamic> _protocolIdsToJson(List<String> ids) {
-  return ids
-      .map<dynamic>((value) => int.tryParse(value) ?? value)
-      .toList();
+  return ids.map<dynamic>((value) => int.tryParse(value) ?? value).toList();
 }

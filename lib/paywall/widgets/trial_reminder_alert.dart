@@ -114,4 +114,3 @@ class _UpgradeButton extends StatelessWidget {
     );
   }
 }
-

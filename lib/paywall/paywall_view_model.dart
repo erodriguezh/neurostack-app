@@ -7,7 +7,7 @@ import 'package:neurostack/paywall/domain/entitlement_snapshot.dart';
 /// Navigation is handled by the view after paywall closes.
 class PaywallViewModel {
   PaywallViewModel({required RevenueCatService revenueCatService})
-      : _revenueCatService = revenueCatService;
+    : _revenueCatService = revenueCatService;
 
   final RevenueCatService _revenueCatService;
 

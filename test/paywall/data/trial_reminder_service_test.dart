@@ -35,23 +35,24 @@ void main() {
 
   group('TrialReminderService', () {
     group('shouldShowTrialReminder', () {
-      test('returns true when in expiration window and never shown before',
-          () async {
-        final now = DateTime(2025, 6, 15, 12, 0, 0);
-        final expiresAt = now.add(const Duration(hours: 12));
-        final snapshot = trialSnapshot(expiresAt: expiresAt);
+      test(
+        'returns true when in expiration window and never shown before',
+        () async {
+          final now = DateTime(2025, 6, 15, 12, 0, 0);
+          final expiresAt = now.add(const Duration(hours: 12));
+          final snapshot = trialSnapshot(expiresAt: expiresAt);
 
-        final result = await service.shouldShowTrialReminder(
-          userId: 'user-1',
-          snapshot: snapshot,
-          now: now,
-        );
+          final result = await service.shouldShowTrialReminder(
+            userId: 'user-1',
+            snapshot: snapshot,
+            now: now,
+          );
 
-        expect(result, isTrue);
-      });
+          expect(result, isTrue);
+        },
+      );
 
-      test('returns false when not in expiration window (>24h away)',
-          () async {
+      test('returns false when not in expiration window (>24h away)', () async {
         final now = DateTime(2025, 6, 15, 12, 0, 0);
         final expiresAt = now.add(const Duration(hours: 48));
         final snapshot = trialSnapshot(expiresAt: expiresAt);
@@ -150,7 +151,10 @@ void main() {
         final now = DateTime(2025, 6, 15, 12, 0, 0);
         final expiresAt = now.add(const Duration(hours: 12));
         // Snapshot belongs to user-other, but we query for user-1
-        final snapshot = trialSnapshot(expiresAt: expiresAt, userId: 'user-other');
+        final snapshot = trialSnapshot(
+          expiresAt: expiresAt,
+          userId: 'user-other',
+        );
 
         final result = await service.shouldShowTrialReminder(
           userId: 'user-1',
@@ -235,8 +239,10 @@ void main() {
       test('handles corrupted stored timestamp gracefully', () async {
         final now = DateTime(2025, 6, 15, 12, 0, 0);
         final expiresAt = now.add(const Duration(hours: 12));
-        final snapshot =
-            trialSnapshot(expiresAt: expiresAt, userId: 'user-corrupt');
+        final snapshot = trialSnapshot(
+          expiresAt: expiresAt,
+          userId: 'user-corrupt',
+        );
 
         // Manually corrupt the stored value
         await prefs.setString(

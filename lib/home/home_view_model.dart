@@ -24,6 +24,7 @@ import 'package:neurostack/features/user/domain/entities/user.dart';
 import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
 import 'package:neurostack/features/user/domain/failures/user_failures.dart';
 import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
+import 'package:neurostack/core/models/home_bottom_tab.dart';
 import 'package:neurostack/home/home_bottom_tab_coordinator.dart';
 import 'package:neurostack/home/home_state.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
@@ -32,8 +33,7 @@ import 'package:neurostack/paywall/data/trial_expiration_decision_store.dart';
 import 'package:neurostack/paywall/data/trial_reminder_service.dart';
 import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 
-class HomeViewModel
-    with EntitlementListenerMixin, ConnectivityListenerMixin {
+class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
   final Logger _logger = Logger('Home');
 
   HomeViewModel({
@@ -557,8 +557,8 @@ class HomeViewModel
     final snapshot = _scopedSnapshot(user);
 
     // 1. Load lastSeenStatus from decision store
-    final lastSeenStatus =
-        await _trialExpirationDecisionStore?.getLastSeenStatus(user.id);
+    final lastSeenStatus = await _trialExpirationDecisionStore
+        ?.getLastSeenStatus(user.id);
 
     // 2. Compute currentEffectiveStatus via resolver
     final currentEffectiveStatus = _resolver.resolveEffectiveStatus(
@@ -699,8 +699,7 @@ class HomeViewModel
           isTappable: true,
         );
       case SubscriptionStatus.free:
-        final limit =
-            effectiveStatus.protocolLimit ?? user.activeProtocolCount;
+        final limit = effectiveStatus.protocolLimit ?? user.activeProtocolCount;
         return HomeBannerModel(
           type: HomeBannerType.free,
           message: '${user.activeProtocolCount}/$limit active',

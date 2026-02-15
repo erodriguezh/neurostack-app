@@ -46,16 +46,19 @@ class EntitlementSnapshot {
     required this.originalTransactionId,
     required this.latestPurchaseDate,
     required this.lastPeriodType,
-  })  : assert(
-          // If user has entitlement, at least one state flag should be true
-          !hasProEntitlement || isTrialPeriod || isInGracePeriod || productId != null,
-          'Active entitlement should have trial, grace, or productId set',
-        ),
-        assert(
-          // If in trial or grace period, must have entitlement
-          (!isTrialPeriod && !isInGracePeriod) || hasProEntitlement,
-          'Trial or grace period requires hasProEntitlement to be true',
-        );
+  }) : assert(
+         // If user has entitlement, at least one state flag should be true
+         !hasProEntitlement ||
+             isTrialPeriod ||
+             isInGracePeriod ||
+             productId != null,
+         'Active entitlement should have trial, grace, or productId set',
+       ),
+       assert(
+         // If in trial or grace period, must have entitlement
+         (!isTrialPeriod && !isInGracePeriod) || hasProEntitlement,
+         'Trial or grace period requires hasProEntitlement to be true',
+       );
 
   /// Known state: user has NEVER had entitlement.
   ///
@@ -119,19 +122,20 @@ class EntitlementSnapshot {
 
   @override
   int get hashCode => Object.hash(
-        appUserId,
-        hasProEntitlement,
-        isTrialPeriod,
-        isInGracePeriod,
-        productId,
-        expirationDate,
-        originalTransactionId,
-        latestPurchaseDate,
-        lastPeriodType,
-      );
+    appUserId,
+    hasProEntitlement,
+    isTrialPeriod,
+    isInGracePeriod,
+    productId,
+    expirationDate,
+    originalTransactionId,
+    latestPurchaseDate,
+    lastPeriodType,
+  );
 
   @override
-  String toString() => 'EntitlementSnapshot('
+  String toString() =>
+      'EntitlementSnapshot('
       'appUserId: $appUserId, '
       'hasProEntitlement: $hasProEntitlement, '
       'isTrialPeriod: $isTrialPeriod, '

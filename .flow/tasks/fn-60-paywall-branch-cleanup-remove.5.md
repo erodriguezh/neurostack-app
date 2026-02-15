@@ -55,9 +55,8 @@ These serve different purposes. Extract the unit test fake to its own file (`tes
 - [ ] `flutter test` passes (all tests green)
 - [ ] `flutter analyze` passes
 ## Done summary
-TBD
-
+Consolidated duplicate test mock declarations from 9 test files into shared test/mocks/mock_services.dart and extracted unit test FakeRevenueCatClient to test/mocks/fake_revenuecat_client.dart. Integration test FakeRevenueCatClient remains intentionally separate.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 6591278, 04d438b
+- Tests: flutter test, flutter analyze
 - PRs:

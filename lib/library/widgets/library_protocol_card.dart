@@ -147,7 +147,6 @@ class _LibraryProtocolCardState extends State<LibraryProtocolCard> {
       ],
     );
   }
-
 }
 
 class _CategoryPill extends StatelessWidget {

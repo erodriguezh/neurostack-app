@@ -47,8 +47,9 @@ void main() {
       mockUuid = MockUuid();
 
       // Default mock setup for NotifyService (void methods use thenAnswer)
-      when(() => mockNotifyService.setHapticFeedbackEvent(any()))
-          .thenAnswer((_) {});
+      when(
+        () => mockNotifyService.setHapticFeedbackEvent(any()),
+      ).thenAnswer((_) {});
       when(() => mockNotifyService.setToastEvent(any())).thenAnswer((_) {});
     });
 
@@ -75,8 +76,9 @@ void main() {
     group('init', () {
       test('init_whenEligible_setsLogSessionReadyState', () async {
         // Arrange
-        when(() => mockCheckEligibility.execute(any()))
-            .thenAnswer((_) async => right(unit));
+        when(
+          () => mockCheckEligibility.execute(any()),
+        ).thenAnswer((_) async => right(unit));
         viewModel = createViewModel();
 
         // Act
@@ -88,17 +90,20 @@ void main() {
 
       test('init_passesCorrectParamsToCheckEligibility', () async {
         // Arrange
-        when(() => mockCheckEligibility.execute(any()))
-            .thenAnswer((_) async => right(unit));
+        when(
+          () => mockCheckEligibility.execute(any()),
+        ).thenAnswer((_) async => right(unit));
         viewModel = createViewModel();
 
         // Act
         await viewModel!.init();
 
         // Assert - capture and verify params
-        final captured = verify(() => mockCheckEligibility.execute(captureAny()))
-            .captured
-            .single as CheckEligibilityParams;
+        final captured =
+            verify(
+                  () => mockCheckEligibility.execute(captureAny()),
+                ).captured.single
+                as CheckEligibilityParams;
 
         expect(captured.userId, TestConstants.user.id);
         expect(captured.protocolId, viewModel!.protocol.id);
@@ -106,8 +111,9 @@ void main() {
 
       test('init_whenTooManyProtocols_setsLogSessionIneligibleState', () async {
         // Arrange
-        when(() => mockCheckEligibility.execute(any()))
-            .thenAnswer((_) async => left(UserFailures.tooManyActiveProtocols));
+        when(
+          () => mockCheckEligibility.execute(any()),
+        ).thenAnswer((_) async => left(UserFailures.tooManyActiveProtocols));
         viewModel = createViewModel();
 
         // Act
@@ -125,8 +131,9 @@ void main() {
           code: 'User.NotFound',
           message: 'User not found',
         );
-        when(() => mockCheckEligibility.execute(any()))
-            .thenAnswer((_) async => left(otherFailure));
+        when(
+          () => mockCheckEligibility.execute(any()),
+        ).thenAnswer((_) async => left(otherFailure));
         viewModel = createViewModel();
 
         // Act
@@ -141,8 +148,9 @@ void main() {
 
     group('date clamping', () {
       setUp(() {
-        when(() => mockCheckEligibility.execute(any()))
-            .thenAnswer((_) async => right(unit));
+        when(
+          () => mockCheckEligibility.execute(any()),
+        ).thenAnswer((_) async => right(unit));
       });
 
       test('initialDate_clampsFutureDateToToday', () async {
@@ -200,122 +208,143 @@ void main() {
     group('submit validation', () {
       setUp(() {
         // Set up eligible user for submit tests
-        when(() => mockCheckEligibility.execute(any()))
-            .thenAnswer((_) async => right(unit));
-      });
-
-      test('submit_withZeroDuration_setsLogSessionErrorWithValidationFailure',
-          () async {
-        // Arrange
-        final now = DateTime.now();
-        viewModel = createViewModel(initialDate: now);
-        await viewModel!.init();
-
-        // Set duration to 0
-        viewModel!.updateDurationMinutes(0);
-
-        // Set up mocks for submission attempt
-        when(() => mockUuid.v4()).thenReturn('test-uuid');
-
-        // Act
-        await viewModel!.submit();
-
-        // Assert - should be LogSessionError due to duration validation
-        expect(viewModel!.state.value, isA<LogSessionError>());
-        final state = viewModel!.state.value as LogSessionError;
-        expect(state.failure.code, SessionFailures.durationMustBePositive.code);
-
-        // Verify haptic error feedback
-        verify(
-          () => mockNotifyService
-              .setHapticFeedbackEvent(HapticFeedbackEvent.error),
-        ).called(1);
-
-        // Verify toast error
-        verify(
-          () => mockNotifyService.setToastEvent(any(that: isA<ToastEventError>())),
-        ).called(1);
-
-        // Verify no persistence or sync occurred
-        verifyNever(() => mockLocalDataSource.savePendingSession(any()));
-        verifyNever(() => mockSyncService.sync());
+        when(
+          () => mockCheckEligibility.execute(any()),
+        ).thenAnswer((_) async => right(unit));
       });
 
       test(
-          'submit_withNegativeDuration_setsLogSessionErrorWithValidationFailure',
-          () async {
-        // Arrange
-        final now = DateTime.now();
-        viewModel = createViewModel(initialDate: now);
-        await viewModel!.init();
+        'submit_withZeroDuration_setsLogSessionErrorWithValidationFailure',
+        () async {
+          // Arrange
+          final now = DateTime.now();
+          viewModel = createViewModel(initialDate: now);
+          await viewModel!.init();
 
-        // Set negative duration
-        viewModel!.updateDurationMinutes(-5);
+          // Set duration to 0
+          viewModel!.updateDurationMinutes(0);
 
-        // Set up mocks for submission attempt
-        when(() => mockUuid.v4()).thenReturn('test-uuid');
+          // Set up mocks for submission attempt
+          when(() => mockUuid.v4()).thenReturn('test-uuid');
 
-        // Act
-        await viewModel!.submit();
+          // Act
+          await viewModel!.submit();
 
-        // Assert - should be LogSessionError due to duration validation
-        expect(viewModel!.state.value, isA<LogSessionError>());
-        final state = viewModel!.state.value as LogSessionError;
-        expect(state.failure.code, SessionFailures.durationMustBePositive.code);
+          // Assert - should be LogSessionError due to duration validation
+          expect(viewModel!.state.value, isA<LogSessionError>());
+          final state = viewModel!.state.value as LogSessionError;
+          expect(
+            state.failure.code,
+            SessionFailures.durationMustBePositive.code,
+          );
 
-        // Verify haptic error feedback
-        verify(
-          () => mockNotifyService
-              .setHapticFeedbackEvent(HapticFeedbackEvent.error),
-        ).called(1);
+          // Verify haptic error feedback
+          verify(
+            () => mockNotifyService.setHapticFeedbackEvent(
+              HapticFeedbackEvent.error,
+            ),
+          ).called(1);
 
-        // Verify toast error
-        verify(
-          () => mockNotifyService.setToastEvent(any(that: isA<ToastEventError>())),
-        ).called(1);
+          // Verify toast error
+          verify(
+            () => mockNotifyService.setToastEvent(
+              any(that: isA<ToastEventError>()),
+            ),
+          ).called(1);
 
-        // Verify no persistence or sync occurred
-        verifyNever(() => mockLocalDataSource.savePendingSession(any()));
-        verifyNever(() => mockSyncService.sync());
-      });
+          // Verify no persistence or sync occurred
+          verifyNever(() => mockLocalDataSource.savePendingSession(any()));
+          verifyNever(() => mockSyncService.sync());
+        },
+      );
+
+      test(
+        'submit_withNegativeDuration_setsLogSessionErrorWithValidationFailure',
+        () async {
+          // Arrange
+          final now = DateTime.now();
+          viewModel = createViewModel(initialDate: now);
+          await viewModel!.init();
+
+          // Set negative duration
+          viewModel!.updateDurationMinutes(-5);
+
+          // Set up mocks for submission attempt
+          when(() => mockUuid.v4()).thenReturn('test-uuid');
+
+          // Act
+          await viewModel!.submit();
+
+          // Assert - should be LogSessionError due to duration validation
+          expect(viewModel!.state.value, isA<LogSessionError>());
+          final state = viewModel!.state.value as LogSessionError;
+          expect(
+            state.failure.code,
+            SessionFailures.durationMustBePositive.code,
+          );
+
+          // Verify haptic error feedback
+          verify(
+            () => mockNotifyService.setHapticFeedbackEvent(
+              HapticFeedbackEvent.error,
+            ),
+          ).called(1);
+
+          // Verify toast error
+          verify(
+            () => mockNotifyService.setToastEvent(
+              any(that: isA<ToastEventError>()),
+            ),
+          ).called(1);
+
+          // Verify no persistence or sync occurred
+          verifyNever(() => mockLocalDataSource.savePendingSession(any()));
+          verifyNever(() => mockSyncService.sync());
+        },
+      );
     });
 
     group('submit success', () {
       setUp(() {
         // Set up eligible user for submit tests
-        when(() => mockCheckEligibility.execute(any()))
-            .thenAnswer((_) async => right(unit));
+        when(
+          () => mockCheckEligibility.execute(any()),
+        ).thenAnswer((_) async => right(unit));
       });
 
-      test('submit_withValidData_savesPendingSessionWithCorrectContent',
-          () async {
-        // Arrange
-        final now = DateTime.now();
-        viewModel = createViewModel(initialDate: now);
-        await viewModel!.init();
+      test(
+        'submit_withValidData_savesPendingSessionWithCorrectContent',
+        () async {
+          // Arrange
+          final now = DateTime.now();
+          viewModel = createViewModel(initialDate: now);
+          await viewModel!.init();
 
-        viewModel!.updateNotes('Test notes');
+          viewModel!.updateNotes('Test notes');
 
-        const testUuid = 'test-uuid-123';
-        when(() => mockUuid.v4()).thenReturn(testUuid);
-        when(() => mockLocalDataSource.savePendingSession(any()))
-            .thenAnswer((_) async {});
-        when(() => mockSyncService.sync()).thenAnswer((_) async {});
+          const testUuid = 'test-uuid-123';
+          when(() => mockUuid.v4()).thenReturn(testUuid);
+          when(
+            () => mockLocalDataSource.savePendingSession(any()),
+          ).thenAnswer((_) async {});
+          when(() => mockSyncService.sync()).thenAnswer((_) async {});
 
-        // Act
-        await viewModel!.submit();
+          // Act
+          await viewModel!.submit();
 
-        // Assert - capture and verify pending session content
-        final captured =
-            verify(() => mockLocalDataSource.savePendingSession(captureAny()))
-                .captured
-                .single as PendingSession;
+          // Assert - capture and verify pending session content
+          final captured =
+              verify(
+                    () => mockLocalDataSource.savePendingSession(captureAny()),
+                  ).captured.single
+                  as PendingSession;
 
-        expect(captured.localId, testUuid);
-        expect(captured.userId, TestConstants.user.id);
-        expect(captured.draft.protocolId, viewModel!.protocol.id);
-        expect(captured.draft.notes, 'Test notes');
-      });
+          expect(captured.localId, testUuid);
+          expect(captured.userId, TestConstants.user.id);
+          expect(captured.draft.protocolId, viewModel!.protocol.id);
+          expect(captured.draft.notes, 'Test notes');
+        },
+      );
 
       test('submit_withValidData_triggersSessionSyncServiceSync', () async {
         // Arrange
@@ -325,8 +354,9 @@ void main() {
 
         const testUuid = 'test-uuid-123';
         when(() => mockUuid.v4()).thenReturn(testUuid);
-        when(() => mockLocalDataSource.savePendingSession(any()))
-            .thenAnswer((_) async {});
+        when(
+          () => mockLocalDataSource.savePendingSession(any()),
+        ).thenAnswer((_) async {});
         when(() => mockSyncService.sync()).thenAnswer((_) async {});
 
         // Act
@@ -344,8 +374,9 @@ void main() {
 
         const testUuid = 'test-uuid-123';
         when(() => mockUuid.v4()).thenReturn(testUuid);
-        when(() => mockLocalDataSource.savePendingSession(any()))
-            .thenAnswer((_) async {});
+        when(
+          () => mockLocalDataSource.savePendingSession(any()),
+        ).thenAnswer((_) async {});
         when(() => mockSyncService.sync()).thenAnswer((_) async {});
 
         // Act
@@ -362,40 +393,46 @@ void main() {
 
         // Verify success haptic feedback
         verify(
-          () => mockNotifyService
-              .setHapticFeedbackEvent(HapticFeedbackEvent.success),
+          () => mockNotifyService.setHapticFeedbackEvent(
+            HapticFeedbackEvent.success,
+          ),
         ).called(1);
 
         // Verify toast
         verify(
-          () => mockNotifyService.setToastEvent(any(that: isA<ToastEventSuccess>())),
+          () => mockNotifyService.setToastEvent(
+            any(that: isA<ToastEventSuccess>()),
+          ),
         ).called(1);
       });
 
-      test('submit_withValidDataAndDuration_includesDurationInSession',
-          () async {
-        // Arrange
-        final now = DateTime.now();
-        viewModel = createViewModel(initialDate: now);
-        await viewModel!.init();
+      test(
+        'submit_withValidDataAndDuration_includesDurationInSession',
+        () async {
+          // Arrange
+          final now = DateTime.now();
+          viewModel = createViewModel(initialDate: now);
+          await viewModel!.init();
 
-        // Set valid duration
-        viewModel!.updateDurationMinutes(30);
+          // Set valid duration
+          viewModel!.updateDurationMinutes(30);
 
-        const testUuid = 'test-uuid-123';
-        when(() => mockUuid.v4()).thenReturn(testUuid);
-        when(() => mockLocalDataSource.savePendingSession(any()))
-            .thenAnswer((_) async {});
-        when(() => mockSyncService.sync()).thenAnswer((_) async {});
+          const testUuid = 'test-uuid-123';
+          when(() => mockUuid.v4()).thenReturn(testUuid);
+          when(
+            () => mockLocalDataSource.savePendingSession(any()),
+          ).thenAnswer((_) async {});
+          when(() => mockSyncService.sync()).thenAnswer((_) async {});
 
-        // Act
-        await viewModel!.submit();
+          // Act
+          await viewModel!.submit();
 
-        // Assert
-        expect(viewModel!.state.value, isA<LogSessionSuccess>());
-        final state = viewModel!.state.value as LogSessionSuccess;
-        expect(state.session.duration?.inMinutes, 30);
-      });
+          // Assert
+          expect(viewModel!.state.value, isA<LogSessionSuccess>());
+          final state = viewModel!.state.value as LogSessionSuccess;
+          expect(state.session.duration?.inMinutes, 30);
+        },
+      );
 
       test('submit_withValidDataAndNotes_includesNotesInSession', () async {
         // Arrange
@@ -408,8 +445,9 @@ void main() {
 
         const testUuid = 'test-uuid-123';
         when(() => mockUuid.v4()).thenReturn(testUuid);
-        when(() => mockLocalDataSource.savePendingSession(any()))
-            .thenAnswer((_) async {});
+        when(
+          () => mockLocalDataSource.savePendingSession(any()),
+        ).thenAnswer((_) async {});
         when(() => mockSyncService.sync()).thenAnswer((_) async {});
 
         // Act
@@ -424,8 +462,9 @@ void main() {
 
     group('form state', () {
       setUp(() {
-        when(() => mockCheckEligibility.execute(any()))
-            .thenAnswer((_) async => right(unit));
+        when(
+          () => mockCheckEligibility.execute(any()),
+        ).thenAnswer((_) async => right(unit));
       });
 
       test('selectedDate_updatesCorrectly', () async {
@@ -501,8 +540,9 @@ void main() {
 
     group('submit guards', () {
       setUp(() {
-        when(() => mockCheckEligibility.execute(any()))
-            .thenAnswer((_) async => right(unit));
+        when(
+          () => mockCheckEligibility.execute(any()),
+        ).thenAnswer((_) async => right(unit));
       });
 
       test('submit_whenInitialState_doesNothing', () async {
@@ -512,8 +552,9 @@ void main() {
         // Do NOT call init() - state remains LogSessionInitial
 
         when(() => mockUuid.v4()).thenReturn('test-uuid');
-        when(() => mockLocalDataSource.savePendingSession(any()))
-            .thenAnswer((_) async {});
+        when(
+          () => mockLocalDataSource.savePendingSession(any()),
+        ).thenAnswer((_) async {});
 
         // Act
         await viewModel!.submit();
@@ -525,15 +566,17 @@ void main() {
 
       test('submit_whenIneligible_doesNothing', () async {
         // Arrange
-        when(() => mockCheckEligibility.execute(any()))
-            .thenAnswer((_) async => left(UserFailures.tooManyActiveProtocols));
+        when(
+          () => mockCheckEligibility.execute(any()),
+        ).thenAnswer((_) async => left(UserFailures.tooManyActiveProtocols));
         final now = DateTime.now();
         viewModel = createViewModel(initialDate: now);
         await viewModel!.init();
 
         when(() => mockUuid.v4()).thenReturn('test-uuid');
-        when(() => mockLocalDataSource.savePendingSession(any()))
-            .thenAnswer((_) async {});
+        when(
+          () => mockLocalDataSource.savePendingSession(any()),
+        ).thenAnswer((_) async {});
 
         // Act
         await viewModel!.submit();
@@ -551,8 +594,9 @@ void main() {
 
         const testUuid = 'test-uuid-123';
         when(() => mockUuid.v4()).thenReturn(testUuid);
-        when(() => mockLocalDataSource.savePendingSession(any()))
-            .thenAnswer((_) async {
+        when(() => mockLocalDataSource.savePendingSession(any())).thenAnswer((
+          _,
+        ) async {
           // Slow save to simulate being in submitting state
           await Future<void>.delayed(const Duration(milliseconds: 100));
         });
@@ -582,8 +626,9 @@ void main() {
 
         const testUuid = 'test-uuid-123';
         when(() => mockUuid.v4()).thenReturn(testUuid);
-        when(() => mockLocalDataSource.savePendingSession(any()))
-            .thenAnswer((_) async {});
+        when(
+          () => mockLocalDataSource.savePendingSession(any()),
+        ).thenAnswer((_) async {});
         when(() => mockSyncService.sync()).thenAnswer((_) async {});
 
         // First submit
@@ -592,8 +637,9 @@ void main() {
 
         // Reset mock counts
         reset(mockLocalDataSource);
-        when(() => mockLocalDataSource.savePendingSession(any()))
-            .thenAnswer((_) async {});
+        when(
+          () => mockLocalDataSource.savePendingSession(any()),
+        ).thenAnswer((_) async {});
 
         // Act - second submit
         await viewModel!.submit();
@@ -605,8 +651,9 @@ void main() {
 
     group('error handling', () {
       setUp(() {
-        when(() => mockCheckEligibility.execute(any()))
-            .thenAnswer((_) async => right(unit));
+        when(
+          () => mockCheckEligibility.execute(any()),
+        ).thenAnswer((_) async => right(unit));
       });
 
       test('submit_whenLocalSaveFails_setsErrorStateWithToast', () async {
@@ -617,8 +664,9 @@ void main() {
 
         const testUuid = 'test-uuid-123';
         when(() => mockUuid.v4()).thenReturn(testUuid);
-        when(() => mockLocalDataSource.savePendingSession(any()))
-            .thenThrow(Exception('Local storage error'));
+        when(
+          () => mockLocalDataSource.savePendingSession(any()),
+        ).thenThrow(Exception('Local storage error'));
 
         // Act
         await viewModel!.submit();
@@ -630,13 +678,16 @@ void main() {
 
         // Verify error haptic feedback
         verify(
-          () => mockNotifyService
-              .setHapticFeedbackEvent(HapticFeedbackEvent.error),
+          () => mockNotifyService.setHapticFeedbackEvent(
+            HapticFeedbackEvent.error,
+          ),
         ).called(1);
 
         // Verify toast error
         verify(
-          () => mockNotifyService.setToastEvent(any(that: isA<ToastEventError>())),
+          () => mockNotifyService.setToastEvent(
+            any(that: isA<ToastEventError>()),
+          ),
         ).called(1);
 
         // Verify sync was not triggered (save failed before sync)

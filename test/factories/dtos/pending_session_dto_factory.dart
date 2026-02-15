@@ -24,7 +24,8 @@ abstract final class PendingSessionDtoFactory {
       localId: localId ?? TestConstants.pendingSession.localId,
       userId: userId ?? TestConstants.user.id,
       protocolId: protocolId ?? TestConstants.session.protocolId,
-      completedAt: completedAt ??
+      completedAt:
+          completedAt ??
           TestConstants.session.validCompletedAt.toIso8601String(),
       durationSeconds: durationSeconds,
       notes: notes,
@@ -103,12 +104,10 @@ abstract final class PendingSessionDtoFactory {
       'local_id': localId ?? TestConstants.pendingSession.localId,
       'user_id': userId ?? TestConstants.user.id,
       'protocol_id': TestConstants.session.protocolId,
-      'completed_at':
-          TestConstants.session.validCompletedAt.toIso8601String(),
+      'completed_at': TestConstants.session.validCompletedAt.toIso8601String(),
       if (durationSeconds != null) 'duration_seconds': durationSeconds,
       if (notes != null) 'notes': notes,
-      'created_at':
-          TestConstants.pendingSession.createdAt.toIso8601String(),
+      'created_at': TestConstants.pendingSession.createdAt.toIso8601String(),
       'retry_count': retryCount,
     };
   }

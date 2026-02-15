@@ -2,8 +2,6 @@ import 'package:neurostack/core/models/home_bottom_tab.dart';
 import 'package:neurostack/features/protocol/domain/entities/protocol.dart';
 import 'package:neurostack/features/user/domain/entities/user.dart';
 
-export 'package:neurostack/core/models/home_bottom_tab.dart';
-
 const _unset = Object();
 
 enum HomeStatus { loading, empty, populated, error }
@@ -128,8 +126,9 @@ class HomeViewState {
       showGraceModal: showGraceModal ?? this.showGraceModal,
       showDeactivationModal:
           showDeactivationModal ?? this.showDeactivationModal,
-      errorMessage:
-          errorMessage == _unset ? this.errorMessage : errorMessage as String?,
+      errorMessage: errorMessage == _unset
+          ? this.errorMessage
+          : errorMessage as String?,
       isRefreshing: isRefreshing ?? this.isRefreshing,
       activeTab: activeTab ?? this.activeTab,
       logSessionRequest: logSessionRequest == _unset

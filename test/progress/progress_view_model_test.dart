@@ -22,7 +22,8 @@ import 'package:neurostack/features/session/domain/repositories/session_reposito
 import 'package:neurostack/features/user/domain/entities/user.dart';
 import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
 import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
-import 'package:neurostack/features/user/domain/value_objects/stack.dart' as user_stack;
+import 'package:neurostack/features/user/domain/value_objects/stack.dart'
+    as user_stack;
 import 'package:neurostack/progress/data/cached_week_progress_store.dart';
 import 'package:neurostack/progress/progress_state.dart';
 import 'package:neurostack/progress/progress_view_model.dart';
@@ -150,53 +151,57 @@ void main() {
         viewModel.dispose();
       });
 
-      test('updates cell state to completed for session within current week',
-          () async {
-        // Arrange: Set up a loaded state with a notDone cell
-        final weekStart = DateTime(2025, 1, 13); // Monday
-        final weekEnd = DateTime(2025, 1, 19, 23, 59, 59, 999); // Sunday end
-        final sessionDay = DateTime(2025, 1, 15); // Wednesday
-        const protocolId = 'protocol-001';
+      test(
+        'updates cell state to completed for session within current week',
+        () async {
+          // Arrange: Set up a loaded state with a notDone cell
+          final weekStart = DateTime(2025, 1, 13); // Monday
+          final weekEnd = DateTime(2025, 1, 19, 23, 59, 59, 999); // Sunday end
+          final sessionDay = DateTime(2025, 1, 15); // Wednesday
+          const protocolId = 'protocol-001';
 
-        final initialRow = ProtocolRow(
-          protocolId: protocolId,
-          protocolName: 'Test Protocol',
-          cells: List.generate(7, (index) {
-            final day = weekStart.add(Duration(days: index));
-            return DayCell(
-              date: day,
-              state: CellState.notDone,
-            );
-          }),
-        );
+          final initialRow = ProtocolRow(
+            protocolId: protocolId,
+            protocolName: 'Test Protocol',
+            cells: List.generate(7, (index) {
+              final day = weekStart.add(Duration(days: index));
+              return DayCell(
+                date: day,
+                state: CellState.notDone,
+              );
+            }),
+          );
 
-        // Set the view model to a loaded state
-        viewModel.state.value = ProgressLoaded(
-          rows: [initialRow],
-          weekRange: DateTimeRange(start: weekStart, end: weekEnd),
-          todayIndex: 4, // Friday
-          isOffline: false,
-        );
+          // Set the view model to a loaded state
+          viewModel.state.value = ProgressLoaded(
+            rows: [initialRow],
+            weekRange: DateTimeRange(start: weekStart, end: weekEnd),
+            todayIndex: 4, // Friday
+            isOffline: false,
+          );
 
-        final session = SessionFactory.reconstitute(
-          id: 'session-001',
-          protocolId: protocolId,
-          completedAt: sessionDay,
-        );
+          final session = SessionFactory.reconstitute(
+            id: 'session-001',
+            protocolId: protocolId,
+            completedAt: sessionDay,
+          );
 
-        // Act
-        await viewModel.onSessionLogged(session);
+          // Act
+          await viewModel.onSessionLogged(session);
 
-        // Assert
-        final state = viewModel.state.value;
-        expect(state, isA<ProgressLoaded>());
+          // Assert
+          final state = viewModel.state.value;
+          expect(state, isA<ProgressLoaded>());
 
-        final loaded = state as ProgressLoaded;
-        final row = loaded.rows.firstWhere((r) => r.protocolId == protocolId);
-        final cell = row.cells.firstWhere((c) => c.date.day == sessionDay.day);
+          final loaded = state as ProgressLoaded;
+          final row = loaded.rows.firstWhere((r) => r.protocolId == protocolId);
+          final cell = row.cells.firstWhere(
+            (c) => c.date.day == sessionDay.day,
+          );
 
-        expect(cell.state, CellState.completed);
-      });
+          expect(cell.state, CellState.completed);
+        },
+      );
 
       test('triggers haptic feedback on session logged', () async {
         // Arrange
@@ -399,7 +404,10 @@ void main() {
         // Assert
         expect(sessionLocalDataSource.upsertSyncedSessionsCalled, isTrue);
         expect(sessionLocalDataSource.lastUpsertUserId, userId);
-        expect(sessionLocalDataSource.lastUpsertedSessions, contains(remoteSession));
+        expect(
+          sessionLocalDataSource.lastUpsertedSessions,
+          contains(remoteSession),
+        );
       });
 
       test('online_remoteListFails_stillLoadsFromLocalDataSource', () async {
@@ -417,7 +425,9 @@ void main() {
           protocolId: 'protocol-001',
           completedAt: DateTime.now(),
         );
-        await sessionLocalDataSource.upsertSyncedSessions(userId, [localSession]);
+        await sessionLocalDataSource.upsertSyncedSessions(userId, [
+          localSession,
+        ]);
         sessionLocalDataSource.upsertSyncedSessionsCalled = false; // Reset
 
         viewModel = createViewModel();
@@ -430,40 +440,43 @@ void main() {
         expect(state, isA<ProgressLoaded>());
       });
 
-      test('offline_cachedUserWithActiveProtocols_showsRowsEvenWithNoSessions', () async {
-        // Arrange
-        const userId = 'user-001';
-        const protocolId = 'protocol-001';
+      test(
+        'offline_cachedUserWithActiveProtocols_showsRowsEvenWithNoSessions',
+        () async {
+          // Arrange
+          const userId = 'user-001';
+          const protocolId = 'protocol-001';
 
-        final user = UserFactory.create(
-          id: userId,
-          subscriptionStatus: SubscriptionStatus.free,
-          onboardingCompleted: true,
-          stack: user_stack.Stack.fromIds([protocolId]),
-        );
+          final user = UserFactory.create(
+            id: userId,
+            subscriptionStatus: SubscriptionStatus.free,
+            onboardingCompleted: true,
+            stack: user_stack.Stack.fromIds([protocolId]),
+          );
 
-        // Set offline auth state
-        authService.authState.value = AuthenticatedOffline(user);
-        connectivityService.status.value = NetworkStatus.offline;
+          // Set offline auth state
+          authService.authState.value = AuthenticatedOffline(user);
+          connectivityService.status.value = NetworkStatus.offline;
 
-        // Cache the user for offline lookup
-        await cachedUserStore.saveUser(user);
+          // Cache the user for offline lookup
+          await cachedUserStore.saveUser(user);
 
-        // No sessions in local data source
-        viewModel = createViewModel();
+          // No sessions in local data source
+          viewModel = createViewModel();
 
-        // Act
-        await viewModel.init();
+          // Act
+          await viewModel.init();
 
-        // Assert: Should show rows for active protocols even with no sessions
-        final state = viewModel.state.value;
-        expect(state, isA<ProgressLoaded>());
+          // Assert: Should show rows for active protocols even with no sessions
+          final state = viewModel.state.value;
+          expect(state, isA<ProgressLoaded>());
 
-        final loaded = state as ProgressLoaded;
-        expect(loaded.rows.length, 1);
-        expect(loaded.rows.first.protocolId, protocolId);
-        expect(loaded.isOffline, isTrue);
-      });
+          final loaded = state as ProgressLoaded;
+          expect(loaded.rows.length, 1);
+          expect(loaded.rows.first.protocolId, protocolId);
+          expect(loaded.isOffline, isTrue);
+        },
+      );
 
       test('offline_pendingSessionInLocalDS_showsAsCompleted', () async {
         // Arrange
@@ -510,7 +523,8 @@ void main() {
 
         // Find the cell for today
         final todayCell = row.cells.firstWhere(
-          (c) => c.date.day == sessionDay.day && c.date.month == sessionDay.month,
+          (c) =>
+              c.date.day == sessionDay.day && c.date.month == sessionDay.month,
         );
         expect(todayCell.state, CellState.completed);
       });
@@ -532,8 +546,9 @@ class FakeNotifyService extends NotifyService {
 
 class FakeAuthService implements AuthService {
   @override
-  final ValueNotifier<AuthState> authState =
-      ValueNotifier<AuthState>(const Unauthenticated());
+  final ValueNotifier<AuthState> authState = ValueNotifier<AuthState>(
+    const Unauthenticated(),
+  );
 
   @override
   bool get isAuthenticated =>
@@ -566,7 +581,8 @@ class FakeAuthService implements AuthService {
 
 class FakeRouterService extends RouterService {
   FakeRouterService()
-      : super(supportedRoutes: [
+    : super(
+        supportedRoutes: [
           RouteEntry(
             path: '/',
             builder: (key, routeData) => const SizedBox.shrink(),
@@ -575,7 +591,8 @@ class FakeRouterService extends RouterService {
             path: '/404',
             builder: (key, routeData) => const SizedBox.shrink(),
           ),
-        ]);
+        ],
+      );
 }
 
 class FakeUserRepository implements UserRepository {
@@ -669,8 +686,9 @@ class FakeConnectivityService implements ConnectivityService {
   }
 
   @override
-  final ValueNotifier<NetworkStatus> status =
-      ValueNotifier<NetworkStatus>(NetworkStatus.online);
+  final ValueNotifier<NetworkStatus> status = ValueNotifier<NetworkStatus>(
+    NetworkStatus.online,
+  );
 
   @override
   Future<void> init() async {}
@@ -788,7 +806,10 @@ class FakeSessionLocalDataSource implements SessionLocalDataSource {
   }
 
   @override
-  Future<void> upsertSyncedSessions(String userId, List<Session> sessions) async {
+  Future<void> upsertSyncedSessions(
+    String userId,
+    List<Session> sessions,
+  ) async {
     upsertSyncedSessionsCalled = true;
     lastUpsertUserId = userId;
     lastUpsertedSessions = sessions;

@@ -179,12 +179,15 @@ void main() {
             completedAt: pending.draft.completedAt.toIso8601String(),
           );
 
-          when(() => mockRemote.createSession(any()))
-              .thenAnswer((_) async => sessionDto);
-          when(() => mockLocal.upsertSyncedSessions(any(), any()))
-              .thenAnswer((_) async {});
-          when(() => mockLocal.removePendingSession(any(), any()))
-              .thenAnswer((_) async {});
+          when(
+            () => mockRemote.createSession(any()),
+          ).thenAnswer((_) async => sessionDto);
+          when(
+            () => mockLocal.upsertSyncedSessions(any(), any()),
+          ).thenAnswer((_) async {});
+          when(
+            () => mockLocal.removePendingSession(any(), any()),
+          ).thenAnswer((_) async {});
 
           // Act - start two syncs simultaneously
           final sync1 = service.sync();
@@ -208,8 +211,9 @@ void main() {
 
         test('sync_whenNoPendingSessions_noOp', () async {
           // Arrange
-          when(() => mockLocal.getPendingSessions(any()))
-              .thenAnswer((_) async => []);
+          when(
+            () => mockLocal.getPendingSessions(any()),
+          ).thenAnswer((_) async => []);
 
           // Act
           await service.sync();
@@ -218,48 +222,60 @@ void main() {
           verifyNever(() => mockRemote.createSession(any()));
         });
 
-        test('sync_onRemoteSuccess_removesFromPendingAndUpsertsToSynced',
-            () async {
-          // Arrange
-          final pending = PendingSessionFactory.create(localId: 'local-1');
-          when(() => mockLocal.getPendingSessions(any()))
-              .thenAnswer((_) async => [pending]);
+        test(
+          'sync_onRemoteSuccess_removesFromPendingAndUpsertsToSynced',
+          () async {
+            // Arrange
+            final pending = PendingSessionFactory.create(localId: 'local-1');
+            when(
+              () => mockLocal.getPendingSessions(any()),
+            ).thenAnswer((_) async => [pending]);
 
-          final sessionDto = SessionDto(
-            id: 'remote-id-1',
-            protocolId: pending.draft.protocolId,
-            userId: pending.userId,
-            completedAt: pending.draft.completedAt.toIso8601String(),
-          );
-          when(() => mockRemote.createSession(any()))
-              .thenAnswer((_) async => sessionDto);
-          when(() => mockLocal.upsertSyncedSessions(any(), any()))
-              .thenAnswer((_) async {});
-          when(() => mockLocal.removePendingSession(any(), any()))
-              .thenAnswer((_) async {});
+            final sessionDto = SessionDto(
+              id: 'remote-id-1',
+              protocolId: pending.draft.protocolId,
+              userId: pending.userId,
+              completedAt: pending.draft.completedAt.toIso8601String(),
+            );
+            when(
+              () => mockRemote.createSession(any()),
+            ).thenAnswer((_) async => sessionDto);
+            when(
+              () => mockLocal.upsertSyncedSessions(any(), any()),
+            ).thenAnswer((_) async {});
+            when(
+              () => mockLocal.removePendingSession(any(), any()),
+            ).thenAnswer((_) async {});
 
-          // Act
-          await service.sync();
+            // Act
+            await service.sync();
 
-          // Assert
-          verify(() => mockRemote.createSession(any())).called(1);
-          verify(() => mockLocal.upsertSyncedSessions(
+            // Assert
+            verify(() => mockRemote.createSession(any())).called(1);
+            verify(
+              () => mockLocal.upsertSyncedSessions(
                 TestConstants.user.id,
                 any(that: hasLength(1)),
-              )).called(1);
-          verify(() => mockLocal.removePendingSession(
+              ),
+            ).called(1);
+            verify(
+              () => mockLocal.removePendingSession(
                 TestConstants.user.id,
                 'local-1',
-              )).called(1);
-        });
+              ),
+            ).called(1);
+          },
+        );
 
         test('sync_onRemoteFailure_keepsPendingInQueue', () async {
           // Arrange
           final pending = PendingSessionFactory.create(localId: 'local-1');
-          when(() => mockLocal.getPendingSessions(any()))
-              .thenAnswer((_) async => [pending]);
-          when(() => mockRemote.createSession(any()))
-              .thenThrow(Exception('Network error'));
+          when(
+            () => mockLocal.getPendingSessions(any()),
+          ).thenAnswer((_) async => [pending]);
+          when(
+            () => mockRemote.createSession(any()),
+          ).thenThrow(Exception('Network error'));
 
           // Act
           await service.sync();
@@ -273,8 +289,9 @@ void main() {
           // Arrange
           final pending1 = PendingSessionFactory.create(localId: 'local-1');
           final pending2 = PendingSessionFactory.create(localId: 'local-2');
-          when(() => mockLocal.getPendingSessions(any()))
-              .thenAnswer((_) async => [pending1, pending2]);
+          when(
+            () => mockLocal.getPendingSessions(any()),
+          ).thenAnswer((_) async => [pending1, pending2]);
 
           when(() => mockRemote.createSession(any())).thenAnswer((inv) async {
             final dto = inv.positionalArguments[0] as SessionInsertDto;
@@ -285,10 +302,12 @@ void main() {
               completedAt: dto.completedAt,
             );
           });
-          when(() => mockLocal.upsertSyncedSessions(any(), any()))
-              .thenAnswer((_) async {});
-          when(() => mockLocal.removePendingSession(any(), any()))
-              .thenAnswer((_) async {});
+          when(
+            () => mockLocal.upsertSyncedSessions(any(), any()),
+          ).thenAnswer((_) async {});
+          when(
+            () => mockLocal.removePendingSession(any(), any()),
+          ).thenAnswer((_) async {});
 
           // Act
           await service.sync();
@@ -302,8 +321,9 @@ void main() {
           // Arrange
           final pending1 = PendingSessionFactory.create(localId: 'local-1');
           final pending2 = PendingSessionFactory.create(localId: 'local-2');
-          when(() => mockLocal.getPendingSessions(any()))
-              .thenAnswer((_) async => [pending1, pending2]);
+          when(
+            () => mockLocal.getPendingSessions(any()),
+          ).thenAnswer((_) async => [pending1, pending2]);
 
           var callCount = 0;
           when(() => mockRemote.createSession(any())).thenAnswer((_) async {
@@ -318,32 +338,39 @@ void main() {
               completedAt: pending2.draft.completedAt.toIso8601String(),
             );
           });
-          when(() => mockLocal.upsertSyncedSessions(any(), any()))
-              .thenAnswer((_) async {});
-          when(() => mockLocal.removePendingSession(any(), any()))
-              .thenAnswer((_) async {});
+          when(
+            () => mockLocal.upsertSyncedSessions(any(), any()),
+          ).thenAnswer((_) async {});
+          when(
+            () => mockLocal.removePendingSession(any(), any()),
+          ).thenAnswer((_) async {});
 
           // Act
           await service.sync();
 
           // Assert - both attempted, only second succeeded
           verify(() => mockRemote.createSession(any())).called(2);
-          verify(() => mockLocal.removePendingSession(
-                TestConstants.user.id,
-                'local-2',
-              )).called(1);
+          verify(
+            () => mockLocal.removePendingSession(
+              TestConstants.user.id,
+              'local-2',
+            ),
+          ).called(1);
           // First one stays in queue
-          verifyNever(() => mockLocal.removePendingSession(
-                TestConstants.user.id,
-                'local-1',
-              ));
+          verifyNever(
+            () => mockLocal.removePendingSession(
+              TestConstants.user.id,
+              'local-1',
+            ),
+          );
         });
 
         test('sync_passesCorrectUserIdToRemote', () async {
           // Arrange
           final pending = PendingSessionFactory.create();
-          when(() => mockLocal.getPendingSessions(any()))
-              .thenAnswer((_) async => [pending]);
+          when(
+            () => mockLocal.getPendingSessions(any()),
+          ).thenAnswer((_) async => [pending]);
 
           SessionInsertDto? capturedDto;
           when(() => mockRemote.createSession(any())).thenAnswer((inv) async {
@@ -355,10 +382,12 @@ void main() {
               completedAt: capturedDto!.completedAt,
             );
           });
-          when(() => mockLocal.upsertSyncedSessions(any(), any()))
-              .thenAnswer((_) async {});
-          when(() => mockLocal.removePendingSession(any(), any()))
-              .thenAnswer((_) async {});
+          when(
+            () => mockLocal.upsertSyncedSessions(any(), any()),
+          ).thenAnswer((_) async {});
+          when(
+            () => mockLocal.removePendingSession(any(), any()),
+          ).thenAnswer((_) async {});
 
           // Act
           await service.sync();
@@ -380,10 +409,12 @@ void main() {
         test('sync_doesNotThrow_onRemoteError', () async {
           // Arrange
           final pending = PendingSessionFactory.create();
-          when(() => mockLocal.getPendingSessions(any()))
-              .thenAnswer((_) async => [pending]);
-          when(() => mockRemote.createSession(any()))
-              .thenThrow(Exception('Server error'));
+          when(
+            () => mockLocal.getPendingSessions(any()),
+          ).thenAnswer((_) async => [pending]);
+          when(
+            () => mockRemote.createSession(any()),
+          ).thenThrow(Exception('Server error'));
 
           // Act & Assert - should not throw
           await expectLater(service.sync(), completes);
@@ -391,8 +422,9 @@ void main() {
 
         test('sync_doesNotThrow_onLocalError', () async {
           // Arrange
-          when(() => mockLocal.getPendingSessions(any()))
-              .thenThrow(Exception('Local storage error'));
+          when(
+            () => mockLocal.getPendingSessions(any()),
+          ).thenThrow(Exception('Local storage error'));
 
           // Act & Assert - sync() should never throw (called via unawaited())
           await expectLater(service.sync(), completes);
@@ -406,8 +438,9 @@ void main() {
           // If remote succeeds but local caching fails, we still remove from
           // pending to avoid duplicate submissions.
           final pending = PendingSessionFactory.create(localId: 'local-1');
-          when(() => mockLocal.getPendingSessions(any()))
-              .thenAnswer((_) async => [pending]);
+          when(
+            () => mockLocal.getPendingSessions(any()),
+          ).thenAnswer((_) async => [pending]);
 
           final sessionDto = SessionDto(
             id: 'remote-id-1',
@@ -415,22 +448,27 @@ void main() {
             userId: pending.userId,
             completedAt: pending.draft.completedAt.toIso8601String(),
           );
-          when(() => mockRemote.createSession(any()))
-              .thenAnswer((_) async => sessionDto);
-          when(() => mockLocal.removePendingSession(any(), any()))
-              .thenAnswer((_) async {});
-          when(() => mockLocal.upsertSyncedSessions(any(), any()))
-              .thenThrow(Exception('disk full'));
+          when(
+            () => mockRemote.createSession(any()),
+          ).thenAnswer((_) async => sessionDto);
+          when(
+            () => mockLocal.removePendingSession(any(), any()),
+          ).thenAnswer((_) async {});
+          when(
+            () => mockLocal.upsertSyncedSessions(any(), any()),
+          ).thenThrow(Exception('disk full'));
 
           // Act
           await expectLater(service.sync(), completes);
 
           // Assert - remote was called, pending was removed even though upsert failed
           verify(() => mockRemote.createSession(any())).called(1);
-          verify(() => mockLocal.removePendingSession(
-                TestConstants.user.id,
-                'local-1',
-              )).called(1);
+          verify(
+            () => mockLocal.removePendingSession(
+              TestConstants.user.id,
+              'local-1',
+            ),
+          ).called(1);
         });
       });
     });
@@ -442,8 +480,9 @@ void main() {
         mockUser = MockUser();
         when(() => mockUser.id).thenReturn(TestConstants.user.id);
         when(() => mockAuth.currentUser).thenReturn(mockUser);
-        when(() => mockLocal.getPendingSessions(any()))
-            .thenAnswer((_) async => []);
+        when(
+          () => mockLocal.getPendingSessions(any()),
+        ).thenAnswer((_) async => []);
       });
 
       test('connectivityChange_toOnline_triggersSync', () async {
@@ -484,8 +523,9 @@ void main() {
         mockUser = MockUser();
         when(() => mockUser.id).thenReturn(TestConstants.user.id);
         when(() => mockAuth.currentUser).thenReturn(mockUser);
-        when(() => mockLocal.getPendingSessions(any()))
-            .thenAnswer((_) async => []);
+        when(
+          () => mockLocal.getPendingSessions(any()),
+        ).thenAnswer((_) async => []);
       });
 
       test('lifecycleChange_toResumed_triggersSync', () async {

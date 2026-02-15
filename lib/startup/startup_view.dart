@@ -11,8 +11,7 @@ import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/core/utils/l10n/translate.dart';
 import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
-import 'package:neurostack/features/auth/domain/auth_state.dart'
-    as auth_state;
+import 'package:neurostack/features/auth/domain/auth_state.dart' as auth_state;
 import 'package:neurostack/startup/startup_view_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

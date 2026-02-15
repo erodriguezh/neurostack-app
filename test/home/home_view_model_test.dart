@@ -54,23 +54,29 @@ void main() {
     subscriptionStatusResolver = const SubscriptionStatusResolver();
 
     // Default connectivity setup
-    when(() => mockConnectivityService.status)
-        .thenReturn(ValueNotifier(NetworkStatus.online));
+    when(
+      () => mockConnectivityService.status,
+    ).thenReturn(ValueNotifier(NetworkStatus.online));
 
     // Default RevenueCat setup - null snapshot (RC unavailable, fallback to DB)
-    when(() => mockRevenueCatService.entitlementSnapshot)
-        .thenReturn(ValueNotifier<EntitlementSnapshot?>(null));
+    when(
+      () => mockRevenueCatService.entitlementSnapshot,
+    ).thenReturn(ValueNotifier<EntitlementSnapshot?>(null));
 
     // Default trial reminder setup - never show reminder
-    when(() => mockTrialReminderService.shouldShowTrialReminder(
-          userId: any(named: 'userId'),
-          snapshot: any(named: 'snapshot'),
-          now: any(named: 'now'),
-        )).thenAnswer((_) async => false);
-    when(() => mockTrialReminderService.markReminderShown(
-          userId: any(named: 'userId'),
-          now: any(named: 'now'),
-        )).thenAnswer((_) async {});
+    when(
+      () => mockTrialReminderService.shouldShowTrialReminder(
+        userId: any(named: 'userId'),
+        snapshot: any(named: 'snapshot'),
+        now: any(named: 'now'),
+      ),
+    ).thenAnswer((_) async => false);
+    when(
+      () => mockTrialReminderService.markReminderShown(
+        userId: any(named: 'userId'),
+        now: any(named: 'now'),
+      ),
+    ).thenAnswer((_) async {});
   });
 
   HomeViewModel createViewModel() {
@@ -92,56 +98,62 @@ void main() {
   group('HomeViewModel', () {
     group('handleUseFreeTier', () {
       test(
-          'with 2 protocols - returns true, refreshes, does NOT write to DB',
-          () async {
-        // Arrange
-        final user = UserFactory.create(
-          subscriptionStatus: SubscriptionStatus.trial,
-          stack: StackFactory.atFreeCapacity(), // 2 protocols
-          onboardingCompleted: true,
-        );
+        'with 2 protocols - returns true, refreshes, does NOT write to DB',
+        () async {
+          // Arrange
+          final user = UserFactory.create(
+            subscriptionStatus: SubscriptionStatus.trial,
+            stack: StackFactory.atFreeCapacity(), // 2 protocols
+            onboardingCompleted: true,
+          );
 
-        // Setup auth state for refresh
-        when(() => mockAuthService.authState)
-            .thenReturn(ValueNotifier(AuthenticatedOnline(user)));
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(user));
-        when(() => mockSessionRepository.list(
+          // Setup auth state for refresh
+          when(
+            () => mockAuthService.authState,
+          ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+          when(
+            () => mockUserRepository.getById(any()),
+          ).thenAnswer((_) async => right(user));
+          when(
+            () => mockSessionRepository.list(
               from: any(named: 'from'),
               to: any(named: 'to'),
-            )).thenAnswer((_) async => right(<Session>[]));
-        when(
-          () => mockSessionLocalDataSource.listSessions(
-            any(),
-            from: any(named: 'from'),
-            to: any(named: 'to'),
-          ),
-        ).thenAnswer((_) async => <Session>[]);
-        when(() =>
-                mockSessionLocalDataSource.upsertSyncedSessions(any(), any()))
-            .thenAnswer((_) async {});
-        when(() => mockProtocolRepository.getById(any()))
-            .thenAnswer((_) async => right(ProtocolFactory.reconstitute()));
+            ),
+          ).thenAnswer((_) async => right(<Session>[]));
+          when(
+            () => mockSessionLocalDataSource.listSessions(
+              any(),
+              from: any(named: 'from'),
+              to: any(named: 'to'),
+            ),
+          ).thenAnswer((_) async => <Session>[]);
+          when(
+            () => mockSessionLocalDataSource.upsertSyncedSessions(any(), any()),
+          ).thenAnswer((_) async {});
+          when(
+            () => mockProtocolRepository.getById(any()),
+          ).thenAnswer((_) async => right(ProtocolFactory.reconstitute()));
 
-        final viewModel = createViewModel();
-        addTearDown(viewModel.dispose);
-        viewModel.state.value = viewModel.state.value.copyWith(user: user);
+          final viewModel = createViewModel();
+          addTearDown(viewModel.dispose);
+          viewModel.state.value = viewModel.state.value.copyWith(user: user);
 
-        // Act
-        final result = await viewModel.handleUseFreeTier();
+          // Act
+          final result = await viewModel.handleUseFreeTier();
 
-        // Assert - returns true (success)
-        expect(result, isTrue);
+          // Assert - returns true (success)
+          expect(result, isTrue);
 
-        // Assert - does NOT write subscription status to DB
-        // (webhook is the only DB writer for subscription state)
-        verifyNever(() => mockUserRepository.save(any()));
+          // Assert - does NOT write subscription status to DB
+          // (webhook is the only DB writer for subscription state)
+          verifyNever(() => mockUserRepository.save(any()));
 
-        expect(viewModel.state.value.showDeactivationModal, isFalse);
+          expect(viewModel.state.value.showDeactivationModal, isFalse);
 
-        // Assert - refresh was called (getById invoked)
-        verify(() => mockUserRepository.getById(any())).called(1);
-      });
+          // Assert - refresh was called (getById invoked)
+          verify(() => mockUserRepository.getById(any())).called(1);
+        },
+      );
 
       test('with 3 protocols - triggers deactivation modal', () async {
         // Arrange
@@ -166,44 +178,49 @@ void main() {
 
     group('_maybeTriggerExpiredModal (via init)', () {
       test(
-          'does NOT trigger for trial status without RC snapshot (no transition)',
-          () async {
-        // Arrange - trial status without RC snapshot means we can't detect
-        // expiration. Modal only triggers on status transitions or expired status.
-        final user = UserFactory.create(
-          subscriptionStatus: SubscriptionStatus.trial,
-          onboardingCompleted: true,
-        );
+        'does NOT trigger for trial status without RC snapshot (no transition)',
+        () async {
+          // Arrange - trial status without RC snapshot means we can't detect
+          // expiration. Modal only triggers on status transitions or expired status.
+          final user = UserFactory.create(
+            subscriptionStatus: SubscriptionStatus.trial,
+            onboardingCompleted: true,
+          );
 
-        when(() => mockAuthService.authState)
-            .thenReturn(ValueNotifier(AuthenticatedOnline(user)));
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(user));
-        when(() => mockSessionRepository.list(
+          when(
+            () => mockAuthService.authState,
+          ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+          when(
+            () => mockUserRepository.getById(any()),
+          ).thenAnswer((_) async => right(user));
+          when(
+            () => mockSessionRepository.list(
               from: any(named: 'from'),
               to: any(named: 'to'),
-            )).thenAnswer((_) async => right(<Session>[]));
-        when(
-          () => mockSessionLocalDataSource.listSessions(
-            any(),
-            from: any(named: 'from'),
-            to: any(named: 'to'),
-          ),
-        ).thenAnswer((_) async => <Session>[]);
-        when(() =>
-                mockSessionLocalDataSource.upsertSyncedSessions(any(), any()))
-            .thenAnswer((_) async {});
+            ),
+          ).thenAnswer((_) async => right(<Session>[]));
+          when(
+            () => mockSessionLocalDataSource.listSessions(
+              any(),
+              from: any(named: 'from'),
+              to: any(named: 'to'),
+            ),
+          ).thenAnswer((_) async => <Session>[]);
+          when(
+            () => mockSessionLocalDataSource.upsertSyncedSessions(any(), any()),
+          ).thenAnswer((_) async {});
 
-        final viewModel = createViewModel();
-        addTearDown(viewModel.dispose);
+          final viewModel = createViewModel();
+          addTearDown(viewModel.dispose);
 
-        // Act
-        await viewModel.init();
+          // Act
+          await viewModel.init();
 
-        // Assert - without RC snapshot, effective status is DB status (trial)
-        // Modal does not trigger because there's no detected transition
-        expect(viewModel.state.value.showTrialExpiredModal, isFalse);
-      });
+          // Assert - without RC snapshot, effective status is DB status (trial)
+          // Modal does not trigger because there's no detected transition
+          expect(viewModel.state.value.showTrialExpiredModal, isFalse);
+        },
+      );
 
       test('triggers for premium expiration (expired status)', () async {
         // Arrange
@@ -212,14 +229,18 @@ void main() {
           onboardingCompleted: true,
         );
 
-        when(() => mockAuthService.authState)
-            .thenReturn(ValueNotifier(AuthenticatedOnline(user)));
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(user));
-        when(() => mockSessionRepository.list(
-              from: any(named: 'from'),
-              to: any(named: 'to'),
-            )).thenAnswer((_) async => right(<Session>[]));
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+        when(
+          () => mockUserRepository.getById(any()),
+        ).thenAnswer((_) async => right(user));
+        when(
+          () => mockSessionRepository.list(
+            from: any(named: 'from'),
+            to: any(named: 'to'),
+          ),
+        ).thenAnswer((_) async => right(<Session>[]));
         when(
           () => mockSessionLocalDataSource.listSessions(
             any(),
@@ -227,9 +248,9 @@ void main() {
             to: any(named: 'to'),
           ),
         ).thenAnswer((_) async => <Session>[]);
-        when(() =>
-                mockSessionLocalDataSource.upsertSyncedSessions(any(), any()))
-            .thenAnswer((_) async {});
+        when(
+          () => mockSessionLocalDataSource.upsertSyncedSessions(any(), any()),
+        ).thenAnswer((_) async {});
 
         final viewModel = createViewModel();
         addTearDown(viewModel.dispose);
@@ -249,14 +270,18 @@ void main() {
           onboardingCompleted: true,
         );
 
-        when(() => mockAuthService.authState)
-            .thenReturn(ValueNotifier(AuthenticatedOnline(user)));
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(user));
-        when(() => mockSessionRepository.list(
-              from: any(named: 'from'),
-              to: any(named: 'to'),
-            )).thenAnswer((_) async => right(<Session>[]));
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+        when(
+          () => mockUserRepository.getById(any()),
+        ).thenAnswer((_) async => right(user));
+        when(
+          () => mockSessionRepository.list(
+            from: any(named: 'from'),
+            to: any(named: 'to'),
+          ),
+        ).thenAnswer((_) async => right(<Session>[]));
         when(
           () => mockSessionLocalDataSource.listSessions(
             any(),
@@ -264,9 +289,9 @@ void main() {
             to: any(named: 'to'),
           ),
         ).thenAnswer((_) async => <Session>[]);
-        when(() =>
-                mockSessionLocalDataSource.upsertSyncedSessions(any(), any()))
-            .thenAnswer((_) async {});
+        when(
+          () => mockSessionLocalDataSource.upsertSyncedSessions(any(), any()),
+        ).thenAnswer((_) async {});
 
         final viewModel = createViewModel();
         addTearDown(viewModel.dispose);
@@ -286,14 +311,18 @@ void main() {
           onboardingCompleted: true,
         );
 
-        when(() => mockAuthService.authState)
-            .thenReturn(ValueNotifier(AuthenticatedOnline(user)));
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(user));
-        when(() => mockSessionRepository.list(
-              from: any(named: 'from'),
-              to: any(named: 'to'),
-            )).thenAnswer((_) async => right(<Session>[]));
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+        when(
+          () => mockUserRepository.getById(any()),
+        ).thenAnswer((_) async => right(user));
+        when(
+          () => mockSessionRepository.list(
+            from: any(named: 'from'),
+            to: any(named: 'to'),
+          ),
+        ).thenAnswer((_) async => right(<Session>[]));
         when(
           () => mockSessionLocalDataSource.listSessions(
             any(),
@@ -301,9 +330,9 @@ void main() {
             to: any(named: 'to'),
           ),
         ).thenAnswer((_) async => <Session>[]);
-        when(() =>
-                mockSessionLocalDataSource.upsertSyncedSessions(any(), any()))
-            .thenAnswer((_) async {});
+        when(
+          () => mockSessionLocalDataSource.upsertSyncedSessions(any(), any()),
+        ).thenAnswer((_) async {});
 
         final viewModel = createViewModel();
         addTearDown(viewModel.dispose);

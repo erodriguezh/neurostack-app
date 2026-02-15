@@ -39,11 +39,13 @@ sealed class Target with _$Target {
     // INV-P2: frequency is required, which is enforced by the type system
     // Additional validations could be added here if needed
 
-    return right(Target._internal(
-      frequency: frequency,
-      duration: duration,
-      intensity: intensity?.trim().isEmpty == true ? null : intensity?.trim(),
-    ));
+    return right(
+      Target._internal(
+        frequency: frequency,
+        duration: duration,
+        intensity: intensity?.trim().isEmpty == true ? null : intensity?.trim(),
+      ),
+    );
   }
 
   /// Display text for UI.

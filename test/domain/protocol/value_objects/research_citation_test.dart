@@ -154,7 +154,12 @@ void main() {
         final full = citation.fullCitation;
 
         // Assert - Verify complete format with URL
-        expect(full, equals('Smith (2020). A Study. Science. URL: https://example.com/study'));
+        expect(
+          full,
+          equals(
+            'Smith (2020). A Study. Science. URL: https://example.com/study',
+          ),
+        );
         expect(full, endsWith('URL: https://example.com/study'));
       });
 

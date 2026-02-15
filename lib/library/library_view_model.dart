@@ -49,21 +49,22 @@ class LibraryViewModel
     CachedUserStore? cachedUserStore,
     CachedProtocolStore? cachedProtocolStore,
     HomeBottomTabCoordinator? tabCoordinator,
-  })  : _notifyService = notifyService,
-        _routerService = routerService,
-        _authService = authService,
-        _userRepository = userRepository,
-        _protocolRepository = protocolRepository,
-        _sessionRepository = sessionRepository,
-        _connectivityService = connectivityService,
-        _resolver = subscriptionStatusResolver,
-        _revenueCatService = revenueCatService,
-        _cachedUserStore = cachedUserStore,
-        _cachedProtocolStore = cachedProtocolStore,
-        _tabCoordinator = tabCoordinator ??
-            HomeBottomTabCoordinator(
-              routerService: routerService,
-            );
+  }) : _notifyService = notifyService,
+       _routerService = routerService,
+       _authService = authService,
+       _userRepository = userRepository,
+       _protocolRepository = protocolRepository,
+       _sessionRepository = sessionRepository,
+       _connectivityService = connectivityService,
+       _resolver = subscriptionStatusResolver,
+       _revenueCatService = revenueCatService,
+       _cachedUserStore = cachedUserStore,
+       _cachedProtocolStore = cachedProtocolStore,
+       _tabCoordinator =
+           tabCoordinator ??
+           HomeBottomTabCoordinator(
+             routerService: routerService,
+           );
 
   final NotifyService _notifyService;
   final RouterService _routerService;
@@ -181,11 +182,11 @@ class LibraryViewModel
 
     if (result.isLeft()) {
       final failure = result.getLeft().getOrElse(
-            () => const DomainFailure(
-              code: 'Library.UnexpectedError',
-              message: 'Unable to log session',
-            ),
-          );
+        () => const DomainFailure(
+          code: 'Library.UnexpectedError',
+          message: 'Unable to log session',
+        ),
+      );
       _notifyService.setToastEvent(ToastEventError(message: failure.message));
       return;
     }
@@ -210,11 +211,11 @@ class LibraryViewModel
 
     if (result.isLeft()) {
       final failure = result.getLeft().getOrElse(
-            () => const DomainFailure(
-              code: 'Library.UnexpectedError',
-              message: 'Unable to activate protocol',
-            ),
-          );
+        () => const DomainFailure(
+          code: 'Library.UnexpectedError',
+          message: 'Unable to activate protocol',
+        ),
+      );
 
       if (failure.code == UserFailures.protocolLimitReached.code) {
         goToPaywall();
@@ -237,11 +238,11 @@ class LibraryViewModel
     final saveResult = await _saveUserWithRetry(updatedUser);
     if (saveResult.isLeft()) {
       final failure = saveResult.getLeft().getOrElse(
-            () => const DomainFailure(
-              code: 'Library.UnexpectedError',
-              message: 'Unable to save protocol changes',
-            ),
-          );
+        () => const DomainFailure(
+          code: 'Library.UnexpectedError',
+          message: 'Unable to save protocol changes',
+        ),
+      );
       _notifyService.setToastEvent(ToastEventError(message: failure.message));
       await _loadLibrary(showLoading: false);
       return;
@@ -265,11 +266,11 @@ class LibraryViewModel
     final result = user.deactivateProtocol(protocolId);
     if (result.isLeft()) {
       final failure = result.getLeft().getOrElse(
-            () => const DomainFailure(
-              code: 'Library.UnexpectedError',
-              message: 'Unable to remove protocol',
-            ),
-          );
+        () => const DomainFailure(
+          code: 'Library.UnexpectedError',
+          message: 'Unable to remove protocol',
+        ),
+      );
       _notifyService.setToastEvent(ToastEventWarning(message: failure.message));
       return;
     }
@@ -281,11 +282,11 @@ class LibraryViewModel
     final saveResult = await _saveUserWithRetry(updatedUser);
     if (saveResult.isLeft()) {
       final failure = saveResult.getLeft().getOrElse(
-            () => const DomainFailure(
-              code: 'Library.UnexpectedError',
-              message: 'Unable to save protocol changes',
-            ),
-          );
+        () => const DomainFailure(
+          code: 'Library.UnexpectedError',
+          message: 'Unable to save protocol changes',
+        ),
+      );
       _notifyService.setToastEvent(ToastEventError(message: failure.message));
       await _loadLibrary(showLoading: false);
       return;
@@ -298,11 +299,11 @@ class LibraryViewModel
     final result = await _sessionRepository.list(protocolId: protocolId);
     if (result.isLeft()) {
       final failure = result.getLeft().getOrElse(
-            () => const DomainFailure(
-              code: 'Library.UnexpectedError',
-              message: 'Unable to load session stats',
-            ),
-          );
+        () => const DomainFailure(
+          code: 'Library.UnexpectedError',
+          message: 'Unable to load session stats',
+        ),
+      );
       _notifyService.setToastEvent(ToastEventError(message: failure.message));
       return const LibraryProtocolStats(
         totalSessions: 0,
@@ -357,12 +358,13 @@ class LibraryViewModel
         cachedUserStore: _cachedUserStore,
       );
       if (cachedUser != null) {
-        final shouldUseMemoryCache = _cachedProtocols.isNotEmpty &&
+        final shouldUseMemoryCache =
+            _cachedProtocols.isNotEmpty &&
             _cachedProtocolsUserId == cachedUser.id;
         final cachedProtocols = shouldUseMemoryCache
             ? _cachedProtocols
             : await _cachedProtocolStore?.loadProtocols(cachedUser.id) ??
-                const [];
+                  const [];
         _cachedUser = cachedUser;
         _cachedProtocols = cachedProtocols;
         _cachedProtocolsUserId = cachedUser.id;
@@ -397,8 +399,9 @@ class LibraryViewModel
       return;
     }
 
-    final protocols =
-        protocolsResult.getOrElse((_) => throw StateError('Unreachable'));
+    final protocols = protocolsResult.getOrElse(
+      (_) => throw StateError('Unreachable'),
+    );
     _cachedUser = user;
     _cachedProtocols = protocols;
     _cachedProtocolsUserId = user.id;
@@ -458,13 +461,13 @@ class LibraryViewModel
     );
     final sorted = List<Protocol>.from(protocols)
       ..sort((a, b) {
-        final categoryCompare =
-            a.category.index.compareTo(b.category.index);
+        final categoryCompare = a.category.index.compareTo(b.category.index);
         if (categoryCompare != 0) {
           return categoryCompare;
         }
 
-        final statusCompare = _statusRank(
+        final statusCompare =
+            _statusRank(
               _deriveCardStatus(user, a.id, effectiveStatus),
             ).compareTo(
               _statusRank(
@@ -480,8 +483,7 @@ class LibraryViewModel
 
     return sorted.map((protocol) {
       final status = _deriveCardStatus(user, protocol.id, effectiveStatus);
-      final disableBadge =
-          isOffline && status == LibraryCardStatus.available;
+      final disableBadge = isOffline && status == LibraryCardStatus.available;
 
       return LibraryProtocolCardModel(
         protocolId: protocol.id,
@@ -582,7 +584,6 @@ class LibraryViewModel
       _updateCards(user, _cachedProtocols);
     });
   }
-
 
   void _setError(String message, {required bool preserveContent}) {
     final current = state.value;

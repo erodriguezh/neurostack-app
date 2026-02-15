@@ -13,7 +13,7 @@ import 'package:neurostack/startup/startup_view_model.dart';
 /// subscription changes made outside the app (e.g., via App Store settings).
 class AppLifecycleService {
   AppLifecycleService({required RevenueCatService revenueCatService})
-      : _revenueCatService = revenueCatService;
+    : _revenueCatService = revenueCatService;
 
   final RevenueCatService _revenueCatService;
   StartupViewModel? _startupViewModel;

@@ -60,14 +60,16 @@ sealed class ResearchCitation with _$ResearchCitation {
       return left(ProtocolFailures.citationYearInvalid);
     }
 
-    return right(ResearchCitation._internal(
-      authors: trimmedAuthors,
-      year: year,
-      title: trimmedTitle,
-      journal: trimmedJournal,
-      doi: doi?.trim().isEmpty == true ? null : doi?.trim(),
-      url: url?.trim().isEmpty == true ? null : url?.trim(),
-    ));
+    return right(
+      ResearchCitation._internal(
+        authors: trimmedAuthors,
+        year: year,
+        title: trimmedTitle,
+        journal: trimmedJournal,
+        doi: doi?.trim().isEmpty == true ? null : doi?.trim(),
+        url: url?.trim().isEmpty == true ? null : url?.trim(),
+      ),
+    );
   }
 
   /// Short citation format for compact display.
@@ -75,7 +77,10 @@ sealed class ResearchCitation with _$ResearchCitation {
   String get shortCitation {
     // Extract first author's last name
     final firstAuthor = authors.split(',').first.split(' ').first;
-    final hasMultipleAuthors = authors.contains(',') || authors.contains('&') || authors.contains('and');
+    final hasMultipleAuthors =
+        authors.contains(',') ||
+        authors.contains('&') ||
+        authors.contains('and');
     final etAl = hasMultipleAuthors ? ' et al.' : '';
     return '$firstAuthor$etAl ($year)';
   }
@@ -83,16 +88,18 @@ sealed class ResearchCitation with _$ResearchCitation {
   /// Full citation format for detailed display.
   /// Example: "Wisløff et al. (2007). Superior cardiovascular effect... Circulation. DOI: 10.1161/..."
   String get fullCitation {
-    final shortTitle = title.length > 60 ? '${title.substring(0, 57)}...' : title;
+    final shortTitle = title.length > 60
+        ? '${title.substring(0, 57)}...'
+        : title;
     final citation = '$shortCitation. $shortTitle. $journal.';
-    
+
     // Add DOI or URL if available (DOI preferred)
     if (doi != null && doi!.isNotEmpty) {
       return '$citation DOI: $doi';
     } else if (url != null && url!.isNotEmpty) {
       return '$citation URL: $url';
     }
-    
+
     return citation;
   }
 }

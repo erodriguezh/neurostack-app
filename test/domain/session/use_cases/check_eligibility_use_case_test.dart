@@ -37,8 +37,9 @@ void main() {
           code: 'User.NotFound',
           message: 'User not found',
         );
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => left(userNotFoundFailure));
+        when(
+          () => mockUserRepository.getById(any()),
+        ).thenAnswer((_) async => left(userNotFoundFailure));
 
         // Act
         final result = await useCase.execute(validParams);
@@ -47,25 +48,27 @@ void main() {
         expect(result, isLeftWith(userNotFoundFailure));
       });
 
-      test('whenOnboardingNotCompleted_returnsOnboardingNotCompleted',
-          () async {
-        // Arrange
-        final userWithoutOnboarding = UserFactory.create(
-          onboardingCompleted: false,
-          stack: StackFactory.withProtocol(TestConstants.session.protocolId),
-          subscriptionStatus: SubscriptionStatus.trial,
+      test(
+        'whenOnboardingNotCompleted_returnsOnboardingNotCompleted',
+        () async {
+          // Arrange
+          final userWithoutOnboarding = UserFactory.create(
+            onboardingCompleted: false,
+            stack: StackFactory.withProtocol(TestConstants.session.protocolId),
+            subscriptionStatus: SubscriptionStatus.trial,
+          );
 
-        );
+          when(
+            () => mockUserRepository.getById(any()),
+          ).thenAnswer((_) async => right(userWithoutOnboarding));
 
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(userWithoutOnboarding));
+          // Act
+          final result = await useCase.execute(validParams);
 
-        // Act
-        final result = await useCase.execute(validParams);
-
-        // Assert
-        expect(result, isLeftWith(UserFailures.onboardingNotCompleted));
-      });
+          // Assert
+          expect(result, isLeftWith(UserFailures.onboardingNotCompleted));
+        },
+      );
 
       test('whenProtocolNotInStack_returnsProtocolNotInStack', () async {
         // Arrange
@@ -73,11 +76,11 @@ void main() {
           onboardingCompleted: true,
           stack: Stack.empty(),
           subscriptionStatus: SubscriptionStatus.trial,
-
         );
 
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(userWithoutProtocol));
+        when(
+          () => mockUserRepository.getById(any()),
+        ).thenAnswer((_) async => right(userWithoutProtocol));
 
         // Act
         final result = await useCase.execute(validParams);
@@ -95,8 +98,9 @@ void main() {
           // Arrange
           final expiredTrialUser = UserFactory.createExpiredTrialOverLimit();
 
-          when(() => mockUserRepository.getById(any()))
-              .thenAnswer((_) async => right(expiredTrialUser));
+          when(
+            () => mockUserRepository.getById(any()),
+          ).thenAnswer((_) async => right(expiredTrialUser));
 
           // Derive protocol from user's stack to avoid coupling to factory internals
           final protocolIdInStack = expiredTrialUser.activeProtocolIds.first;
@@ -119,11 +123,11 @@ void main() {
           onboardingCompleted: true,
           stack: StackFactory.withProtocol(TestConstants.session.protocolId),
           subscriptionStatus: SubscriptionStatus.trial,
-
         );
 
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(validUser));
+        when(
+          () => mockUserRepository.getById(any()),
+        ).thenAnswer((_) async => right(validUser));
 
         // Act
         final result = await useCase.execute(validParams);

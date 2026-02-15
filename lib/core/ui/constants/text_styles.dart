@@ -35,7 +35,10 @@ class CustomTextStyles extends ThemeExtension<CustomTextStyles> {
   const CustomTextStyles({
     this.xs = const TextStyle(fontSize: 12.0, fontWeight: FontWeight.w400),
     this.sm = const TextStyle(fontSize: 14.0, fontWeight: FontWeight.w300),
-    this.standard = const TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400),
+    this.standard = const TextStyle(
+      fontSize: 16.0,
+      fontWeight: FontWeight.w400,
+    ),
     this.lg = const TextStyle(fontSize: 18.0, fontWeight: FontWeight.w500),
     this.xl = const TextStyle(fontSize: 20.0, fontWeight: FontWeight.w400),
     this.xxl = const TextStyle(fontSize: 24.0, fontWeight: FontWeight.w600),

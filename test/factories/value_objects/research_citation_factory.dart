@@ -12,7 +12,9 @@ abstract final class ResearchCitationFactory {
       title: TestConstants.citation.title,
       journal: TestConstants.citation.journal,
       doi: TestConstants.citation.doi,
-    ).getOrElse((l) => throw Exception('Factory produced invalid ResearchCitation: $l'));
+    ).getOrElse(
+      (l) => throw Exception('Factory produced invalid ResearchCitation: $l'),
+    );
   }
 
   /// Creates a ResearchCitation with custom values.

@@ -17,11 +17,7 @@ class UserRemoteDataSource {
   ///
   /// Throws [Exception] if user not found or connection fails.
   Future<UserDto> getUser(String id) async {
-    final json = await _dataSource
-        .from(_table)
-        .select()
-        .eq('id', id)
-        .single();
+    final json = await _dataSource.from(_table).select().eq('id', id).single();
     return UserDto.fromJson(json);
   }
 
@@ -61,10 +57,12 @@ class UserRemoteDataSource {
     String? onConflict,
     bool ignoreDuplicates = false,
   }) async {
-    await _dataSource.from(_table).upsert(
-      dto.toJson(),
-      onConflict: onConflict,
-      ignoreDuplicates: ignoreDuplicates,
-    );
+    await _dataSource
+        .from(_table)
+        .upsert(
+          dto.toJson(),
+          onConflict: onConflict,
+          ignoreDuplicates: ignoreDuplicates,
+        );
   }
 }

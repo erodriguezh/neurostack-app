@@ -120,7 +120,9 @@ class _LibraryViewState extends State<LibraryView> {
                         width: 134,
                         height: 5,
                         decoration: BoxDecoration(
-                          color: context.kitColors.white90.withValues(alpha: 0.3),
+                          color: context.kitColors.white90.withValues(
+                            alpha: 0.3,
+                          ),
                           borderRadius: BorderRadius.circular(999),
                         ),
                       ),
@@ -190,7 +192,12 @@ class _LibraryViewState extends State<LibraryView> {
         slivers.add(
           SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.fromLTRB(spacing.lg, spacing.lg, spacing.lg, 0),
+              padding: EdgeInsets.fromLTRB(
+                spacing.lg,
+                spacing.lg,
+                spacing.lg,
+                0,
+              ),
               child: StaggeredFadeIn(
                 index: 1,
                 child: Text(
@@ -221,9 +228,11 @@ class _LibraryViewState extends State<LibraryView> {
           final children = <Widget>[];
           var staggerIndex = 2;
 
-          for (int sectionIndex = 0;
-              sectionIndex < state.sections.length;
-              sectionIndex++) {
+          for (
+            int sectionIndex = 0;
+            sectionIndex < state.sections.length;
+            sectionIndex++
+          ) {
             final section = state.sections[sectionIndex];
             children.add(
               Padding(
@@ -249,8 +258,7 @@ class _LibraryViewState extends State<LibraryView> {
                     child: LibraryProtocolCard(
                       model: card,
                       onTapCard: () => _showDetails(context, state, card),
-                      onTapBadge: () =>
-                          _handleBadgeTap(context, state, card),
+                      onTapBadge: () => _handleBadgeTap(context, state, card),
                     ),
                   ),
                 ),
@@ -375,7 +383,6 @@ class _LibraryViewState extends State<LibraryView> {
     Navigator.of(context).pop();
     await _viewModel.removeProtocol(protocol.id);
   }
-
 }
 
 class _EmptyState extends StatelessWidget {

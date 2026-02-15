@@ -48,10 +48,14 @@ void main() {
           await dataSource.savePendingSession(pending2);
 
           // Assert
-          final loaded =
-              await dataSource.getPendingSessions(TestConstants.user.id);
+          final loaded = await dataSource.getPendingSessions(
+            TestConstants.user.id,
+          );
           expect(loaded, hasLength(2));
-          expect(loaded.map((p) => p.localId), containsAll(['local-1', 'local-2']));
+          expect(
+            loaded.map((p) => p.localId),
+            containsAll(['local-1', 'local-2']),
+          );
         });
 
         test('savePendingSession_upsertsExistingByLocalId', () async {
@@ -69,8 +73,9 @@ void main() {
           await dataSource.savePendingSession(updated);
 
           // Assert
-          final loaded =
-              await dataSource.getPendingSessions(TestConstants.user.id);
+          final loaded = await dataSource.getPendingSessions(
+            TestConstants.user.id,
+          );
           expect(loaded, hasLength(1));
           expect(loaded.first.retryCount, 5);
         });
@@ -79,8 +84,9 @@ void main() {
       group('getPendingSessions', () {
         test('getPendingSessions_whenEmpty_returnsEmptyList', () async {
           // Act
-          final result =
-              await dataSource.getPendingSessions(TestConstants.user.id);
+          final result = await dataSource.getPendingSessions(
+            TestConstants.user.id,
+          );
 
           // Assert
           expect(result, isEmpty);
@@ -127,8 +133,9 @@ void main() {
           );
 
           // Assert
-          final loaded =
-              await dataSource.getPendingSessions(TestConstants.user.id);
+          final loaded = await dataSource.getPendingSessions(
+            TestConstants.user.id,
+          );
           expect(loaded, hasLength(1));
           expect(loaded.first.localId, 'local-2');
         });
@@ -185,32 +192,36 @@ void main() {
           await dataSource.clearPendingSessions(TestConstants.user.id);
 
           // Assert
-          final loaded =
-              await dataSource.getPendingSessions(TestConstants.user.id);
+          final loaded = await dataSource.getPendingSessions(
+            TestConstants.user.id,
+          );
           expect(loaded, isEmpty);
         });
       });
 
       group('corrupt data handling', () {
-        test('getPendingSessions_whenCorruptJson_clearsAndReturnsEmpty',
-            () async {
-          // Arrange - write corrupt data directly
-          await prefs.setString(
-            'pending_sessions_${TestConstants.user.id}',
-            'not valid json',
-          );
+        test(
+          'getPendingSessions_whenCorruptJson_clearsAndReturnsEmpty',
+          () async {
+            // Arrange - write corrupt data directly
+            await prefs.setString(
+              'pending_sessions_${TestConstants.user.id}',
+              'not valid json',
+            );
 
-          // Act
-          final result =
-              await dataSource.getPendingSessions(TestConstants.user.id);
+            // Act
+            final result = await dataSource.getPendingSessions(
+              TestConstants.user.id,
+            );
 
-          // Assert
-          expect(result, isEmpty);
-          expect(
-            prefs.containsKey('pending_sessions_${TestConstants.user.id}'),
-            isFalse,
-          );
-        });
+            // Assert
+            expect(result, isEmpty);
+            expect(
+              prefs.containsKey('pending_sessions_${TestConstants.user.id}'),
+              isFalse,
+            );
+          },
+        );
 
         test('getPendingSessions_whenNotList_clearsAndReturnsEmpty', () async {
           // Arrange - write JSON object instead of list
@@ -220,8 +231,9 @@ void main() {
           );
 
           // Act
-          final result =
-              await dataSource.getPendingSessions(TestConstants.user.id);
+          final result = await dataSource.getPendingSessions(
+            TestConstants.user.id,
+          );
 
           // Assert
           expect(result, isEmpty);
@@ -245,38 +257,42 @@ void main() {
           );
 
           // Act
-          final result =
-              await dataSource.getPendingSessions(TestConstants.user.id);
+          final result = await dataSource.getPendingSessions(
+            TestConstants.user.id,
+          );
 
           // Assert - only valid entry returned
           expect(result, hasLength(1));
           expect(result.first.localId, 'valid');
         });
 
-        test('getPendingSessions_selfHeals_removesCorruptEntriesFromStorage',
-            () async {
-          // Arrange - one valid, one corrupt entry
-          final validDto = PendingSessionDto.fromDomain(
-            PendingSessionFactory.create(localId: 'valid'),
-          );
-          await prefs.setString(
-            'pending_sessions_${TestConstants.user.id}',
-            jsonEncode([
-              validDto.toJson(),
-              {'invalid': 'entry'}, // Missing required fields
-            ]),
-          );
+        test(
+          'getPendingSessions_selfHeals_removesCorruptEntriesFromStorage',
+          () async {
+            // Arrange - one valid, one corrupt entry
+            final validDto = PendingSessionDto.fromDomain(
+              PendingSessionFactory.create(localId: 'valid'),
+            );
+            await prefs.setString(
+              'pending_sessions_${TestConstants.user.id}',
+              jsonEncode([
+                validDto.toJson(),
+                {'invalid': 'entry'}, // Missing required fields
+              ]),
+            );
 
-          // Act - first read triggers self-healing
-          await dataSource.getPendingSessions(TestConstants.user.id);
+            // Act - first read triggers self-healing
+            await dataSource.getPendingSessions(TestConstants.user.id);
 
-          // Assert - storage now only contains valid entry
-          final raw =
-              prefs.getString('pending_sessions_${TestConstants.user.id}');
-          expect(raw, isNotNull);
-          final decoded = jsonDecode(raw!) as List;
-          expect(decoded, hasLength(1)); // corrupt entry was removed
-        });
+            // Assert - storage now only contains valid entry
+            final raw = prefs.getString(
+              'pending_sessions_${TestConstants.user.id}',
+            );
+            expect(raw, isNotNull);
+            final decoded = jsonDecode(raw!) as List;
+            expect(decoded, hasLength(1)); // corrupt entry was removed
+          },
+        );
       });
     });
 
@@ -290,13 +306,20 @@ void main() {
           ];
 
           // Act
-          await dataSource.upsertSyncedSessions(TestConstants.user.id, sessions);
+          await dataSource.upsertSyncedSessions(
+            TestConstants.user.id,
+            sessions,
+          );
 
           // Assert
-          final loaded =
-              await dataSource.getSyncedSessions(TestConstants.user.id);
+          final loaded = await dataSource.getSyncedSessions(
+            TestConstants.user.id,
+          );
           expect(loaded, hasLength(2));
-          expect(loaded.map((s) => s.id), containsAll(['session-1', 'session-2']));
+          expect(
+            loaded.map((s) => s.id),
+            containsAll(['session-1', 'session-2']),
+          );
         });
 
         test('upsertSyncedSessions_updatesExistingById', () async {
@@ -323,8 +346,9 @@ void main() {
           );
 
           // Assert
-          final loaded =
-              await dataSource.getSyncedSessions(TestConstants.user.id);
+          final loaded = await dataSource.getSyncedSessions(
+            TestConstants.user.id,
+          );
           expect(loaded, hasLength(1));
           expect(loaded.first.notes, 'Updated notes');
         });
@@ -343,8 +367,9 @@ void main() {
           );
 
           // Assert - both sessions present
-          final loaded =
-              await dataSource.getSyncedSessions(TestConstants.user.id);
+          final loaded = await dataSource.getSyncedSessions(
+            TestConstants.user.id,
+          );
           expect(loaded, hasLength(2));
         });
       });
@@ -352,8 +377,9 @@ void main() {
       group('getSyncedSessions', () {
         test('getSyncedSessions_whenEmpty_returnsEmptyList', () async {
           // Act
-          final result =
-              await dataSource.getSyncedSessions(TestConstants.user.id);
+          final result = await dataSource.getSyncedSessions(
+            TestConstants.user.id,
+          );
 
           // Assert
           expect(result, isEmpty);
@@ -397,32 +423,36 @@ void main() {
           await dataSource.clearSyncedSessions(TestConstants.user.id);
 
           // Assert
-          final loaded =
-              await dataSource.getSyncedSessions(TestConstants.user.id);
+          final loaded = await dataSource.getSyncedSessions(
+            TestConstants.user.id,
+          );
           expect(loaded, isEmpty);
         });
       });
 
       group('corrupt data handling', () {
-        test('getSyncedSessions_whenCorruptJson_clearsAndReturnsEmpty',
-            () async {
-          // Arrange
-          await prefs.setString(
-            'synced_sessions_${TestConstants.user.id}',
-            'not valid json',
-          );
+        test(
+          'getSyncedSessions_whenCorruptJson_clearsAndReturnsEmpty',
+          () async {
+            // Arrange
+            await prefs.setString(
+              'synced_sessions_${TestConstants.user.id}',
+              'not valid json',
+            );
 
-          // Act
-          final result =
-              await dataSource.getSyncedSessions(TestConstants.user.id);
+            // Act
+            final result = await dataSource.getSyncedSessions(
+              TestConstants.user.id,
+            );
 
-          // Assert
-          expect(result, isEmpty);
-          expect(
-            prefs.containsKey('synced_sessions_${TestConstants.user.id}'),
-            isFalse,
-          );
-        });
+            // Assert
+            expect(result, isEmpty);
+            expect(
+              prefs.containsKey('synced_sessions_${TestConstants.user.id}'),
+              isFalse,
+            );
+          },
+        );
 
         test('getSyncedSessions_whenSingleCorruptEntry_skipsIt', () async {
           // Arrange
@@ -439,39 +469,43 @@ void main() {
           );
 
           // Act
-          final result =
-              await dataSource.getSyncedSessions(TestConstants.user.id);
+          final result = await dataSource.getSyncedSessions(
+            TestConstants.user.id,
+          );
 
           // Assert
           expect(result, hasLength(1));
           expect(result.first.id, 'valid');
         });
 
-        test('getSyncedSessions_selfHeals_removesCorruptEntriesFromStorage',
-            () async {
-          // Arrange - one valid, one corrupt entry (missing id)
-          final validDto = SessionDto.fromDomain(
-            SessionFactory.reconstitute(id: 'valid'),
-            TestConstants.user.id,
-          );
-          await prefs.setString(
-            'synced_sessions_${TestConstants.user.id}',
-            jsonEncode([
-              validDto.toJson(),
-              {'invalid': 'entry'},
-            ]),
-          );
+        test(
+          'getSyncedSessions_selfHeals_removesCorruptEntriesFromStorage',
+          () async {
+            // Arrange - one valid, one corrupt entry (missing id)
+            final validDto = SessionDto.fromDomain(
+              SessionFactory.reconstitute(id: 'valid'),
+              TestConstants.user.id,
+            );
+            await prefs.setString(
+              'synced_sessions_${TestConstants.user.id}',
+              jsonEncode([
+                validDto.toJson(),
+                {'invalid': 'entry'},
+              ]),
+            );
 
-          // Act - first read triggers self-healing
-          await dataSource.getSyncedSessions(TestConstants.user.id);
+            // Act - first read triggers self-healing
+            await dataSource.getSyncedSessions(TestConstants.user.id);
 
-          // Assert - storage now only contains valid entry
-          final raw =
-              prefs.getString('synced_sessions_${TestConstants.user.id}');
-          expect(raw, isNotNull);
-          final decoded = jsonDecode(raw!) as List;
-          expect(decoded, hasLength(1)); // corrupt entry was removed
-        });
+            // Assert - storage now only contains valid entry
+            final raw = prefs.getString(
+              'synced_sessions_${TestConstants.user.id}',
+            );
+            expect(raw, isNotNull);
+            final decoded = jsonDecode(raw!) as List;
+            expect(decoded, hasLength(1)); // corrupt entry was removed
+          },
+        );
 
         test('getSyncedSessions_rejectsEntryWithEmptyId', () async {
           // Arrange - entry with empty id
@@ -495,8 +529,9 @@ void main() {
           );
 
           // Act
-          final result =
-              await dataSource.getSyncedSessions(TestConstants.user.id);
+          final result = await dataSource.getSyncedSessions(
+            TestConstants.user.id,
+          );
 
           // Assert - entry with empty id is rejected
           expect(result, hasLength(1));
@@ -524,8 +559,9 @@ void main() {
           );
 
           // Act
-          final result =
-              await dataSource.getSyncedSessions(TestConstants.user.id);
+          final result = await dataSource.getSyncedSessions(
+            TestConstants.user.id,
+          );
 
           // Assert - entry with empty protocol_id is rejected
           expect(result, hasLength(1));
@@ -686,8 +722,9 @@ void main() {
 
         // Act
         await dataSource.savePendingSession(original);
-        final loaded =
-            await dataSource.getPendingSessions(TestConstants.user.id);
+        final loaded = await dataSource.getPendingSessions(
+          TestConstants.user.id,
+        );
 
         // Assert
         expect(loaded, hasLength(1));
@@ -712,8 +749,9 @@ void main() {
           TestConstants.user.id,
           [original],
         );
-        final loaded =
-            await dataSource.getSyncedSessions(TestConstants.user.id);
+        final loaded = await dataSource.getSyncedSessions(
+          TestConstants.user.id,
+        );
 
         // Assert
         expect(loaded, hasLength(1));

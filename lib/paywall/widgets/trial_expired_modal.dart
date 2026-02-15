@@ -108,93 +108,95 @@ class _TrialExpiredModalState extends State<TrialExpiredModal>
         backgroundColor: Colors.transparent,
         insetPadding: EdgeInsets.zero,
         child: SizedBox.expand(
-        child: Stack(
-          children: [
-            // Amber radial glow at top
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: IgnorePointer(
-                child: FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: Container(
-                    height: 260,
-                    decoration: BoxDecoration(
-                      gradient: RadialGradient(
-                        center: Alignment.topCenter,
-                        radius: 0.8,
-                        colors: [
-                          kitColors.yellow400.withValues(alpha: 0.1),
-                          Colors.transparent,
-                        ],
+          child: Stack(
+            children: [
+              // Amber radial glow at top
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: IgnorePointer(
+                  child: FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: Container(
+                      height: 260,
+                      decoration: BoxDecoration(
+                        gradient: RadialGradient(
+                          center: Alignment.topCenter,
+                          radius: 0.8,
+                          colors: [
+                            kitColors.yellow400.withValues(alpha: 0.1),
+                            Colors.transparent,
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-            // Main content
-            FadeTransition(
-              opacity: _fadeAnimation,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: spacing.lg),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Hourglass icon with glow
-                    _HourglassIcon(),
-                    SizedBox(height: spacing.xl),
-                    // Headline
-                    Text(
-                      widget.isTrialExpiration
-                          ? 'Your Premium Trial Has Ended'
-                          : 'Your Subscription Has Lapsed',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.newsreader(
-                        fontSize: 28,
-                        fontStyle: FontStyle.italic,
-                        fontWeight: FontWeight.w500,
-                        color: kitColors.white90,
-                        letterSpacing: -0.025 * 28,
-                        height: 1.2,
-                      ),
-                    ),
-                    // Conditional subtext when activeProtocolCount > 2
-                    if (widget.activeProtocolCount > 2) ...[
-                      SizedBox(height: spacing.md),
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 280),
-                        child: Text(
-                          'You currently have ${widget.activeProtocolCount} active protocols. The free tier allows 2.',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.inter(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w300,
-                            color: kitColors.white50,
-                            height: 1.5,
-                          ),
+              // Main content
+              FadeTransition(
+                opacity: _fadeAnimation,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: spacing.lg),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Hourglass icon with glow
+                      _HourglassIcon(),
+                      SizedBox(height: spacing.xl),
+                      // Headline
+                      Text(
+                        widget.isTrialExpiration
+                            ? 'Your Premium Trial Has Ended'
+                            : 'Your Subscription Has Lapsed',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.newsreader(
+                          fontSize: 28,
+                          fontStyle: FontStyle.italic,
+                          fontWeight: FontWeight.w500,
+                          color: kitColors.white90,
+                          letterSpacing: -0.025 * 28,
+                          height: 1.2,
                         ),
                       ),
+                      // Conditional subtext when activeProtocolCount > 2
+                      if (widget.activeProtocolCount > 2) ...[
+                        SizedBox(height: spacing.md),
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 280),
+                          child: Text(
+                            'You currently have ${widget.activeProtocolCount} active protocols. The free tier allows 2.',
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.inter(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w300,
+                              color: kitColors.white50,
+                              height: 1.5,
+                            ),
+                          ),
+                        ),
+                      ],
+                      SizedBox(height: spacing.xxl),
+                      // Decision cards
+                      _UpgradeCard(
+                        onTap: () => Navigator.of(
+                          context,
+                        ).pop(TrialExpiredChoice.keepEverything),
+                      ),
+                      SizedBox(height: spacing.md),
+                      _DowngradeCard(
+                        onTap: () => Navigator.of(
+                          context,
+                        ).pop(TrialExpiredChoice.continueWithFree),
+                      ),
                     ],
-                    SizedBox(height: spacing.xxl),
-                    // Decision cards
-                    _UpgradeCard(
-                      onTap: () =>
-                          Navigator.of(context).pop(TrialExpiredChoice.keepEverything),
-                    ),
-                    SizedBox(height: spacing.md),
-                    _DowngradeCard(
-                      onTap: () =>
-                          Navigator.of(context).pop(TrialExpiredChoice.continueWithFree),
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
       ),
     );
   }

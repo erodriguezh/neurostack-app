@@ -44,8 +44,8 @@ class StartupViewModel {
   StartupViewModel({
     required SharedPreferences sharedPreferences,
     LoggingAbstraction? loggingAbstraction,
-  })  : _sharedPreferences = sharedPreferences,
-        _loggingAbstraction = loggingAbstraction ?? LoggingAbstraction();
+  }) : _sharedPreferences = sharedPreferences,
+       _loggingAbstraction = loggingAbstraction ?? LoggingAbstraction();
 
   final appStateNotifier = ValueNotifier<AppState>(const InitializingApp());
 

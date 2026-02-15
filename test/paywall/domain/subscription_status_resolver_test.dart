@@ -177,8 +177,9 @@ void main() {
         id: 'user-001',
         subscriptionStatus: SubscriptionStatus.premiumAnnual,
       );
-      final snapshot =
-          EntitlementSnapshotFactory.activePaidMonthly(userId: 'other-user');
+      final snapshot = EntitlementSnapshotFactory.activePaidMonthly(
+        userId: 'other-user',
+      );
 
       final result = resolver.resolveEffectiveStatus(
         user: user,
@@ -193,8 +194,9 @@ void main() {
         id: 'user-001',
         subscriptionStatus: SubscriptionStatus.free, // DB says free
       );
-      final snapshot =
-          EntitlementSnapshotFactory.activePaidMonthly(userId: 'user-001');
+      final snapshot = EntitlementSnapshotFactory.activePaidMonthly(
+        userId: 'user-001',
+      );
 
       final result = resolver.resolveEffectiveStatus(
         user: user,
@@ -227,8 +229,9 @@ void main() {
         id: 'user-001',
         subscriptionStatus: SubscriptionStatus.free,
       );
-      final snapshot =
-          EntitlementSnapshotFactory.activeTrial(userId: 'user-001');
+      final snapshot = EntitlementSnapshotFactory.activeTrial(
+        userId: 'user-001',
+      );
 
       final result = resolver.resolveEffectiveStatus(
         user: user,
@@ -243,8 +246,9 @@ void main() {
         id: 'user-001',
         subscriptionStatus: SubscriptionStatus.trial,
       );
-      final snapshot =
-          EntitlementSnapshotFactory.expiredTrial(userId: 'user-001');
+      final snapshot = EntitlementSnapshotFactory.expiredTrial(
+        userId: 'user-001',
+      );
 
       final result = resolver.resolveEffectiveStatus(
         user: user,
@@ -259,8 +263,9 @@ void main() {
         id: 'user-001',
         subscriptionStatus: SubscriptionStatus.free,
       );
-      final snapshot =
-          EntitlementSnapshotFactory.gracePeriod(userId: 'user-001');
+      final snapshot = EntitlementSnapshotFactory.gracePeriod(
+        userId: 'user-001',
+      );
 
       final result = resolver.resolveEffectiveStatus(
         user: user,
@@ -305,8 +310,9 @@ void main() {
     test('within24h_returnsTrue', () {
       final now = DateTime(2025, 6, 15, 12, 0, 0);
       final expiresAt = now.add(const Duration(hours: 12));
-      final snapshot =
-          EntitlementSnapshotFactory.activeTrial(expirationDate: expiresAt);
+      final snapshot = EntitlementSnapshotFactory.activeTrial(
+        expirationDate: expiresAt,
+      );
 
       final result = resolver.shouldShowTrialReminder(
         snapshot: snapshot,
@@ -319,8 +325,9 @@ void main() {
     test('exactly24h_returnsTrue', () {
       final now = DateTime(2025, 6, 15, 12, 0, 0);
       final expiresAt = now.add(const Duration(hours: 24));
-      final snapshot =
-          EntitlementSnapshotFactory.activeTrial(expirationDate: expiresAt);
+      final snapshot = EntitlementSnapshotFactory.activeTrial(
+        expirationDate: expiresAt,
+      );
 
       final result = resolver.shouldShowTrialReminder(
         snapshot: snapshot,
@@ -333,8 +340,9 @@ void main() {
     test('moreThan24h_returnsFalse', () {
       final now = DateTime(2025, 6, 15, 12, 0, 0);
       final expiresAt = now.add(const Duration(hours: 48));
-      final snapshot =
-          EntitlementSnapshotFactory.activeTrial(expirationDate: expiresAt);
+      final snapshot = EntitlementSnapshotFactory.activeTrial(
+        expirationDate: expiresAt,
+      );
 
       final result = resolver.shouldShowTrialReminder(
         snapshot: snapshot,
@@ -347,8 +355,9 @@ void main() {
     test('alreadyExpired_returnsFalse', () {
       final now = DateTime(2025, 6, 15, 12, 0, 0);
       final expiresAt = now.subtract(const Duration(hours: 1));
-      final snapshot =
-          EntitlementSnapshotFactory.activeTrial(expirationDate: expiresAt);
+      final snapshot = EntitlementSnapshotFactory.activeTrial(
+        expirationDate: expiresAt,
+      );
 
       final result = resolver.shouldShowTrialReminder(
         snapshot: snapshot,
@@ -399,8 +408,9 @@ void main() {
 
     test('nullExpirationDate_returnsFalse', () {
       final now = DateTime(2025, 6, 15, 12, 0, 0);
-      final snapshot =
-          EntitlementSnapshotFactory.activeTrial(expirationDate: null);
+      final snapshot = EntitlementSnapshotFactory.activeTrial(
+        expirationDate: null,
+      );
 
       final result = resolver.shouldShowTrialReminder(
         snapshot: snapshot,
@@ -413,8 +423,9 @@ void main() {
     test('expiresNow_returnsTrue', () {
       // Duration.zero is not negative, so "now" is within the window
       final now = DateTime(2025, 6, 15, 12, 0, 0);
-      final snapshot =
-          EntitlementSnapshotFactory.activeTrial(expirationDate: now);
+      final snapshot = EntitlementSnapshotFactory.activeTrial(
+        expirationDate: now,
+      );
 
       final result = resolver.shouldShowTrialReminder(
         snapshot: snapshot,
@@ -427,8 +438,9 @@ void main() {
     test('expiresIn1Minute_returnsTrue', () {
       final now = DateTime(2025, 6, 15, 12, 0, 0);
       final expiresAt = now.add(const Duration(minutes: 1));
-      final snapshot =
-          EntitlementSnapshotFactory.activeTrial(expirationDate: expiresAt);
+      final snapshot = EntitlementSnapshotFactory.activeTrial(
+        expirationDate: expiresAt,
+      );
 
       final result = resolver.shouldShowTrialReminder(
         snapshot: snapshot,
@@ -442,8 +454,9 @@ void main() {
       final now = DateTime(2025, 6, 15, 12, 0, 0);
       // Just over 24 hours
       final expiresAt = now.add(const Duration(hours: 24, seconds: 1));
-      final snapshot =
-          EntitlementSnapshotFactory.activeTrial(expirationDate: expiresAt);
+      final snapshot = EntitlementSnapshotFactory.activeTrial(
+        expirationDate: expiresAt,
+      );
 
       final result = resolver.shouldShowTrialReminder(
         snapshot: snapshot,
