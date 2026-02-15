@@ -28,9 +28,8 @@ Final validation pass after all cleanup tasks. Run static analysis, full test su
 - [ ] Grep for dead code patterns returns zero results in `lib/`
 - [ ] No cross-module `HomeBottomTab` imports from `home_state.dart`
 ## Done summary
-TBD
-
+Final validation pass: applied dart format across 80 files, removed HomeBottomTab re-export from home_state.dart, added direct imports in home_view_model.dart and progress_view.dart. All acceptance criteria verified: flutter analyze (zero issues), flutter test (all green), no dead code patterns, no cross-module HomeBottomTab imports.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 6552cf75e5b91d417bc1d23737aada0a21fefa95
+- Tests: flutter analyze, flutter test, dart format lib test --set-exit-if-changed
 - PRs:
