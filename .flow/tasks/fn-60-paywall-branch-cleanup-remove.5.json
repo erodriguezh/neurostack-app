@@ -1,0 +1,17 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-02-14T20:50:23.298434Z",
+  "depends_on": [
+    "fn-60-paywall-branch-cleanup-remove.1",
+    "fn-60-paywall-branch-cleanup-remove.2"
+  ],
+  "epic": "fn-60-paywall-branch-cleanup-remove",
+  "id": "fn-60-paywall-branch-cleanup-remove.5",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-60-paywall-branch-cleanup-remove.5.md",
+  "status": "todo",
+  "title": "Consolidate test mocks and fakes",
+  "updated_at": "2026-02-14T20:52:00.286252Z"
+}

@@ -1428,10 +1428,21 @@ Only proceed after webhook + UI gating are stable.
   - Interactions: Upgrade tap fires onUpgrade (not onDismiss), dismiss tap fires onDismiss (not onUpgrade)
   - Layout: All key elements are descendants of TrialReminderAlert
 
-### 12.3 Integration Tests
-- Sandbox purchase flow
-- Trial → expiration → modal flow
-- Webhook verification
+### 12.3 Integration Tests [DONE]
+- **New File:** `integration_test/mocks/fake_revenuecat_client.dart` (108 lines)
+  - Controllable fake `RevenueCatClient` for integration tests
+  - `nextPaywallOutcome` field for controlling paywall result
+  - `simulatePurchase()` and `simulateEntitlementChange()` helpers
+  - Call tracking: `presentPaywallCallCount`, `restorePurchasesCallCount`
+- **New File:** `integration_test/flows/paywall_flow_test.dart` (815 lines, 14 tests)
+  - Purchase Flow (3 tests): paywall purchase updates entitlement, paywall cancel leaves entitlement unchanged, restore purchases updates entitlement
+  - Trial Expiration Flow (4 tests): trial expires → shows modal, premium expires → shows modal, active trial → no modal, premium user → no modal
+  - Trial Reminder Flow (3 tests): within 24h → shows alert, >24h → no alert, throttled after first show
+  - Real-time Entitlement Updates (3 tests): trial → purchased updates snapshot, wrong user ignored, null doesn't clobber known state
+  - Service Lifecycle (3 tests): identify before init throws, paywall before identify returns error, logout clears snapshot
+- **Modified:** `integration_test/utils/test_app.dart`
+  - Added `RevenueCatClient` and `RevenueCatService` override support to `buildTestModules` and `createTestApp`
+- **Note:** Webhook verification remains a manual step (requires deployed Supabase Edge Function + RevenueCat webhook configuration). See Phase 9.4-9.6 for manual deployment steps.
 
 ---
 

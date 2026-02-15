@@ -1,0 +1,151 @@
+{
+  "created_at": "2026-02-14T20:54:00.532016Z",
+  "epic": {
+    "data": {
+      "branch_name": "feature/paywall-modal",
+      "completion_review_status": "unknown",
+      "completion_reviewed_at": null,
+      "created_at": "2026-02-14T20:49:43.838445Z",
+      "default_impl": null,
+      "default_review": null,
+      "default_sync": null,
+      "depends_on_epics": [],
+      "id": "fn-60-paywall-branch-cleanup-remove",
+      "next_task": 1,
+      "plan_review_status": "unknown",
+      "plan_reviewed_at": null,
+      "spec_path": ".flow/specs/fn-60-paywall-branch-cleanup-remove.md",
+      "status": "open",
+      "title": "Paywall branch cleanup: remove duplicates, dead code, and consolidate tests",
+      "updated_at": "2026-02-14T20:50:14.137557Z"
+    },
+    "spec": "# Paywall Branch Cleanup\n\n## Overview\n\nRefactor and clean up the `feature/paywall-modal` branch after 100+ commits across 12 implementation phases. The branch accumulated significant duplicate code across ViewModels, dead code from iterative development, and scattered test mock declarations.\n\n**Scope:** Internal refactoring only \u2014 no user-visible changes, no new features, no behavioral changes.\n\n## Stakeholders\n\n- **End users:** No visible changes\n- **Developers:** Cleaner architecture, shared utilities, fewer duplicate mocks\n- **Operations:** No changes\n\n## Key Findings (from research)\n\n### Duplicate Code\n1. `_resolveUserId()` \u2014 identical in Home, Library, Progress ViewModels\n2. `_resolveCachedUser()` \u2014 identical in Library and Progress ViewModels\n3. `_failureMessage()` \u2014 near-identical in 3 ViewModels (Home/Library return String, Progress returns DomainFailure)\n4. `_StaggeredFadeIn` widget \u2014 character-for-character identical in Home and Library views\n5. `_ErrorState` widget \u2014 identical in Home, Library, and Progress views\n6. Mixin wiring boilerplate \u2014 identical in Home and Library\n7. Snapshot user-scoping pattern \u2014 repeated inline twice in HomeViewModel\n\n### Dead Code\n1. Legacy `isResolved()`/`markResolved()` on `TrialExpirationDecisionStore` \u2014 never called from production\n2. `isSubscriptionExpirationResolved()`/`markSubscriptionExpirationResolved()` \u2014 never called from production\n3. `ExpirationDecision` enum \u2014 only used by dead methods\n4. `User.upgradeToPremium()` \u2014 never called from production\n5. `User.updateSubscriptionStatus()` \u2014 never called from production\n6. `TrialStartedEvent` + `SubscriptionUpgradedEvent` \u2014 never raised from production\n\n### Test Duplication\n1. Two independent `FakeRevenueCatClient` \u2014 unit test (inline) vs integration test (extracted)\n2. Mock classes redeclared in 3+ test files each (MockNotifyService, MockRouterService, MockAuthService, etc.)\n\n## Scope Decisions\n\n| Item | Decision | Rationale |\n|------|----------|-----------|\n| ProgressViewModel mixin alignment | OUT of scope | Scope creep \u2014 Progress has no paywall/entitlement logic |\n| `goToPaywall()` consolidation | OUT of scope | Home and Library serve different purposes (Home awaits paywall dismissal for retry loop; Library is fire-and-forget) |\n| `onAddProtocol`/`onBrowseLibrary` merge | OUT of scope | Semantically different intents, same implementation today but may diverge |\n| `_failureMessage` extraction | IN scope (Home + Library only) | Progress uses a different signature returning DomainFailure |\n| Web stub (`revenuecat_client_stub.dart`) | NOT dead code | Serves web platform \u2014 explicitly keep |\n| Orphaned SharedPreferences keys | Leave as harmless orphaned data | No migration needed |\n\n## Quick commands\n\n```bash\nflutter analyze\nflutter test\nflutter test test/paywall/\nflutter test test/home/\nflutter test test/library/\nflutter test test/progress/\n```\n\n## Acceptance\n\n- [ ] `flutter analyze` passes with zero warnings\n- [ ] `flutter test` passes (all existing + updated tests green)\n- [ ] No duplicate `_resolveUserId()` across ViewModels\n- [ ] No duplicate `_ErrorState` or `_StaggeredFadeIn` widgets across views\n- [ ] Dead code removed from TrialExpirationDecisionStore (legacy + unused new methods)\n- [ ] Dead domain methods removed from User entity\n- [ ] Dead domain events removed (TrialStartedEvent, SubscriptionUpgradedEvent)\n- [ ] Shared mocks extracted to `test/mocks/` (no duplicate Mock class declarations)\n- [ ] `HomeBottomTab` lives in a shared location (not imported from home_state.dart by Library/Progress)\n"
+  },
+  "epic_id": "fn-60-paywall-branch-cleanup-remove",
+  "schema_version": 2,
+  "tasks": [
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-02-14T20:50:22.472922Z",
+        "depends_on": [],
+        "epic": "fn-60-paywall-branch-cleanup-remove",
+        "id": "fn-60-paywall-branch-cleanup-remove.1",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-60-paywall-branch-cleanup-remove.1.md",
+        "status": "todo",
+        "title": "Remove dead code from TrialExpirationDecisionStore",
+        "updated_at": "2026-02-14T20:50:59.039132Z"
+      },
+      "id": "fn-60-paywall-branch-cleanup-remove.1",
+      "runtime": null,
+      "spec": "# fn-60-paywall-branch-cleanup-remove.1 Remove dead code from TrialExpirationDecisionStore\n\n## Description\nRemove all dead code from `TrialExpirationDecisionStore` \u2014 both the legacy methods (keyed by trialStartDate) and the newer subscription-based methods that were never wired into production code.\n\n**Size:** M\n**Files:**\n- `lib/paywall/data/trial_expiration_decision_store.dart` (interface + implementation)\n- `test/paywall/data/trial_expiration_decision_store_test.dart`\n\n## What to remove\n\n### From the abstract interface (top of file)\n- `isResolved()` method signature (L22-28)\n- `markResolved()` method signature (L30-40)\n- `isSubscriptionExpirationResolved()` method signature (L50-56)\n- `markSubscriptionExpirationResolved()` method signature (L57-65)\n- `ExpirationDecision` enum (L7-13 \u2014 only used by dead methods)\n\n### From the implementation\n- `_keyPrefix` constant (L94)\n- `_subExpKeyPrefix` constant (L95)\n- `_key()` helper (L100-101)\n- `_buildDecisionKey()` helper (L114-136)\n- `isResolved()` implementation (L140-156)\n- `markResolved()` implementation\n- `isSubscriptionExpirationResolved()` implementation (L161-175)\n- `markSubscriptionExpirationResolved()` implementation (L176-189)\n\n### From tests\n- All tests covering the removed methods (~20+ test cases)\n- Keep tests for `saveLastSeenStatus()` and `getLastSeenStatus()` (these ARE used in production)\n\n## Approach\n\n- Follow pattern at `lib/paywall/data/trial_expiration_decision_store.dart` \u2014 the file has clear sections\n- The remaining interface should only contain: `saveLastSeenStatus()`, `getLastSeenStatus()`, constructor\n- Verify with `grep -r \"isResolved\\|markResolved\\|isSubscriptionExpirationResolved\\|markSubscriptionExpirationResolved\\|ExpirationDecision\" lib/` that no production code references these\n\n## Key context\n\n- The legacy methods have comments saying \"Kept for backward compatibility\" \u2014 that compatibility is no longer needed since callers were migrated\n- The \"new\" subscription methods were designed but never wired into HomeViewModel; production uses `saveLastSeenStatus`/`getLastSeenStatus` instead\n- Orphaned SharedPreferences keys under `trial_expired_resolved:` prefix are harmless and don't need cleanup\n## Acceptance\n- [ ] `ExpirationDecision` enum deleted\n- [ ] `isResolved()` / `markResolved()` removed from interface and implementation\n- [ ] `isSubscriptionExpirationResolved()` / `markSubscriptionExpirationResolved()` removed from interface and implementation\n- [ ] `_buildDecisionKey()`, `_keyPrefix`, `_subExpKeyPrefix`, `_key()` helpers removed\n- [ ] Tests for removed methods deleted; tests for `saveLastSeenStatus`/`getLastSeenStatus` preserved\n- [ ] `grep -r \"ExpirationDecision\" lib/` returns no results\n- [ ] `flutter test test/paywall/` passes\n- [ ] `flutter analyze` passes\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-02-14T20:50:22.678118Z",
+        "depends_on": [],
+        "epic": "fn-60-paywall-branch-cleanup-remove",
+        "id": "fn-60-paywall-branch-cleanup-remove.2",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-60-paywall-branch-cleanup-remove.2.md",
+        "status": "todo",
+        "title": "Remove dead domain code from User entity and events",
+        "updated_at": "2026-02-14T20:51:09.494019Z"
+      },
+      "id": "fn-60-paywall-branch-cleanup-remove.2",
+      "runtime": null,
+      "spec": "# fn-60-paywall-branch-cleanup-remove.2 Remove dead domain code from User entity and events\n\n## Description\nRemove dead domain methods and events from the User entity that are no longer called from any production code. The webhook now handles all subscription status changes server-side.\n\n**Size:** S\n**Files:**\n- `lib/features/user/domain/entities/user.dart`\n- `lib/features/user/domain/events/user_events.dart`\n- `test/domain/user/user_test.dart`\n\n## What to remove\n\n### From `user.dart`\n- `upgradeToPremium()` method (L232-253) \u2014 never called from production; subscription upgrades handled by RevenueCat webhook\n- `updateSubscriptionStatus()` method (L258-266) \u2014 comment says \"Used when RevenueCat notifies of status changes\" but no production caller exists\n\n### From `user_events.dart`\n- `TrialStartedEvent` class (L15-21) \u2014 never raised; trial is now managed by RevenueCat\n- `SubscriptionUpgradedEvent` class (L65-76) \u2014 only raised by `upgradeToPremium()` which is being deleted\n\n### From tests\n- Tests for `upgradeToPremium()` at `test/domain/user/user_test.dart` (L303-L434 approx)\n- Tests for `updateSubscriptionStatus()` if any exist\n- Any test that constructs `TrialStartedEvent` or `SubscriptionUpgradedEvent`\n\n## Approach\n\n- Verify with grep before removing: `grep -r \"upgradeToPremium\\|updateSubscriptionStatus\\|TrialStartedEvent\\|SubscriptionUpgradedEvent\" lib/`\n- Keep all other User methods intact\n- Keep `SubscriptionStatusChangedEvent` if it exists and is used elsewhere\n## Acceptance\n- [ ] `User.upgradeToPremium()` removed\n- [ ] `User.updateSubscriptionStatus()` removed\n- [ ] `TrialStartedEvent` class removed from `user_events.dart`\n- [ ] `SubscriptionUpgradedEvent` class removed from `user_events.dart`\n- [ ] Associated tests removed\n- [ ] `grep -r \"upgradeToPremium\\|TrialStartedEvent\\|SubscriptionUpgradedEvent\" lib/` returns no results\n- [ ] `flutter test test/domain/user/` passes\n- [ ] `flutter analyze` passes\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-02-14T20:50:22.880906Z",
+        "depends_on": [],
+        "epic": "fn-60-paywall-branch-cleanup-remove",
+        "id": "fn-60-paywall-branch-cleanup-remove.3",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-60-paywall-branch-cleanup-remove.3.md",
+        "status": "todo",
+        "title": "Extract shared ErrorState and StaggeredFadeIn widgets",
+        "updated_at": "2026-02-14T20:51:22.863024Z"
+      },
+      "id": "fn-60-paywall-branch-cleanup-remove.3",
+      "runtime": null,
+      "spec": "# fn-60-paywall-branch-cleanup-remove.3 Extract shared ErrorState and StaggeredFadeIn widgets\n\n## Description\nExtract duplicate private widgets into shared public widgets in `lib/core/ui/widgets/`.\n\n**Size:** M\n**Files:**\n- `lib/home/home_view.dart` (remove `_ErrorState` at L447-476, `_StaggeredFadeIn` at L484-515)\n- `lib/library/library_view.dart` (remove `_ErrorState` at L411-440, `_StaggeredFadeIn` at L448-479)\n- `lib/progress/progress_view.dart` (remove `_ErrorState` at L341-370)\n- `lib/core/ui/widgets/error_state_view.dart` (NEW)\n- `lib/core/ui/widgets/staggered_fade_in.dart` (NEW)\n\n## What to extract\n\n### `_ErrorState` \u2192 `ErrorStateView` (from 3 views)\nAll three views have an identical `StatelessWidget` with:\n- message text\n- \"Pull to refresh to retry.\" subtitle\n- Centered column layout\n\nExtract to `lib/core/ui/widgets/error_state_view.dart` with a `message` parameter.\n\n### `_StaggeredFadeIn` \u2192 `StaggeredFadeIn` (from 2 views)\nHome and Library have an identical `StatefulWidget` with:\n- `delay` parameter (Duration)\n- `child` parameter\n- `initState` starts a delayed opacity animation\n- `AnimatedOpacity` in build\n\nExtract to `lib/core/ui/widgets/staggered_fade_in.dart` with `delay` and `child` parameters.\n\n## Approach\n\n- Follow existing pattern at `lib/core/ui/widgets/dismiss_button.dart` for widget extraction conventions\n- Use `const` constructors where possible\n- Keep the same visual behavior \u2014 no design changes\n- Update imports in all 3 view files\n- No test changes needed unless widget tests reference the private types by name\n\n## Key context\n\n- ProgressView does NOT use `_StaggeredFadeIn` \u2014 only Home + Library\n- The name `ErrorStateView` avoids conflict with `ErrorState` which could collide with state management concepts\n## Acceptance\n- [ ] `ErrorStateView` widget created at `lib/core/ui/widgets/error_state_view.dart`\n- [ ] `StaggeredFadeIn` widget created at `lib/core/ui/widgets/staggered_fade_in.dart`\n- [ ] Private `_ErrorState` removed from `home_view.dart`, `library_view.dart`, `progress_view.dart`\n- [ ] Private `_StaggeredFadeIn` removed from `home_view.dart`, `library_view.dart`\n- [ ] All 3 views import and use the shared widgets\n- [ ] `flutter analyze` passes\n- [ ] `flutter test` passes (no regressions)\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-02-14T20:50:23.087609Z",
+        "depends_on": [
+          "fn-60-paywall-branch-cleanup-remove.3"
+        ],
+        "epic": "fn-60-paywall-branch-cleanup-remove",
+        "id": "fn-60-paywall-branch-cleanup-remove.4",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-60-paywall-branch-cleanup-remove.4.md",
+        "status": "todo",
+        "title": "Extract shared ViewModel utilities and relocate HomeBottomTab",
+        "updated_at": "2026-02-14T20:51:43.372186Z"
+      },
+      "id": "fn-60-paywall-branch-cleanup-remove.4",
+      "runtime": null,
+      "spec": "# fn-60-paywall-branch-cleanup-remove.4 Extract shared ViewModel utilities and relocate HomeBottomTab\n\n## Description\nExtract shared ViewModel utility methods that are duplicated across Home, Library, and Progress ViewModels. Also relocate `HomeBottomTab` and `HomeBottomTabCoordinator` to a shared location.\n\n**Size:** M\n**Files:**\n- `lib/home/home_view_model.dart`\n- `lib/library/library_view_model.dart`\n- `lib/progress/progress_view_model.dart`\n- `lib/home/home_state.dart` (remove `HomeBottomTab` from here)\n- `lib/library/library_state.dart` (update import)\n- `lib/core/utils/auth_helpers.dart` (NEW \u2014 shared auth resolution utility)\n- `lib/core/models/home_bottom_tab.dart` (NEW \u2014 relocated enum)\n- `lib/home/home_bottom_tab_coordinator.dart` (update import)\n\n## What to extract\n\n### `_resolveUserId()` \u2192 standalone function or extension\nIdentical in 3 ViewModels. Depends only on `AuthService.authState`. Extract to `lib/core/utils/auth_helpers.dart`:\n\n```dart\nString? resolveUserId(ValueListenable<AuthState> authState) { ... }\n```\n\nOr as an extension on `AuthService`.\n\n### `_resolveCachedUser()` \u2192 shared utility (Library + Progress only)\nBoth check `_cachedUser`, then `AuthenticatedOffline`, then `CachedUserStore`. Extract as a utility function that takes the dependencies as parameters.\n\n### Snapshot user-scoping helper (HomeViewModel only)\nThe pattern `rawSnapshot != null && rawSnapshot.isForUser(user.id) ? rawSnapshot : null` appears twice in HomeViewModel (L556-560, L663-667). Extract to a private helper `_scopedSnapshot(User user)`.\n\n### `_failureMessage()` \u2192 shared utility (Home + Library only)\nNear-identical in Home (L734) and Library (L614), both return `String`. Progress uses a different signature (returns `DomainFailure`) so it stays as-is.\n\n### `HomeBottomTab` \u2192 `lib/core/models/home_bottom_tab.dart`\nCurrently defined in `home_state.dart` but imported by Library and Progress, creating a cross-module dependency. Move to shared location. Update `HomeBottomTabCoordinator` import accordingly.\n\n## Approach\n\n- Create `lib/core/utils/auth_helpers.dart` for `resolveUserId` and `resolveCachedUser`\n- These are pure functions taking explicit parameters (not mixins) \u2014 keeps ProgressVM compatible without scope creep\n- Move `HomeBottomTab` enum and update ~8 import sites\n- Do NOT migrate ProgressViewModel to use entitlement/connectivity mixins (out of scope)\n\n## Key context\n\n- ProgressViewModel does NOT use `EntitlementListenerMixin` or `ConnectivityListenerMixin` \u2014 only manual connectivity listener\n- The `_failureMessage` in Progress returns `DomainFailure` not `String` \u2014 different signature, leave it alone\n- `HomeBottomTabCoordinator` at `lib/home/home_bottom_tab_coordinator.dart` must update its import after the enum moves\n## Acceptance\n- [ ] `resolveUserId()` extracted to shared utility \u2014 no copies in VMs\n- [ ] `resolveCachedUser()` extracted to shared utility \u2014 no copies in Library/Progress VMs\n- [ ] Snapshot-scoping helper extracted in HomeViewModel (no inline repetition)\n- [ ] `_failureMessage()` extracted for Home + Library (Progress keeps its own variant)\n- [ ] `HomeBottomTab` relocated from `home_state.dart` to `lib/core/models/`\n- [ ] All imports updated (~8 files)\n- [ ] `flutter test test/home/ test/library/ test/progress/` passes\n- [ ] `flutter analyze` passes\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-02-14T20:50:23.298434Z",
+        "depends_on": [
+          "fn-60-paywall-branch-cleanup-remove.1",
+          "fn-60-paywall-branch-cleanup-remove.2"
+        ],
+        "epic": "fn-60-paywall-branch-cleanup-remove",
+        "id": "fn-60-paywall-branch-cleanup-remove.5",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-60-paywall-branch-cleanup-remove.5.md",
+        "status": "todo",
+        "title": "Consolidate test mocks and fakes",
+        "updated_at": "2026-02-14T20:52:00.286252Z"
+      },
+      "id": "fn-60-paywall-branch-cleanup-remove.5",
+      "runtime": null,
+      "spec": "# fn-60-paywall-branch-cleanup-remove.5 Consolidate test mocks and fakes\n\n## Description\nConsolidate duplicate mock class declarations scattered across test files into a shared `test/mocks/` directory. Assess the two `FakeRevenueCatClient` implementations.\n\n**Size:** M\n**Files:**\n- `test/mocks/mock_services.dart` (NEW \u2014 shared mock declarations)\n- `test/home/home_view_model_test.dart` (remove inline mocks, import shared)\n- `test/library/library_view_model_test.dart` (remove inline mocks, import shared)\n- `test/features/session/presentation/views/log_session_view_test.dart` (remove inline mocks, import shared)\n- `test/core/utils/app_lifecycle_service_test.dart` (remove inline mock, import shared)\n- `test/paywall/data/revenuecat_service_test.dart` (extract inline FakeRevenueCatClient)\n- `integration_test/mocks/fake_revenuecat_client.dart` (document or consolidate)\n\n## Duplicate mocks to consolidate\n\nThese mock classes are re-declared in 2-3+ test files each:\n- `MockNotifyService` (3 files)\n- `MockRouterService` (2 files)\n- `MockAuthService` (2 files)\n- `MockUserRepository` (2 files)\n- `MockProtocolRepository` (2 files)\n- `MockSessionRepository` (2 files)\n- `MockConnectivityService` (2 files)\n- `MockRevenueCatService` (3 files)\n- `MockSessionLocalDataSource` (2 files)\n\n## `FakeRevenueCatClient` assessment\n\nTwo independent implementations exist:\n1. **Unit test** (`test/paywall/data/revenuecat_service_test.dart:L9-107`): More features \u2014 `configureDelay`, `configureThrows`, error simulation\n2. **Integration test** (`integration_test/mocks/fake_revenuecat_client.dart:L13-109`): Different features \u2014 `simulatePurchase`, `setSnapshot`, call counting\n\nThese serve different purposes. Extract the unit test fake to its own file (`test/mocks/fake_revenuecat_client.dart`). Document both fakes as intentionally separate due to different testing needs.\n\n## Approach\n\n- Create `test/mocks/mock_services.dart` with all shared mock class declarations using mocktail\n- Existing `test/mocks/data_source_mocks.dart` already exists \u2014 add the new file alongside it\n- Replace inline mock declarations in each test file with imports from the shared file\n- Keep test-specific mocks that are truly unique to a single test file\n- Do NOT consolidate the two FakeRevenueCatClient implementations \u2014 they serve different purposes\n\n## Key context\n\n- The codebase uses `mocktail` (not `mockito`) for mocking \u2014 `extends Mock implements X` pattern\n- `test/mocks/data_source_mocks.dart` already exists as a shared mocks file \u2014 follow the same pattern\n- Integration tests live in `integration_test/` which has its own `mocks/` directory \u2014 keep that separation\n## Acceptance\n- [ ] `test/mocks/mock_services.dart` created with shared mock declarations\n- [ ] No duplicate mock class declarations across `test/home/`, `test/library/`, `test/features/session/`, `test/core/`\n- [ ] Unit test `FakeRevenueCatClient` extracted from inline test to `test/mocks/` or `test/paywall/mocks/`\n- [ ] Integration test `FakeRevenueCatClient` remains in `integration_test/mocks/` (intentionally separate)\n- [ ] `flutter test` passes (all tests green)\n- [ ] `flutter analyze` passes\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-02-14T20:50:23.479388Z",
+        "depends_on": [
+          "fn-60-paywall-branch-cleanup-remove.3",
+          "fn-60-paywall-branch-cleanup-remove.4",
+          "fn-60-paywall-branch-cleanup-remove.5"
+        ],
+        "epic": "fn-60-paywall-branch-cleanup-remove",
+        "id": "fn-60-paywall-branch-cleanup-remove.6",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-60-paywall-branch-cleanup-remove.6.md",
+        "status": "todo",
+        "title": "Run static analysis and final validation",
+        "updated_at": "2026-02-14T20:52:07.493963Z"
+      },
+      "id": "fn-60-paywall-branch-cleanup-remove.6",
+      "runtime": null,
+      "spec": "# fn-60-paywall-branch-cleanup-remove.6 Run static analysis and final validation\n\n## Description\nFinal validation pass after all cleanup tasks. Run static analysis, full test suite, and verify no regressions.\n\n**Size:** S\n**Files:** None (validation only)\n\n## Steps\n\n1. Run `flutter analyze` \u2014 must pass with zero warnings/errors\n2. Run `flutter test` \u2014 all tests must pass\n3. Run `dart format lib test` \u2014 verify formatting\n4. Grep for any remaining known dead code patterns:\n   - `grep -r \"ExpirationDecision\\|isResolved\\|markResolved\\|upgradeToPremium\\|updateSubscriptionStatus\\|TrialStartedEvent\\|SubscriptionUpgradedEvent\" lib/`\n   - Should return zero results\n5. Verify no cross-module imports of `home_state.dart` from Library/Progress for `HomeBottomTab`\n6. Spot-check that shared widgets are properly imported in views\n\n## Key context\n\n- This is a validation-only task \u2014 no code changes unless issues found\n- If issues are found, fix them in this task (they should be minor)\n## Acceptance\n- [ ] `flutter analyze` passes with zero warnings\n- [ ] `flutter test` passes (all tests green)\n- [ ] `dart format lib test` produces no changes\n- [ ] Grep for dead code patterns returns zero results in `lib/`\n- [ ] No cross-module `HomeBottomTab` imports from `home_state.dart`\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    }
+  ]
+}

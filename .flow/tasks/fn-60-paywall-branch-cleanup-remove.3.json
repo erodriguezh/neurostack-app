@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-02-14T20:50:22.880906Z",
+  "depends_on": [],
+  "epic": "fn-60-paywall-branch-cleanup-remove",
+  "id": "fn-60-paywall-branch-cleanup-remove.3",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-60-paywall-branch-cleanup-remove.3.md",
+  "status": "todo",
+  "title": "Extract shared ErrorState and StaggeredFadeIn widgets",
+  "updated_at": "2026-02-14T20:51:22.863024Z"
+}
