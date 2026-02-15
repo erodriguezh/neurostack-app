@@ -114,9 +114,8 @@ Fix two production code pattern issues: migrate ALL deprecated `WillPopScope` us
 - [ ] `flutter analyze` reports 0 issues
 - [ ] `flutter test` all pass
 ## Done summary
-TBD
-
+Migrated WillPopScope→PopScope(canPop: false) in trial_expired_modal.dart with the simpler pattern (Navigator.pop bypasses PopScope). Removed redundant _scopedSnapshot from HomeViewModel, aligning with LibraryViewModel's pattern. Added invariant docs to RevenueCatService.entitlementSnapshot and SubscriptionStatusResolver.shouldShowTrialExpiredModal. Added 7 new tests: system-back blocked, escape blocked, button pops with correct choices, and mismatched user/snapshot regression tests for both resolver and HomeViewModel. Standardized INV-U3 (DEPRECATED) annotation format across docs. Corrected PopScope misconception in epic and task specs.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: a50f642
+- Tests: flutter test — 530 passing, flutter analyze — 0 issues
 - PRs:

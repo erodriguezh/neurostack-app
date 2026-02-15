@@ -1482,6 +1482,29 @@ Only proceed after webhook + UI gating are stable.
 - `flutter analyze`: zero issues
 - `flutter test`: all tests pass
 
+## Phase 14: Branch Cleanup Phase 2 — Dedup, Deprecations, Patterns
+
+**Epic:** fn-61-paywall-branch-cleanup-phase-2-dedup
+**Scope:** Internal refactoring only — no user-visible changes, no new features, no behavioral changes.
+
+### 14.1 Mechanical Cleanup: Dead Code, Dependency Fix, Doc Deprecation [DONE]
+- Removed 12-line commented-out platform key block from `revenuecat_service.dart`
+- Moved `mocktail` from `dependencies` to `dev_dependencies`
+- Annotated all stale INV-U3 references with `(DEPRECATED)` across `lib/` and `docs/`
+- Added DEPRECATED headers to obsolete trial expiration cronjob spec and race condition investigation
+
+### 14.2 Test Infrastructure: Mock Consolidation and Factory Adoption [TODO]
+- Consolidate remaining duplicate mocks/fakes across test files to `test/mocks/`
+- Adopt `EntitlementSnapshotFactory` in `library_view_model_test.dart` and `revenuecat_service_test.dart`
+
+### 14.3 Production Code Patterns: WillPopScope Migration and Snapshot Scoping [DONE]
+- Migrated `WillPopScope` → `PopScope(canPop: false)` in `trial_expired_modal.dart`
+  - Corrected spec misconception: `Navigator.pop()` bypasses `PopScope` — no guarded-pop pattern needed
+- Removed redundant `_scopedSnapshot` from `HomeViewModel`, aligning with `LibraryViewModel` pattern
+- Added invariant docs to `RevenueCatService.entitlementSnapshot` and `SubscriptionStatusResolver.shouldShowTrialExpiredModal`
+- Added 7 regression tests: system-back blocked, escape blocked, button pops, mismatched user/snapshot
+- Standardized INV-U3 `(DEPRECATED)` annotation format across all docs
+
 ---
 
 ## Verification Steps
@@ -1589,6 +1612,8 @@ Phase 11: Database cleanup (AFTER 10)
 Phase 12: Testing
     ↓
 Phase 13: Branch cleanup (post-implementation refactoring)
+    ↓
+Phase 14: Branch cleanup phase 2 (dedup, deprecations, patterns)
 ```
 
 ---
