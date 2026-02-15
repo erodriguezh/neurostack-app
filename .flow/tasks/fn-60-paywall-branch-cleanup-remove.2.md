@@ -39,9 +39,8 @@ Remove dead domain methods and events from the User entity that are no longer ca
 - [ ] `flutter test test/domain/user/` passes
 - [ ] `flutter analyze` passes
 ## Done summary
-TBD
-
+Removed dead domain code from User entity: upgradeToPremium(), updateSubscriptionStatus(), TrialStartedEvent, SubscriptionUpgradedEvent, invalidSubscriptionUpgrade failure, and 4 associated tests. Updated INV-U5 comment for accuracy.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 0298944c5d3c81993988fbb65191235ae303ddaf, 9e06cae3b0b5615f994a9fd2710a537a034c17b4
+- Tests: flutter test test/domain/user/, flutter analyze
 - PRs:
