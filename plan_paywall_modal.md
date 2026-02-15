@@ -1446,6 +1446,44 @@ Only proceed after webhook + UI gating are stable.
 
 ---
 
+## Phase 13: Branch Cleanup (Post-Implementation Refactoring) [DONE]
+
+**Epic:** fn-60-paywall-branch-cleanup-remove
+**Scope:** Internal refactoring only — no user-visible changes, no new features, no behavioral changes.
+
+### 13.1 Remove Dead Code from TrialExpirationDecisionStore [DONE]
+- Removed `ExpirationDecision` enum, `isResolved()`/`markResolved()`, `isSubscriptionExpirationResolved()`/`markSubscriptionExpirationResolved()`, associated helpers
+- Only `saveLastSeenStatus` and `getLastSeenStatus` remain
+
+### 13.2 Remove Dead Domain Code from User Entity and Events [DONE]
+- Removed `User.upgradeToPremium()`, `User.updateSubscriptionStatus()`
+- Removed `TrialStartedEvent`, `SubscriptionUpgradedEvent` from `user_events.dart`
+
+### 13.3 Extract Shared ErrorState and StaggeredFadeIn Widgets [DONE]
+- **New File:** `lib/core/ui/widgets/error_state_view.dart` — shared `ErrorStateView`
+- **New File:** `lib/core/ui/widgets/staggered_fade_in.dart` — shared `StaggeredFadeIn`
+- Removed duplicate private widgets from Home, Library, Progress views (~101 lines removed)
+
+### 13.4 Extract Shared ViewModel Utilities and Relocate HomeBottomTab [DONE]
+- **New File:** `lib/core/utils/auth_helpers.dart` — shared `resolveUserId()`, `resolveCachedUser()`
+- **New File:** `lib/core/utils/failure_helpers.dart` — shared `failureMessage()` (Home + Library only)
+- **New File:** `lib/core/models/home_bottom_tab.dart` — relocated `HomeBottomTab` enum
+- Removed duplicate private methods from Home, Library, Progress ViewModels
+
+### 13.5 Consolidate Test Mocks and Fakes [DONE]
+- **New File:** `test/mocks/mock_services.dart` — 12 shared mock classes
+- **New File:** `test/mocks/fake_revenuecat_client.dart` — extracted unit test fake
+- Removed duplicate mock declarations from 9 test files
+- Integration test `FakeRevenueCatClient` intentionally remains separate
+
+### 13.6 Run Static Analysis and Final Validation [DONE]
+- Applied `dart format` across lib/test
+- Removed `HomeBottomTab` re-export from `home_state.dart`
+- `flutter analyze`: zero issues
+- `flutter test`: all tests pass
+
+---
+
 ## Verification Steps
 
 1. **Build passes:** `flutter analyze`
@@ -1549,6 +1587,8 @@ Phase 10: Domain layer cleanup (AFTER 1-9 verified)
 Phase 11: Database cleanup (AFTER 10)
     ↓
 Phase 12: Testing
+    ↓
+Phase 13: Branch cleanup (post-implementation refactoring)
 ```
 
 ---
