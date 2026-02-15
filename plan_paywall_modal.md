@@ -1493,9 +1493,13 @@ Only proceed after webhook + UI gating are stable.
 - Annotated all stale INV-U3 references with `(DEPRECATED)` across `lib/` and `docs/`
 - Added DEPRECATED headers to obsolete trial expiration cronjob spec and race condition investigation
 
-### 14.2 Test Infrastructure: Mock Consolidation and Factory Adoption [TODO]
-- Consolidate remaining duplicate mocks/fakes across test files to `test/mocks/`
-- Adopt `EntitlementSnapshotFactory` in `library_view_model_test.dart` and `revenuecat_service_test.dart`
+### 14.2 Test Infrastructure: Mock Consolidation and Factory Adoption [DONE]
+- Moved `MockTrialReminderService`, `MockSubscriptionStatusResolver` to `test/mocks/mock_services.dart`
+- Extracted `FakeCheckEligibilityParams`, `FakePendingSession` to new `test/mocks/fake_params.dart`
+- Removed duplicate fake/mock definitions from 4 test files
+- Replaced 2 inline `EntitlementSnapshot` constructions in `library_view_model_test.dart` with `EntitlementSnapshotFactory.activePaidMonthly`
+- Replaced 1 inline construction in `revenuecat_service_test.dart` with `EntitlementSnapshotFactory.activeTrial`
+- Remaining inline constructions kept where factory defaults don't match test's null-valued fields
 
 ### 14.3 Production Code Patterns: WillPopScope Migration and Snapshot Scoping [DONE]
 - Migrated `WillPopScope` → `PopScope(canPop: false)` in `trial_expired_modal.dart`

@@ -96,9 +96,8 @@ Consolidate remaining test mock/fake duplication and improve adoption of `Entitl
 - [ ] No test changed its semantic assertions (only construction method changed)
 - [ ] `flutter test` all pass
 ## Done summary
-TBD
-
+Consolidated duplicate mock/fake classes into shared test/mocks/ files (mock_services.dart, fake_params.dart) and replaced 3 inline EntitlementSnapshot constructions with EntitlementSnapshotFactory usage in library_view_model_test.dart and revenuecat_service_test.dart.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: ec37f331cde6cd59b0b06542391b9d8e8c045980
+- Tests: flutter analyze, flutter test
 - PRs:
