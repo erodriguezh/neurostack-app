@@ -1,5 +1,5 @@
 study docs/README.md
-study plan_paywall_modal.md and pick the most important thing to do
+study task fn-60-paywall-branch-cleanup-remove and pick the most important thing to do
 
 IMPORTANT:
 - after implementation, anything you'd refactor, simplify, change, etc... if you implemented again. Do not move on from this step until the user says yes or not to the proposals

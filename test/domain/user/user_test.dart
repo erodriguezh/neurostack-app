@@ -300,58 +300,6 @@ void main() {
       );
     });
 
-    group('upgradeToPremium', () {
-      test('upgradeToPremium_withPremiumMonthly_succeeds', () {
-        // Arrange
-        final user = UserFactory.create(
-          subscriptionStatus: SubscriptionStatus.free,
-        );
-
-        // Act
-        final result = user.upgradeToPremium(SubscriptionStatus.premiumMonthly);
-
-        // Assert
-        expect(result, isRight<User>());
-        final upgraded = result.getOrElse(
-          (l) => throw Exception('Failed to upgrade: $l'),
-        );
-        expect(upgraded.subscriptionStatus, SubscriptionStatus.premiumMonthly);
-      });
-
-      test('upgradeToPremium_withPremiumAnnual_succeeds', () {
-        // Arrange
-        final user = UserFactory.create(
-          subscriptionStatus: SubscriptionStatus.free,
-        );
-
-        // Act
-        final result = user.upgradeToPremium(SubscriptionStatus.premiumAnnual);
-
-        // Assert
-        expect(result, isRight<User>());
-        final upgraded = result.getOrElse(
-          (l) => throw Exception('Failed to upgrade: $l'),
-        );
-        expect(upgraded.subscriptionStatus, SubscriptionStatus.premiumAnnual);
-      });
-
-      test(
-        'upgradeToPremium_withNonPremiumStatus_returnsInvalidSubscriptionUpgrade',
-        () {
-          // Arrange
-          final user = UserFactory.create(
-            subscriptionStatus: SubscriptionStatus.free,
-          );
-
-          // Act
-          final result = user.upgradeToPremium(SubscriptionStatus.trial);
-
-          // Assert
-          expect(result, isLeftWith(UserFailures.invalidSubscriptionUpgrade));
-        },
-      );
-    });
-
     group('domain events', () {
       test('activateProtocol_whenSuccessful_raisesProtocolActivatedEvent', () {
         // Arrange
@@ -422,31 +370,6 @@ void main() {
         },
       );
 
-      test(
-        'upgradeToPremium_whenSuccessful_raisesSubscriptionUpgradedEvent',
-        () {
-          // Arrange
-          final user = UserFactory.create(
-            subscriptionStatus: SubscriptionStatus.free,
-          );
-
-          // Act
-          final result = user.upgradeToPremium(
-            SubscriptionStatus.premiumMonthly,
-          );
-
-          // Assert
-          final upgraded = result.getOrElse(
-            (l) => throw Exception('Failed to upgrade: $l'),
-          );
-          expect(upgraded.hasDomainEvents, true);
-          final event = upgraded.domainEvents
-              .whereType<SubscriptionUpgradedEvent>()
-              .first;
-          expect(event.userId, user.id);
-          expect(event.newStatus, SubscriptionStatus.premiumMonthly);
-        },
-      );
     });
 
     group('activeProtocolIds', () {

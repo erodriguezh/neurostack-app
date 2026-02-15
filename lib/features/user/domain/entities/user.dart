@@ -223,45 +223,4 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
 
     return right(updated);
   }
-
-  /// Upgrades the user to a premium subscription.
-  ///
-  /// - [newStatus]: Must be premiumMonthly or premiumAnnual.
-  ///
-  /// Returns [Left] with [UserFailures.invalidSubscriptionUpgrade] if invalid status.
-  Either<DomainFailure, User> upgradeToPremium(SubscriptionStatus newStatus) {
-    if (!newStatus.isPremium) {
-      return left(UserFailures.invalidSubscriptionUpgrade);
-    }
-
-    final updated = User._(
-      id: id,
-      subscriptionStatus: newStatus,
-      stack: _stack,
-      onboardingCompleted: onboardingCompleted,
-      createdAt: createdAt,
-    );
-
-    updated.raiseDomainEvent(
-      SubscriptionUpgradedEvent(
-        userId: id,
-        newStatus: newStatus,
-      ),
-    );
-
-    return right(updated);
-  }
-
-  /// Updates subscription status (for external subscription state changes).
-  ///
-  /// Used when RevenueCat notifies of status changes.
-  User updateSubscriptionStatus(SubscriptionStatus newStatus) {
-    return User._(
-      id: id,
-      subscriptionStatus: newStatus,
-      stack: _stack,
-      onboardingCompleted: onboardingCompleted,
-      createdAt: createdAt,
-    );
-  }
 }

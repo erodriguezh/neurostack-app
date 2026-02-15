@@ -1,5 +1,4 @@
 import '../../../../core/models/common/domain_event.dart';
-import '../enums/subscription_status.dart';
 
 /// Raised when a new user is created.
 class UserCreatedEvent extends DomainEvent {
@@ -9,16 +8,6 @@ class UserCreatedEvent extends DomainEvent {
 
   @override
   String toString() => 'UserCreatedEvent(userId: $userId)';
-}
-
-/// Raised when a user's trial period begins.
-class TrialStartedEvent extends DomainEvent {
-  TrialStartedEvent({required this.userId});
-
-  final String userId;
-
-  @override
-  String toString() => 'TrialStartedEvent(userId: $userId)';
 }
 
 /// Raised when a protocol is activated in user's stack.
@@ -61,17 +50,3 @@ class OnboardingCompletedEvent extends DomainEvent {
   String toString() => 'OnboardingCompletedEvent(userId: $userId)';
 }
 
-/// Raised when user upgrades to premium subscription.
-class SubscriptionUpgradedEvent extends DomainEvent {
-  SubscriptionUpgradedEvent({
-    required this.userId,
-    required this.newStatus,
-  });
-
-  final String userId;
-  final SubscriptionStatus newStatus;
-
-  @override
-  String toString() =>
-      'SubscriptionUpgradedEvent(userId: $userId, newStatus: $newStatus)';
-}

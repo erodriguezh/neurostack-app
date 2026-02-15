@@ -36,12 +36,6 @@ abstract final class UserFailures {
     message: 'Cannot log session for protocol not in your stack',
   );
 
-  // Subscription - general
-  static const invalidSubscriptionUpgrade = DomainFailure(
-    code: 'User.InvalidSubscriptionUpgrade',
-    message: 'Invalid subscription type for upgrade',
-  );
-
   static const alreadyOnboarded = DomainFailure(
     code: 'User.AlreadyOnboarded',
     message: 'Onboarding has already been completed',
