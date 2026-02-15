@@ -1,6 +1,6 @@
+import 'package:neurostack/core/models/home_bottom_tab.dart';
 import 'package:neurostack/core/utils/navigation/route_data.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
-import 'package:neurostack/home/home_state.dart';
 
 class HomeBottomTabCoordinator {
   HomeBottomTabCoordinator({

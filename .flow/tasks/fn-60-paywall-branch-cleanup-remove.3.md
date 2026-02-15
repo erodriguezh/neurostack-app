@@ -51,9 +51,8 @@ Extract to `lib/core/ui/widgets/staggered_fade_in.dart` with `delay` and `child`
 - [ ] `flutter analyze` passes
 - [ ] `flutter test` passes (no regressions)
 ## Done summary
-TBD
-
+Extracted duplicate _ErrorState and _StaggeredFadeIn private widgets from home_view.dart, library_view.dart, and progress_view.dart into shared ErrorStateView and StaggeredFadeIn widgets in lib/core/ui/widgets/, removing 101 lines of duplicated code.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 9b0a99a8a92296f1362fb82e31e97efb90091fee
+- Tests: flutter analyze, flutter test test/home/ test/library/ test/progress/
 - PRs:

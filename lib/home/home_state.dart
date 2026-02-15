@@ -1,13 +1,14 @@
+import 'package:neurostack/core/models/home_bottom_tab.dart';
 import 'package:neurostack/features/protocol/domain/entities/protocol.dart';
 import 'package:neurostack/features/user/domain/entities/user.dart';
+
+export 'package:neurostack/core/models/home_bottom_tab.dart';
 
 const _unset = Object();
 
 enum HomeStatus { loading, empty, populated, error }
 
 enum HomeBannerType { trial, free, expired, grace, offline }
-
-enum HomeBottomTab { stack, library, progress }
 
 class HomeBannerModel {
   const HomeBannerModel({

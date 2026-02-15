@@ -1,8 +1,8 @@
+import 'package:neurostack/core/models/home_bottom_tab.dart';
 import 'package:neurostack/features/protocol/domain/entities/protocol.dart';
 import 'package:neurostack/features/protocol/domain/enums/category.dart';
 import 'package:neurostack/features/protocol/domain/enums/evidence_level.dart';
 import 'package:neurostack/features/user/domain/entities/user.dart';
-import 'package:neurostack/home/home_state.dart';
 
 const _unset = Object();
 

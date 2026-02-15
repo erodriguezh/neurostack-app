@@ -4,14 +4,16 @@ import 'package:logging/logging.dart';
 import 'package:neurostack/core/abstractions/connectivity_listener_mixin.dart';
 import 'package:neurostack/core/abstractions/entitlement_listener_mixin.dart';
 import 'package:neurostack/core/failures/domain_failure.dart';
+import 'package:neurostack/core/models/home_bottom_tab.dart';
+import 'package:neurostack/core/utils/auth_helpers.dart' as auth;
 import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
+import 'package:neurostack/core/utils/failure_helpers.dart' as helpers;
 import 'package:neurostack/core/utils/internal_notification/notify_service.dart';
 import 'package:neurostack/core/utils/internal_notification/toast/toast_event.dart';
 import 'package:neurostack/core/utils/navigation/route_data.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
 import 'package:neurostack/features/auth/data/cached_user_store.dart';
-import 'package:neurostack/features/auth/domain/auth_state.dart';
 import 'package:neurostack/features/protocol/data/cached_protocol_store.dart';
 import 'package:neurostack/features/protocol/domain/entities/protocol.dart';
 import 'package:neurostack/features/protocol/domain/enums/category.dart'
@@ -24,7 +26,6 @@ import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
 import 'package:neurostack/features/user/domain/failures/user_failures.dart';
 import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
 import 'package:neurostack/home/home_bottom_tab_coordinator.dart';
-import 'package:neurostack/home/home_state.dart';
 import 'package:neurostack/library/library_state.dart';
 import 'package:neurostack/library/library_stats.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
@@ -350,7 +351,11 @@ class LibraryViewModel
     );
 
     if (isOffline && preferCacheWhenOffline) {
-      final cachedUser = await _resolveCachedUser();
+      final cachedUser = await auth.resolveCachedUser(
+        authService: _authService,
+        cachedUser: _cachedUser,
+        cachedUserStore: _cachedUserStore,
+      );
       if (cachedUser != null) {
         final shouldUseMemoryCache = _cachedProtocols.isNotEmpty &&
             _cachedProtocolsUserId == cachedUser.id;
@@ -367,7 +372,7 @@ class LibraryViewModel
       }
     }
 
-    final userId = _resolveUserId();
+    final userId = auth.resolveUserId(_authService);
     if (userId == null) {
       _setError('Unable to load user.', preserveContent: !showLoading);
       return;
@@ -375,7 +380,10 @@ class LibraryViewModel
 
     final userResult = await _userRepository.getById(userId);
     if (userResult.isLeft()) {
-      _setError(_failureMessage(userResult), preserveContent: !showLoading);
+      _setError(
+        helpers.failureMessage(userResult, 'Unable to load library data'),
+        preserveContent: !showLoading,
+      );
       return;
     }
 
@@ -383,7 +391,7 @@ class LibraryViewModel
     final protocolsResult = await _protocolRepository.list(activeOnly: true);
     if (protocolsResult.isLeft()) {
       _setError(
-        _failureMessage(protocolsResult),
+        helpers.failureMessage(protocolsResult, 'Unable to load library data'),
         preserveContent: !showLoading,
       );
       return;
@@ -575,51 +583,6 @@ class LibraryViewModel
     });
   }
 
-  String? _resolveUserId() {
-    final authState = _authService.authState.value;
-    if (authState is AuthenticatedOnline) {
-      return authState.user.id;
-    }
-    if (authState is AuthenticatedOffline) {
-      return authState.user.id;
-    }
-    return null;
-  }
-
-  Future<User?> _resolveCachedUser() async {
-    final currentUserId = _resolveUserId();
-    if (_cachedUser != null &&
-        (currentUserId == null || _cachedUser!.id == currentUserId)) {
-      return _cachedUser;
-    }
-
-    final authState = _authService.authState.value;
-    if (authState is AuthenticatedOffline) {
-      return authState.user;
-    }
-    if (authState is AuthenticatedOnline) {
-      return authState.user;
-    }
-
-    final cachedUser = await _cachedUserStore?.loadUser();
-    if (cachedUser == null) {
-      return null;
-    }
-    if (currentUserId != null && cachedUser.id != currentUserId) {
-      return null;
-    }
-    return cachedUser;
-  }
-
-  String _failureMessage<T>(Either<DomainFailure, T> result) {
-    final failure = result.getLeft().getOrElse(
-          () => const DomainFailure(
-            code: 'Library.UnexpectedError',
-            message: 'Unable to load library data',
-          ),
-        );
-    return failure.message;
-  }
 
   void _setError(String message, {required bool preserveContent}) {
     final current = state.value;

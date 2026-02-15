@@ -6,14 +6,15 @@ import 'package:logging/logging.dart';
 import 'package:neurostack/core/abstractions/connectivity_listener_mixin.dart';
 import 'package:neurostack/core/abstractions/entitlement_listener_mixin.dart';
 import 'package:neurostack/core/failures/domain_failure.dart';
+import 'package:neurostack/core/utils/auth_helpers.dart' as auth;
 import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
 import 'package:neurostack/core/utils/date_time_extensions.dart';
+import 'package:neurostack/core/utils/failure_helpers.dart' as helpers;
 import 'package:neurostack/core/utils/internal_notification/notify_service.dart';
 import 'package:neurostack/core/utils/internal_notification/toast/toast_event.dart';
 import 'package:neurostack/core/utils/navigation/route_data.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
-import 'package:neurostack/features/auth/domain/auth_state.dart';
 import 'package:neurostack/features/protocol/domain/entities/protocol.dart';
 import 'package:neurostack/features/protocol/domain/repositories/protocol_repository.dart';
 import 'package:neurostack/features/session/data/data_sources/session_local_data_source.dart';
@@ -385,7 +386,7 @@ class HomeViewModel
       ),
     );
 
-    final userId = _resolveUserId();
+    final userId = auth.resolveUserId(_authService);
     if (userId == null) {
       _setError('Unable to load user.');
       return;
@@ -393,7 +394,9 @@ class HomeViewModel
 
     final userResult = await _userRepository.getById(userId);
     if (userResult.isLeft()) {
-      _setError(_failureMessage(userResult));
+      _setError(
+        helpers.failureMessage(userResult, 'Unable to load home data'),
+      );
       return;
     }
 
@@ -530,15 +533,13 @@ class HomeViewModel
     return loggedToday;
   }
 
-  String? _resolveUserId() {
-    final authState = _authService.authState.value;
-    if (authState is AuthenticatedOnline) {
-      return authState.user.id;
-    }
-    if (authState is AuthenticatedOffline) {
-      return authState.user.id;
-    }
-    return null;
+  /// Scopes the current entitlement snapshot to [user].
+  ///
+  /// Returns `null` if the snapshot belongs to a different user
+  /// (Design Principle #10).
+  EntitlementSnapshot? _scopedSnapshot(User user) {
+    final raw = _revenueCatService.entitlementSnapshot.value;
+    return (raw != null && raw.isForUser(user.id)) ? raw : null;
   }
 
   Future<HomeViewState> _maybeTriggerExpiredModal(
@@ -553,11 +554,7 @@ class HomeViewModel
     }
 
     final now = DateTime.now();
-    final rawSnapshot = _revenueCatService.entitlementSnapshot.value;
-    // Scope snapshot to current user (Design Principle #10)
-    final snapshot = (rawSnapshot != null && rawSnapshot.isForUser(user.id))
-        ? rawSnapshot
-        : null;
+    final snapshot = _scopedSnapshot(user);
 
     // 1. Load lastSeenStatus from decision store
     final lastSeenStatus =
@@ -660,11 +657,7 @@ class HomeViewModel
     final user = next.user!;
 
     // Use resolver to get effective status (RC or DB fallback)
-    final rawSnapshot = _revenueCatService.entitlementSnapshot.value;
-    // Scope snapshot to current user (Design Principle #10)
-    final snapshot = (rawSnapshot != null && rawSnapshot.isForUser(user.id))
-        ? rawSnapshot
-        : null;
+    final snapshot = _scopedSnapshot(user);
     final effectiveStatus = _resolver.resolveEffectiveStatus(
       user: user,
       snapshot: snapshot,
@@ -729,16 +722,6 @@ class HomeViewModel
       case SubscriptionStatus.premiumAnnual:
         return null;
     }
-  }
-
-  String _failureMessage<T>(Either<DomainFailure, T> result) {
-    final failure = result.getLeft().getOrElse(
-      () => const DomainFailure(
-        code: 'Home.UnexpectedError',
-        message: 'Unable to load home data',
-      ),
-    );
-    return failure.message;
   }
 
   void _setError(String message) {

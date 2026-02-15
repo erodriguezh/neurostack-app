@@ -2,8 +2,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:neurostack/core/models/home_bottom_tab.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
-import 'package:neurostack/home/home_state.dart';
 
 class HomeBottomNav extends StatelessWidget {
   const HomeBottomNav({
