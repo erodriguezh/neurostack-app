@@ -2,9 +2,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:neurostack/core/utils/app_lifecycle_service.dart';
-import 'package:neurostack/paywall/data/revenuecat_service.dart';
 
-class MockRevenueCatService extends Mock implements RevenueCatService {}
+import '../../mocks/mock_services.dart';
 
 void main() {
   group('AppLifecycleService', () {

@@ -4,7 +4,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:neurostack/core/utils/app_lifecycle_service.dart';
 import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
 import 'package:neurostack/core/utils/data_source/data_source_abstraction.dart';
-import 'package:neurostack/features/session/data/data_sources/session_local_data_source.dart';
 import 'package:neurostack/features/session/data/data_sources/session_remote_data_source.dart';
 import 'package:neurostack/features/session/data/dtos/session_dto.dart';
 import 'package:neurostack/features/session/data/dtos/session_insert_dto.dart';
@@ -14,15 +13,11 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 import '../../../../constants/test_constants.dart';
 import '../../../../factories/pending_session_factory.dart';
+import '../../../../mocks/mock_services.dart';
 
-// Mocks
-class MockSessionLocalDataSource extends Mock
-    implements SessionLocalDataSource {}
-
+// Mocks unique to this test file
 class MockSessionRemoteDataSource extends Mock
     implements SessionRemoteDataSource {}
-
-class MockConnectivityService extends Mock implements ConnectivityService {}
 
 class MockDataSourceAbstraction extends Mock implements DataSourceAbstraction {}
 

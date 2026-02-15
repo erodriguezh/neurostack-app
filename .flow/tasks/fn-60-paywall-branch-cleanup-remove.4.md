@@ -59,9 +59,8 @@ Currently defined in `home_state.dart` but imported by Library and Progress, cre
 - [ ] `flutter test test/home/ test/library/ test/progress/` passes
 - [ ] `flutter analyze` passes
 ## Done summary
-TBD
-
+Extracted shared ViewModel utilities (resolveUserId, resolveCachedUser, failureMessage) to core, relocated HomeBottomTab enum to lib/core/models/, and added _scopedSnapshot helper in HomeViewModel to eliminate inline duplication.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: e309c6b3c67f43e292c1d10fb2afb7c4056899da
+- Tests: flutter test test/home/ test/library/ test/progress/, flutter analyze
 - PRs:

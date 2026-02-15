@@ -3,45 +3,19 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
-import 'package:neurostack/core/utils/internal_notification/notify_service.dart';
 import 'package:neurostack/core/utils/internal_notification/toast/toast_event.dart';
-import 'package:neurostack/core/utils/navigation/router_service.dart';
-import 'package:neurostack/features/auth/data/auth_service.dart';
 import 'package:neurostack/features/auth/domain/auth_state.dart';
-import 'package:neurostack/features/protocol/domain/repositories/protocol_repository.dart';
-import 'package:neurostack/features/session/data/data_sources/session_local_data_source.dart';
 import 'package:neurostack/features/session/domain/entities/session.dart';
-import 'package:neurostack/features/session/domain/repositories/session_repository.dart';
 import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
-import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
 import 'package:neurostack/home/home_view_model.dart';
-import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:neurostack/paywall/data/trial_reminder_service.dart';
 import 'package:neurostack/paywall/domain/entitlement_snapshot.dart';
 import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 
 import '../factories/factories.dart';
+import '../mocks/mock_services.dart';
 
-// Mocks
-class MockNotifyService extends Mock implements NotifyService {}
-
-class MockRouterService extends Mock implements RouterService {}
-
-class MockAuthService extends Mock implements AuthService {}
-
-class MockUserRepository extends Mock implements UserRepository {}
-
-class MockProtocolRepository extends Mock implements ProtocolRepository {}
-
-class MockSessionRepository extends Mock implements SessionRepository {}
-
-class MockSessionLocalDataSource extends Mock
-    implements SessionLocalDataSource {}
-
-class MockConnectivityService extends Mock implements ConnectivityService {}
-
-class MockRevenueCatService extends Mock implements RevenueCatService {}
-
+// Mocks unique to this test file
 class MockTrialReminderService extends Mock implements TrialReminderService {}
 
 class MockSubscriptionStatusResolver extends Mock

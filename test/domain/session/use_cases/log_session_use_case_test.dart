@@ -6,11 +6,9 @@ import 'package:neurostack/core/failures/domain_failure.dart';
 import 'package:neurostack/features/session/domain/entities/session.dart';
 import 'package:neurostack/features/session/domain/entities/session_draft.dart';
 import 'package:neurostack/features/session/domain/failures/session_failures.dart';
-import 'package:neurostack/features/session/domain/repositories/session_repository.dart';
 import 'package:neurostack/features/session/domain/use_cases/log_session_use_case.dart';
 import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
 import 'package:neurostack/features/user/domain/failures/user_failures.dart';
-import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
 import 'package:neurostack/features/user/domain/value_objects/stack.dart';
 
 import '../../../constants/test_constants.dart';
@@ -18,11 +16,7 @@ import '../../../factories/session_factory.dart';
 import '../../../factories/user_factory.dart';
 import '../../../factories/value_objects/stack_factory.dart';
 import '../../../matchers/either_matchers.dart';
-
-// Mocks
-class MockUserRepository extends Mock implements UserRepository {}
-
-class MockSessionRepository extends Mock implements SessionRepository {}
+import '../../../mocks/mock_services.dart';
 
 void main() {
   late LogSessionUseCase useCase;

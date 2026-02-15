@@ -6,15 +6,13 @@ import 'package:neurostack/core/failures/domain_failure.dart';
 import 'package:neurostack/features/session/domain/use_cases/check_eligibility_use_case.dart';
 import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
 import 'package:neurostack/features/user/domain/failures/user_failures.dart';
-import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
 import 'package:neurostack/features/user/domain/value_objects/stack.dart';
 
 import '../../../constants/test_constants.dart';
 import '../../../factories/user_factory.dart';
 import '../../../factories/value_objects/stack_factory.dart';
 import '../../../matchers/either_matchers.dart';
-
-class MockUserRepository extends Mock implements UserRepository {}
+import '../../../mocks/mock_services.dart';
 
 void main() {
   late CheckEligibilityUseCase useCase;

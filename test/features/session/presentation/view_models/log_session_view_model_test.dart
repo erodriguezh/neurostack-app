@@ -4,33 +4,18 @@ import 'package:mocktail/mocktail.dart';
 
 import 'package:neurostack/core/failures/domain_failure.dart';
 import 'package:neurostack/core/utils/internal_notification/haptic_feedback/haptic_feedback_listener.dart';
-import 'package:neurostack/core/utils/internal_notification/notify_service.dart';
 import 'package:neurostack/core/utils/internal_notification/toast/toast_event.dart';
 import 'package:neurostack/features/session/data/data_sources/session_local_data_source.dart';
-import 'package:neurostack/features/session/data/services/session_sync_service.dart';
 import 'package:neurostack/features/session/domain/entities/pending_session.dart';
 import 'package:neurostack/features/session/domain/failures/session_failures.dart';
 import 'package:neurostack/features/session/domain/use_cases/check_eligibility_use_case.dart';
 import 'package:neurostack/features/session/presentation/view_models/log_session_state.dart';
 import 'package:neurostack/features/session/presentation/view_models/log_session_view_model.dart';
 import 'package:neurostack/features/user/domain/failures/user_failures.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../../../constants/test_constants.dart';
 import '../../../../factories/protocol_factory.dart';
-
-// Mocks
-class MockCheckEligibilityUseCase extends Mock
-    implements CheckEligibilityUseCase {}
-
-class MockSessionLocalDataSource extends Mock
-    implements SessionLocalDataSource {}
-
-class MockSessionSyncService extends Mock implements SessionSyncService {}
-
-class MockNotifyService extends Mock implements NotifyService {}
-
-class MockUuid extends Mock implements Uuid {}
+import '../../../../mocks/mock_services.dart';
 
 // Fakes for registerFallbackValue
 class FakeCheckEligibilityParams extends Fake
