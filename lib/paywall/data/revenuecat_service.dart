@@ -135,22 +135,9 @@ class RevenueCatService {
   /// For now, uses the single REVENUECAT_API_KEY. Per-platform keys can be
   /// added later if needed.
   String _selectPlatformKey() {
-    // NOTE: The env.json currently has a single REVENUECAT_API_KEY.
-    // When per-platform keys are needed, update env.json and this method:
-    //
-    // if (Platform.isIOS) {
-    //   return const String.fromEnvironment('REVENUECAT_IOS_KEY',
-    //       defaultValue: String.fromEnvironment('REVENUECAT_API_KEY'));
-    // }
-    // if (Platform.isAndroid) {
-    //   return const String.fromEnvironment('REVENUECAT_ANDROID_KEY',
-    //       defaultValue: String.fromEnvironment('REVENUECAT_API_KEY'));
-    // }
-    // if (Platform.isMacOS) {
-    //   return const String.fromEnvironment('REVENUECAT_MACOS_KEY',
-    //       defaultValue: String.fromEnvironment('REVENUECAT_API_KEY'));
-    // }
-
+    // When per-platform keys are needed, update env.json with
+    // REVENUECAT_IOS_KEY / REVENUECAT_ANDROID_KEY / REVENUECAT_MACOS_KEY
+    // and add Platform checks here.
     const apiKey = String.fromEnvironment('REVENUECAT_API_KEY');
     if (apiKey.isEmpty) {
       _logger.warning(
