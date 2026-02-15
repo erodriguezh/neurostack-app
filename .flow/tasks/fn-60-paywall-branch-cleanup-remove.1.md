@@ -52,9 +52,8 @@ Remove all dead code from `TrialExpirationDecisionStore` — both the legacy met
 - [ ] `flutter test test/paywall/` passes
 - [ ] `flutter analyze` passes
 ## Done summary
-TBD
-
+Removed all dead code from TrialExpirationDecisionStore: deleted ExpirationDecision enum, legacy isResolved/markResolved methods, unused subscription-based methods (isSubscriptionExpirationResolved/markSubscriptionExpirationResolved), associated helpers (_buildDecisionKey, _keyPrefix, _subExpKeyPrefix, _key), EntitlementSnapshot import, and ~440 lines of tests for the removed methods. Preserved saveLastSeenStatus/getLastSeenStatus which are used in production.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 4b650e14960abe91e50191f5262a619675ec58f6
+- Tests: flutter test test/paywall/, flutter analyze
 - PRs:

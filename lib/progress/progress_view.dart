@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
 import 'package:neurostack/core/ui/constants/spacing.dart';
 import 'package:neurostack/core/ui/widgets/app_grid_background.dart';
+import 'package:neurostack/core/ui/widgets/error_state_view.dart';
 import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
 import 'package:neurostack/core/utils/internal_notification/notify_service.dart';
 import 'package:neurostack/core/utils/internal_notification/toast/toast_event.dart';
@@ -174,7 +175,7 @@ class _ProgressViewState extends State<ProgressView>
       slivers.add(
         SliverFillRemaining(
           hasScrollBody: false,
-          child: _ErrorState(message: state.failure.message),
+          child: ErrorStateView(message: state.failure.message),
         ),
       );
       return slivers;
@@ -334,43 +335,6 @@ class _ProgressViewState extends State<ProgressView>
       userId: userId,
       initialDate: day,
       onSessionLogged: _viewModel.onSessionLogged,
-    );
-  }
-}
-
-class _ErrorState extends StatelessWidget {
-  const _ErrorState({this.message});
-
-  final String? message;
-
-  @override
-  Widget build(BuildContext context) {
-    final kitColors = context.kitColors;
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: context.spacing.lg),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              message ?? 'Something went wrong.',
-              textAlign: TextAlign.center,
-              style: context.theme.textTheme.bodyMedium?.copyWith(
-                color: kitColors.white60,
-                height: 1.5,
-              ),
-            ),
-            SizedBox(height: context.spacing.sm),
-            Text(
-              'Pull to refresh to retry.',
-              textAlign: TextAlign.center,
-              style: context.theme.textTheme.bodySmall?.copyWith(
-                color: kitColors.white40,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

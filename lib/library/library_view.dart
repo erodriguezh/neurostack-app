@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
 import 'package:neurostack/core/ui/constants/spacing.dart';
 import 'package:neurostack/core/ui/widgets/app_grid_background.dart';
+import 'package:neurostack/core/ui/widgets/error_state_view.dart';
+import 'package:neurostack/core/ui/widgets/staggered_fade_in.dart';
 import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
 import 'package:neurostack/core/utils/internal_notification/notify_service.dart';
 import 'package:neurostack/core/utils/locator.dart';
@@ -146,7 +148,7 @@ class _LibraryViewState extends State<LibraryView> {
         SliverToBoxAdapter(
           child: Padding(
             padding: EdgeInsets.only(top: spacing.sm),
-            child: const _StaggeredFadeIn(
+            child: const StaggeredFadeIn(
               index: 0,
               child: HomeStatusBanner(
                 banner: _libraryOfflineBanner,
@@ -179,7 +181,7 @@ class _LibraryViewState extends State<LibraryView> {
         slivers.add(
           SliverFillRemaining(
             hasScrollBody: false,
-            child: _ErrorState(message: state.errorMessage),
+            child: ErrorStateView(message: state.errorMessage),
           ),
         );
         break;
@@ -189,7 +191,7 @@ class _LibraryViewState extends State<LibraryView> {
           SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.fromLTRB(spacing.lg, spacing.lg, spacing.lg, 0),
-              child: _StaggeredFadeIn(
+              child: StaggeredFadeIn(
                 index: 1,
                 child: Text(
                   'Protocol Library',
@@ -229,7 +231,7 @@ class _LibraryViewState extends State<LibraryView> {
                   top: sectionIndex == 0 ? 0 : spacing.lg,
                   bottom: spacing.sm,
                 ),
-                child: _StaggeredFadeIn(
+                child: StaggeredFadeIn(
                   index: staggerIndex++,
                   child: LibraryCategoryHeader(
                     label: section.category.displayName.toUpperCase(),
@@ -242,7 +244,7 @@ class _LibraryViewState extends State<LibraryView> {
               children.add(
                 Padding(
                   padding: EdgeInsets.only(bottom: spacing.md),
-                  child: _StaggeredFadeIn(
+                  child: StaggeredFadeIn(
                     index: staggerIndex++,
                     child: LibraryProtocolCard(
                       model: card,
@@ -403,85 +405,6 @@ class _EmptyState extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ErrorState extends StatelessWidget {
-  const _ErrorState({this.message});
-
-  final String? message;
-
-  @override
-  Widget build(BuildContext context) {
-    final kitColors = context.kitColors;
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: context.spacing.lg),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              message ?? 'Something went wrong.',
-              textAlign: TextAlign.center,
-              style: context.theme.textTheme.bodyMedium?.copyWith(
-                color: kitColors.white60,
-                height: 1.5,
-              ),
-            ),
-            SizedBox(height: context.spacing.sm),
-            Text(
-              'Pull to refresh to retry.',
-              textAlign: TextAlign.center,
-              style: context.theme.textTheme.bodySmall?.copyWith(
-                color: kitColors.white40,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _StaggeredFadeIn extends StatefulWidget {
-  const _StaggeredFadeIn({
-    required this.child,
-    required this.index,
-  });
-
-  final Widget child;
-  final int index;
-
-  @override
-  State<_StaggeredFadeIn> createState() => _StaggeredFadeInState();
-}
-
-class _StaggeredFadeInState extends State<_StaggeredFadeIn> {
-  bool _visible = false;
-
-  @override
-  void initState() {
-    super.initState();
-    Future.delayed(Duration(milliseconds: 100 * widget.index), () {
-      if (mounted) {
-        setState(() => _visible = true);
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedOpacity(
-      duration: const Duration(milliseconds: 500),
-      opacity: _visible ? 1 : 0,
-      curve: Curves.easeOut,
-      child: AnimatedSlide(
-        duration: const Duration(milliseconds: 500),
-        offset: _visible ? Offset.zero : const Offset(0, 0.05),
-        curve: Curves.easeOut,
-        child: widget.child,
       ),
     );
   }
