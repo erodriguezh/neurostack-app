@@ -223,16 +223,8 @@ void main() {
         );
 
         // RC says user has premium monthly subscription
-        final snapshot = EntitlementSnapshot(
-          appUserId: user.id,
-          hasProEntitlement: true,
-          isTrialPeriod: false,
-          isInGracePeriod: false,
-          productId: 'neurostack_monthly',
-          expirationDate: DateTime.now().add(const Duration(days: 30)),
-          originalTransactionId: 'txn-001',
-          latestPurchaseDate: DateTime.now(),
-          lastPeriodType: EntitlementPeriodType.normal,
+        final snapshot = EntitlementSnapshotFactory.activePaidMonthly(
+          userId: user.id,
         );
 
         when(
@@ -361,16 +353,8 @@ void main() {
         clearInteractions(mockUserRepository);
 
         // Act: entitlement changes to premium
-        final premiumSnapshot = EntitlementSnapshot(
-          appUserId: user.id,
-          hasProEntitlement: true,
-          isTrialPeriod: false,
-          isInGracePeriod: false,
-          productId: 'neurostack_monthly',
-          expirationDate: DateTime.now().add(const Duration(days: 30)),
-          originalTransactionId: 'txn-001',
-          latestPurchaseDate: DateTime.now(),
-          lastPeriodType: EntitlementPeriodType.normal,
+        final premiumSnapshot = EntitlementSnapshotFactory.activePaidMonthly(
+          userId: user.id,
         );
         entitlementNotifier.value = premiumSnapshot;
 

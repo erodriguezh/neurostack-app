@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:neurostack/paywall/domain/entitlement_snapshot.dart';
 
+import '../../factories/factories.dart';
 import '../../mocks/fake_revenuecat_client.dart';
 
 void main() {
@@ -272,16 +273,8 @@ void main() {
         fakeClient.snapshotToReturn = initialSnapshot;
         await service.refreshEntitlement();
 
-        const updatedSnapshot = EntitlementSnapshot(
-          appUserId: 'user-123',
-          hasProEntitlement: true,
-          isTrialPeriod: true,
-          isInGracePeriod: false,
-          productId: 'neurostack_monthly',
-          expirationDate: null,
-          originalTransactionId: null,
-          latestPurchaseDate: null,
-          lastPeriodType: EntitlementPeriodType.trial,
+        final updatedSnapshot = EntitlementSnapshotFactory.activeTrial(
+          userId: 'user-123',
         );
         fakeClient.snapshotToReturn = updatedSnapshot;
         fakeClient.paywallOutcome = PaywallOutcome.purchased;

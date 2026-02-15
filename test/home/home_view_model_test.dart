@@ -8,18 +8,11 @@ import 'package:neurostack/features/auth/domain/auth_state.dart';
 import 'package:neurostack/features/session/domain/entities/session.dart';
 import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
 import 'package:neurostack/home/home_view_model.dart';
-import 'package:neurostack/paywall/data/trial_reminder_service.dart';
 import 'package:neurostack/paywall/domain/entitlement_snapshot.dart';
 import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 
 import '../factories/factories.dart';
 import '../mocks/mock_services.dart';
-
-// Mocks unique to this test file
-class MockTrialReminderService extends Mock implements TrialReminderService {}
-
-class MockSubscriptionStatusResolver extends Mock
-    implements SubscriptionStatusResolver {}
 
 void main() {
   late MockNotifyService mockNotifyService;

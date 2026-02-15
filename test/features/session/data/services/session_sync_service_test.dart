@@ -7,15 +7,16 @@ import 'package:neurostack/core/utils/data_source/data_source_abstraction.dart';
 import 'package:neurostack/features/session/data/dtos/session_dto.dart';
 import 'package:neurostack/features/session/data/dtos/session_insert_dto.dart';
 import 'package:neurostack/features/session/data/services/session_sync_service.dart';
-import 'package:neurostack/features/session/domain/entities/pending_session.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 import '../../../../constants/test_constants.dart';
 import '../../../../factories/pending_session_factory.dart';
 import '../../../../mocks/data_source_mocks.dart';
+import '../../../../mocks/fake_params.dart';
 import '../../../../mocks/mock_services.dart';
 
-// Mocks unique to this test file
+// Mocks unique to this test file — these depend on Supabase types and
+// AppLifecycleService, which are only needed in this test.
 class MockDataSourceAbstraction extends Mock implements DataSourceAbstraction {}
 
 class MockAppLifecycleService extends Mock implements AppLifecycleService {}
@@ -24,9 +25,7 @@ class MockGoTrueClient extends Mock implements supabase.GoTrueClient {}
 
 class MockUser extends Mock implements supabase.User {}
 
-// Fakes for registerFallbackValue
-class FakePendingSession extends Fake implements PendingSession {}
-
+// Fake unique to this test file (only used here for registerFallbackValue)
 class FakeSessionInsertDto extends Fake implements SessionInsertDto {}
 
 void main() {

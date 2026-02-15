@@ -6,20 +6,13 @@ import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 
 import 'package:neurostack/core/ui/app_theme.dart';
-import 'package:neurostack/features/session/domain/entities/pending_session.dart';
-import 'package:neurostack/features/session/domain/use_cases/check_eligibility_use_case.dart';
 import 'package:neurostack/features/session/presentation/view_models/log_session_view_model.dart';
 import 'package:neurostack/features/session/presentation/views/log_session_view.dart';
 
 import '../../../../constants/test_constants.dart';
 import '../../../../factories/protocol_factory.dart';
+import '../../../../mocks/fake_params.dart';
 import '../../../../mocks/mock_services.dart';
-
-// Fakes for registerFallbackValue
-class FakeCheckEligibilityParams extends Fake
-    implements CheckEligibilityParams {}
-
-class FakePendingSession extends Fake implements PendingSession {}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

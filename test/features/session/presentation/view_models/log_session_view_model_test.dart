@@ -15,13 +15,8 @@ import 'package:neurostack/features/user/domain/failures/user_failures.dart';
 
 import '../../../../constants/test_constants.dart';
 import '../../../../factories/protocol_factory.dart';
+import '../../../../mocks/fake_params.dart';
 import '../../../../mocks/mock_services.dart';
-
-// Fakes for registerFallbackValue
-class FakeCheckEligibilityParams extends Fake
-    implements CheckEligibilityParams {}
-
-class FakePendingSession extends Fake implements PendingSession {}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
