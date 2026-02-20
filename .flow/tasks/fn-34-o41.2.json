@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-01-27T20:34:22.308866Z",
+  "depends_on": [],
+  "epic": "fn-34-o41",
+  "id": "fn-34-o41.2",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-34-o41.2.md",
+  "status": "todo",
+  "title": "Update DB CHECK constraint for subscription_status (Phase 1.4)",
+  "updated_at": "2026-01-27T20:34:22.311895Z"
+}

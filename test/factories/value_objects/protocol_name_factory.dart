@@ -6,8 +6,9 @@ import '../../constants/test_constants.dart';
 abstract final class ProtocolNameFactory {
   /// Creates a valid ProtocolName.
   static ProtocolName valid() {
-    return ProtocolName.create(TestConstants.protocol.validName)
-        .getOrElse((l) => throw Exception('Factory produced invalid ProtocolName: $l'));
+    return ProtocolName.create(TestConstants.protocol.validName).getOrElse(
+      (l) => throw Exception('Factory produced invalid ProtocolName: $l'),
+    );
   }
 
   /// Creates a ProtocolName from a custom string.

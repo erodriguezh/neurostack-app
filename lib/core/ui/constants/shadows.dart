@@ -158,7 +158,7 @@ class CustomShadows extends ThemeExtension<CustomShadows> {
       skyGlow: BoxShadow.lerpList(skyGlow, other.skyGlow, t) ?? skyGlow,
       skyGlowStrong:
           BoxShadow.lerpList(skyGlowStrong, other.skyGlowStrong, t) ??
-              skyGlowStrong,
+          skyGlowStrong,
       amberGlow: BoxShadow.lerpList(amberGlow, other.amberGlow, t) ?? amberGlow,
       iconGlow: BoxShadow.lerpList(iconGlow, other.iconGlow, t) ?? iconGlow,
     );

@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-55-phase-103-104-mark-userbootstrapservice",
+  "created_at": "2026-02-13T19:36:31.775657Z",
+  "depends_on_epics": [],
+  "id": "fn-55-phase-103-104-mark-userbootstrapservice",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-55-phase-103-104-mark-userbootstrapservice.md",
+  "status": "open",
+  "title": "Phase 10.3-10.4: Mark UserBootstrapService done, Update UserDto",
+  "updated_at": "2026-02-13T19:36:31.775998Z"
+}

@@ -140,7 +140,8 @@ class _LogSessionViewState extends State<LogSessionView> {
         final isSubmitting = state is LogSessionSubmitting;
         final isInitial = state is LogSessionInitial;
         // Extract error message for general (non-duration) errors
-        final generalErrorMessage = state is LogSessionError &&
+        final generalErrorMessage =
+            state is LogSessionError &&
                 state.failure.code != 'Session.DurationMustBePositive'
             ? state.failure.message
             : null;
@@ -182,7 +183,9 @@ class _LogSessionViewState extends State<LogSessionView> {
 
                   // Header row
                   _HeaderRow(
-                    onClose: isSubmitting ? null : () => Navigator.of(context).pop(),
+                    onClose: isSubmitting
+                        ? null
+                        : () => Navigator.of(context).pop(),
                   ),
                   SizedBox(height: spacing.xs),
 
@@ -327,7 +330,9 @@ class _DateField extends StatelessWidget {
           valueListenable: viewModel.selectedDate,
           builder: (context, selectedDate, child) {
             return GestureDetector(
-              onTap: enabled ? () => _showDatePicker(context, selectedDate) : null,
+              onTap: enabled
+                  ? () => _showDatePicker(context, selectedDate)
+                  : null,
               child: Container(
                 padding: EdgeInsets.all(spacing.md),
                 decoration: BoxDecoration(
@@ -381,7 +386,10 @@ class _DateField extends StatelessWidget {
     return '${DateFormat.EEEE(locale).format(date)}, ${DateFormat.MMMd(locale).format(date)}';
   }
 
-  Future<void> _showDatePicker(BuildContext context, DateTime currentDate) async {
+  Future<void> _showDatePicker(
+    BuildContext context,
+    DateTime currentDate,
+  ) async {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final oldestAllowed = today.subtract(
@@ -459,7 +467,9 @@ class _DurationField extends StatelessWidget {
             color: kitColors.white02,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: hasError ? kitColors.red500.withValues(alpha: 0.5) : kitColors.white10,
+              color: hasError
+                  ? kitColors.red500.withValues(alpha: 0.5)
+                  : kitColors.white10,
             ),
             boxShadow: hasError
                 ? [

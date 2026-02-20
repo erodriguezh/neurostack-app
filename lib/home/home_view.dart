@@ -2,20 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
 import 'package:neurostack/core/ui/constants/spacing.dart';
 import 'package:neurostack/core/ui/widgets/app_grid_background.dart';
+import 'package:neurostack/core/ui/widgets/error_state_view.dart';
+import 'package:neurostack/core/ui/widgets/staggered_fade_in.dart';
 import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
 import 'package:neurostack/core/utils/internal_notification/notify_service.dart';
 import 'package:neurostack/core/utils/internal_notification/toast/toast_event.dart';
 import 'package:neurostack/core/utils/locator.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
-import 'package:neurostack/features/auth/data/cached_user_store.dart';
 import 'package:neurostack/features/protocol/domain/repositories/protocol_repository.dart';
 import 'package:neurostack/features/session/data/data_sources/session_local_data_source.dart';
 import 'package:neurostack/features/session/domain/repositories/session_repository.dart';
 import 'package:neurostack/features/session/presentation/log_session_modal.dart';
 import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
+import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:neurostack/paywall/data/trial_expiration_decision_store.dart';
+import 'package:neurostack/paywall/data/trial_reminder_service.dart';
+import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 import 'package:neurostack/paywall/widgets/trial_expired_modal.dart';
+import 'package:neurostack/paywall/widgets/trial_reminder_alert.dart';
 import 'package:neurostack/home/home_state.dart';
 import 'package:neurostack/home/home_view_model.dart';
 import 'package:neurostack/home/widgets/home_bottom_nav.dart';
@@ -41,8 +46,10 @@ class _HomeViewState extends State<HomeView> {
     sessionRepository: locator<SessionRepository>(),
     sessionLocalDataSource: locator<SessionLocalDataSource>(),
     connectivityService: locator<ConnectivityService>(),
-    cachedUserStore: locator<CachedUserStore>(),
+    subscriptionStatusResolver: locator<SubscriptionStatusResolver>(),
+    revenueCatService: locator<RevenueCatService>(),
     trialExpirationDecisionStore: locator<TrialExpirationDecisionStore>(),
+    trialReminderService: locator<TrialReminderService>(),
   );
 
   bool _showingTrialExpired = false;
@@ -145,7 +152,7 @@ class _HomeViewState extends State<HomeView> {
         SliverToBoxAdapter(
           child: Padding(
             padding: EdgeInsets.only(top: spacing.sm),
-            child: _StaggeredFadeIn(
+            child: StaggeredFadeIn(
               index: 0,
               child: HomeStatusBanner(
                 banner: state.banner!,
@@ -157,6 +164,23 @@ class _HomeViewState extends State<HomeView> {
         ),
       );
       slivers.add(SliverToBoxAdapter(child: SizedBox(height: spacing.md)));
+    }
+
+    if (state.showTrialReminder) {
+      slivers.add(
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.only(
+              top: state.banner == null ? spacing.sm : 0,
+              bottom: spacing.md,
+            ),
+            child: TrialReminderAlert(
+              onUpgrade: () => _viewModel.goToPaywall(),
+              onDismiss: _viewModel.dismissTrialReminder,
+            ),
+          ),
+        ),
+      );
     }
 
     switch (state.status) {
@@ -178,7 +202,7 @@ class _HomeViewState extends State<HomeView> {
         slivers.add(
           SliverFillRemaining(
             hasScrollBody: false,
-            child: _ErrorState(message: state.errorMessage),
+            child: ErrorStateView(message: state.errorMessage),
           ),
         );
         break;
@@ -193,7 +217,7 @@ class _HomeViewState extends State<HomeView> {
                 spacing.lg,
                 0,
               ),
-              child: _StaggeredFadeIn(
+              child: StaggeredFadeIn(
                 index: 1,
                 child: HomeHeader(onAdd: _viewModel.onAddProtocol),
               ),
@@ -207,7 +231,7 @@ class _HomeViewState extends State<HomeView> {
             SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: spacing.lg),
-                child: _StaggeredFadeIn(
+                child: StaggeredFadeIn(
                   index: 2,
                   child: Padding(
                     padding: EdgeInsets.only(top: spacing.xxl),
@@ -227,7 +251,7 @@ class _HomeViewState extends State<HomeView> {
                     final card = state.cards[index];
                     return Padding(
                       padding: EdgeInsets.only(bottom: spacing.md),
-                      child: _StaggeredFadeIn(
+                      child: StaggeredFadeIn(
                         index: index + 2,
                         child: HomeProtocolCard(
                           model: card,
@@ -340,6 +364,7 @@ class _HomeViewState extends State<HomeView> {
       final choice = await showTrialExpiredModal(
         context,
         activeProtocolCount: currentProtocolCount,
+        isTrialExpiration: state.isTrialExpiration,
       );
 
       switch (choice) {
@@ -417,85 +442,6 @@ class _HomeViewState extends State<HomeView> {
           ],
         );
       },
-    );
-  }
-}
-
-class _ErrorState extends StatelessWidget {
-  const _ErrorState({this.message});
-
-  final String? message;
-
-  @override
-  Widget build(BuildContext context) {
-    final kitColors = context.kitColors;
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: context.spacing.lg),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              message ?? 'Something went wrong.',
-              textAlign: TextAlign.center,
-              style: context.theme.textTheme.bodyMedium?.copyWith(
-                color: kitColors.white60,
-                height: 1.5,
-              ),
-            ),
-            SizedBox(height: context.spacing.sm),
-            Text(
-              'Pull to refresh to retry.',
-              textAlign: TextAlign.center,
-              style: context.theme.textTheme.bodySmall?.copyWith(
-                color: kitColors.white40,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _StaggeredFadeIn extends StatefulWidget {
-  const _StaggeredFadeIn({
-    required this.child,
-    required this.index,
-  });
-
-  final Widget child;
-  final int index;
-
-  @override
-  State<_StaggeredFadeIn> createState() => _StaggeredFadeInState();
-}
-
-class _StaggeredFadeInState extends State<_StaggeredFadeIn> {
-  bool _visible = false;
-
-  @override
-  void initState() {
-    super.initState();
-    Future.delayed(Duration(milliseconds: 100 * widget.index), () {
-      if (mounted) {
-        setState(() => _visible = true);
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedOpacity(
-      duration: const Duration(milliseconds: 500),
-      opacity: _visible ? 1 : 0,
-      curve: Curves.easeOut,
-      child: AnimatedSlide(
-        duration: const Duration(milliseconds: 500),
-        offset: _visible ? Offset.zero : const Offset(0, 0.05),
-        curve: Curves.easeOut,
-        child: widget.child,
-      ),
     );
   }
 }

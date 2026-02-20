@@ -1,14 +1,19 @@
 import 'package:flutter/foundation.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:logging/logging.dart';
+import 'package:neurostack/core/abstractions/connectivity_listener_mixin.dart';
+import 'package:neurostack/core/abstractions/entitlement_listener_mixin.dart';
 import 'package:neurostack/core/failures/domain_failure.dart';
+import 'package:neurostack/core/models/home_bottom_tab.dart';
+import 'package:neurostack/core/utils/auth_helpers.dart' as auth;
 import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
+import 'package:neurostack/core/utils/failure_helpers.dart' as helpers;
 import 'package:neurostack/core/utils/internal_notification/notify_service.dart';
 import 'package:neurostack/core/utils/internal_notification/toast/toast_event.dart';
 import 'package:neurostack/core/utils/navigation/route_data.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
 import 'package:neurostack/features/auth/data/cached_user_store.dart';
-import 'package:neurostack/features/auth/domain/auth_state.dart';
 import 'package:neurostack/features/protocol/data/cached_protocol_store.dart';
 import 'package:neurostack/features/protocol/domain/entities/protocol.dart';
 import 'package:neurostack/features/protocol/domain/enums/category.dart'
@@ -21,11 +26,16 @@ import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
 import 'package:neurostack/features/user/domain/failures/user_failures.dart';
 import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
 import 'package:neurostack/home/home_bottom_tab_coordinator.dart';
-import 'package:neurostack/home/home_state.dart';
 import 'package:neurostack/library/library_state.dart';
 import 'package:neurostack/library/library_stats.dart';
+import 'package:neurostack/paywall/data/revenuecat_service.dart';
+import 'package:neurostack/paywall/domain/entitlement_snapshot.dart';
+import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 
-class LibraryViewModel {
+class LibraryViewModel
+    with EntitlementListenerMixin, ConnectivityListenerMixin {
+  final Logger _logger = Logger('Library');
+
   LibraryViewModel({
     required NotifyService notifyService,
     required RouterService routerService,
@@ -34,22 +44,27 @@ class LibraryViewModel {
     required ProtocolRepository protocolRepository,
     required SessionRepository sessionRepository,
     required ConnectivityService connectivityService,
+    required SubscriptionStatusResolver subscriptionStatusResolver,
+    required RevenueCatService revenueCatService,
     CachedUserStore? cachedUserStore,
     CachedProtocolStore? cachedProtocolStore,
     HomeBottomTabCoordinator? tabCoordinator,
-  })  : _notifyService = notifyService,
-        _routerService = routerService,
-        _authService = authService,
-        _userRepository = userRepository,
-        _protocolRepository = protocolRepository,
-        _sessionRepository = sessionRepository,
-        _connectivityService = connectivityService,
-        _cachedUserStore = cachedUserStore,
-        _cachedProtocolStore = cachedProtocolStore,
-        _tabCoordinator = tabCoordinator ??
-            HomeBottomTabCoordinator(
-              routerService: routerService,
-            );
+  }) : _notifyService = notifyService,
+       _routerService = routerService,
+       _authService = authService,
+       _userRepository = userRepository,
+       _protocolRepository = protocolRepository,
+       _sessionRepository = sessionRepository,
+       _connectivityService = connectivityService,
+       _resolver = subscriptionStatusResolver,
+       _revenueCatService = revenueCatService,
+       _cachedUserStore = cachedUserStore,
+       _cachedProtocolStore = cachedProtocolStore,
+       _tabCoordinator =
+           tabCoordinator ??
+           HomeBottomTabCoordinator(
+             routerService: routerService,
+           );
 
   final NotifyService _notifyService;
   final RouterService _routerService;
@@ -58,6 +73,8 @@ class LibraryViewModel {
   final ProtocolRepository _protocolRepository;
   final SessionRepository _sessionRepository;
   final ConnectivityService _connectivityService;
+  final SubscriptionStatusResolver _resolver;
+  final RevenueCatService _revenueCatService;
   final CachedUserStore? _cachedUserStore;
   final CachedProtocolStore? _cachedProtocolStore;
   final HomeBottomTabCoordinator _tabCoordinator;
@@ -68,15 +85,70 @@ class LibraryViewModel {
 
   bool _isLoading = false;
   bool _isDisposed = false;
-  VoidCallback? _connectivityListener;
   User? _cachedUser;
   List<Protocol> _cachedProtocols = const [];
   String? _cachedProtocolsUserId;
 
+  // --- Mixin wiring ---
+
+  @override
+  RevenueCatService get entitlementListenerService => _revenueCatService;
+
+  @override
+  ConnectivityService get connectivityListenerService => _connectivityService;
+
+  @override
+  void onEntitlementChanged() {
+    _logger.fine('Entitlement changed, refreshing library');
+    refresh();
+  }
+
+  @override
+  void onConnectivityChanged() {
+    final isOffline =
+        _connectivityService.status.value == NetworkStatus.offline;
+    final current = state.value;
+
+    if (current.isOffline == isOffline) {
+      return;
+    }
+
+    if (isOffline) {
+      if (_cachedUser != null &&
+          _cachedProtocols.isNotEmpty &&
+          _cachedProtocolsUserId == _cachedUser!.id) {
+        final snapshot = _revenueCatService.entitlementSnapshot.value;
+        final cards = _buildCards(
+          _cachedUser!,
+          _cachedProtocols,
+          snapshot: snapshot,
+          isOffline: true,
+        );
+        final sections = _buildSections(cards);
+        state.value = current.copyWith(
+          isOffline: true,
+          cards: cards,
+          sections: sections,
+        );
+        return;
+      }
+
+      state.value = current.copyWith(isOffline: true);
+      return;
+    }
+
+    state.value = current.copyWith(isOffline: false);
+    _loadLibrary(
+      showLoading: current.cards.isEmpty,
+      preferCacheWhenOffline: false,
+    );
+  }
+
+  // --- Public API ---
+
   Future<void> init() async {
-    _connectivityListener ??= _handleConnectivityChange;
-    _connectivityService.status.removeListener(_connectivityListener!);
-    _connectivityService.status.addListener(_connectivityListener!);
+    initConnectivityListener();
+    initEntitlementListener();
 
     final isOffline =
         _connectivityService.status.value == NetworkStatus.offline;
@@ -106,18 +178,15 @@ class LibraryViewModel {
       return;
     }
 
-    final result = user.canLogSession(
-      protocolId,
-      currentTime: DateTime.now(),
-    );
+    final result = user.canLogSession(protocolId);
 
     if (result.isLeft()) {
       final failure = result.getLeft().getOrElse(
-            () => const DomainFailure(
-              code: 'Library.UnexpectedError',
-              message: 'Unable to log session',
-            ),
-          );
+        () => const DomainFailure(
+          code: 'Library.UnexpectedError',
+          message: 'Unable to log session',
+        ),
+      );
       _notifyService.setToastEvent(ToastEventError(message: failure.message));
       return;
     }
@@ -138,18 +207,15 @@ class LibraryViewModel {
       return;
     }
 
-    final result = user.activateProtocol(
-      protocolId,
-      currentTime: DateTime.now(),
-    );
+    final result = user.activateProtocol(protocolId);
 
     if (result.isLeft()) {
       final failure = result.getLeft().getOrElse(
-            () => const DomainFailure(
-              code: 'Library.UnexpectedError',
-              message: 'Unable to activate protocol',
-            ),
-          );
+        () => const DomainFailure(
+          code: 'Library.UnexpectedError',
+          message: 'Unable to activate protocol',
+        ),
+      );
 
       if (failure.code == UserFailures.protocolLimitReached.code) {
         goToPaywall();
@@ -172,11 +238,11 @@ class LibraryViewModel {
     final saveResult = await _saveUserWithRetry(updatedUser);
     if (saveResult.isLeft()) {
       final failure = saveResult.getLeft().getOrElse(
-            () => const DomainFailure(
-              code: 'Library.UnexpectedError',
-              message: 'Unable to save protocol changes',
-            ),
-          );
+        () => const DomainFailure(
+          code: 'Library.UnexpectedError',
+          message: 'Unable to save protocol changes',
+        ),
+      );
       _notifyService.setToastEvent(ToastEventError(message: failure.message));
       await _loadLibrary(showLoading: false);
       return;
@@ -200,11 +266,11 @@ class LibraryViewModel {
     final result = user.deactivateProtocol(protocolId);
     if (result.isLeft()) {
       final failure = result.getLeft().getOrElse(
-            () => const DomainFailure(
-              code: 'Library.UnexpectedError',
-              message: 'Unable to remove protocol',
-            ),
-          );
+        () => const DomainFailure(
+          code: 'Library.UnexpectedError',
+          message: 'Unable to remove protocol',
+        ),
+      );
       _notifyService.setToastEvent(ToastEventWarning(message: failure.message));
       return;
     }
@@ -216,11 +282,11 @@ class LibraryViewModel {
     final saveResult = await _saveUserWithRetry(updatedUser);
     if (saveResult.isLeft()) {
       final failure = saveResult.getLeft().getOrElse(
-            () => const DomainFailure(
-              code: 'Library.UnexpectedError',
-              message: 'Unable to save protocol changes',
-            ),
-          );
+        () => const DomainFailure(
+          code: 'Library.UnexpectedError',
+          message: 'Unable to save protocol changes',
+        ),
+      );
       _notifyService.setToastEvent(ToastEventError(message: failure.message));
       await _loadLibrary(showLoading: false);
       return;
@@ -233,11 +299,11 @@ class LibraryViewModel {
     final result = await _sessionRepository.list(protocolId: protocolId);
     if (result.isLeft()) {
       final failure = result.getLeft().getOrElse(
-            () => const DomainFailure(
-              code: 'Library.UnexpectedError',
-              message: 'Unable to load session stats',
-            ),
-          );
+        () => const DomainFailure(
+          code: 'Library.UnexpectedError',
+          message: 'Unable to load session stats',
+        ),
+      );
       _notifyService.setToastEvent(ToastEventError(message: failure.message));
       return const LibraryProtocolStats(
         totalSessions: 0,
@@ -258,11 +324,12 @@ class LibraryViewModel {
 
   void dispose() {
     _isDisposed = true;
-    if (_connectivityListener != null) {
-      _connectivityService.status.removeListener(_connectivityListener!);
-    }
+    disposeConnectivityListener();
+    disposeEntitlementListener();
     state.dispose();
   }
+
+  // --- Private helpers ---
 
   Future<void> _loadLibrary({
     required bool showLoading,
@@ -285,14 +352,19 @@ class LibraryViewModel {
     );
 
     if (isOffline && preferCacheWhenOffline) {
-      final cachedUser = await _resolveCachedUser();
+      final cachedUser = await auth.resolveCachedUser(
+        authService: _authService,
+        cachedUser: _cachedUser,
+        cachedUserStore: _cachedUserStore,
+      );
       if (cachedUser != null) {
-        final shouldUseMemoryCache = _cachedProtocols.isNotEmpty &&
+        final shouldUseMemoryCache =
+            _cachedProtocols.isNotEmpty &&
             _cachedProtocolsUserId == cachedUser.id;
         final cachedProtocols = shouldUseMemoryCache
             ? _cachedProtocols
             : await _cachedProtocolStore?.loadProtocols(cachedUser.id) ??
-                const [];
+                  const [];
         _cachedUser = cachedUser;
         _cachedProtocols = cachedProtocols;
         _cachedProtocolsUserId = cachedUser.id;
@@ -302,7 +374,7 @@ class LibraryViewModel {
       }
     }
 
-    final userId = _resolveUserId();
+    final userId = auth.resolveUserId(_authService);
     if (userId == null) {
       _setError('Unable to load user.', preserveContent: !showLoading);
       return;
@@ -310,7 +382,10 @@ class LibraryViewModel {
 
     final userResult = await _userRepository.getById(userId);
     if (userResult.isLeft()) {
-      _setError(_failureMessage(userResult), preserveContent: !showLoading);
+      _setError(
+        helpers.failureMessage(userResult, 'Unable to load library data'),
+        preserveContent: !showLoading,
+      );
       return;
     }
 
@@ -318,14 +393,15 @@ class LibraryViewModel {
     final protocolsResult = await _protocolRepository.list(activeOnly: true);
     if (protocolsResult.isLeft()) {
       _setError(
-        _failureMessage(protocolsResult),
+        helpers.failureMessage(protocolsResult, 'Unable to load library data'),
         preserveContent: !showLoading,
       );
       return;
     }
 
-    final protocols =
-        protocolsResult.getOrElse((_) => throw StateError('Unreachable'));
+    final protocols = protocolsResult.getOrElse(
+      (_) => throw StateError('Unreachable'),
+    );
     _cachedUser = user;
     _cachedProtocols = protocols;
     _cachedProtocolsUserId = user.id;
@@ -342,9 +418,11 @@ class LibraryViewModel {
     String? highlightProtocolId,
   }) {
     final isOffline = state.value.isOffline;
+    final snapshot = _revenueCatService.entitlementSnapshot.value;
     final cards = _buildCards(
       user,
       protocols,
+      snapshot: snapshot,
       isOffline: isOffline,
       highlightProtocolId: highlightProtocolId,
     );
@@ -366,22 +444,30 @@ class LibraryViewModel {
     );
   }
 
+  /// Builds library protocol cards from the given data.
+  ///
+  /// Pure function: receives the entitlement [snapshot] as a parameter
+  /// instead of reading it from the service, making it easier to test.
   List<LibraryProtocolCardModel> _buildCards(
     User user,
     List<Protocol> protocols, {
+    required EntitlementSnapshot? snapshot,
     required bool isOffline,
     String? highlightProtocolId,
   }) {
-    final effectiveStatus = user.getEffectiveStatus(DateTime.now());
+    final effectiveStatus = _resolver.resolveEffectiveStatus(
+      user: user,
+      snapshot: snapshot,
+    );
     final sorted = List<Protocol>.from(protocols)
       ..sort((a, b) {
-        final categoryCompare =
-            a.category.index.compareTo(b.category.index);
+        final categoryCompare = a.category.index.compareTo(b.category.index);
         if (categoryCompare != 0) {
           return categoryCompare;
         }
 
-        final statusCompare = _statusRank(
+        final statusCompare =
+            _statusRank(
               _deriveCardStatus(user, a.id, effectiveStatus),
             ).compareTo(
               _statusRank(
@@ -397,8 +483,7 @@ class LibraryViewModel {
 
     return sorted.map((protocol) {
       final status = _deriveCardStatus(user, protocol.id, effectiveStatus);
-      final disableBadge =
-          isOffline && status == LibraryCardStatus.available;
+      final disableBadge = isOffline && status == LibraryCardStatus.available;
 
       return LibraryProtocolCardModel(
         protocolId: protocol.id,
@@ -498,91 +583,6 @@ class LibraryViewModel {
 
       _updateCards(user, _cachedProtocols);
     });
-  }
-
-
-  String? _resolveUserId() {
-    final authState = _authService.authState.value;
-    if (authState is AuthenticatedOnline) {
-      return authState.user.id;
-    }
-    if (authState is AuthenticatedOffline) {
-      return authState.user.id;
-    }
-    return null;
-  }
-
-  Future<User?> _resolveCachedUser() async {
-    final currentUserId = _resolveUserId();
-    if (_cachedUser != null &&
-        (currentUserId == null || _cachedUser!.id == currentUserId)) {
-      return _cachedUser;
-    }
-
-    final authState = _authService.authState.value;
-    if (authState is AuthenticatedOffline) {
-      return authState.user;
-    }
-    if (authState is AuthenticatedOnline) {
-      return authState.user;
-    }
-
-    final cachedUser = await _cachedUserStore?.loadUser();
-    if (cachedUser == null) {
-      return null;
-    }
-    if (currentUserId != null && cachedUser.id != currentUserId) {
-      return null;
-    }
-    return cachedUser;
-  }
-
-  void _handleConnectivityChange() {
-    final isOffline =
-        _connectivityService.status.value == NetworkStatus.offline;
-    final current = state.value;
-
-    if (current.isOffline == isOffline) {
-      return;
-    }
-
-    if (isOffline) {
-      if (_cachedUser != null &&
-          _cachedProtocols.isNotEmpty &&
-          _cachedProtocolsUserId == _cachedUser!.id) {
-        final cards = _buildCards(
-          _cachedUser!,
-          _cachedProtocols,
-          isOffline: true,
-        );
-        final sections = _buildSections(cards);
-        state.value = current.copyWith(
-          isOffline: true,
-          cards: cards,
-          sections: sections,
-        );
-        return;
-      }
-
-      state.value = current.copyWith(isOffline: true);
-      return;
-    }
-
-    state.value = current.copyWith(isOffline: false);
-    _loadLibrary(
-      showLoading: current.cards.isEmpty,
-      preferCacheWhenOffline: false,
-    );
-  }
-
-  String _failureMessage<T>(Either<DomainFailure, T> result) {
-    final failure = result.getLeft().getOrElse(
-          () => const DomainFailure(
-            code: 'Library.UnexpectedError',
-            message: 'Unable to load library data',
-          ),
-        );
-    return failure.message;
   }
 
   void _setError(String message, {required bool preserveContent}) {

@@ -5,8 +5,6 @@ import '../../../../core/failures/domain_failure.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/enums/subscription_status.dart';
 import '../../domain/value_objects/stack.dart';
-import '../../domain/value_objects/trial_period.dart';
-import 'trial_period_dto.dart';
 
 part 'user_dto.freezed.dart';
 part 'user_dto.g.dart';
@@ -20,9 +18,7 @@ part 'user_dto.g.dart';
 /// Supports:
 /// - **INV-U1**: Free Tier users CANNOT activate more than 2 protocols
 /// - **INV-U2**: Premium Trial users CAN activate unlimited protocols
-/// - **INV-U3**: Trial MUST auto-activate on first app launch
 /// - **INV-U4**: Users MUST complete onboarding before tracking Sessions
-/// - **INV-M2**: Premium Trial MUST last exactly 7 days
 @freezed
 abstract class UserDto with _$UserDto {
   const UserDto._();
@@ -34,10 +30,6 @@ abstract class UserDto with _$UserDto {
       fromJson: _stringFromJson,
     )
     required String subscriptionStatus,
-    @JsonKey(name: 'trial_period') TrialPeriodDto? trialPeriod,
-    // Denormalized field for SQL queries (cron, analytics). Source of truth is trialPeriod.
-    @JsonKey(name: 'trial_ends_at', fromJson: _nullableDateTimeFromJson)
-    DateTime? trialEndsAt,
     @JsonKey(
       name: 'protocol_ids',
       fromJson: _protocolIdsFromJson,
@@ -59,7 +51,6 @@ abstract class UserDto with _$UserDto {
   ///
   /// Returns [Left] with validation failure if:
   /// - SubscriptionStatus enum parsing fails
-  /// - Trial period date parsing fails
   /// - CreatedAt date parsing fails
   Either<DomainFailure, User> toDomain() {
     try {
@@ -76,22 +67,8 @@ abstract class UserDto with _$UserDto {
         );
       }
 
-      // Parse date (needed for trial fallback)
+      // Parse date
       final createdAtDate = DateTime.parse(createdAt);
-
-      // Parse trial period if present
-      TrialPeriod? domainTrialPeriod;
-      if (trialPeriod != null) {
-        final trialResult = trialPeriod!.toDomain();
-        if (trialResult.isRight()) {
-          domainTrialPeriod =
-              trialResult.getOrElse((l) => throw StateError('Unreachable'));
-        } else if (domainStatus == SubscriptionStatus.trial) {
-          domainTrialPeriod = TrialPeriod.fromStartDate(createdAtDate);
-        }
-      } else if (domainStatus == SubscriptionStatus.trial) {
-        domainTrialPeriod = TrialPeriod.fromStartDate(createdAtDate);
-      }
 
       // Create stack from protocol IDs
       final domainStack = Stack.fromIds(protocolIds);
@@ -101,7 +78,6 @@ abstract class UserDto with _$UserDto {
         User.reconstitute(
           id: id,
           subscriptionStatus: domainStatus,
-          trialPeriod: domainTrialPeriod,
           stack: domainStack,
           onboardingCompleted: onboardingCompleted,
           createdAt: createdAtDate,
@@ -122,10 +98,6 @@ abstract class UserDto with _$UserDto {
     return UserDto(
       id: user.id,
       subscriptionStatus: user.subscriptionStatus.name,
-      trialPeriod: user.trialPeriod != null
-          ? TrialPeriodDto.fromDomain(user.trialPeriod!)
-          : null,
-      trialEndsAt: user.trialPeriod?.endDate,
       protocolIds: user.activeProtocolIds,
       onboardingCompleted: user.onboardingCompleted,
       createdAt: user.createdAt.toIso8601String(),
@@ -148,12 +120,5 @@ List<String> _protocolIdsFromJson(dynamic raw) {
 }
 
 List<dynamic> _protocolIdsToJson(List<String> ids) {
-  return ids
-      .map<dynamic>((value) => int.tryParse(value) ?? value)
-      .toList();
-}
-
-DateTime? _nullableDateTimeFromJson(dynamic raw) {
-  if (raw == null) return null;
-  return DateTime.tryParse(raw.toString());
+  return ids.map<dynamic>((value) => int.tryParse(value) ?? value).toList();
 }

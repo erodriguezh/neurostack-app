@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:logging/logging.dart';
 import 'package:neurostack/core/failures/domain_failure.dart';
+import 'package:neurostack/core/models/home_bottom_tab.dart';
+import 'package:neurostack/core/utils/auth_helpers.dart' as auth;
 import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
 import 'package:neurostack/core/utils/date_time_extensions.dart';
 import 'package:neurostack/core/utils/internal_notification/haptic_feedback/haptic_feedback_listener.dart';
@@ -10,7 +12,6 @@ import 'package:neurostack/core/utils/internal_notification/toast/toast_event.da
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
 import 'package:neurostack/features/auth/data/cached_user_store.dart';
-import 'package:neurostack/features/auth/domain/auth_state.dart';
 import 'package:neurostack/features/protocol/domain/repositories/protocol_repository.dart';
 import 'package:neurostack/features/session/data/data_sources/session_local_data_source.dart';
 import 'package:neurostack/features/session/domain/entities/session.dart';
@@ -18,7 +19,6 @@ import 'package:neurostack/features/session/domain/repositories/session_reposito
 import 'package:neurostack/features/user/domain/entities/user.dart';
 import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
 import 'package:neurostack/home/home_bottom_tab_coordinator.dart';
-import 'package:neurostack/home/home_state.dart';
 import 'package:neurostack/progress/data/cached_week_progress_store.dart';
 import 'package:neurostack/progress/progress_state.dart';
 
@@ -37,19 +37,20 @@ class ProgressViewModel {
     CachedUserStore? cachedUserStore,
     CachedWeekProgressStore? cachedWeekProgressStore,
     HomeBottomTabCoordinator? tabCoordinator,
-  })  : _notifyService = notifyService,
-        _authService = authService,
-        _userRepository = userRepository,
-        _protocolRepository = protocolRepository,
-        _sessionRepository = sessionRepository,
-        _sessionLocalDataSource = sessionLocalDataSource,
-        _connectivityService = connectivityService,
-        _cachedUserStore = cachedUserStore,
-        _cachedWeekProgressStore = cachedWeekProgressStore,
-        _tabCoordinator = tabCoordinator ??
-            HomeBottomTabCoordinator(
-              routerService: routerService,
-            );
+  }) : _notifyService = notifyService,
+       _authService = authService,
+       _userRepository = userRepository,
+       _protocolRepository = protocolRepository,
+       _sessionRepository = sessionRepository,
+       _sessionLocalDataSource = sessionLocalDataSource,
+       _connectivityService = connectivityService,
+       _cachedUserStore = cachedUserStore,
+       _cachedWeekProgressStore = cachedWeekProgressStore,
+       _tabCoordinator =
+           tabCoordinator ??
+           HomeBottomTabCoordinator(
+             routerService: routerService,
+           );
 
   final NotifyService _notifyService;
   final AuthService _authService;
@@ -124,7 +125,7 @@ class ProgressViewModel {
 
     _notifyService.setHapticFeedbackEvent(HapticFeedbackEvent.success);
 
-    final userId = _resolveUserId();
+    final userId = auth.resolveUserId(_authService);
     if (userId != null) {
       await _persistCache(userId, updated);
     }
@@ -160,7 +161,11 @@ class ProgressViewModel {
     }
 
     if (isOffline && preferCacheWhenOffline) {
-      final cachedUser = await _resolveCachedUser();
+      final cachedUser = await auth.resolveCachedUser(
+        authService: _authService,
+        cachedUser: _cachedUser,
+        cachedUserStore: _cachedUserStore,
+      );
 
       // First, try reading from SessionLocalDataSource for combined sessions
       // Build rows even if sessions is empty (to show active protocols)
@@ -245,7 +250,7 @@ class ProgressViewModel {
       return;
     }
 
-    final userId = _resolveUserId();
+    final userId = auth.resolveUserId(_authService);
     if (userId == null) {
       _setFailure(
         const DomainFailure(
@@ -267,8 +272,7 @@ class ProgressViewModel {
     }
 
     final user = userResult.getOrElse((_) => throw StateError('Unreachable'));
-    final isOnline =
-        _connectivityService.status.value == NetworkStatus.online;
+    final isOnline = _connectivityService.status.value == NetworkStatus.online;
 
     // If online, fetch from remote and upsert to local cache (best-effort)
     // Remote sync failure is non-fatal: we fall back to cached + pending sessions
@@ -407,8 +411,10 @@ class ProgressViewModel {
 
     final rows = <ProtocolRow>[];
     for (final protocolId in orderedIds) {
-      final protocolName = protocolNamesById[protocolId] ?? 'Protocol unavailable';
-      final completedDays = completedDaysByProtocolId[protocolId] ?? <DateTime>{};
+      final protocolName =
+          protocolNamesById[protocolId] ?? 'Protocol unavailable';
+      final completedDays =
+          completedDaysByProtocolId[protocolId] ?? <DateTime>{};
       final cells = List<DayCell>.generate(7, (index) {
         final day = _startOfDay(weekStart.add(Duration(days: index)));
         final state = computeCellState(
@@ -498,47 +504,11 @@ class ProgressViewModel {
     String fallbackMessage,
   ) {
     return result.getLeft().getOrElse(
-          () => DomainFailure(
-            code: 'Progress.UnexpectedError',
-            message: fallbackMessage,
-          ),
-        );
-  }
-
-  String? _resolveUserId() {
-    final authState = _authService.authState.value;
-    if (authState is AuthenticatedOnline) {
-      return authState.user.id;
-    }
-    if (authState is AuthenticatedOffline) {
-      return authState.user.id;
-    }
-    return null;
-  }
-
-  Future<User?> _resolveCachedUser() async {
-    final currentUserId = _resolveUserId();
-    if (_cachedUser != null &&
-        (currentUserId == null || _cachedUser!.id == currentUserId)) {
-      return _cachedUser;
-    }
-
-    final authState = _authService.authState.value;
-    if (authState is AuthenticatedOffline) {
-      return authState.user;
-    }
-    if (authState is AuthenticatedOnline) {
-      return authState.user;
-    }
-
-    final cachedUser = await _cachedUserStore?.loadUser();
-    if (cachedUser == null) {
-      return null;
-    }
-    if (currentUserId != null && cachedUser.id != currentUserId) {
-      return null;
-    }
-    return cachedUser;
+      () => DomainFailure(
+        code: 'Progress.UnexpectedError',
+        message: fallbackMessage,
+      ),
+    );
   }
 
   void _handleConnectivityChange() {

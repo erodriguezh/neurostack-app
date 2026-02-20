@@ -31,6 +31,6 @@ abstract interface class UserRepository {
   /// Persists a user (insert or update).
   ///
   /// Returns [Unit] on success, [DomainFailure] on infrastructure errors.
-  /// Trial expiration is handled by `User.getEffectiveStatus()` in domain logic.
+  /// Trial/subscription gating is handled by `SubscriptionStatusResolver`.
   Future<Either<DomainFailure, Unit>> save(User user);
 }

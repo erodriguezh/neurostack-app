@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-37-tmv",
+  "created_at": "2026-01-28T19:28:51.503157Z",
+  "depends_on_epics": [],
+  "id": "fn-37-tmv",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-37-tmv.md",
+  "status": "open",
+  "title": "Paywall Modal - Phase 2.4: Create RevenueCatClient Interface",
+  "updated_at": "2026-01-28T19:28:51.503639Z"
+}

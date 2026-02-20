@@ -1,3 +1,4 @@
+import 'package:neurostack/core/models/home_bottom_tab.dart';
 import 'package:neurostack/features/protocol/domain/entities/protocol.dart';
 import 'package:neurostack/features/user/domain/entities/user.dart';
 
@@ -6,8 +7,6 @@ const _unset = Object();
 enum HomeStatus { loading, empty, populated, error }
 
 enum HomeBannerType { trial, free, expired, grace, offline }
-
-enum HomeBottomTab { stack, library, progress }
 
 class HomeBannerModel {
   const HomeBannerModel({
@@ -66,6 +65,8 @@ class HomeViewState {
     this.banner,
     this.bannerDismissed = false,
     this.showTrialExpiredModal = false,
+    this.isTrialExpiration = true,
+    this.showTrialReminder = false,
     this.showGraceModal = false,
     this.showDeactivationModal = false,
     this.errorMessage,
@@ -81,6 +82,12 @@ class HomeViewState {
   final HomeBannerModel? banner;
   final bool bannerDismissed;
   final bool showTrialExpiredModal;
+
+  /// Whether the expiration modal is for trial (true) or paid subscription (false).
+  ///
+  /// Only relevant when [showTrialExpiredModal] is true.
+  final bool isTrialExpiration;
+  final bool showTrialReminder;
   final bool showGraceModal;
   final bool showDeactivationModal;
   final String? errorMessage;
@@ -96,6 +103,8 @@ class HomeViewState {
     Object? banner = _unset,
     bool? bannerDismissed,
     bool? showTrialExpiredModal,
+    bool? isTrialExpiration,
+    bool? showTrialReminder,
     bool? showGraceModal,
     bool? showDeactivationModal,
     Object? errorMessage = _unset,
@@ -112,11 +121,14 @@ class HomeViewState {
       bannerDismissed: bannerDismissed ?? this.bannerDismissed,
       showTrialExpiredModal:
           showTrialExpiredModal ?? this.showTrialExpiredModal,
+      isTrialExpiration: isTrialExpiration ?? this.isTrialExpiration,
+      showTrialReminder: showTrialReminder ?? this.showTrialReminder,
       showGraceModal: showGraceModal ?? this.showGraceModal,
       showDeactivationModal:
           showDeactivationModal ?? this.showDeactivationModal,
-      errorMessage:
-          errorMessage == _unset ? this.errorMessage : errorMessage as String?,
+      errorMessage: errorMessage == _unset
+          ? this.errorMessage
+          : errorMessage as String?,
       isRefreshing: isRefreshing ?? this.isRefreshing,
       activeTab: activeTab ?? this.activeTab,
       logSessionRequest: logSessionRequest == _unset

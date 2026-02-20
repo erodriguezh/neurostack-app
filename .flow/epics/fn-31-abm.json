@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-31-abm",
+  "created_at": "2026-01-26T20:08:08.688370Z",
+  "depends_on_epics": [],
+  "id": "fn-31-abm",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-31-abm.md",
+  "status": "open",
+  "title": "Paywall Modal - Phase 0.4: Update Ubiquitous Language",
+  "updated_at": "2026-01-26T20:08:08.688674Z"
+}

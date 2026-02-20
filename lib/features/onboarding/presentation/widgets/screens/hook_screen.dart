@@ -75,7 +75,7 @@ class _HookScreenState extends State<HookScreen> {
               SizedBox(height: spacing.lg),
               // Body lines
               _AnimatedText(
-                delay:  const Duration(milliseconds: _line1Delay),
+                delay: const Duration(milliseconds: _line1Delay),
                 duration: durations.duration500,
                 skipped: _skipped,
                 child: Text(

@@ -20,10 +20,12 @@ class WeekProgressCache {
       'weekStart': weekRange.start.toIso8601String(),
       'weekEnd': weekRange.end.toIso8601String(),
       'protocols': protocolNamesById.entries
-          .map((entry) => {
-                'id': entry.key,
-                'name': entry.value,
-              })
+          .map(
+            (entry) => {
+              'id': entry.key,
+              'name': entry.value,
+            },
+          )
           .toList(),
       'completedByProtocol': completedDaysByProtocolId.map(
         (key, value) => MapEntry(

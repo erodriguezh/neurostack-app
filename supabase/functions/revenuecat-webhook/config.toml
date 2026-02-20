@@ -1,0 +1,3 @@
+# RevenueCat webhook does not send a Supabase JWT.
+# Authorization is handled via shared secret in the Authorization header.
+verify_jwt = false

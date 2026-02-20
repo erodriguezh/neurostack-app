@@ -15,7 +15,8 @@ Matcher isRight<R>() => isA<Right<Object?, R>>();
 Matcher isLeft<L>() => isA<Left<L, Object?>>();
 
 /// Matches a Left containing a DomainFailure with specific code.
-Matcher isLeftWithCode<R>(String expectedCode) => _IsLeftWithCode<R>(expectedCode);
+Matcher isLeftWithCode<R>(String expectedCode) =>
+    _IsLeftWithCode<R>(expectedCode);
 
 class _IsRight<R> extends Matcher {
   const _IsRight(this.expected);

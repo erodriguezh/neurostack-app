@@ -9,6 +9,9 @@ import 'package:neurostack/core/utils/locator.dart';
 import 'package:neurostack/core/utils/navigation/best_router.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/features/auth/data/user_bootstrap_service.dart';
+import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
+import 'package:neurostack/paywall/data/revenuecat_client.dart';
+import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 List<Module> buildTestModules({
@@ -16,6 +19,9 @@ List<Module> buildTestModules({
   DataSourceAbstraction? dataSource,
   UserBootstrapService? userBootstrapService,
   ConnectivityService? connectivityService,
+  RevenueCatClient? revenueCatClient,
+  RevenueCatService? revenueCatService,
+  UserRepository? userRepository,
 }) {
   final modules = buildModules(sharedPreferences: sharedPreferences);
   final overrides = <Type, Module>{};
@@ -38,6 +44,24 @@ List<Module> buildTestModules({
       lazy: false,
     );
   }
+  if (revenueCatClient != null) {
+    overrides[RevenueCatClient] = Module<RevenueCatClient>(
+      builder: () => revenueCatClient,
+      lazy: true,
+    );
+  }
+  if (revenueCatService != null) {
+    overrides[RevenueCatService] = Module<RevenueCatService>(
+      builder: () => revenueCatService,
+      lazy: true,
+    );
+  }
+  if (userRepository != null) {
+    overrides[UserRepository] = Module<UserRepository>(
+      builder: () => userRepository,
+      lazy: true,
+    );
+  }
 
   return modules
       .map((module) => overrides[module.type] ?? module)
@@ -49,6 +73,9 @@ Future<Widget> createTestApp({
   DataSourceAbstraction? dataSource,
   UserBootstrapService? userBootstrapService,
   ConnectivityService? connectivityService,
+  RevenueCatClient? revenueCatClient,
+  RevenueCatService? revenueCatService,
+  UserRepository? userRepository,
 }) async {
   locator.reset();
   locator.registerMany(
@@ -57,6 +84,9 @@ Future<Widget> createTestApp({
       dataSource: dataSource,
       userBootstrapService: userBootstrapService,
       connectivityService: connectivityService,
+      revenueCatClient: revenueCatClient,
+      revenueCatService: revenueCatService,
+      userRepository: userRepository,
     ),
   );
 

@@ -9,8 +9,9 @@ class ConnectivityService {
   ConnectivityService(this._connectivity);
 
   final Connectivity _connectivity;
-  final ValueNotifier<NetworkStatus> status =
-      ValueNotifier<NetworkStatus>(NetworkStatus.online);
+  final ValueNotifier<NetworkStatus> status = ValueNotifier<NetworkStatus>(
+    NetworkStatus.online,
+  );
 
   StreamSubscription<List<ConnectivityResult>>? _subscription;
 
@@ -27,7 +28,8 @@ class ConnectivityService {
   }
 
   void _updateStatus(List<ConnectivityResult> results) {
-    final nextStatus = results.isEmpty || results.contains(ConnectivityResult.none)
+    final nextStatus =
+        results.isEmpty || results.contains(ConnectivityResult.none)
         ? NetworkStatus.offline
         : NetworkStatus.online;
     if (status.value != nextStatus) {

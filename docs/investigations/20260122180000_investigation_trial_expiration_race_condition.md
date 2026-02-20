@@ -1,7 +1,13 @@
+# DEPRECATED
+
+> **This investigation is deprecated.** The race condition described here was resolved
+> by the RevenueCat event-driven architecture and client-side transition detection.
+> The pg_cron approach was removed entirely. Retained for historical context only.
+
 # Investigation: Trial Expiration Modal Race Condition
 
 **Created:** 2026-01-22
-**Status:** Complete
+**Status:** Deprecated
 **References:**
 - Modal Spec: `docs/specs/20260120120000_spec_trial_expiration_modal.md`
 - Cronjob Spec: `docs/specs/20260122150000_spec_trial_expiration_cronjob.md`

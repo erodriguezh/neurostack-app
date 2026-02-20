@@ -24,9 +24,12 @@ enum TrialExpiredChoice {
 /// Parameters:
 /// - [context]: The build context for showing the dialog.
 /// - [activeProtocolCount]: The number of active protocols the user has.
+/// - [isTrialExpiration]: If true, shows "trial has ended" messaging.
+///   If false, shows "subscription has lapsed" messaging for paid users.
 Future<TrialExpiredChoice?> showTrialExpiredModal(
   BuildContext context, {
   required int activeProtocolCount,
+  bool isTrialExpiration = true,
 }) async {
   return showDialog<TrialExpiredChoice>(
     context: context,
@@ -37,13 +40,14 @@ Future<TrialExpiredChoice?> showTrialExpiredModal(
         filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
         child: TrialExpiredModal(
           activeProtocolCount: activeProtocolCount,
+          isTrialExpiration: isTrialExpiration,
         ),
       );
     },
   );
 }
 
-/// A blocking modal shown when the user's trial has expired.
+/// A blocking modal shown when the user's trial or subscription has expired.
 ///
 /// Displays two options:
 /// - "Keep Everything" - subscribe to premium
@@ -52,10 +56,16 @@ class TrialExpiredModal extends StatefulWidget {
   const TrialExpiredModal({
     super.key,
     required this.activeProtocolCount,
+    this.isTrialExpiration = true,
   });
 
   /// The number of active protocols the user currently has.
   final int activeProtocolCount;
+
+  /// Whether this is a trial expiration (true) or paid subscription lapse (false).
+  ///
+  /// Controls the headline text shown to the user.
+  final bool isTrialExpiration;
 
   @override
   State<TrialExpiredModal> createState() => _TrialExpiredModalState();
@@ -91,98 +101,105 @@ class _TrialExpiredModalState extends State<TrialExpiredModal>
     final kitColors = context.kitColors;
     final spacing = context.spacing;
 
-    // ignore: deprecated_member_use
-    return WillPopScope(
-      onWillPop: () async => false, // Block system back, allow programmatic pop
+    // PopScope with canPop: false blocks system back (Android back button,
+    // escape key) while allowing programmatic Navigator.pop() from buttons.
+    // Navigator.pop() bypasses PopScope entirely -- only system-initiated
+    // pops and Navigator.maybePop() respect the canPop flag.
+    return PopScope(
+      canPop: false,
       child: Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: EdgeInsets.zero,
         child: SizedBox.expand(
-        child: Stack(
-          children: [
-            // Amber radial glow at top
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: IgnorePointer(
-                child: FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: Container(
-                    height: 260,
-                    decoration: BoxDecoration(
-                      gradient: RadialGradient(
-                        center: Alignment.topCenter,
-                        radius: 0.8,
-                        colors: [
-                          kitColors.yellow400.withValues(alpha: 0.1),
-                          Colors.transparent,
-                        ],
+          child: Stack(
+            children: [
+              // Amber radial glow at top
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: IgnorePointer(
+                  child: FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: Container(
+                      height: 260,
+                      decoration: BoxDecoration(
+                        gradient: RadialGradient(
+                          center: Alignment.topCenter,
+                          radius: 0.8,
+                          colors: [
+                            kitColors.yellow400.withValues(alpha: 0.1),
+                            Colors.transparent,
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-            // Main content
-            FadeTransition(
-              opacity: _fadeAnimation,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: spacing.lg),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Hourglass icon with glow
-                    _HourglassIcon(),
-                    SizedBox(height: spacing.xl),
-                    // Headline
-                    Text(
-                      'Your Premium Trial Has Ended',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.newsreader(
-                        fontSize: 28,
-                        fontStyle: FontStyle.italic,
-                        fontWeight: FontWeight.w500,
-                        color: kitColors.white90,
-                        letterSpacing: -0.025 * 28,
-                        height: 1.2,
+              // Main content
+              FadeTransition(
+                opacity: _fadeAnimation,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: spacing.lg),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Hourglass icon with glow
+                      _HourglassIcon(),
+                      SizedBox(height: spacing.xl),
+                      // Headline
+                      Text(
+                        widget.isTrialExpiration
+                            ? 'Your Premium Trial Has Ended'
+                            : 'Your Subscription Has Lapsed',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.newsreader(
+                          fontSize: 28,
+                          fontStyle: FontStyle.italic,
+                          fontWeight: FontWeight.w500,
+                          color: kitColors.white90,
+                          letterSpacing: -0.025 * 28,
+                          height: 1.2,
+                        ),
                       ),
-                    ),
-                    // Conditional subtext when activeProtocolCount > 2
-                    if (widget.activeProtocolCount > 2) ...[
-                      SizedBox(height: spacing.md),
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 280),
-                        child: Text(
-                          'You currently have ${widget.activeProtocolCount} active protocols. The free tier allows 2.',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.inter(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w300,
-                            color: kitColors.white50,
-                            height: 1.5,
+                      // Conditional subtext when activeProtocolCount > 2
+                      if (widget.activeProtocolCount > 2) ...[
+                        SizedBox(height: spacing.md),
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 280),
+                          child: Text(
+                            'You currently have ${widget.activeProtocolCount} active protocols. The free tier allows 2.',
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.inter(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w300,
+                              color: kitColors.white50,
+                              height: 1.5,
+                            ),
                           ),
+                        ),
+                      ],
+                      SizedBox(height: spacing.xxl),
+                      // Decision cards
+                      _UpgradeCard(
+                        onTap: () => Navigator.of(context).pop(
+                          TrialExpiredChoice.keepEverything,
+                        ),
+                      ),
+                      SizedBox(height: spacing.md),
+                      _DowngradeCard(
+                        onTap: () => Navigator.of(context).pop(
+                          TrialExpiredChoice.continueWithFree,
                         ),
                       ),
                     ],
-                    SizedBox(height: spacing.xxl),
-                    // Decision cards
-                    _UpgradeCard(
-                      onTap: () =>
-                          Navigator.of(context).pop(TrialExpiredChoice.keepEverything),
-                    ),
-                    SizedBox(height: spacing.md),
-                    _DowngradeCard(
-                      onTap: () =>
-                          Navigator.of(context).pop(TrialExpiredChoice.continueWithFree),
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
       ),
     );
   }

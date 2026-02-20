@@ -1,7 +1,13 @@
+# DEPRECATED
+
+> **This spec is deprecated.** The pg_cron trial-expiration approach was replaced by
+> RevenueCat webhook-driven architecture (Phase 9) and the pg_cron extension was
+> removed (Phase 11.1). Retained for historical context only.
+
 # Spec: Trial Expiration Cronjob
 
 **Created:** 2026-01-22
-**Status:** Draft
+**Status:** Deprecated
 **References:**
 - Related: `docs/specs/20260120120000_spec_trial_expiration_modal.md`
 - Schema: `supabase/migrations/20251204192228_initial_schema.sql`

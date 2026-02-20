@@ -30,7 +30,9 @@ void main() {
     group('create fails', () {
       test('create_whenEmpty_returnsNameEmpty', () {
         // Act
-        final result = ProtocolNameFactory.create(TestConstants.protocol.emptyName);
+        final result = ProtocolNameFactory.create(
+          TestConstants.protocol.emptyName,
+        );
 
         // Assert
         expect(result, isLeftWith(ProtocolFailures.nameEmpty));
@@ -38,7 +40,9 @@ void main() {
 
       test('create_whenTooLong_returnsNameTooLong', () {
         // Act
-        final result = ProtocolNameFactory.create(TestConstants.protocol.tooLongName);
+        final result = ProtocolNameFactory.create(
+          TestConstants.protocol.tooLongName,
+        );
 
         // Assert
         expect(result, isLeftWith(ProtocolFailures.nameTooLong));

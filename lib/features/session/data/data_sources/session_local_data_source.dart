@@ -116,7 +116,10 @@ class SessionLocalDataSource {
   ///
   /// This is an upsert: new sessions are added, existing sessions (by ID)
   /// are updated. Typically called after a successful remote fetch.
-  Future<void> upsertSyncedSessions(String userId, List<Session> sessions) async {
+  Future<void> upsertSyncedSessions(
+    String userId,
+    List<Session> sessions,
+  ) async {
     final key = _syncedKey(userId);
     final existing = await _loadSyncedDtos(userId);
     final existingById = {for (final dto in existing) dto.id: dto};
@@ -146,7 +149,9 @@ class SessionLocalDataSource {
       final result = dto.toDomain();
       result.fold(
         (failure) {
-          _logger.warning('Skipping corrupt synced session: ${failure.message}');
+          _logger.warning(
+            'Skipping corrupt synced session: ${failure.message}',
+          );
           hasCorruptEntries = true;
         },
         (session) {

@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-30-vib",
+  "created_at": "2026-01-26T19:44:10.337137Z",
+  "depends_on_epics": [],
+  "id": "fn-30-vib",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-30-vib.md",
+  "status": "open",
+  "title": "Paywall Modal - Phase 0.3: Update Onboarding Copy",
+  "updated_at": "2026-01-26T19:44:10.337847Z"
+}

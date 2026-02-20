@@ -17,11 +17,7 @@ class SessionRemoteDataSource {
   ///
   /// Throws [Exception] if session not found or connection fails.
   Future<SessionDto> getSession(String id) async {
-    final json = await _dataSource
-        .from(_table)
-        .select()
-        .eq('id', id)
-        .single();
+    final json = await _dataSource.from(_table).select().eq('id', id).single();
     return SessionDto.fromJson(json);
   }
 
@@ -49,7 +45,9 @@ class SessionRemoteDataSource {
     }
 
     final jsonList = await query;
-    return jsonList.map<SessionDto>((json) => SessionDto.fromJson(json)).toList();
+    return jsonList
+        .map<SessionDto>((json) => SessionDto.fromJson(json))
+        .toList();
   }
 
   /// Persists a session and returns the inserted record.

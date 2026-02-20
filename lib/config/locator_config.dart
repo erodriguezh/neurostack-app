@@ -23,6 +23,7 @@ import 'package:neurostack/features/auth/data/user_bootstrap_service.dart';
 import 'package:neurostack/features/onboarding/data/onboarding_store.dart';
 import 'package:neurostack/features/protocol/data/cached_protocol_store.dart';
 import 'package:neurostack/paywall/data/trial_expiration_decision_store.dart';
+import 'package:neurostack/paywall/data/trial_reminder_service.dart';
 import 'package:neurostack/progress/data/cached_week_progress_store.dart';
 
 // Repository interfaces
@@ -38,6 +39,12 @@ import 'package:neurostack/features/user/data/repositories/user_repository_impl.
 // Services
 import 'package:neurostack/features/session/data/services/session_sync_service.dart';
 
+// RevenueCat
+import 'package:neurostack/paywall/data/revenuecat_client.dart';
+import 'package:neurostack/paywall/data/revenuecat_client_factory.dart';
+import 'package:neurostack/paywall/data/revenuecat_service.dart';
+import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
+
 // Use cases
 import 'package:neurostack/features/session/domain/use_cases/check_eligibility_use_case.dart';
 
@@ -48,8 +55,22 @@ List<Module> buildModules({required SharedPreferences sharedPreferences}) => [
     lazy: false,
   ),
   Module<NotifyService>(builder: () => NotifyService(), lazy: false),
+
+  // RevenueCat (SINGLETONS - must be app-lifetime to prevent duplicate SDK listeners)
+  // Registered before AppLifecycleService which depends on RevenueCatService.
+  Module<RevenueCatClient>(
+    builder: () => createRevenueCatClient(),
+    lazy: true,
+  ),
+  Module<RevenueCatService>(
+    builder: () => RevenueCatService(locator<RevenueCatClient>()),
+    lazy: true,
+  ),
+
   Module<AppLifecycleService>(
-    builder: () => AppLifecycleService(),
+    builder: () => AppLifecycleService(
+      revenueCatService: locator<RevenueCatService>(),
+    ),
     lazy: false,
   ),
   Module<ConnectivityService>(
@@ -93,6 +114,21 @@ List<Module> buildModules({required SharedPreferences sharedPreferences}) => [
   Module<TrialExpirationDecisionStore>(
     builder: () =>
         SharedPrefsTrialExpirationDecisionStore(locator<SharedPreferences>()),
+    lazy: true,
+  ),
+
+  // Subscription resolver (centralized policy for UI gating)
+  Module<SubscriptionStatusResolver>(
+    builder: () => const SubscriptionStatusResolver(),
+    lazy: true,
+  ),
+
+  // Trial reminder throttle (once per 24h per user)
+  Module<TrialReminderService>(
+    builder: () => TrialReminderService(
+      sharedPreferences: locator<SharedPreferences>(),
+      resolver: locator<SubscriptionStatusResolver>(),
+    ),
     lazy: true,
   ),
 
@@ -147,6 +183,7 @@ List<Module> buildModules({required SharedPreferences sharedPreferences}) => [
       routerService: locator<RouterService>(),
       connectivityService: locator<ConnectivityService>(),
       appLifecycleService: locator<AppLifecycleService>(),
+      revenueCatService: locator<RevenueCatService>(),
     ),
     lazy: true,
   ),

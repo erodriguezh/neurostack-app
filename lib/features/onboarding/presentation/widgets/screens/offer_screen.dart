@@ -41,7 +41,7 @@ class _OfferScreenState extends State<OfferScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           AppPrimaryCta(
-            label: "Start my free trial",
+            label: "Get started",
             onPressed: widget.onNext,
           ),
           SizedBox(height: spacing.sm),
@@ -240,7 +240,7 @@ class _TrialOfferCard extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            "7 days free",
+            "7-day free trial",
             style: context.theme.textTheme.titleMedium?.copyWith(
               fontSize: 20,
               fontWeight: FontWeight.w500,
@@ -249,7 +249,7 @@ class _TrialOfferCard extends StatelessWidget {
           ),
           SizedBox(height: spacing.xs),
           Text(
-            "No credit card required",
+            "Payment method required \u2022 cancel anytime",
             style: context.theme.textTheme.bodySmall?.copyWith(
               fontSize: 13,
               color: kitColors.white50,

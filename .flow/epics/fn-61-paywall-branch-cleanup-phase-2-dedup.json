@@ -1,0 +1,18 @@
+{
+  "branch_name": "feature/paywall-modal",
+  "completion_review_status": "unknown",
+  "completion_reviewed_at": null,
+  "created_at": "2026-02-15T19:36:19.968291Z",
+  "default_impl": null,
+  "default_review": null,
+  "default_sync": null,
+  "depends_on_epics": [],
+  "id": "fn-61-paywall-branch-cleanup-phase-2-dedup",
+  "next_task": 1,
+  "plan_review_status": "ship",
+  "plan_reviewed_at": "2026-02-15T19:56:42.953289Z",
+  "spec_path": ".flow/specs/fn-61-paywall-branch-cleanup-phase-2-dedup.md",
+  "status": "open",
+  "title": "Paywall branch cleanup phase 2: dedup, deprecations, patterns",
+  "updated_at": "2026-02-15T19:56:42.953971Z"
+}

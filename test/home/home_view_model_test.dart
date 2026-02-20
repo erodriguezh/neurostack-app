@@ -3,42 +3,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
-import 'package:neurostack/core/utils/internal_notification/notify_service.dart';
 import 'package:neurostack/core/utils/internal_notification/toast/toast_event.dart';
-import 'package:neurostack/core/utils/navigation/router_service.dart';
-import 'package:neurostack/features/auth/data/auth_service.dart';
-import 'package:neurostack/features/auth/data/cached_user_store.dart';
 import 'package:neurostack/features/auth/domain/auth_state.dart';
-import 'package:neurostack/features/protocol/domain/repositories/protocol_repository.dart';
-import 'package:neurostack/features/session/data/data_sources/session_local_data_source.dart';
 import 'package:neurostack/features/session/domain/entities/session.dart';
-import 'package:neurostack/features/session/domain/repositories/session_repository.dart';
-import 'package:neurostack/features/user/domain/entities/user.dart';
 import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
-import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
 import 'package:neurostack/home/home_view_model.dart';
+import 'package:neurostack/paywall/domain/entitlement_snapshot.dart';
+import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 
 import '../factories/factories.dart';
-
-// Mocks
-class MockNotifyService extends Mock implements NotifyService {}
-
-class MockRouterService extends Mock implements RouterService {}
-
-class MockAuthService extends Mock implements AuthService {}
-
-class MockUserRepository extends Mock implements UserRepository {}
-
-class MockProtocolRepository extends Mock implements ProtocolRepository {}
-
-class MockSessionRepository extends Mock implements SessionRepository {}
-
-class MockSessionLocalDataSource extends Mock
-    implements SessionLocalDataSource {}
-
-class MockConnectivityService extends Mock implements ConnectivityService {}
-
-class MockCachedUserStore extends Mock implements CachedUserStore {}
+import '../mocks/mock_services.dart';
 
 void main() {
   late MockNotifyService mockNotifyService;
@@ -49,7 +23,9 @@ void main() {
   late MockSessionRepository mockSessionRepository;
   late MockSessionLocalDataSource mockSessionLocalDataSource;
   late MockConnectivityService mockConnectivityService;
-  late MockCachedUserStore mockCachedUserStore;
+  late MockRevenueCatService mockRevenueCatService;
+  late MockTrialReminderService mockTrialReminderService;
+  late SubscriptionStatusResolver subscriptionStatusResolver;
 
   setUpAll(() {
     registerFallbackValue(ToastEventError(message: 'fallback'));
@@ -65,11 +41,35 @@ void main() {
     mockSessionRepository = MockSessionRepository();
     mockSessionLocalDataSource = MockSessionLocalDataSource();
     mockConnectivityService = MockConnectivityService();
-    mockCachedUserStore = MockCachedUserStore();
+    mockRevenueCatService = MockRevenueCatService();
+    mockTrialReminderService = MockTrialReminderService();
+    // Use real resolver since it's pure functions
+    subscriptionStatusResolver = const SubscriptionStatusResolver();
 
     // Default connectivity setup
-    when(() => mockConnectivityService.status)
-        .thenReturn(ValueNotifier(NetworkStatus.online));
+    when(
+      () => mockConnectivityService.status,
+    ).thenReturn(ValueNotifier(NetworkStatus.online));
+
+    // Default RevenueCat setup - null snapshot (RC unavailable, fallback to DB)
+    when(
+      () => mockRevenueCatService.entitlementSnapshot,
+    ).thenReturn(ValueNotifier<EntitlementSnapshot?>(null));
+
+    // Default trial reminder setup - never show reminder
+    when(
+      () => mockTrialReminderService.shouldShowTrialReminder(
+        userId: any(named: 'userId'),
+        snapshot: any(named: 'snapshot'),
+        now: any(named: 'now'),
+      ),
+    ).thenAnswer((_) async => false);
+    when(
+      () => mockTrialReminderService.markReminderShown(
+        userId: any(named: 'userId'),
+        now: any(named: 'now'),
+      ),
+    ).thenAnswer((_) async {});
   });
 
   HomeViewModel createViewModel() {
@@ -82,88 +82,76 @@ void main() {
       sessionRepository: mockSessionRepository,
       sessionLocalDataSource: mockSessionLocalDataSource,
       connectivityService: mockConnectivityService,
-      cachedUserStore: mockCachedUserStore,
+      subscriptionStatusResolver: subscriptionStatusResolver,
+      revenueCatService: mockRevenueCatService,
+      trialReminderService: mockTrialReminderService,
     );
   }
 
   group('HomeViewModel', () {
     group('handleUseFreeTier', () {
       test(
-          'with 2 protocols - status becomes free, cache updated, and refresh called',
-          () async {
-        // Arrange
-        final user = UserFactory.create(
-          subscriptionStatus: SubscriptionStatus.trial,
-          trialPeriod: TrialPeriodFactory.expired(),
-          stack: StackFactory.atFreeCapacity(), // 2 protocols
-          onboardingCompleted: true,
-        );
+        'with 2 protocols - returns true, refreshes, does NOT write to DB',
+        () async {
+          // Arrange
+          final user = UserFactory.create(
+            subscriptionStatus: SubscriptionStatus.trial,
+            stack: StackFactory.atFreeCapacity(), // 2 protocols
+            onboardingCompleted: true,
+          );
 
-        final updatedUser =
-            user.updateSubscriptionStatus(SubscriptionStatus.free);
-
-        when(() => mockUserRepository.save(any()))
-            .thenAnswer((_) async => right(unit));
-        when(() => mockCachedUserStore.saveUser(any()))
-            .thenAnswer((_) async {});
-
-        // Setup auth state for refresh
-        when(() => mockAuthService.authState)
-            .thenReturn(ValueNotifier(AuthenticatedOnline(user)));
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(updatedUser));
-        when(() => mockSessionRepository.list(
+          // Setup auth state for refresh
+          when(
+            () => mockAuthService.authState,
+          ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+          when(
+            () => mockUserRepository.getById(any()),
+          ).thenAnswer((_) async => right(user));
+          when(
+            () => mockSessionRepository.list(
               from: any(named: 'from'),
               to: any(named: 'to'),
-            )).thenAnswer((_) async => right(<Session>[]));
-        when(
-          () => mockSessionLocalDataSource.listSessions(
-            any(),
-            from: any(named: 'from'),
-            to: any(named: 'to'),
-          ),
-        ).thenAnswer((_) async => <Session>[]);
-        when(() =>
-                mockSessionLocalDataSource.upsertSyncedSessions(any(), any()))
-            .thenAnswer((_) async {});
-        when(() => mockProtocolRepository.getById(any()))
-            .thenAnswer((_) async => right(ProtocolFactory.reconstitute()));
-
-        final viewModel = createViewModel();
-        addTearDown(viewModel.dispose);
-        viewModel.state.value = viewModel.state.value.copyWith(user: user);
-
-        // Act
-        await viewModel.handleUseFreeTier();
-
-        // Assert - verify save with correct status
-        verify(
-          () => mockUserRepository.save(
-            any(
-              that: predicate<User>(
-                (u) => u.subscriptionStatus == SubscriptionStatus.free,
-              ),
             ),
-          ),
-        ).called(1);
-        verify(() => mockCachedUserStore.saveUser(any())).called(1);
-        expect(viewModel.state.value.showDeactivationModal, isFalse);
+          ).thenAnswer((_) async => right(<Session>[]));
+          when(
+            () => mockSessionLocalDataSource.listSessions(
+              any(),
+              from: any(named: 'from'),
+              to: any(named: 'to'),
+            ),
+          ).thenAnswer((_) async => <Session>[]);
+          when(
+            () => mockSessionLocalDataSource.upsertSyncedSessions(any(), any()),
+          ).thenAnswer((_) async {});
+          when(
+            () => mockProtocolRepository.getById(any()),
+          ).thenAnswer((_) async => right(ProtocolFactory.reconstitute()));
 
-        // Assert - verify refresh was called (getById invoked)
-        verify(() => mockUserRepository.getById(any())).called(1);
+          final viewModel = createViewModel();
+          addTearDown(viewModel.dispose);
+          viewModel.state.value = viewModel.state.value.copyWith(user: user);
 
-        // Assert - verify state was updated with refreshed user
-        expect(
-          viewModel.state.value.user?.subscriptionStatus,
-          SubscriptionStatus.free,
-        );
-      });
+          // Act
+          final result = await viewModel.handleUseFreeTier();
+
+          // Assert - returns true (success)
+          expect(result, isTrue);
+
+          // Assert - does NOT write subscription status to DB
+          // (webhook is the only DB writer for subscription state)
+          verifyNever(() => mockUserRepository.save(any()));
+
+          expect(viewModel.state.value.showDeactivationModal, isFalse);
+
+          // Assert - refresh was called (getById invoked)
+          verify(() => mockUserRepository.getById(any())).called(1);
+        },
+      );
 
       test('with 3 protocols - triggers deactivation modal', () async {
         // Arrange
         final user = UserFactory.create(
           subscriptionStatus: SubscriptionStatus.trial,
-          trialPeriod: TrialPeriodFactory.expired(),
           stack: StackFactory.overFreeCapacity(), // 3 protocols
           onboardingCompleted: true,
         );
@@ -183,47 +171,49 @@ void main() {
 
     group('_maybeTriggerExpiredModal (via init)', () {
       test(
-          'triggers for expired trial (raw status trial + trialPeriod expired)',
-          () async {
-        // Arrange - trial started 10 days ago relative to now, definitely expired
-        final now = DateTime.now();
-        final expiredTrialPeriod = TrialPeriodFactory.create(
-          startDate: now.subtract(const Duration(days: 10)),
-        );
-        final user = UserFactory.create(
-          subscriptionStatus: SubscriptionStatus.trial,
-          trialPeriod: expiredTrialPeriod,
-          onboardingCompleted: true,
-        );
+        'does NOT trigger for trial status without RC snapshot (no transition)',
+        () async {
+          // Arrange - trial status without RC snapshot means we can't detect
+          // expiration. Modal only triggers on status transitions or expired status.
+          final user = UserFactory.create(
+            subscriptionStatus: SubscriptionStatus.trial,
+            onboardingCompleted: true,
+          );
 
-        when(() => mockAuthService.authState)
-            .thenReturn(ValueNotifier(AuthenticatedOnline(user)));
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(user));
-        when(() => mockSessionRepository.list(
+          when(
+            () => mockAuthService.authState,
+          ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+          when(
+            () => mockUserRepository.getById(any()),
+          ).thenAnswer((_) async => right(user));
+          when(
+            () => mockSessionRepository.list(
               from: any(named: 'from'),
               to: any(named: 'to'),
-            )).thenAnswer((_) async => right(<Session>[]));
-        when(
-          () => mockSessionLocalDataSource.listSessions(
-            any(),
-            from: any(named: 'from'),
-            to: any(named: 'to'),
-          ),
-        ).thenAnswer((_) async => <Session>[]);
-        when(() =>
-                mockSessionLocalDataSource.upsertSyncedSessions(any(), any()))
-            .thenAnswer((_) async {});
+            ),
+          ).thenAnswer((_) async => right(<Session>[]));
+          when(
+            () => mockSessionLocalDataSource.listSessions(
+              any(),
+              from: any(named: 'from'),
+              to: any(named: 'to'),
+            ),
+          ).thenAnswer((_) async => <Session>[]);
+          when(
+            () => mockSessionLocalDataSource.upsertSyncedSessions(any(), any()),
+          ).thenAnswer((_) async {});
 
-        final viewModel = createViewModel();
-        addTearDown(viewModel.dispose);
+          final viewModel = createViewModel();
+          addTearDown(viewModel.dispose);
 
-        // Act
-        await viewModel.init();
+          // Act
+          await viewModel.init();
 
-        // Assert
-        expect(viewModel.state.value.showTrialExpiredModal, isTrue);
-      });
+          // Assert - without RC snapshot, effective status is DB status (trial)
+          // Modal does not trigger because there's no detected transition
+          expect(viewModel.state.value.showTrialExpiredModal, isFalse);
+        },
+      );
 
       test('triggers for premium expiration (expired status)', () async {
         // Arrange
@@ -232,14 +222,18 @@ void main() {
           onboardingCompleted: true,
         );
 
-        when(() => mockAuthService.authState)
-            .thenReturn(ValueNotifier(AuthenticatedOnline(user)));
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(user));
-        when(() => mockSessionRepository.list(
-              from: any(named: 'from'),
-              to: any(named: 'to'),
-            )).thenAnswer((_) async => right(<Session>[]));
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+        when(
+          () => mockUserRepository.getById(any()),
+        ).thenAnswer((_) async => right(user));
+        when(
+          () => mockSessionRepository.list(
+            from: any(named: 'from'),
+            to: any(named: 'to'),
+          ),
+        ).thenAnswer((_) async => right(<Session>[]));
         when(
           () => mockSessionLocalDataSource.listSessions(
             any(),
@@ -247,9 +241,9 @@ void main() {
             to: any(named: 'to'),
           ),
         ).thenAnswer((_) async => <Session>[]);
-        when(() =>
-                mockSessionLocalDataSource.upsertSyncedSessions(any(), any()))
-            .thenAnswer((_) async {});
+        when(
+          () => mockSessionLocalDataSource.upsertSyncedSessions(any(), any()),
+        ).thenAnswer((_) async {});
 
         final viewModel = createViewModel();
         addTearDown(viewModel.dispose);
@@ -257,30 +251,30 @@ void main() {
         // Act
         await viewModel.init();
 
-        // Assert
+        // Assert - modal shows with paid-lapse messaging (not trial messaging)
         expect(viewModel.state.value.showTrialExpiredModal, isTrue);
+        expect(viewModel.state.value.isTrialExpiration, isFalse);
       });
 
       test('does NOT trigger for active trial', () async {
-        // Arrange - trial started 1 day ago relative to now, 6 days remaining
-        final now = DateTime.now();
-        final activeTrialPeriod = TrialPeriodFactory.create(
-          startDate: now.subtract(const Duration(days: 1)),
-        );
+        // Arrange - user with trial status
         final user = UserFactory.create(
           subscriptionStatus: SubscriptionStatus.trial,
-          trialPeriod: activeTrialPeriod,
           onboardingCompleted: true,
         );
 
-        when(() => mockAuthService.authState)
-            .thenReturn(ValueNotifier(AuthenticatedOnline(user)));
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(user));
-        when(() => mockSessionRepository.list(
-              from: any(named: 'from'),
-              to: any(named: 'to'),
-            )).thenAnswer((_) async => right(<Session>[]));
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+        when(
+          () => mockUserRepository.getById(any()),
+        ).thenAnswer((_) async => right(user));
+        when(
+          () => mockSessionRepository.list(
+            from: any(named: 'from'),
+            to: any(named: 'to'),
+          ),
+        ).thenAnswer((_) async => right(<Session>[]));
         when(
           () => mockSessionLocalDataSource.listSessions(
             any(),
@@ -288,9 +282,9 @@ void main() {
             to: any(named: 'to'),
           ),
         ).thenAnswer((_) async => <Session>[]);
-        when(() =>
-                mockSessionLocalDataSource.upsertSyncedSessions(any(), any()))
-            .thenAnswer((_) async {});
+        when(
+          () => mockSessionLocalDataSource.upsertSyncedSessions(any(), any()),
+        ).thenAnswer((_) async {});
 
         final viewModel = createViewModel();
         addTearDown(viewModel.dispose);
@@ -302,28 +296,26 @@ void main() {
         expect(viewModel.state.value.showTrialExpiredModal, isFalse);
       });
 
-      test('does NOT trigger for free user with expired trialPeriod', () async {
-        // Arrange - user who chose free tier (status=free) but still has
-        // the old expired trialPeriod. Modal should NOT re-trigger.
-        // This is a critical regression test for the modal not re-appearing.
-        final now = DateTime.now();
-        final expiredTrialPeriod = TrialPeriodFactory.create(
-          startDate: now.subtract(const Duration(days: 10)),
-        );
+      test('does NOT trigger for free user', () async {
+        // Arrange - user who chose free tier (status=free).
+        // Modal should NOT trigger for free users.
         final user = UserFactory.create(
           subscriptionStatus: SubscriptionStatus.free,
-          trialPeriod: expiredTrialPeriod,
           onboardingCompleted: true,
         );
 
-        when(() => mockAuthService.authState)
-            .thenReturn(ValueNotifier(AuthenticatedOnline(user)));
-        when(() => mockUserRepository.getById(any()))
-            .thenAnswer((_) async => right(user));
-        when(() => mockSessionRepository.list(
-              from: any(named: 'from'),
-              to: any(named: 'to'),
-            )).thenAnswer((_) async => right(<Session>[]));
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+        when(
+          () => mockUserRepository.getById(any()),
+        ).thenAnswer((_) async => right(user));
+        when(
+          () => mockSessionRepository.list(
+            from: any(named: 'from'),
+            to: any(named: 'to'),
+          ),
+        ).thenAnswer((_) async => right(<Session>[]));
         when(
           () => mockSessionLocalDataSource.listSessions(
             any(),
@@ -331,9 +323,9 @@ void main() {
             to: any(named: 'to'),
           ),
         ).thenAnswer((_) async => <Session>[]);
-        when(() =>
-                mockSessionLocalDataSource.upsertSyncedSessions(any(), any()))
-            .thenAnswer((_) async {});
+        when(
+          () => mockSessionLocalDataSource.upsertSyncedSessions(any(), any()),
+        ).thenAnswer((_) async {});
 
         final viewModel = createViewModel();
         addTearDown(viewModel.dispose);
@@ -346,16 +338,113 @@ void main() {
       });
     });
 
+    group('regression: mismatched snapshot does not influence effective status',
+        () {
+      test(
+        'mismatchedSnapshot_effectiveStatusUsesDbFallback',
+        () async {
+          // Regression guard: After removing _scopedSnapshot from HomeViewModel,
+          // ensure that a mismatched entitlement snapshot (belonging to a
+          // different user) does NOT influence the effective status.
+          // Safety relies on SubscriptionStatusResolver.resolveEffectiveStatus
+          // checking snapshot.isForUser(user.id) internally.
+          final user = UserFactory.create(
+            id: 'user-a',
+            subscriptionStatus: SubscriptionStatus.free,
+            onboardingCompleted: true,
+          );
+
+          // Set up a snapshot for a DIFFERENT user with premium status
+          final mismatchedSnapshot =
+              EntitlementSnapshotFactory.activePaidMonthly(
+            userId: 'user-b',
+          );
+          when(
+            () => mockRevenueCatService.entitlementSnapshot,
+          ).thenReturn(ValueNotifier<EntitlementSnapshot?>(mismatchedSnapshot));
+
+          when(
+            () => mockAuthService.authState,
+          ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+          when(
+            () => mockUserRepository.getById(any()),
+          ).thenAnswer((_) async => right(user));
+          when(
+            () => mockSessionRepository.list(
+              from: any(named: 'from'),
+              to: any(named: 'to'),
+            ),
+          ).thenAnswer((_) async => right(<Session>[]));
+          when(
+            () => mockSessionLocalDataSource.listSessions(
+              any(),
+              from: any(named: 'from'),
+              to: any(named: 'to'),
+            ),
+          ).thenAnswer((_) async => <Session>[]);
+          when(
+            () => mockSessionLocalDataSource.upsertSyncedSessions(any(), any()),
+          ).thenAnswer((_) async {});
+
+          final viewModel = createViewModel();
+          addTearDown(viewModel.dispose);
+
+          // Act - isTrialOrPremiumExpired uses the raw snapshot
+          final result = viewModel.isTrialOrPremiumExpired(user);
+
+          // Assert - should use DB status (free), not the mismatched
+          // snapshot's premiumMonthly. Free status IS considered expired
+          // for paywall purposes, so result is true.
+          expect(result, isTrue);
+
+          // Double-check: if it incorrectly used the mismatched snapshot,
+          // it would resolve to premiumMonthly and return false.
+          // The fact it returns true confirms DB fallback is in effect.
+        },
+      );
+
+      test(
+        'mismatchedSnapshot_premiumUserNotDowngraded',
+        () async {
+          // Regression guard: A premium user should NOT be downgraded
+          // because of a mismatched expired snapshot from another user.
+          final user = UserFactory.create(
+            id: 'user-a',
+            subscriptionStatus: SubscriptionStatus.premiumMonthly,
+            onboardingCompleted: true,
+          );
+
+          // Set up an expired snapshot for a DIFFERENT user
+          final mismatchedSnapshot = EntitlementSnapshotFactory.expiredTrial(
+            userId: 'user-b',
+          );
+          when(
+            () => mockRevenueCatService.entitlementSnapshot,
+          ).thenReturn(ValueNotifier<EntitlementSnapshot?>(mismatchedSnapshot));
+
+          final viewModel = createViewModel();
+          addTearDown(viewModel.dispose);
+
+          // Act
+          final result = viewModel.isTrialOrPremiumExpired(user);
+
+          // Assert - should use DB status (premiumMonthly), not the
+          // mismatched snapshot's expired state. Premium = not expired.
+          expect(result, isFalse);
+        },
+      );
+    });
+
     group('isTrialOrPremiumExpired', () {
-      test('returns true for expired trial', () {
-        // Arrange - trial started 10 days ago relative to now
-        final now = DateTime.now();
-        final expiredTrialPeriod = TrialPeriodFactory.create(
-          startDate: now.subtract(const Duration(days: 10)),
-        );
+      // Note: isTrialOrPremiumExpired() is synchronous and checks
+      // effective status (expired/free).
+
+      test('returns false for trial status', () {
+        // Arrange - when RC is unavailable, effective status is the DB status.
+        // For trial status, the method returns false since it only checks
+        // for expired/free states.
         final user = UserFactory.create(
           subscriptionStatus: SubscriptionStatus.trial,
-          trialPeriod: expiredTrialPeriod,
           onboardingCompleted: true,
         );
 
@@ -365,33 +454,11 @@ void main() {
         // Act
         final result = viewModel.isTrialOrPremiumExpired(user);
 
-        // Assert
-        expect(result, isTrue);
-      });
-
-      test('returns false for active trial', () {
-        // Arrange - trial started 1 day ago relative to now
-        final now = DateTime.now();
-        final activeTrialPeriod = TrialPeriodFactory.create(
-          startDate: now.subtract(const Duration(days: 1)),
-        );
-        final user = UserFactory.create(
-          subscriptionStatus: SubscriptionStatus.trial,
-          trialPeriod: activeTrialPeriod,
-          onboardingCompleted: true,
-        );
-
-        final viewModel = createViewModel();
-        addTearDown(viewModel.dispose);
-
-        // Act
-        final result = viewModel.isTrialOrPremiumExpired(user);
-
-        // Assert
+        // Assert - trial is not expired/free, so returns false
         expect(result, isFalse);
       });
 
-      test('returns true for expired premium', () {
+      test('returns true for expired status', () {
         // Arrange
         final user = UserFactory.create(
           subscriptionStatus: SubscriptionStatus.expired,
@@ -408,10 +475,27 @@ void main() {
         expect(result, isTrue);
       });
 
-      test('returns false for free user', () {
-        // Arrange
+      test('returns true for free status', () {
+        // Arrange - free users are considered "expired" for paywall purposes
         final user = UserFactory.create(
           subscriptionStatus: SubscriptionStatus.free,
+          onboardingCompleted: true,
+        );
+
+        final viewModel = createViewModel();
+        addTearDown(viewModel.dispose);
+
+        // Act
+        final result = viewModel.isTrialOrPremiumExpired(user);
+
+        // Assert
+        expect(result, isTrue);
+      });
+
+      test('returns false for premium monthly', () {
+        // Arrange
+        final user = UserFactory.create(
+          subscriptionStatus: SubscriptionStatus.premiumMonthly,
           onboardingCompleted: true,
         );
 
@@ -425,17 +509,10 @@ void main() {
         expect(result, isFalse);
       });
 
-      test('returns false for free user with expired trialPeriod', () {
-        // Arrange - regression test: user who chose free tier should not
-        // trigger modal even if they have an old expired trialPeriod.
-        // The VM checks raw subscriptionStatus, not getEffectiveStatus().
-        final now = DateTime.now();
-        final expiredTrialPeriod = TrialPeriodFactory.create(
-          startDate: now.subtract(const Duration(days: 10)),
-        );
+      test('returns false for premium annual', () {
+        // Arrange
         final user = UserFactory.create(
-          subscriptionStatus: SubscriptionStatus.free,
-          trialPeriod: expiredTrialPeriod,
+          subscriptionStatus: SubscriptionStatus.premiumAnnual,
           onboardingCompleted: true,
         );
 
@@ -445,7 +522,24 @@ void main() {
         // Act
         final result = viewModel.isTrialOrPremiumExpired(user);
 
-        // Assert - should be false because raw status is free, not trial
+        // Assert
+        expect(result, isFalse);
+      });
+
+      test('returns false for grace status', () {
+        // Arrange - grace means billing issue but still has access
+        final user = UserFactory.create(
+          subscriptionStatus: SubscriptionStatus.grace,
+          onboardingCompleted: true,
+        );
+
+        final viewModel = createViewModel();
+        addTearDown(viewModel.dispose);
+
+        // Act
+        final result = viewModel.isTrialOrPremiumExpired(user);
+
+        // Assert
         expect(result, isFalse);
       });
     });

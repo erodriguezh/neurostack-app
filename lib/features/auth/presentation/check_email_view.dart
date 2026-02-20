@@ -44,15 +44,16 @@ class _CheckEmailViewState extends State<CheckEmailView>
       parent: _entranceController,
       curve: CustomCurves.easeOut,
     );
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.05),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _entranceController,
-        curve: CustomCurves.easeOut,
-      ),
-    );
+    _slideAnimation =
+        Tween<Offset>(
+          begin: const Offset(0, 0.05),
+          end: Offset.zero,
+        ).animate(
+          CurvedAnimation(
+            parent: _entranceController,
+            curve: CustomCurves.easeOut,
+          ),
+        );
     _floatController = AnimationController(
       duration: const Duration(seconds: 3),
       vsync: this,
@@ -108,8 +109,7 @@ class _CheckEmailViewState extends State<CheckEmailView>
                                 decoration: BoxDecoration(
                                   boxShadow: [
                                     BoxShadow(
-                                      color:
-                                          kitColors.brandSky.withValues(
+                                      color: kitColors.brandSky.withValues(
                                         alpha: 0.25,
                                       ),
                                       blurRadius: 30,

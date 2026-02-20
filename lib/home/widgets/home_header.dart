@@ -17,12 +17,12 @@ class HomeHeader extends StatelessWidget {
         Text(
           'Your Stack',
           style: context.theme.textTheme.headlineLarge?.copyWith(
-                fontSize: textStyles.h1.fontSize,
-                fontStyle: textStyles.h1.fontStyle,
-                fontWeight: textStyles.h1.fontWeight,
-                letterSpacing: -0.5,
-                color: kitColors.white90,
-              ),
+            fontSize: textStyles.h1.fontSize,
+            fontStyle: textStyles.h1.fontStyle,
+            fontWeight: textStyles.h1.fontWeight,
+            letterSpacing: -0.5,
+            color: kitColors.white90,
+          ),
         ),
         TextButton(
           onPressed: onAdd,

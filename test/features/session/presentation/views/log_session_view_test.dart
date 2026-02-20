@@ -6,36 +6,13 @@ import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 
 import 'package:neurostack/core/ui/app_theme.dart';
-import 'package:neurostack/features/session/data/data_sources/session_local_data_source.dart';
-import 'package:neurostack/features/session/data/services/session_sync_service.dart';
-import 'package:neurostack/features/session/domain/entities/pending_session.dart';
-import 'package:neurostack/features/session/domain/use_cases/check_eligibility_use_case.dart';
 import 'package:neurostack/features/session/presentation/view_models/log_session_view_model.dart';
 import 'package:neurostack/features/session/presentation/views/log_session_view.dart';
-import 'package:neurostack/core/utils/internal_notification/notify_service.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../../../constants/test_constants.dart';
 import '../../../../factories/protocol_factory.dart';
-
-// Mocks
-class MockCheckEligibilityUseCase extends Mock
-    implements CheckEligibilityUseCase {}
-
-class MockSessionLocalDataSource extends Mock
-    implements SessionLocalDataSource {}
-
-class MockSessionSyncService extends Mock implements SessionSyncService {}
-
-class MockNotifyService extends Mock implements NotifyService {}
-
-class MockUuid extends Mock implements Uuid {}
-
-// Fakes for registerFallbackValue
-class FakeCheckEligibilityParams extends Fake
-    implements CheckEligibilityParams {}
-
-class FakePendingSession extends Fake implements PendingSession {}
+import '../../../../mocks/fake_params.dart';
+import '../../../../mocks/mock_services.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -60,8 +37,9 @@ void main() {
       mockUuid = MockUuid();
 
       // Default mock setup for NotifyService (void methods use thenAnswer)
-      when(() => mockNotifyService.setHapticFeedbackEvent(any()))
-          .thenAnswer((_) {});
+      when(
+        () => mockNotifyService.setHapticFeedbackEvent(any()),
+      ).thenAnswer((_) {});
       when(() => mockNotifyService.setToastEvent(any())).thenAnswer((_) {});
     });
 
@@ -97,8 +75,9 @@ void main() {
         'notesCounter_whenLessThan100Characters_isHidden',
         (tester) async {
           // Arrange
-          when(() => mockCheckEligibility.execute(any()))
-              .thenAnswer((_) async => right(unit));
+          when(
+            () => mockCheckEligibility.execute(any()),
+          ).thenAnswer((_) async => right(unit));
 
           final viewModel = createViewModel();
           await viewModel.init();
@@ -129,8 +108,9 @@ void main() {
         'notesCounter_when100OrMoreCharacters_isVisible',
         (tester) async {
           // Arrange
-          when(() => mockCheckEligibility.execute(any()))
-              .thenAnswer((_) async => right(unit));
+          when(
+            () => mockCheckEligibility.execute(any()),
+          ).thenAnswer((_) async => right(unit));
 
           final viewModel = createViewModel();
           await viewModel.init();
@@ -161,8 +141,9 @@ void main() {
         'notesCounter_when130OrMoreCharacters_isRed',
         (tester) async {
           // Arrange
-          when(() => mockCheckEligibility.execute(any()))
-              .thenAnswer((_) async => right(unit));
+          when(
+            () => mockCheckEligibility.execute(any()),
+          ).thenAnswer((_) async => right(unit));
 
           final viewModel = createViewModel();
           await viewModel.init();
@@ -200,8 +181,9 @@ void main() {
         'notesCounter_whenBelow130Characters_isNotRed',
         (tester) async {
           // Arrange
-          when(() => mockCheckEligibility.execute(any()))
-              .thenAnswer((_) async => right(unit));
+          when(
+            () => mockCheckEligibility.execute(any()),
+          ).thenAnswer((_) async => right(unit));
 
           final viewModel = createViewModel();
           await viewModel.init();
@@ -241,15 +223,17 @@ void main() {
         'submitButton_whenSubmitting_showsLoadingIndicator',
         (tester) async {
           // Arrange
-          when(() => mockCheckEligibility.execute(any()))
-              .thenAnswer((_) async => right(unit));
+          when(
+            () => mockCheckEligibility.execute(any()),
+          ).thenAnswer((_) async => right(unit));
           when(() => mockUuid.v4()).thenReturn('test-uuid');
           when(() => mockSyncService.sync()).thenAnswer((_) async {});
 
           // Use Completer for deterministic timing (no real delays)
           final saveCompleter = Completer<void>();
-          when(() => mockLocalDataSource.savePendingSession(any()))
-              .thenAnswer((_) => saveCompleter.future);
+          when(
+            () => mockLocalDataSource.savePendingSession(any()),
+          ).thenAnswer((_) => saveCompleter.future);
 
           final viewModel = createViewModel();
           await viewModel.init();
@@ -291,8 +275,9 @@ void main() {
         'submitButton_whenReady_showsLabelNotLoading',
         (tester) async {
           // Arrange
-          when(() => mockCheckEligibility.execute(any()))
-              .thenAnswer((_) async => right(unit));
+          when(
+            () => mockCheckEligibility.execute(any()),
+          ).thenAnswer((_) async => right(unit));
 
           final viewModel = createViewModel();
           await viewModel.init();
@@ -323,8 +308,9 @@ void main() {
         'durationField_whenValidationError_showsErrorStyling',
         (tester) async {
           // Arrange
-          when(() => mockCheckEligibility.execute(any()))
-              .thenAnswer((_) async => right(unit));
+          when(
+            () => mockCheckEligibility.execute(any()),
+          ).thenAnswer((_) async => right(unit));
           when(() => mockUuid.v4()).thenReturn('test-uuid');
 
           final viewModel = createViewModel();
@@ -359,15 +345,17 @@ void main() {
 
           // Assert - duration field container should have error border styling
           // Find the Container ancestor of the TextField that has BoxDecoration
-          final decoratedContainerFinder = find.ancestor(
-            of: durationField,
-            matching: find.byWidgetPredicate((widget) {
-              if (widget is! Container) return false;
-              final decoration = widget.decoration;
-              if (decoration is! BoxDecoration) return false;
-              return decoration.border != null;
-            }),
-          ).first;
+          final decoratedContainerFinder = find
+              .ancestor(
+                of: durationField,
+                matching: find.byWidgetPredicate((widget) {
+                  if (widget is! Container) return false;
+                  final decoration = widget.decoration;
+                  if (decoration is! BoxDecoration) return false;
+                  return decoration.border != null;
+                }),
+              )
+              .first;
 
           final container = tester.widget<Container>(decoratedContainerFinder);
           final decoration = container.decoration! as BoxDecoration;
@@ -389,8 +377,9 @@ void main() {
         'durationField_whenNoError_doesNotShowErrorText',
         (tester) async {
           // Arrange
-          when(() => mockCheckEligibility.execute(any()))
-              .thenAnswer((_) async => right(unit));
+          when(
+            () => mockCheckEligibility.execute(any()),
+          ).thenAnswer((_) async => right(unit));
 
           final viewModel = createViewModel();
           await viewModel.init();
@@ -419,8 +408,9 @@ void main() {
         'durationField_errorClears_whenUserTypesNewValue',
         (tester) async {
           // Arrange
-          when(() => mockCheckEligibility.execute(any()))
-              .thenAnswer((_) async => right(unit));
+          when(
+            () => mockCheckEligibility.execute(any()),
+          ).thenAnswer((_) async => right(unit));
           when(() => mockUuid.v4()).thenReturn('test-uuid');
 
           final viewModel = createViewModel();
@@ -452,15 +442,17 @@ void main() {
           );
 
           // Capture the error border color
-          final decoratedContainerFinder = find.ancestor(
-            of: durationField,
-            matching: find.byWidgetPredicate((widget) {
-              if (widget is! Container) return false;
-              final decoration = widget.decoration;
-              if (decoration is! BoxDecoration) return false;
-              return decoration.border != null;
-            }),
-          ).first;
+          final decoratedContainerFinder = find
+              .ancestor(
+                of: durationField,
+                matching: find.byWidgetPredicate((widget) {
+                  if (widget is! Container) return false;
+                  final decoration = widget.decoration;
+                  if (decoration is! BoxDecoration) return false;
+                  return decoration.border != null;
+                }),
+              )
+              .first;
 
           var container = tester.widget<Container>(decoratedContainerFinder);
           var decoration = container.decoration! as BoxDecoration;

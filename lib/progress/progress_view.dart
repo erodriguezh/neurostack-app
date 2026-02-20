@@ -1,13 +1,17 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
+import 'package:neurostack/core/models/home_bottom_tab.dart';
 import 'package:neurostack/core/ui/constants/spacing.dart';
 import 'package:neurostack/core/ui/widgets/app_grid_background.dart';
+import 'package:neurostack/core/ui/widgets/error_state_view.dart';
 import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
 import 'package:neurostack/core/utils/internal_notification/notify_service.dart';
 import 'package:neurostack/core/utils/internal_notification/toast/toast_event.dart';
 import 'package:neurostack/core/utils/locator.dart';
+import 'package:neurostack/core/utils/navigation/route_data.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
 import 'package:neurostack/features/auth/data/cached_user_store.dart';
@@ -129,7 +133,9 @@ class _ProgressViewState extends State<ProgressView>
                         width: 134,
                         height: 5,
                         decoration: BoxDecoration(
-                          color: context.kitColors.white90.withValues(alpha: 0.3),
+                          color: context.kitColors.white90.withValues(
+                            alpha: 0.3,
+                          ),
                           borderRadius: BorderRadius.circular(999),
                         ),
                       ),
@@ -172,7 +178,7 @@ class _ProgressViewState extends State<ProgressView>
       slivers.add(
         SliverFillRemaining(
           hasScrollBody: false,
-          child: _ErrorState(message: state.failure.message),
+          child: ErrorStateView(message: state.failure.message),
         ),
       );
       return slivers;
@@ -183,26 +189,42 @@ class _ProgressViewState extends State<ProgressView>
         SliverToBoxAdapter(
           child: Padding(
             padding: EdgeInsets.fromLTRB(spacing.lg, spacing.lg, spacing.lg, 0),
-            child: Column(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'This Week',
-                  style: context.theme.textTheme.headlineLarge?.copyWith(
-                    fontSize: 32,
-                    fontStyle: FontStyle.italic,
-                    letterSpacing: -0.8,
-                    color: context.kitColors.white90,
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'This Week',
+                      style: context.theme.textTheme.headlineLarge?.copyWith(
+                        fontSize: 32,
+                        fontStyle: FontStyle.italic,
+                        letterSpacing: -0.8,
+                        color: context.kitColors.white90,
+                      ),
+                    ),
+                    SizedBox(height: spacing.xs),
+                    Text(
+                      _formatWeekRange(context, state.weekRange),
+                      style: context.theme.textTheme.bodyMedium?.copyWith(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w300,
+                        color: context.kitColors.white40,
+                      ),
+                    ),
+                  ],
                 ),
-                SizedBox(height: spacing.xs),
-                Text(
-                  _formatWeekRange(context, state.weekRange),
-                  style: context.theme.textTheme.bodyMedium?.copyWith(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w300,
+                IconButton(
+                  icon: Icon(
+                    LucideIcons.settings,
                     color: context.kitColors.white40,
+                    size: 20,
                   ),
+                  onPressed: () {
+                    locator<RouterService>().goTo(Path(name: '/settings'));
+                  },
                 ),
               ],
             ),
@@ -288,14 +310,16 @@ class _ProgressViewState extends State<ProgressView>
     }
 
     // Resolve Protocol: try cache first, then repository fallback
-    final cachedProtocols =
-        await locator<CachedProtocolStore>().loadProtocols(userId);
+    final cachedProtocols = await locator<CachedProtocolStore>().loadProtocols(
+      userId,
+    );
     var protocol = cachedProtocols.firstWhereOrNull((p) => p.id == protocolId);
 
     // Fallback to repository if not in cache (e.g., cache cleared, first run)
     if (protocol == null) {
-      final repoResult =
-          await locator<ProtocolRepository>().getById(protocolId);
+      final repoResult = await locator<ProtocolRepository>().getById(
+        protocolId,
+      );
       protocol = repoResult.fold((_) => null, (p) => p);
     }
 
@@ -316,43 +340,6 @@ class _ProgressViewState extends State<ProgressView>
       userId: userId,
       initialDate: day,
       onSessionLogged: _viewModel.onSessionLogged,
-    );
-  }
-}
-
-class _ErrorState extends StatelessWidget {
-  const _ErrorState({this.message});
-
-  final String? message;
-
-  @override
-  Widget build(BuildContext context) {
-    final kitColors = context.kitColors;
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: context.spacing.lg),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              message ?? 'Something went wrong.',
-              textAlign: TextAlign.center,
-              style: context.theme.textTheme.bodyMedium?.copyWith(
-                color: kitColors.white60,
-                height: 1.5,
-              ),
-            ),
-            SizedBox(height: context.spacing.sm),
-            Text(
-              'Pull to refresh to retry.',
-              textAlign: TextAlign.center,
-              style: context.theme.textTheme.bodySmall?.copyWith(
-                color: kitColors.white40,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

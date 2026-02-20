@@ -20,7 +20,8 @@ abstract final class UserFailures {
     message: 'This protocol is not in your stack',
   );
 
-  // Session logging - INV-U4, INV-U5
+  // Session logging - INV-U4
+  // Note: Trial expiration gating (INV-U5) is enforced by SubscriptionStatusResolver.
   static const onboardingNotCompleted = DomainFailure(
     code: 'User.OnboardingNotCompleted',
     message: 'Complete onboarding to start tracking sessions',
@@ -34,12 +35,6 @@ abstract final class UserFailures {
   static const protocolNotInStack = DomainFailure(
     code: 'User.ProtocolNotInStack',
     message: 'Cannot log session for protocol not in your stack',
-  );
-
-  // Subscription - general
-  static const invalidSubscriptionUpgrade = DomainFailure(
-    code: 'User.InvalidSubscriptionUpgrade',
-    message: 'Invalid subscription type for upgrade',
   );
 
   static const alreadyOnboarded = DomainFailure(

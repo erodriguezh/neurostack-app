@@ -5,8 +5,9 @@ import 'package:neurostack/features/session/domain/value_objects/session_duratio
 abstract final class SessionDurationFactory {
   /// Creates a valid SessionDuration (22 minutes, common session length).
   static SessionDuration valid() {
-    return SessionDuration.create(const Duration(minutes: 22))
-        .getOrElse((l) => throw Exception('Factory produced invalid SessionDuration: $l'));
+    return SessionDuration.create(const Duration(minutes: 22)).getOrElse(
+      (l) => throw Exception('Factory produced invalid SessionDuration: $l'),
+    );
   }
 
   /// Creates a SessionDuration with custom duration.

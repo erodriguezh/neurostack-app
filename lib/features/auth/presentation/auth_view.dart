@@ -46,15 +46,16 @@ class _AuthViewState extends State<AuthView>
       parent: _entranceController,
       curve: CustomCurves.easeOut,
     );
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.06),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _entranceController,
-        curve: CustomCurves.easeOut,
-      ),
-    );
+    _slideAnimation =
+        Tween<Offset>(
+          begin: const Offset(0, 0.06),
+          end: Offset.zero,
+        ).animate(
+          CurvedAnimation(
+            parent: _entranceController,
+            curve: CustomCurves.easeOut,
+          ),
+        );
   }
 
   @override

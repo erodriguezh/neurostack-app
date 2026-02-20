@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -235,6 +236,107 @@ void main() {
                 (widget is AnimatedModalBarrier && widget.dismissible == false),
           );
           expect(barrierFinder, findsAtLeast(1));
+        },
+      );
+
+      testWidgets(
+        'trialExpiredModal_systemBack_doesNotDismissModal',
+        (tester) async {
+          // Arrange
+          setUpTestViewport(tester);
+          addTearDown(() => tearDownTestViewport(tester));
+
+          TrialExpiredChoice? result;
+
+          await tester.pumpWidget(
+            MaterialApp(
+              theme: AppTheme.buildTheme(Brightness.dark),
+              home: Builder(
+                builder: (context) {
+                  return Scaffold(
+                    body: ElevatedButton(
+                      onPressed: () async {
+                        result = await showTrialExpiredModal(
+                          context,
+                          activeProtocolCount: 2,
+                        );
+                      },
+                      child: const Text('Show Modal'),
+                    ),
+                  );
+                },
+              ),
+            ),
+          );
+
+          // Open the modal
+          await tester.tap(find.text('Show Modal'));
+          await tester.pumpAndSettle();
+
+          // Verify the modal is showing
+          expect(find.text('Keep Everything'), findsOneWidget);
+
+          // Act - simulate system back button via pop route
+          final popped = await tester.binding
+              .handlePopRoute();
+          await tester.pumpAndSettle();
+
+          // Assert - modal should still be visible (not dismissed)
+          // handlePopRoute returns true = event was handled by Navigator,
+          // NOT that the route actually popped. PopScope blocks the pop but
+          // the Navigator still "handles" the system-back event.
+          expect(popped, isTrue);
+          expect(find.text('Keep Everything'), findsOneWidget);
+          // Result should still be null (modal not closed)
+          expect(result, isNull);
+        },
+      );
+
+      testWidgets(
+        'trialExpiredModal_escapeKey_doesNotDismissModal',
+        (tester) async {
+          // Arrange
+          setUpTestViewport(tester);
+          addTearDown(() => tearDownTestViewport(tester));
+
+          TrialExpiredChoice? result;
+
+          await tester.pumpWidget(
+            MaterialApp(
+              theme: AppTheme.buildTheme(Brightness.dark),
+              home: Builder(
+                builder: (context) {
+                  return Scaffold(
+                    body: ElevatedButton(
+                      onPressed: () async {
+                        result = await showTrialExpiredModal(
+                          context,
+                          activeProtocolCount: 2,
+                        );
+                      },
+                      child: const Text('Show Modal'),
+                    ),
+                  );
+                },
+              ),
+            ),
+          );
+
+          // Open the modal
+          await tester.tap(find.text('Show Modal'));
+          await tester.pumpAndSettle();
+
+          // Verify the modal is showing
+          expect(find.text('Keep Everything'), findsOneWidget);
+
+          // Act - simulate pressing Escape key
+          await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+          await tester.pumpAndSettle();
+
+          // Assert - modal should still be visible (not dismissed)
+          expect(find.text('Keep Everything'), findsOneWidget);
+          // Result should still be null (modal not closed)
+          expect(result, isNull);
         },
       );
     });

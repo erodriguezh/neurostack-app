@@ -373,7 +373,9 @@ void main() {
       locator.reset();
     });
 
-    testWidgets('goTo_onboardingGuardTrue_redirectsToOnboarding', (tester) async {
+    testWidgets('goTo_onboardingGuardTrue_redirectsToOnboarding', (
+      tester,
+    ) async {
       routerService.goTo(Path(name: '/details?from=link'));
       await tester.pump();
 

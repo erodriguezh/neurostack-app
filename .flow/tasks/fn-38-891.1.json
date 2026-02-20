@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-01-28T20:02:29.771411Z",
+  "depends_on": [],
+  "epic": "fn-38-891",
+  "id": "fn-38-891.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-38-891.1.md",
+  "status": "todo",
+  "title": "Create RevenueCatClient implementations (mobile, stub, factory)",
+  "updated_at": "2026-01-28T20:02:29.771811Z"
+}

@@ -19,10 +19,10 @@ class CheckEmailViewModel {
     required RouterService routerService,
     required DataSourceAbstraction dataSource,
     required NotifyService notifyService,
-  })  : _navigationIntentStore = navigationIntentStore,
-        _routerService = routerService,
-        _dataSource = dataSource,
-        _notifyService = notifyService;
+  }) : _navigationIntentStore = navigationIntentStore,
+       _routerService = routerService,
+       _dataSource = dataSource,
+       _notifyService = notifyService;
 
   final NavigationIntentStore _navigationIntentStore;
   final RouterService _routerService;

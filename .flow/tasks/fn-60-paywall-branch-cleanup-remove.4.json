@@ -1,0 +1,16 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-02-14T20:50:23.087609Z",
+  "depends_on": [
+    "fn-60-paywall-branch-cleanup-remove.3"
+  ],
+  "epic": "fn-60-paywall-branch-cleanup-remove",
+  "id": "fn-60-paywall-branch-cleanup-remove.4",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-60-paywall-branch-cleanup-remove.4.md",
+  "status": "todo",
+  "title": "Extract shared ViewModel utilities and relocate HomeBottomTab",
+  "updated_at": "2026-02-14T20:51:43.372186Z"
+}

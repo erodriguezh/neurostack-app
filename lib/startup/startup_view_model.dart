@@ -1,18 +1,19 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 import 'package:neurostack/config/locator_config.dart';
-import 'package:neurostack/core/utils/locator.dart';
 import 'package:neurostack/core/abstractions/logging_abstraction.dart';
 import 'package:neurostack/core/utils/app_lifecycle_service.dart';
 import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
+import 'package:neurostack/core/utils/locator.dart';
 import 'package:neurostack/core/utils/navigation/route_data.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
 import 'package:neurostack/features/auth/domain/auth_state.dart' as auth_state;
 import 'package:neurostack/features/onboarding/data/onboarding_store.dart';
 import 'package:neurostack/features/session/data/services/session_sync_service.dart';
-import 'package:logging/logging.dart';
+import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Represents different states of app initialization
@@ -52,6 +53,8 @@ class StartupViewModel {
   final LoggingAbstraction _loggingAbstraction;
   StreamSubscription<LogRecord>? loggingSubscription;
 
+  final Logger _logger = Logger('StartupViewModel');
+
   Future<void> initializeApp() async {
     appStateNotifier.value = const InitializingApp();
     try {
@@ -70,8 +73,20 @@ class StartupViewModel {
       final routerService = locator<RouterService>();
       routerService.setOnboardingGuard(() => !onboardingStore.isCompleted);
 
+      // CRITICAL: Init RevenueCat FIRST (before auth rehydration triggers identify)
+      // Auth rehydration may call identify() - SDK must be configured first.
+      // If init() fails, identify() will gracefully degrade (log and return).
+      final revenueCatService = locator<RevenueCatService>();
+      try {
+        await revenueCatService.init();
+      } catch (e, st) {
+        _logger.warning('RevenueCat init failed', e, st);
+        // Continue - app works without RC, just can't show paywall
+        // identify() calls will gracefully degrade (log and return)
+      }
+
       final authService = locator<AuthService>();
-      await authService.init();
+      await authService.init(); // This may trigger identify() via rehydration
 
       if (authService.authState.value is auth_state.OfflineNoUser) {
         appStateNotifier.value = const OfflineNoUserState();
@@ -96,6 +111,9 @@ class StartupViewModel {
   }
 
   Future<void> retryInitialization() async {
+    // Set state to initializing BEFORE disposing to prevent widgets from
+    // reading disposed notifiers/services during the transition window
+    appStateNotifier.value = const InitializingApp();
     _disposeServices();
     locator.reset();
     await initializeApp();
@@ -115,6 +133,9 @@ class StartupViewModel {
     } catch (_) {}
     try {
       locator<ConnectivityService>().dispose();
+    } catch (_) {}
+    try {
+      locator<RevenueCatService>().dispose();
     } catch (_) {}
   }
 }

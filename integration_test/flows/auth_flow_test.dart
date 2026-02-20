@@ -1,23 +1,18 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpdart/fpdart.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:neurostack/core/failures/domain_failure.dart';
 import 'package:neurostack/core/ui/constants/widget_keys.dart';
-import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
 import 'package:neurostack/core/utils/locator.dart';
 import 'package:neurostack/core/utils/navigation/route_data.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
-import 'package:neurostack/features/auth/data/user_bootstrap_service.dart';
-import 'package:neurostack/features/user/domain/entities/user.dart';
 import 'package:neurostack/home/home_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
+import '../mocks/fake_services.dart';
 import '../mocks/mock_data_sources.dart';
 import '../utils/pump_helpers.dart';
 import '../utils/test_app.dart';
@@ -85,41 +80,4 @@ void main() {
     // Assert
     expect(routerService.navigationStack.value.last.pathWithParams, '/');
   });
-}
-
-class FakeConnectivityService implements ConnectivityService {
-  @override
-  final ValueNotifier<NetworkStatus> status =
-      ValueNotifier<NetworkStatus>(NetworkStatus.online);
-
-  @override
-  Future<void> init() async {}
-
-  @override
-  void dispose() {
-    status.dispose();
-  }
-}
-
-class FakeUserBootstrapService implements UserBootstrapService {
-  FakeUserBootstrapService(this._user);
-
-  final User _user;
-  bool _hasRemoteUserRecord = true;
-
-  @override
-  bool get hasRemoteUserRecord => _hasRemoteUserRecord;
-
-  @override
-  void invalidatePresenceCache() {
-    _hasRemoteUserRecord = false;
-  }
-
-  @override
-  Future<Either<DomainFailure, UserBootstrapResult>> rehydrateFromRemote({
-    required String userId,
-    DateTime? authCreatedAt,
-  }) async {
-    return right(UserBootstrapResult(user: _user, didRecoverUpsert: false));
-  }
 }

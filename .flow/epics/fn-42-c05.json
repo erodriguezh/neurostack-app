@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-42-c05",
+  "created_at": "2026-01-29T19:49:23.598304Z",
+  "depends_on_epics": [],
+  "id": "fn-42-c05",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-42-c05.md",
+  "status": "open",
+  "title": "Phase 3.2: Register SubscriptionStatusResolver in DI",
+  "updated_at": "2026-01-29T19:49:23.598832Z"
+}

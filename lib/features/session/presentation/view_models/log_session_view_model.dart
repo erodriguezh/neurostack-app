@@ -101,7 +101,6 @@ class LogSessionViewModel {
       CheckEligibilityParams(
         userId: _userId,
         protocolId: _protocol.id,
-        currentTime: DateTime.now(),
       ),
     );
 
@@ -199,7 +198,9 @@ class LogSessionViewModel {
           if (_isDisposed) return null;
           state.value = LogSessionError(failure);
           _notifyService.setHapticFeedbackEvent(HapticFeedbackEvent.error);
-          _notifyService.setToastEvent(ToastEventError(message: failure.message));
+          _notifyService.setToastEvent(
+            ToastEventError(message: failure.message),
+          );
           return null;
         },
         (d) => d,
@@ -330,7 +331,12 @@ class LogSessionViewModel {
   /// exactly 7 days ago at 9am should work, even though midday 7 days ago
   /// might be beyond the exact 168-hour window.
   DateTime _normalizeCompletedAt(DateTime selectedDay, DateTime now) {
-    final midday = DateTime(selectedDay.year, selectedDay.month, selectedDay.day, 12);
+    final midday = DateTime(
+      selectedDay.year,
+      selectedDay.month,
+      selectedDay.day,
+      12,
+    );
     if (midday.isAfter(now)) {
       return now;
     }

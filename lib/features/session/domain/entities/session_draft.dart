@@ -80,8 +80,9 @@ class SessionDraft {
     }
 
     // INV-S4: Session timestamp CANNOT be more than 7 days in the past
-    final oldestAllowed =
-        currentTime.subtract(const Duration(days: maxBackdateDays));
+    final oldestAllowed = currentTime.subtract(
+      const Duration(days: maxBackdateDays),
+    );
     if (completedAt.isBefore(oldestAllowed)) {
       return left(SessionFailures.dateTooOld);
     }
@@ -98,4 +99,3 @@ class SessionDraft {
     );
   }
 }
-

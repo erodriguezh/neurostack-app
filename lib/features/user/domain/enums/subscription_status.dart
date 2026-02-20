@@ -2,7 +2,8 @@
 ///
 /// Determines protocol limits and feature access.
 enum SubscriptionStatus {
-  /// 7-day trial with full access. Auto-activates on first launch (INV-U3).
+  /// 7-day trial with full access. Activated via RevenueCat subscription.
+  /// INV-U3 (DEPRECATED) — trial no longer auto-activates on first launch.
   trial(protocolLimit: null, canAccessPremium: true),
 
   /// Free tier with 2 protocol limit. No time limit (INV-M1, INV-B5).
@@ -39,5 +40,7 @@ enum SubscriptionStatus {
   bool get isFreeOrExpired => this == free || this == expired;
 
   /// True if user has an active premium subscription.
-  bool get isPremium => this == premiumMonthly || this == premiumAnnual;
+  /// Includes grace period (billing issue, payment retry in progress).
+  bool get isPremium =>
+      this == premiumMonthly || this == premiumAnnual || this == grace;
 }

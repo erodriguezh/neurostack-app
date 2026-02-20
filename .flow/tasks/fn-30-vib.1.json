@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-01-26T19:44:15.742377Z",
+  "depends_on": [],
+  "epic": "fn-30-vib",
+  "id": "fn-30-vib.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-30-vib.1.md",
+  "status": "todo",
+  "title": "Update offer_screen.dart copy for RevenueCat payment model",
+  "updated_at": "2026-01-26T19:44:15.743201Z"
+}

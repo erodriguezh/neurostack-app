@@ -30,8 +30,8 @@ class Protocol with EntityMixin<String>, AggregateRootMixin<String> {
     required List<ResearchCitation> citations,
     required this.createdAt,
     this.deletedAt,
-  })  : _citations = List.unmodifiable(citations),
-        isActive = deletedAt == null;
+  }) : _citations = List.unmodifiable(citations),
+       isActive = deletedAt == null;
 
   @override
   final String id;

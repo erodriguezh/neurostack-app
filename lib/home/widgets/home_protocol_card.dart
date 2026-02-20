@@ -33,7 +33,8 @@ class _HomeProtocolCardState extends State<HomeProtocolCard> {
   Widget build(BuildContext context) {
     final kitColors = context.kitColors;
     final spacing = context.spacing;
-    final isCompact = MediaQuery.of(context).size.width < context.breakpoints.sm;
+    final isCompact =
+        MediaQuery.of(context).size.width < context.breakpoints.sm;
     final borderColor = widget.model.isUnavailable
         ? kitColors.warning.withValues(alpha: 0.4)
         : (_isHovering ? kitColors.white20 : kitColors.white10);
@@ -166,9 +167,7 @@ class _LogButtonState extends State<_LogButton> {
             duration: const Duration(milliseconds: 200),
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
             decoration: BoxDecoration(
-              color: _isHovered
-                  ? kitColors.white10
-                  : kitColors.white05,
+              color: _isHovered ? kitColors.white10 : kitColors.white05,
               borderRadius: BorderRadius.circular(999),
               border: Border.all(
                 color: _isHovered
@@ -177,10 +176,10 @@ class _LogButtonState extends State<_LogButton> {
               ),
             ),
             child: Row(
-              mainAxisSize:
-                  widget.expand ? MainAxisSize.max : MainAxisSize.min,
-              mainAxisAlignment:
-                  widget.expand ? MainAxisAlignment.center : MainAxisAlignment.start,
+              mainAxisSize: widget.expand ? MainAxisSize.max : MainAxisSize.min,
+              mainAxisAlignment: widget.expand
+                  ? MainAxisAlignment.center
+                  : MainAxisAlignment.start,
               children: [
                 Text(
                   'Log Session',

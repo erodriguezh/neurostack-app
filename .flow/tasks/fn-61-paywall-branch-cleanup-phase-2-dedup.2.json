@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-02-15T19:36:58.903534Z",
+  "depends_on": [],
+  "epic": "fn-61-paywall-branch-cleanup-phase-2-dedup",
+  "id": "fn-61-paywall-branch-cleanup-phase-2-dedup.2",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-61-paywall-branch-cleanup-phase-2-dedup.2.md",
+  "status": "todo",
+  "title": "Test infrastructure: mock consolidation and factory adoption",
+  "updated_at": "2026-02-15T19:54:36.901713Z"
+}

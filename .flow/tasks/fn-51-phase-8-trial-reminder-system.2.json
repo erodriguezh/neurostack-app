@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-02-10T19:25:59.415655Z",
+  "depends_on": [],
+  "epic": "fn-51-phase-8-trial-reminder-system",
+  "id": "fn-51-phase-8-trial-reminder-system.2",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-51-phase-8-trial-reminder-system.2.md",
+  "status": "todo",
+  "title": "Wire RevenueCat refresh on app resume (Phase 8.4)",
+  "updated_at": "2026-02-10T19:25:59.416460Z"
+}

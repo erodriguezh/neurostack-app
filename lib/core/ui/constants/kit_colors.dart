@@ -385,7 +385,11 @@ class KitColorsExtension extends ThemeExtension<KitColorsExtension> {
       info: Color.lerp(info, other.info, t)!,
       // Evidence Level Colors
       evidenceStrong: Color.lerp(evidenceStrong, other.evidenceStrong, t)!,
-      evidenceModerate: Color.lerp(evidenceModerate, other.evidenceModerate, t)!,
+      evidenceModerate: Color.lerp(
+        evidenceModerate,
+        other.evidenceModerate,
+        t,
+      )!,
       evidenceWeak: Color.lerp(evidenceWeak, other.evidenceWeak, t)!,
       // White Opacity Scale
       white90: Color.lerp(white90, other.white90, t)!,

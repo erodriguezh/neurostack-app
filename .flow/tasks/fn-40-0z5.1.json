@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-01-29T16:50:20.656108Z",
+  "depends_on": [],
+  "epic": "fn-40-0z5",
+  "id": "fn-40-0z5.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-40-0z5.1.md",
+  "status": "todo",
+  "title": "Register RevenueCatClient and RevenueCatService as singletons in locator_config.dart",
+  "updated_at": "2026-01-29T16:50:20.656583Z"
+}
