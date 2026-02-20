@@ -1,5 +1,5 @@
 study docs/README.md
-study task fn-61-paywall-branch-cleanup-phase-2-dedup and pick the most important thing to do
+study task plan_update_protocol_domain_and_db.md and pick the most important thing to do
 
 IMPORTANT:
 - after implementation, anything you'd refactor, simplify, change, etc... if you implemented again. Do not move on from this step until the user says yes or not to the proposals

@@ -1,0 +1,103 @@
+# Spec: Protocol Description Field & Seed Data
+
+**Date:** 2026-02-20
+**Status:** Draft
+**Branch:** `feature/paywall-modal`
+
+---
+
+## Problem
+
+- The `protocols.json` seed file contains 57 science-backed protocols with a `description` field (mechanism + expected outcomes), but the Protocol aggregate, ProtocolDto, and DB `protocols` table lack this field.
+- The existing `supabase/seed.sql` uses stale enum values (`coldTherapy`, `supplementation`, `mindfulness`, `proven`, `strong`, `moderate`, `preliminary`) that do not match the Dart domain enums.
+- The DB comments on `protocols.category` and `protocols.evidence_level` are outdated.
+- No seed migration exists for the 57 protocols in `protocols.json`.
+
+## Scope
+
+- Add `description` to the Protocol domain model, DTO, and DB schema.
+- Create a `ProtocolDescription` value object with non-empty validation.
+- Seed the DB with 57 protocols and 76 citations from `protocols.json` (idempotent upsert).
+- Fix stale DB comments and seed.sql enum values.
+- **Out of scope:** UI changes (detail sheet display deferred).
+
+---
+
+## Data Contract: `protocols.json`
+
+- **57 protocols**, **76 citations** total
+- JSON fields per protocol: `name`, `description`, `target`, `category`, `evidence_level`, `research_citations`, `source_models`
+- JSON fields per citation: `authors`, `year`, `title`, `journal`, `doi` (optional, missing 2/76), `url`, `verification_status`, `verification_note`
+- **Discarded fields (not stored):** `verification_status`, `verification_note` (editorial), `source_models` (provenance)
+
+### New field: `description`
+
+| Property | Value |
+|----------|-------|
+| Type | `String` (non-empty, after trim) |
+| Present in JSON | 57/57 protocols |
+| Domain representation | `ProtocolDescription` value object |
+| DB column | `text NOT NULL DEFAULT ''` |
+| Invariant | Non-empty (validated at domain level) |
+
+### Categories in JSON (7 values)
+
+`coldExposure` (7), `exercise` (9), `heatTherapy` (7), `mind` (8), `nutrition` (8), `sleep` (9), `supplements` (9)
+
+### Evidence levels in JSON (4 values)
+
+`multipleRcts` (25), `singleRct` (24), `observational` (7), `expertConsensus` (1)
+
+### Optionality observations
+
+| Field | JSON | Domain | DB |
+|-------|------|--------|----|
+| `target.durationSeconds` | always present (57/57) | `Duration?` (optional) | jsonb (untyped) |
+| `target.intensity` | always present (57/57) | `String?` (optional) | jsonb (untyped) |
+| citation `url` | present 76/76 | `String?` (optional) | `text` (nullable) |
+| citation `doi` | missing 2/76 | `String?` (optional) | `text` (nullable) |
+
+**Decision:** Keep `Target.duration` and `Target.intensity` optional in domain model — seed data happens to always have them, but the model should allow protocols without them.
+
+---
+
+## Key Files (current state)
+
+### Domain layer
+
+- `lib/features/protocol/domain/entities/protocol.dart` — Protocol aggregate root, `create()`, `reconstitute()`, `softDelete()`
+- `lib/features/protocol/domain/value_objects/protocol_name.dart` — Pattern reference for `ProtocolDescription` VO (freezed sealed class, `_internal` factory, static `create()` returning `Either`)
+- `lib/features/protocol/domain/value_objects/target.dart` — Target VO (freezed, `Frequency` required, `Duration?`, `String?` intensity)
+- `lib/features/protocol/domain/value_objects/research_citation.dart` — Citation VO (authors, year, title, journal, doi?, url?)
+- `lib/features/protocol/domain/failures/protocol_failures.dart` — `DomainFailure` constants (`noCitations`, `nameEmpty`, `nameTooLong`, etc.)
+- `lib/features/protocol/domain/enums/category.dart` — 7 values: exercise, heatTherapy, coldExposure, nutrition, supplements, mind, sleep
+- `lib/features/protocol/domain/enums/evidence_level.dart` — 4 values: multipleRcts(4), singleRct(3), observational(2), expertConsensus(1)
+
+### Data layer
+
+- `lib/features/protocol/data/dtos/protocol_dto.dart` — Freezed DTO, `toDomain()` with Either chain, `fromDomain()`, JSON keys use snake_case for multi-word fields
+- `lib/features/protocol/data/dtos/target_dto.dart` — Freezed DTO, `durationSeconds` (camelCase in JSON)
+
+### Database
+
+- `supabase/migrations/20251204192228_initial_schema.sql` — `protocols` table (id, name, target, category, evidence_level, created_at, deleted_at), `research_citations` table (id, protocol_id FK, authors, year, title, journal, doi, url)
+- `supabase/seed.sql` — 13 test protocols + 20 citations, uses stale enum values
+
+### Test infrastructure
+
+- `test/constants/test_constants.dart` — `_Protocol` class: `id`, `validName`, `emptyName`, `tooLongName`, researcher name variants, `createdAt`
+- `test/factories/protocol_factory.dart` — `create()`, `reconstitute()`, `valid()` with optional params and sub-factory defaults
+- `test/factories/dtos/protocol_dto_factory.dart` — `create()`, `createWithInvalid*()` state variations, `createValidJson()`, `createJsonMissingField()`, `createJsonWithWrongType()`
+- `test/factories/factories.dart` — Barrel export for all factories
+- `test/domain/protocol/protocol_test.dart` — Protocol entity tests (create, reconstitute, softDelete, events, immutability)
+- `test/features/protocol/data/dtos/protocol_dto_test.dart` — DTO tests (toDomain, fromJson, fromDomain, roundtrip)
+
+---
+
+## Business Rules
+
+- **INV-P1:** Every Protocol MUST have at least one Research Citation — **unchanged**
+- **INV-P2:** Protocol Target specifications MUST be measurable — **unchanged**
+- **INV-P3:** Protocol names MUST NOT include researcher names — **unchanged**
+- **INV-P4:** Deleted Protocols MUST preserve historical Session data (soft delete) — **unchanged**
+- **NEW:** Protocol description MUST NOT be empty (after trim)
