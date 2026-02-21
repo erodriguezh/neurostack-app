@@ -32,15 +32,16 @@
   - Cite: same pattern used by `name: ProtocolName` in same file
   - **Call-site check:** Confirmed no `Protocol.create(` calls in `lib/` outside the entity itself — only test factories need updating (Phase 4). Rely on `flutter analyze` as gate.
 
-### 1.4 Run codegen
+### 1.4 Run codegen ✅
 - `dart run build_runner build --delete-conflicting-outputs`
   - Generates `protocol_description.freezed.dart`
+  - **Done:** included in commit `18fb120` (Phase 1.3)
 
 ---
 
 ## Phase 2 — Data Layer (DTO)
 
-### 2.1 Add `description` to ProtocolDto
+### 2.1 Add `description` to ProtocolDto ✅
 - **Edit** `lib/features/protocol/data/dtos/protocol_dto.dart`
   - Add import for `protocol_description.dart`
   - Add `required String description` to freezed factory (after `name` at line ~31, before `target`)
@@ -53,23 +54,26 @@
   - Pass `description: domainDescription` to `Protocol.reconstitute()` (line ~132)
   - In `fromDomain()` (line ~154): add `description: protocol.description.value`
   - Cite: follows `nameResult` pattern at lines 59-67 of same file
+  - **Done:** commit `24b91e0`
 
-### 2.2 Run codegen
+### 2.2 Run codegen ✅
 - `dart run build_runner build --delete-conflicting-outputs`
   - Regenerates `protocol_dto.freezed.dart` and `protocol_dto.g.dart`
+  - **Done:** included in commit `24b91e0` (Phase 2.1)
 
 ---
 
 ## Phase 3 — Database Migrations
 
-### 3.1 Schema migration — add column + fix comments
-- **New** `supabase/migrations/YYYYMMDDHHMMSS_add_protocol_description.sql`
+### 3.1 Schema migration — add column + fix comments ✅
+- **New** `supabase/migrations/20260221193000_add_protocol_description.sql`
   - `ALTER TABLE public.protocols ADD COLUMN IF NOT EXISTS description text NOT NULL DEFAULT ''`
   - Fix stale `COMMENT ON COLUMN public.protocols.category` → list actual enum values (exercise, heatTherapy, coldExposure, nutrition, supplements, mind, sleep)
   - Fix stale `COMMENT ON COLUMN public.protocols.evidence_level` → list actual enum values (multipleRcts, singleRct, observational, expertConsensus)
-  - Fix stale `COMMENT ON COLUMN public.protocols.target` → note JSONB keys use camelCase (`durationSeconds`, `intensity`, `frequency`)
+  - Fix stale `COMMENT ON COLUMN public.protocols.target` → note mixed key casing: top-level camelCase (`durationSeconds`, `intensity`), nested frequency snake_case (`min_per_week`, `max_per_week`) per `@JsonKey` overrides
   - Add `COMMENT ON COLUMN public.protocols.description`
   - Cite: existing comments at `supabase/migrations/20251204192228_initial_schema.sql` lines 33-37
+  - **Done:** commit `ba54cea`
 
 ### 3.2 Seed migration — upsert 57 protocols + 76 citations
 - **New** `supabase/migrations/YYYYMMDDHHMMSS_seed_protocols.sql`

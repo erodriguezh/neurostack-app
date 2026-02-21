@@ -15,9 +15,8 @@ Add `description` field to `ProtocolDto` freezed class. Wire `toDomain()` to val
 - [ ] `flutter test` green
 
 ## Done summary
-TBD
-
+Added createWithEmptyDescription() factory method to ProtocolDtoFactory and updated protocol_dto_test.dart with description validation test case in invalidCases, 'description' in requiredFields for fromJson tests, and description assertion in fromDomain roundtrip test.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 24b91e02076d25b60d884078aae89d463201b460
+- Tests: flutter analyze, flutter test
 - PRs:
