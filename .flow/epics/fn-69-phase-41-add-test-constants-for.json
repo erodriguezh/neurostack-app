@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-69-phase-41-add-test-constants-for",
+  "created_at": "2026-02-21T20:46:46.457157Z",
+  "depends_on_epics": [],
+  "id": "fn-69-phase-41-add-test-constants-for",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-69-phase-41-add-test-constants-for.md",
+  "status": "open",
+  "title": "Phase 4.1: Add test constants for ProtocolDescription",
+  "updated_at": "2026-02-21T20:47:01.348906Z"
+}

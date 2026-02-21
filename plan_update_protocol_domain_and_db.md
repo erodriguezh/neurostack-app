@@ -100,7 +100,7 @@
 
 ## Phase 4 — Test Infrastructure
 
-### 4.1 Add test constants
+### 4.1 Add test constants ✅
 - **Edit** `test/constants/test_constants.dart`
   - Add to `_Protocol` class (after line ~44):
     ```dart
