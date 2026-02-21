@@ -36,6 +36,13 @@ final class _Protocol {
   final String emptyName = '';
   final String tooLongName = 'A' * 101; // > 100 chars
 
+  // Description constants
+  final String validDescription =
+      'High-intensity interval training combining 4-minute intervals at 90-95% max HR.';
+  final String emptyDescription = '';
+  final String tooLongDescription = 'A' * 2001; // > 2000 chars
+  final String maxLengthDescription = 'A' * 2000; // boundary: exactly 2000
+
   // INV-P3 violations
   final String researcherNamePossessive = "Huberman's Protocol";
   final String researcherNameDoctor = 'Dr. Sinclair Method';
