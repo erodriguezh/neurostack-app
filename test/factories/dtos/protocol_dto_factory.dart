@@ -18,6 +18,7 @@ abstract final class ProtocolDtoFactory {
   static ProtocolDto create({
     String? id,
     String? name,
+    String? description,
     TargetDto? target,
     String category = 'exercise',
     String evidenceLevel = 'multipleRcts',
@@ -28,6 +29,7 @@ abstract final class ProtocolDtoFactory {
     return ProtocolDto(
       id: id ?? TestConstants.dto.defaultProtocolId,
       name: name ?? TestConstants.protocol.validName,
+      description: description ?? TestConstants.protocol.validDescription,
       target: target ?? TargetDtoFactory.create(),
       category: category,
       evidenceLevel: evidenceLevel,
@@ -96,6 +98,7 @@ abstract final class ProtocolDtoFactory {
     return {
       'id': id ?? TestConstants.dto.defaultProtocolId,
       'name': TestConstants.protocol.validName,
+      'description': TestConstants.protocol.validDescription,
       'target': TargetDtoFactory.createValidJson(),
       'category': 'exercise',
       'evidence_level': 'multipleRcts',

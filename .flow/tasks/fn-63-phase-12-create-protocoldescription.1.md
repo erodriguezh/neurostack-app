@@ -7,9 +7,8 @@ TBD
 - [ ] TBD
 
 ## Done summary
-TBD
-
+Added descriptionTooLong failure constant and 2000-char max length validation to ProtocolDescription value object, with full test coverage including boundary tests, factory, and test constants.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: e1a3a2a, f01b762, 6599a36
+- Tests: flutter analyze, flutter test
 - PRs:

@@ -9,6 +9,7 @@ part of 'protocol_dto.dart';
 _ProtocolDto _$ProtocolDtoFromJson(Map<String, dynamic> json) => _ProtocolDto(
   id: _stringFromJson(json['id']),
   name: json['name'] as String,
+  description: json['description'] as String,
   target: TargetDto.fromJson(json['target'] as Map<String, dynamic>),
   category: json['category'] as String,
   evidenceLevel: json['evidence_level'] as String,
@@ -23,6 +24,7 @@ Map<String, dynamic> _$ProtocolDtoToJson(_ProtocolDto instance) =>
     <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
+      'description': instance.description,
       'target': instance.target,
       'category': instance.category,
       'evidence_level': instance.evidenceLevel,

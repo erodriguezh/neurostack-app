@@ -5,6 +5,7 @@ import '../../../../core/failures/domain_failure.dart';
 import '../../domain/entities/protocol.dart';
 import '../../domain/enums/category.dart';
 import '../../domain/enums/evidence_level.dart';
+import '../../domain/value_objects/protocol_description.dart';
 import '../../domain/value_objects/protocol_name.dart';
 import '../../domain/value_objects/research_citation.dart';
 import 'research_citation_dto.dart';
@@ -29,6 +30,7 @@ abstract class ProtocolDto with _$ProtocolDto {
   const factory ProtocolDto({
     @JsonKey(fromJson: _stringFromJson) required String id,
     required String name,
+    required String description,
     required TargetDto target,
     required String category,
     @JsonKey(name: 'evidence_level') required String evidenceLevel,
@@ -63,6 +65,19 @@ abstract class ProtocolDto with _$ProtocolDto {
         );
       }
       final domainName = nameResult.getOrElse(
+        (l) => throw StateError('Unreachable'),
+      );
+
+      // Parse description
+      final descriptionResult = ProtocolDescription.create(description);
+      if (descriptionResult.isLeft()) {
+        return left(
+          descriptionResult.getLeft().getOrElse(
+            () => throw StateError('Unreachable'),
+          ),
+        );
+      }
+      final domainDescription = descriptionResult.getOrElse(
         (l) => throw StateError('Unreachable'),
       );
 
@@ -132,6 +147,7 @@ abstract class ProtocolDto with _$ProtocolDto {
         Protocol.reconstitute(
           id: id,
           name: domainName,
+          description: domainDescription,
           target: domainTarget,
           category: domainCategory,
           evidenceLevel: domainEvidenceLevel,
@@ -155,6 +171,7 @@ abstract class ProtocolDto with _$ProtocolDto {
     return ProtocolDto(
       id: protocol.id,
       name: protocol.name.value,
+      description: protocol.description.value,
       target: TargetDto.fromDomain(protocol.target),
       category: protocol.category.name,
       evidenceLevel: protocol.evidenceLevel.name,

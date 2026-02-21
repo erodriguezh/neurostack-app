@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ProtocolDto {
 
-@JsonKey(fromJson: _stringFromJson) String get id; String get name; TargetDto get target; String get category;@JsonKey(name: 'evidence_level') String get evidenceLevel;@JsonKey(name: 'research_citations') List<ResearchCitationDto> get citations;@JsonKey(name: 'created_at') String get createdAt;@JsonKey(name: 'deleted_at') String? get deletedAt;
+@JsonKey(fromJson: _stringFromJson) String get id; String get name; String get description; TargetDto get target; String get category;@JsonKey(name: 'evidence_level') String get evidenceLevel;@JsonKey(name: 'research_citations') List<ResearchCitationDto> get citations;@JsonKey(name: 'created_at') String get createdAt;@JsonKey(name: 'deleted_at') String? get deletedAt;
 /// Create a copy of ProtocolDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $ProtocolDtoCopyWith<ProtocolDto> get copyWith => _$ProtocolDtoCopyWithImpl<Prot
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProtocolDto&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.target, target) || other.target == target)&&(identical(other.category, category) || other.category == category)&&(identical(other.evidenceLevel, evidenceLevel) || other.evidenceLevel == evidenceLevel)&&const DeepCollectionEquality().equals(other.citations, citations)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProtocolDto&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.target, target) || other.target == target)&&(identical(other.category, category) || other.category == category)&&(identical(other.evidenceLevel, evidenceLevel) || other.evidenceLevel == evidenceLevel)&&const DeepCollectionEquality().equals(other.citations, citations)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,target,category,evidenceLevel,const DeepCollectionEquality().hash(citations),createdAt,deletedAt);
+int get hashCode => Object.hash(runtimeType,id,name,description,target,category,evidenceLevel,const DeepCollectionEquality().hash(citations),createdAt,deletedAt);
 
 @override
 String toString() {
-  return 'ProtocolDto(id: $id, name: $name, target: $target, category: $category, evidenceLevel: $evidenceLevel, citations: $citations, createdAt: $createdAt, deletedAt: $deletedAt)';
+  return 'ProtocolDto(id: $id, name: $name, description: $description, target: $target, category: $category, evidenceLevel: $evidenceLevel, citations: $citations, createdAt: $createdAt, deletedAt: $deletedAt)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $ProtocolDtoCopyWith<$Res>  {
   factory $ProtocolDtoCopyWith(ProtocolDto value, $Res Function(ProtocolDto) _then) = _$ProtocolDtoCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(fromJson: _stringFromJson) String id, String name, TargetDto target, String category,@JsonKey(name: 'evidence_level') String evidenceLevel,@JsonKey(name: 'research_citations') List<ResearchCitationDto> citations,@JsonKey(name: 'created_at') String createdAt,@JsonKey(name: 'deleted_at') String? deletedAt
+@JsonKey(fromJson: _stringFromJson) String id, String name, String description, TargetDto target, String category,@JsonKey(name: 'evidence_level') String evidenceLevel,@JsonKey(name: 'research_citations') List<ResearchCitationDto> citations,@JsonKey(name: 'created_at') String createdAt,@JsonKey(name: 'deleted_at') String? deletedAt
 });
 
 
@@ -65,10 +65,11 @@ class _$ProtocolDtoCopyWithImpl<$Res>
 
 /// Create a copy of ProtocolDto
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? target = null,Object? category = null,Object? evidenceLevel = null,Object? citations = null,Object? createdAt = null,Object? deletedAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? description = null,Object? target = null,Object? category = null,Object? evidenceLevel = null,Object? citations = null,Object? createdAt = null,Object? deletedAt = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,target: null == target ? _self.target : target // ignore: cast_nullable_to_non_nullable
 as TargetDto,category: null == category ? _self.category : category // ignore: cast_nullable_to_non_nullable
 as String,evidenceLevel: null == evidenceLevel ? _self.evidenceLevel : evidenceLevel // ignore: cast_nullable_to_non_nullable
@@ -169,10 +170,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(fromJson: _stringFromJson)  String id,  String name,  TargetDto target,  String category, @JsonKey(name: 'evidence_level')  String evidenceLevel, @JsonKey(name: 'research_citations')  List<ResearchCitationDto> citations, @JsonKey(name: 'created_at')  String createdAt, @JsonKey(name: 'deleted_at')  String? deletedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(fromJson: _stringFromJson)  String id,  String name,  String description,  TargetDto target,  String category, @JsonKey(name: 'evidence_level')  String evidenceLevel, @JsonKey(name: 'research_citations')  List<ResearchCitationDto> citations, @JsonKey(name: 'created_at')  String createdAt, @JsonKey(name: 'deleted_at')  String? deletedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ProtocolDto() when $default != null:
-return $default(_that.id,_that.name,_that.target,_that.category,_that.evidenceLevel,_that.citations,_that.createdAt,_that.deletedAt);case _:
+return $default(_that.id,_that.name,_that.description,_that.target,_that.category,_that.evidenceLevel,_that.citations,_that.createdAt,_that.deletedAt);case _:
   return orElse();
 
 }
@@ -190,10 +191,10 @@ return $default(_that.id,_that.name,_that.target,_that.category,_that.evidenceLe
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(fromJson: _stringFromJson)  String id,  String name,  TargetDto target,  String category, @JsonKey(name: 'evidence_level')  String evidenceLevel, @JsonKey(name: 'research_citations')  List<ResearchCitationDto> citations, @JsonKey(name: 'created_at')  String createdAt, @JsonKey(name: 'deleted_at')  String? deletedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(fromJson: _stringFromJson)  String id,  String name,  String description,  TargetDto target,  String category, @JsonKey(name: 'evidence_level')  String evidenceLevel, @JsonKey(name: 'research_citations')  List<ResearchCitationDto> citations, @JsonKey(name: 'created_at')  String createdAt, @JsonKey(name: 'deleted_at')  String? deletedAt)  $default,) {final _that = this;
 switch (_that) {
 case _ProtocolDto():
-return $default(_that.id,_that.name,_that.target,_that.category,_that.evidenceLevel,_that.citations,_that.createdAt,_that.deletedAt);case _:
+return $default(_that.id,_that.name,_that.description,_that.target,_that.category,_that.evidenceLevel,_that.citations,_that.createdAt,_that.deletedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -210,10 +211,10 @@ return $default(_that.id,_that.name,_that.target,_that.category,_that.evidenceLe
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(fromJson: _stringFromJson)  String id,  String name,  TargetDto target,  String category, @JsonKey(name: 'evidence_level')  String evidenceLevel, @JsonKey(name: 'research_citations')  List<ResearchCitationDto> citations, @JsonKey(name: 'created_at')  String createdAt, @JsonKey(name: 'deleted_at')  String? deletedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(fromJson: _stringFromJson)  String id,  String name,  String description,  TargetDto target,  String category, @JsonKey(name: 'evidence_level')  String evidenceLevel, @JsonKey(name: 'research_citations')  List<ResearchCitationDto> citations, @JsonKey(name: 'created_at')  String createdAt, @JsonKey(name: 'deleted_at')  String? deletedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _ProtocolDto() when $default != null:
-return $default(_that.id,_that.name,_that.target,_that.category,_that.evidenceLevel,_that.citations,_that.createdAt,_that.deletedAt);case _:
+return $default(_that.id,_that.name,_that.description,_that.target,_that.category,_that.evidenceLevel,_that.citations,_that.createdAt,_that.deletedAt);case _:
   return null;
 
 }
@@ -225,11 +226,12 @@ return $default(_that.id,_that.name,_that.target,_that.category,_that.evidenceLe
 @JsonSerializable()
 
 class _ProtocolDto extends ProtocolDto {
-  const _ProtocolDto({@JsonKey(fromJson: _stringFromJson) required this.id, required this.name, required this.target, required this.category, @JsonKey(name: 'evidence_level') required this.evidenceLevel, @JsonKey(name: 'research_citations') required final  List<ResearchCitationDto> citations, @JsonKey(name: 'created_at') required this.createdAt, @JsonKey(name: 'deleted_at') this.deletedAt}): _citations = citations,super._();
+  const _ProtocolDto({@JsonKey(fromJson: _stringFromJson) required this.id, required this.name, required this.description, required this.target, required this.category, @JsonKey(name: 'evidence_level') required this.evidenceLevel, @JsonKey(name: 'research_citations') required final  List<ResearchCitationDto> citations, @JsonKey(name: 'created_at') required this.createdAt, @JsonKey(name: 'deleted_at') this.deletedAt}): _citations = citations,super._();
   factory _ProtocolDto.fromJson(Map<String, dynamic> json) => _$ProtocolDtoFromJson(json);
 
 @override@JsonKey(fromJson: _stringFromJson) final  String id;
 @override final  String name;
+@override final  String description;
 @override final  TargetDto target;
 @override final  String category;
 @override@JsonKey(name: 'evidence_level') final  String evidenceLevel;
@@ -256,16 +258,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProtocolDto&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.target, target) || other.target == target)&&(identical(other.category, category) || other.category == category)&&(identical(other.evidenceLevel, evidenceLevel) || other.evidenceLevel == evidenceLevel)&&const DeepCollectionEquality().equals(other._citations, _citations)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProtocolDto&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.target, target) || other.target == target)&&(identical(other.category, category) || other.category == category)&&(identical(other.evidenceLevel, evidenceLevel) || other.evidenceLevel == evidenceLevel)&&const DeepCollectionEquality().equals(other._citations, _citations)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,target,category,evidenceLevel,const DeepCollectionEquality().hash(_citations),createdAt,deletedAt);
+int get hashCode => Object.hash(runtimeType,id,name,description,target,category,evidenceLevel,const DeepCollectionEquality().hash(_citations),createdAt,deletedAt);
 
 @override
 String toString() {
-  return 'ProtocolDto(id: $id, name: $name, target: $target, category: $category, evidenceLevel: $evidenceLevel, citations: $citations, createdAt: $createdAt, deletedAt: $deletedAt)';
+  return 'ProtocolDto(id: $id, name: $name, description: $description, target: $target, category: $category, evidenceLevel: $evidenceLevel, citations: $citations, createdAt: $createdAt, deletedAt: $deletedAt)';
 }
 
 
@@ -276,7 +278,7 @@ abstract mixin class _$ProtocolDtoCopyWith<$Res> implements $ProtocolDtoCopyWith
   factory _$ProtocolDtoCopyWith(_ProtocolDto value, $Res Function(_ProtocolDto) _then) = __$ProtocolDtoCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(fromJson: _stringFromJson) String id, String name, TargetDto target, String category,@JsonKey(name: 'evidence_level') String evidenceLevel,@JsonKey(name: 'research_citations') List<ResearchCitationDto> citations,@JsonKey(name: 'created_at') String createdAt,@JsonKey(name: 'deleted_at') String? deletedAt
+@JsonKey(fromJson: _stringFromJson) String id, String name, String description, TargetDto target, String category,@JsonKey(name: 'evidence_level') String evidenceLevel,@JsonKey(name: 'research_citations') List<ResearchCitationDto> citations,@JsonKey(name: 'created_at') String createdAt,@JsonKey(name: 'deleted_at') String? deletedAt
 });
 
 
@@ -293,10 +295,11 @@ class __$ProtocolDtoCopyWithImpl<$Res>
 
 /// Create a copy of ProtocolDto
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? target = null,Object? category = null,Object? evidenceLevel = null,Object? citations = null,Object? createdAt = null,Object? deletedAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? description = null,Object? target = null,Object? category = null,Object? evidenceLevel = null,Object? citations = null,Object? createdAt = null,Object? deletedAt = freezed,}) {
   return _then(_ProtocolDto(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,target: null == target ? _self.target : target // ignore: cast_nullable_to_non_nullable
 as TargetDto,category: null == category ? _self.category : category // ignore: cast_nullable_to_non_nullable
 as String,evidenceLevel: null == evidenceLevel ? _self.evidenceLevel : evidenceLevel // ignore: cast_nullable_to_non_nullable

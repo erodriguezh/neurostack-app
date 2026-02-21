@@ -7,6 +7,7 @@ import '../enums/category.dart';
 import '../enums/evidence_level.dart';
 import '../events/protocol_events.dart';
 import '../failures/protocol_failures.dart';
+import '../value_objects/protocol_description.dart';
 import '../value_objects/protocol_name.dart';
 import '../value_objects/research_citation.dart';
 import '../value_objects/target.dart';
@@ -24,6 +25,7 @@ class Protocol with EntityMixin<String>, AggregateRootMixin<String> {
   Protocol._({
     required this.id,
     required this.name,
+    required this.description,
     required this.target,
     required this.category,
     required this.evidenceLevel,
@@ -37,6 +39,7 @@ class Protocol with EntityMixin<String>, AggregateRootMixin<String> {
   final String id;
 
   final ProtocolName name;
+  final ProtocolDescription description;
   final Target target;
   final Category category;
   final EvidenceLevel evidenceLevel;
@@ -56,6 +59,7 @@ class Protocol with EntityMixin<String>, AggregateRootMixin<String> {
   static Either<DomainFailure, Protocol> create({
     required String id,
     required ProtocolName name,
+    required ProtocolDescription description,
     required Target target,
     required Category category,
     required EvidenceLevel evidenceLevel,
@@ -70,6 +74,7 @@ class Protocol with EntityMixin<String>, AggregateRootMixin<String> {
     final protocol = Protocol._(
       id: id,
       name: name,
+      description: description,
       target: target,
       category: category,
       evidenceLevel: evidenceLevel,
@@ -88,6 +93,7 @@ class Protocol with EntityMixin<String>, AggregateRootMixin<String> {
   factory Protocol.reconstitute({
     required String id,
     required ProtocolName name,
+    required ProtocolDescription description,
     required Target target,
     required Category category,
     required EvidenceLevel evidenceLevel,
@@ -98,6 +104,7 @@ class Protocol with EntityMixin<String>, AggregateRootMixin<String> {
     return Protocol._(
       id: id,
       name: name,
+      description: description,
       target: target,
       category: category,
       evidenceLevel: evidenceLevel,
@@ -120,6 +127,7 @@ class Protocol with EntityMixin<String>, AggregateRootMixin<String> {
     final deleted = Protocol._(
       id: id,
       name: name,
+      description: description,
       target: target,
       category: category,
       evidenceLevel: evidenceLevel,
