@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-68-phase-33-fix-supabaseseedsql-test-data",
+  "created_at": "2026-02-21T20:14:56.827901Z",
+  "depends_on_epics": [],
+  "id": "fn-68-phase-33-fix-supabaseseedsql-test-data",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-68-phase-33-fix-supabaseseedsql-test-data.md",
+  "status": "open",
+  "title": "Phase 3.3: Fix supabase/seed.sql (test data)",
+  "updated_at": "2026-02-21T20:14:56.828325Z"
+}
