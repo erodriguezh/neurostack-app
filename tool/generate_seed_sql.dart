@@ -203,10 +203,15 @@ String _sha256File(String path) {
     ['shasum', '-a', '256', path],
     ['sha256sum', path],
   ]) {
-    final result = Process.runSync(cmd.first, cmd.sublist(1));
-    if (result.exitCode == 0) {
-      // Output format: "<hash>  <filename>\n" (both tools)
-      return (result.stdout as String).split(' ').first.trim();
+    try {
+      final result = Process.runSync(cmd.first, cmd.sublist(1));
+      if (result.exitCode == 0) {
+        // Output format: "<hash>  <filename>\n" (both tools)
+        return (result.stdout as String).trim().split(RegExp(r'\s+')).first;
+      }
+    } on ProcessException {
+      // Command not found; try the next one.
+      continue;
     }
   }
   stderr.writeln(
