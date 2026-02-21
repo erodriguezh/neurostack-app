@@ -92,9 +92,9 @@ void _writeProtocolUpserts(StringBuffer buf, List<dynamic> protocols) {
     buf.writeln('VALUES (');
     buf.writeln('  ${_dollarQuote(name, 'n')},');
     buf.writeln('  ${_dollarQuote(description, 'desc')},');
-    buf.writeln("  '$targetJson'::jsonb,");
-    buf.writeln("  '$category',");
-    buf.writeln("  '$evidenceLevel'");
+    buf.writeln('  ${_dollarQuote(targetJson, 'tgt')}::jsonb,');
+    buf.writeln('  ${_dollarQuote(category, 'cat')},');
+    buf.writeln('  ${_dollarQuote(evidenceLevel, 'ev')}');
     buf.writeln(')');
     buf.writeln('ON CONFLICT ((lower(name))) DO UPDATE SET');
     buf.writeln('  description = EXCLUDED.description,');
@@ -125,8 +125,9 @@ void _writeCitationInserts(StringBuffer buf, List<dynamic> protocols) {
     final name = protocol['name'] as String;
     final citations =
         protocol['research_citations'] as List<dynamic>? ?? <dynamic>[];
-    if (citations.isEmpty) continue;
 
+    // Always delete existing citations to keep DB in sync, even when
+    // the protocol has zero citations in protocols.json.
     buf.writeln('-- Citations for: $name');
     buf.writeln('DELETE FROM public.research_citations');
     buf.writeln(
@@ -194,15 +195,25 @@ void _writeVerificationQueries(StringBuffer buf) {
   );
 }
 
-/// Computes the SHA-256 checksum of a file by shelling out to `shasum`.
+/// Computes the SHA-256 checksum of a file by shelling out to `shasum`
+/// (macOS) or `sha256sum` (Linux).
 String _sha256File(String path) {
-  final result = Process.runSync('shasum', ['-a', '256', path]);
-  if (result.exitCode != 0) {
-    stderr.writeln('Error computing SHA-256: ${result.stderr}');
-    exit(1);
+  // Try macOS/BSD shasum first, then Linux sha256sum.
+  for (final cmd in [
+    ['shasum', '-a', '256', path],
+    ['sha256sum', path],
+  ]) {
+    final result = Process.runSync(cmd.first, cmd.sublist(1));
+    if (result.exitCode == 0) {
+      // Output format: "<hash>  <filename>\n" (both tools)
+      return (result.stdout as String).split(' ').first.trim();
+    }
   }
-  // Output format: "<hash>  <filename>\n"
-  return (result.stdout as String).split(' ').first.trim();
+  stderr.writeln(
+    'Error: Could not compute SHA-256. '
+    'Ensure shasum (macOS) or sha256sum (Linux) is on PATH.',
+  );
+  exit(1);
 }
 
 /// Wraps [value] in dollar-quoted SQL string: `$tag$value$tag$`.

@@ -16,9 +16,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Deliberate Cold Water Immersion for Dopamine and Norepinephrine$n$,
   $desc$Immersion in cold water (10–15°C) triggers sustained release of norepinephrine (up to 530%) and dopamine (up to 250%) via sympathetic nervous system activation,  enhancing alertness, mood, and focus for hours post-exposure.$desc$,
-  '{"frequency":{"min_per_week":2,"max_per_week":4},"durationSeconds":180,"intensity":"10-15°C"}'::jsonb,
-  'coldExposure',
-  'singleRct'
+  $tgt${"frequency":{"min_per_week":2,"max_per_week":4},"durationSeconds":180,"intensity":"10-15°C"}$tgt$::jsonb,
+  $cat$coldExposure$cat$,
+  $ev$singleRct$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -30,9 +30,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Post-Exercise Cold Water Immersion for Recovery$n$,
   $desc$Cold water immersion at 10–15°C for 10–15 minutes after high-intensity exercise reduces delayed-onset muscle soreness and creatine kinase levels  via vasoconstriction-mediated inflammation reduction and decreased nerve conduction velocity.$desc$,
-  '{"frequency":{"min_per_week":1,"max_per_week":4},"durationSeconds":720,"intensity":"10-15°C"}'::jsonb,
-  'coldExposure',
-  'multipleRcts'
+  $tgt${"frequency":{"min_per_week":1,"max_per_week":4},"durationSeconds":720,"intensity":"10-15°C"}$tgt$::jsonb,
+  $cat$coldExposure$cat$,
+  $ev$multipleRcts$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -44,9 +44,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Daily Cold Shower for Illness Resilience$n$,
   $desc$Ending a regular shower with 30–90 seconds of cold water activates the sympathetic nervous system  and, when practiced daily for 30+ days, reduces self-reported sickness absence from work by 29%.$desc$,
-  '{"frequency":{"min_per_week":5,"max_per_week":7},"durationSeconds":60,"intensity":"10-12°C (coldest tap water)"}'::jsonb,
-  'coldExposure',
-  'singleRct'
+  $tgt${"frequency":{"min_per_week":5,"max_per_week":7},"durationSeconds":60,"intensity":"10-12°C (coldest tap water)"}$tgt$::jsonb,
+  $cat$coldExposure$cat$,
+  $ev$singleRct$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -58,9 +58,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Regular Cold Exposure for Brown Fat Activation$n$,
   $desc$Repeated brief cold water immersion (0–10°C) activates brown adipose tissue thermogenesis via norepinephrine-mediated β-adrenergic signaling, increasing cold-induced energy expenditure and improving thermoregulatory capacity.$desc$,
-  '{"frequency":{"min_per_week":2,"max_per_week":3},"durationSeconds":120,"intensity":"0-10°C (ice water or cold outdoor water)"}'::jsonb,
-  'coldExposure',
-  'observational'
+  $tgt${"frequency":{"min_per_week":2,"max_per_week":3},"durationSeconds":120,"intensity":"0-10°C (ice water or cold outdoor water)"}$tgt$::jsonb,
+  $cat$coldExposure$cat$,
+  $ev$observational$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -72,9 +72,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Finnish Sauna for Cardiovascular Health and Longevity$n$,
   $desc$Regular Finnish dry sauna bathing (80–100°C) improves endothelial function, reduces arterial stiffness, and lowers blood pressure,  with 4–7 sessions per week associated with 50% lower fatal cardiovascular disease risk and 40% lower all-cause mortality over 20 years of follow-up.$desc$,
-  '{"frequency":{"min_per_week":4,"max_per_week":7},"durationSeconds":1200,"intensity":"80-100°C (Finnish dry sauna)"}'::jsonb,
-  'heatTherapy',
-  'observational'
+  $tgt${"frequency":{"min_per_week":4,"max_per_week":7},"durationSeconds":1200,"intensity":"80-100°C (Finnish dry sauna)"}$tgt$::jsonb,
+  $cat$heatTherapy$cat$,
+  $ev$observational$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -86,9 +86,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Far-Infrared Sauna for Mood and Depression$n$,
   $desc$Repeated far-infrared sauna sessions at moderate temperature activate thermoregulatory pathways and increase endorphin and serotonin release, reducing depressive symptoms, appetite loss, and somatic complaints in mildly depressed patients.$desc$,
-  '{"frequency":{"min_per_week":5,"max_per_week":5},"durationSeconds":900,"intensity":"60°C (far-infrared dry sauna)"}'::jsonb,
-  'heatTherapy',
-  'singleRct'
+  $tgt${"frequency":{"min_per_week":5,"max_per_week":5},"durationSeconds":900,"intensity":"60°C (far-infrared dry sauna)"}$tgt$::jsonb,
+  $cat$heatTherapy$cat$,
+  $ev$singleRct$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -100,9 +100,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Post-Exercise Sauna for Endurance Enhancement$n$,
   $desc$Sauna bathing immediately after endurance exercise induces heat acclimation adaptations including expanded plasma volume (~7%) and improved oxygen delivery, resulting in meaningful improvements in  VO2max (~8%) and time-to-exhaustion.$desc$,
-  '{"frequency":{"min_per_week":3,"max_per_week":4},"durationSeconds":1800,"intensity":"89-101°C (Finnish dry sauna, post-exercise)"}'::jsonb,
-  'heatTherapy',
-  'singleRct'
+  $tgt${"frequency":{"min_per_week":3,"max_per_week":4},"durationSeconds":1800,"intensity":"89-101°C (Finnish dry sauna, post-exercise)"}$tgt$::jsonb,
+  $cat$heatTherapy$cat$,
+  $ev$singleRct$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -114,9 +114,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Whole-Body Hyperthermia for Major Depression$n$,
   $desc$A single session raising core body temperature to ~38.5°C stimulates thermoafferent pathways projecting to serotonergic nuclei, producing a rapid antidepressant effect  lasting up to 6 weeks in a double-blind sham-controlled trial.$desc$,
-  '{"frequency":{"min_per_week":1,"max_per_week":1},"durationSeconds":2820,"intensity":"Infrared device raising core temperature to 38.5°C"}'::jsonb,
-  'heatTherapy',
-  'singleRct'
+  $tgt${"frequency":{"min_per_week":1,"max_per_week":1},"durationSeconds":2820,"intensity":"Infrared device raising core temperature to 38.5°C"}$tgt$::jsonb,
+  $cat$heatTherapy$cat$,
+  $ev$singleRct$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -128,9 +128,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Zone 2 Sustained Aerobic Training for Metabolic Health$n$,
   $desc$Low-intensity aerobic exercise performed below the lactate threshold  primarily stresses the mitochondrial oxidative system, enhancing fat oxidation capacity, metabolic flexibility, capillary density, and insulin sensitivity for long-term cardiometabolic health.$desc$,
-  '{"frequency":{"min_per_week":3,"max_per_week":5},"durationSeconds":2700,"intensity":"Zone 2 (60-70% HRmax, RPE 2-3, blood lactate <2 mmol/L)"}'::jsonb,
-  'exercise',
-  'observational'
+  $tgt${"frequency":{"min_per_week":3,"max_per_week":5},"durationSeconds":2700,"intensity":"Zone 2 (60-70% HRmax, RPE 2-3, blood lactate <2 mmol/L)"}$tgt$::jsonb,
+  $cat$exercise$cat$,
+  $ev$observational$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -142,9 +142,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$4x4 High-Intensity Interval Training for VO2max$n$,
   $desc$Four 4-minute intervals at 90–95% maximum heart rate with 3-minute active recovery periods  maximize cardiovascular stress to increase stroke volume and VO2max by ~7%, the strongest independent predictor of cardiovascular health and longevity.$desc$,
-  '{"frequency":{"min_per_week":2,"max_per_week":3},"durationSeconds":2100,"intensity":"90-95% HRmax during intervals, 60-70% HRmax during recovery (RPE 7-8)"}'::jsonb,
-  'exercise',
-  'multipleRcts'
+  $tgt${"frequency":{"min_per_week":2,"max_per_week":3},"durationSeconds":2100,"intensity":"90-95% HRmax during intervals, 60-70% HRmax during recovery (RPE 7-8)"}$tgt$::jsonb,
+  $cat$exercise$cat$,
+  $ev$multipleRcts$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -156,9 +156,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Progressive Resistance Training for Longevity$n$,
   $desc$Structured strength training targeting all major muscle groups reduces all-cause mortality by 15–27% through improvements in muscle mass, strength, insulin sensitivity, and bone density, with maximum mortality risk reduction at approximately 60 minutes per week.$desc$,
-  '{"frequency":{"min_per_week":2,"max_per_week":3},"durationSeconds":1800,"intensity":"70-85% 1RM (RPE 6-8, 2-4 sets of 8-12 reps per exercise)"}'::jsonb,
-  'exercise',
-  'observational'
+  $tgt${"frequency":{"min_per_week":2,"max_per_week":3},"durationSeconds":1800,"intensity":"70-85% 1RM (RPE 6-8, 2-4 sets of 8-12 reps per exercise)"}$tgt$::jsonb,
+  $cat$exercise$cat$,
+  $ev$observational$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -170,9 +170,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Supramaximal Interval Training for Dual Aerobic-Anaerobic Fitness$n$,
   $desc$Ultra-short supramaximal intervals (8 x 20 seconds all-out with 10-second rest) uniquely improve both aerobic capacity (VO2max +15%) and anaerobic capacity (+28%) simultaneously in just 6 weeks,  despite only 4 minutes of total exercise per session.$desc$,
-  '{"frequency":{"min_per_week":3,"max_per_week":4},"durationSeconds":240,"intensity":"RPE 9-10 (maximal effort, ~170% VO2max equivalent)"}'::jsonb,
-  'exercise',
-  'singleRct'
+  $tgt${"frequency":{"min_per_week":3,"max_per_week":4},"durationSeconds":240,"intensity":"RPE 9-10 (maximal effort, ~170% VO2max equivalent)"}$tgt$::jsonb,
+  $cat$exercise$cat$,
+  $ev$singleRct$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -184,9 +184,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Combined Aerobic and Resistance Training for Mortality Reduction$n$,
   $desc$Meeting both aerobic (≥150 min/week moderate) and resistance training (≥2 days/week) guidelines yields a synergistic 40% all-cause mortality reduction,  exceeding either modality alone by targeting complementary cardiovascular, metabolic, and musculoskeletal systems.$desc$,
-  '{"frequency":{"min_per_week":4,"max_per_week":5},"durationSeconds":2700,"intensity":"Aerobic: 60-70% HRmax; Resistance: 60-80% 1RM (RPE 5-8)"}'::jsonb,
-  'exercise',
-  'observational'
+  $tgt${"frequency":{"min_per_week":4,"max_per_week":5},"durationSeconds":2700,"intensity":"Aerobic: 60-70% HRmax; Resistance: 60-80% 1RM (RPE 5-8)"}$tgt$::jsonb,
+  $cat$exercise$cat$,
+  $ev$observational$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -198,9 +198,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Morning Bright Light Exposure for Circadian Entrainment$n$,
   $desc$Exposure to bright light (≥2,000 lux) within 30–60 minutes of waking activates melanopsin-containing retinal ganglion cells and the suprachiasmatic nucleus, advancing circadian phase, strengthening the sleep-wake cycle, and improving sleep onset and daytime alertness.$desc$,
-  '{"frequency":{"min_per_week":5,"max_per_week":7},"durationSeconds":1800,"intensity":"≥2,000-10,000 lux within 60 min of waking"}'::jsonb,
-  'sleep',
-  'multipleRcts'
+  $tgt${"frequency":{"min_per_week":5,"max_per_week":7},"durationSeconds":1800,"intensity":"≥2,000-10,000 lux within 60 min of waking"}$tgt$::jsonb,
+  $cat$sleep$cat$,
+  $ev$multipleRcts$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -212,9 +212,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Cool Bedroom Temperature for Sleep Quality$n$,
   $desc$A cool bedroom environment (18–19°C) facilitates the natural 1–2°C core temperature drop required for sleep initiation, supporting deeper slow-wave sleep, fewer nighttime awakenings, and improved overall sleep efficiency.$desc$,
-  '{"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":28800,"intensity":"18-19°C room temperature"}'::jsonb,
-  'sleep',
-  'observational'
+  $tgt${"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":28800,"intensity":"18-19°C room temperature"}$tgt$::jsonb,
+  $cat$sleep$cat$,
+  $ev$observational$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -226,9 +226,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Sleep Restriction Therapy for Insomnia$n$,
   $desc$Limiting time in bed to match actual sleep time creates mild sleep deprivation that strengthens homeostatic sleep pressure, consolidating sleep and reducing sleep-onset latency and nighttime wakefulness,  with effects comparable to full CBT-I.$desc$,
-  '{"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":18000,"intensity":"Time in bed = actual sleep time (min 5h), adjust by 15-30 min weekly based on ≥85% sleep efficiency"}'::jsonb,
-  'sleep',
-  'multipleRcts'
+  $tgt${"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":18000,"intensity":"Time in bed = actual sleep time (min 5h), adjust by 15-30 min weekly based on ≥85% sleep efficiency"}$tgt$::jsonb,
+  $cat$sleep$cat$,
+  $ev$multipleRcts$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -240,9 +240,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Consistent Sleep-Wake Timing Protocol$n$,
   $desc$Maintaining a consistent wake time (±30 minutes daily, including weekends) strengthens circadian entrainment through predictable light and behavioral cues,  with irregular sleep timing associated with poorer sleep quality, metabolic dysfunction, and increased mortality risk.$desc$,
-  '{"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":60,"intensity":"Wake time variation ≤30 min day-to-day, weekday-weekend ≤1 hour"}'::jsonb,
-  'sleep',
-  'expertConsensus'
+  $tgt${"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":60,"intensity":"Wake time variation ≤30 min day-to-day, weekday-weekend ≤1 hour"}$tgt$::jsonb,
+  $cat$sleep$cat$,
+  $ev$expertConsensus$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -254,9 +254,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Evening Dim Light Protocol for Melatonin Preservation$n$,
   $desc$Restricting ambient light to <10 lux for 1–2 hours before bedtime preserves endogenous melatonin onset, as ordinary room light (~200 lux) suppresses melatonin production by up to 71% and shortens melatonin duration by ~90 minutes.$desc$,
-  '{"frequency":{"min_per_week":5,"max_per_week":7},"durationSeconds":5400,"intensity":"<10 lux ambient light 1-2 hours before bed"}'::jsonb,
-  'sleep',
-  'multipleRcts'
+  $tgt${"frequency":{"min_per_week":5,"max_per_week":7},"durationSeconds":5400,"intensity":"<10 lux ambient light 1-2 hours before bed"}$tgt$::jsonb,
+  $cat$sleep$cat$,
+  $ev$multipleRcts$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -268,9 +268,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Time-Restricted Eating for Metabolic Health$n$,
   $desc$Confining all daily caloric intake to an 8–10 hour window with 14–16 hours fasting  promotes weight loss, improved glucose regulation, and reduced blood pressure by leveraging fasting-mediated metabolic switching from glycogen to fat oxidation.$desc$,
-  '{"frequency":{"min_per_week":5,"max_per_week":7},"durationSeconds":1,"intensity":"8-10 hour eating window"}'::jsonb,
-  'nutrition',
-  'multipleRcts'
+  $tgt${"frequency":{"min_per_week":5,"max_per_week":7},"durationSeconds":1,"intensity":"8-10 hour eating window"}$tgt$::jsonb,
+  $cat$nutrition$cat$,
+  $ev$multipleRcts$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -282,9 +282,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Mediterranean Dietary Pattern for Cardiovascular Protection$n$,
   $desc$A whole-diet pattern emphasizing extra-virgin olive oil, vegetables, fruits, nuts, legumes, and fish  reduces major cardiovascular events by ~30%  through anti-inflammatory, antioxidant, and lipid-modifying mechanisms as demonstrated in the PREDIMED trial.$desc$,
-  '{"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":1,"intensity":"14-point Mediterranean adherence score ≥9; ≥4 tbsp EVOO/day, ≥3 servings fruit/day"}'::jsonb,
-  'nutrition',
-  'multipleRcts'
+  $tgt${"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":1,"intensity":"14-point Mediterranean adherence score ≥9; ≥4 tbsp EVOO/day, ≥3 servings fruit/day"}$tgt$::jsonb,
+  $cat$nutrition$cat$,
+  $ev$multipleRcts$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -296,9 +296,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$High-Protein Intake for Body Composition$n$,
   $desc$Increasing daily protein intake to 1.6–2.2 g/kg body weight during resistance training enhances lean mass accretion and strength gains, with a meta-analytic breakpoint at 1.62 g/kg/day beyond which no further fat-free mass benefits were observed.$desc$,
-  '{"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":1,"intensity":"1.6-2.2g protein/kg/day distributed across 3-4 meals"}'::jsonb,
-  'nutrition',
-  'multipleRcts'
+  $tgt${"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":1,"intensity":"1.6-2.2g protein/kg/day distributed across 3-4 meals"}$tgt$::jsonb,
+  $cat$nutrition$cat$,
+  $ev$multipleRcts$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -310,9 +310,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Peri-Workout Protein for Muscle Protein Synthesis$n$,
   $desc$Consuming 20–40g protein within ~2 hours of resistance exercise supports muscle protein synthesis, though meta-analytic evidence indicates total daily protein intake is the primary driver of muscular adaptations rather than precise timing.$desc$,
-  '{"frequency":{"min_per_week":3,"max_per_week":6},"durationSeconds":1,"intensity":"20-40g protein (≥0.4g/kg) within 2 hours pre- or post-exercise"}'::jsonb,
-  'nutrition',
-  'multipleRcts'
+  $tgt${"frequency":{"min_per_week":3,"max_per_week":6},"durationSeconds":1,"intensity":"20-40g protein (≥0.4g/kg) within 2 hours pre- or post-exercise"}$tgt$::jsonb,
+  $cat$nutrition$cat$,
+  $ev$multipleRcts$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -324,9 +324,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Early Time-Restricted Eating for Insulin Sensitivity$n$,
   $desc$Restricting the eating window to early daytime hours (ending by 3–4 PM) aligns food intake with circadian peaks in insulin sensitivity and β-cell responsiveness, improving blood pressure, oxidative stress, and metabolic markers even without weight loss.$desc$,
-  '{"frequency":{"min_per_week":5,"max_per_week":7},"durationSeconds":1,"intensity":"6-8 hour eating window ending by 3-4 PM"}'::jsonb,
-  'nutrition',
-  'multipleRcts'
+  $tgt${"frequency":{"min_per_week":5,"max_per_week":7},"durationSeconds":1,"intensity":"6-8 hour eating window ending by 3-4 PM"}$tgt$::jsonb,
+  $cat$nutrition$cat$,
+  $ev$multipleRcts$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -338,9 +338,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Creatine Monohydrate for Strength and Cognition$n$,
   $desc$Creatine monohydrate replenishes ATP in muscle and brain tissue, enhancing muscular strength and power output while improving memory, processing speed, and attention, particularly under conditions of mental fatigue or in older adults.$desc$,
-  '{"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":60,"intensity":"5g daily with water or meal"}'::jsonb,
-  'supplements',
-  'multipleRcts'
+  $tgt${"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":60,"intensity":"5g daily with water or meal"}$tgt$::jsonb,
+  $cat$supplements$cat$,
+  $ev$multipleRcts$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -352,9 +352,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Omega-3 EPA/DHA for Cardiovascular Health$n$,
   $desc$Long-chain omega-3 fatty acids reduce triglycerides, lower blood pressure, and decrease systemic inflammation, with dose-dependent reductions in myocardial infarction risk (13%), coronary heart disease events (10%), and cardiovascular mortality (7%).$desc$,
-  '{"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":60,"intensity":"1000-3000mg combined EPA/DHA daily with fat-containing meal"}'::jsonb,
-  'supplements',
-  'multipleRcts'
+  $tgt${"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":60,"intensity":"1000-3000mg combined EPA/DHA daily with fat-containing meal"}$tgt$::jsonb,
+  $cat$supplements$cat$,
+  $ev$multipleRcts$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -366,9 +366,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Vitamin D3 for Immune Function and Cancer Mortality Reduction$n$,
   $desc$Vitamin D3 supplementation corrects widespread deficiency (~40% of adults), supports immune and bone health, and reduces cancer mortality by 16% in meta-analyses of RCTs, with 2,000–5,000 IU daily sufficient to maintain optimal serum levels.$desc$,
-  '{"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":60,"intensity":"2000-5000 IU (50-125µg) daily with fat-containing meal"}'::jsonb,
-  'supplements',
-  'multipleRcts'
+  $tgt${"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":60,"intensity":"2000-5000 IU (50-125µg) daily with fat-containing meal"}$tgt$::jsonb,
+  $cat$supplements$cat$,
+  $ev$multipleRcts$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -380,9 +380,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Magnesium Supplementation for Sleep Quality$n$,
   $desc$Magnesium acts as a natural NMDA receptor antagonist and GABA agonist, reducing sleep onset latency by ~17 minutes, increasing melatonin levels, and decreasing cortisol when supplemented before bed in older adults.$desc$,
-  '{"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":60,"intensity":"200-400mg elemental magnesium (glycinate or threonate) 30-60 min before bed"}'::jsonb,
-  'supplements',
-  'singleRct'
+  $tgt${"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":60,"intensity":"200-400mg elemental magnesium (glycinate or threonate) 30-60 min before bed"}$tgt$::jsonb,
+  $cat$supplements$cat$,
+  $ev$singleRct$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -394,9 +394,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Ashwagandha Root Extract for Stress and Cortisol Reduction$n$,
   $desc$Ashwagandha’s withanolides modulate the hypothalamic-pituitary-adrenal axis and exert GABAergic activity, significantly reducing serum cortisol levels and perceived stress scores in a dose-dependent manner across multiple RCTs.$desc$,
-  '{"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":60,"intensity":"300-600mg standardized root extract (≥5% withanolides) daily with food"}'::jsonb,
-  'supplements',
-  'multipleRcts'
+  $tgt${"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":60,"intensity":"300-600mg standardized root extract (≥5% withanolides) daily with food"}$tgt$::jsonb,
+  $cat$supplements$cat$,
+  $ev$multipleRcts$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -408,9 +408,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Mindfulness-Based Stress Reduction Program$n$,
   $desc$An 8-week structured program combining seated meditation, body scanning, and gentle yoga that cultivates present-moment awareness, producing moderate effects (Hedge’s g = 0.53) on stress, anxiety, depression, and quality of life.$desc$,
-  '{"frequency":{"min_per_week":6,"max_per_week":7},"durationSeconds":2700,"intensity":"Guided meditation + body scan + gentle yoga (instructor-led 8-week program)"}'::jsonb,
-  'mind',
-  'multipleRcts'
+  $tgt${"frequency":{"min_per_week":6,"max_per_week":7},"durationSeconds":2700,"intensity":"Guided meditation + body scan + gentle yoga (instructor-led 8-week program)"}$tgt$::jsonb,
+  $cat$mind$cat$,
+  $ev$multipleRcts$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -422,9 +422,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Guided Body Scan Deep Relaxation$n$,
   $desc$A guided meditation performed lying down that systematically directs awareness through the body to induce deep parasympathetic relaxation while maintaining consciousness, reducing stress and improving sleep quality and well-being.$desc$,
-  '{"frequency":{"min_per_week":3,"max_per_week":7},"durationSeconds":660,"intensity":"Guided audio body scan + breath awareness (lying down)"}'::jsonb,
-  'mind',
-  'singleRct'
+  $tgt${"frequency":{"min_per_week":3,"max_per_week":7},"durationSeconds":660,"intensity":"Guided audio body scan + breath awareness (lying down)"}$tgt$::jsonb,
+  $cat$mind$cat$,
+  $ev$singleRct$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -436,9 +436,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Cyclic Sighing Breathwork for Mood Enhancement$n$,
   $desc$A structured breathing technique (double nasal inhale followed by prolonged oral exhale) activates the parasympathetic nervous system via respiratory sinus arrhythmia, producing greater improvement in positive affect than mindfulness meditation in just 5 minutes daily.$desc$,
-  '{"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":300,"intensity":"Self-guided cyclic sighing (double inhale nose, long exhale mouth)"}'::jsonb,
-  'mind',
-  'singleRct'
+  $tgt${"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":300,"intensity":"Self-guided cyclic sighing (double inhale nose, long exhale mouth)"}$tgt$::jsonb,
+  $cat$mind$cat$,
+  $ev$singleRct$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -450,9 +450,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Structured Gratitude Journaling for Well-Being$n$,
   $desc$Listing 3–5 things one is grateful for with brief reflection shifts attentional focus toward positive experiences through cognitive reappraisal, enhancing positive affect, life satisfaction, and subjective well-being (Hedges’ g = 0.22 across 25 RCTs).$desc$,
-  '{"frequency":{"min_per_week":3,"max_per_week":7},"durationSeconds":600,"intensity":"Self-guided structured writing (3-5 items with reflection)"}'::jsonb,
-  'mind',
-  'multipleRcts'
+  $tgt${"frequency":{"min_per_week":3,"max_per_week":7},"durationSeconds":600,"intensity":"Self-guided structured writing (3-5 items with reflection)"}$tgt$::jsonb,
+  $cat$mind$cat$,
+  $ev$multipleRcts$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -464,9 +464,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Focused Attention Meditation for Cognitive Enhancement$n$,
   $desc$Sustained concentration on a single object (typically the breath) while redirecting attention from distractions strengthens executive control and attention networks, producing small-to-moderate improvements in working memory, sustained attention, and cognitive flexibility.$desc$,
-  '{"frequency":{"min_per_week":3,"max_per_week":7},"durationSeconds":900,"intensity":"Guided or unguided single-point breath concentration"}'::jsonb,
-  'mind',
-  'multipleRcts'
+  $tgt${"frequency":{"min_per_week":3,"max_per_week":7},"durationSeconds":900,"intensity":"Guided or unguided single-point breath concentration"}$tgt$::jsonb,
+  $cat$mind$cat$,
+  $ev$multipleRcts$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -478,9 +478,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$14°C Cold Water Immersion for Catecholamine Response$n$,
   $desc$Immersion in cold water (~14°C) can acutely increase plasma norepinephrine and dopamine, which may transiently boost alertness and support stress resilience via sympathetic activation.$desc$,
-  '{"frequency":{"min_per_week":1,"max_per_week":3},"durationSeconds":1200,"intensity":"14°C"}'::jsonb,
-  'coldExposure',
-  'singleRct'
+  $tgt${"frequency":{"min_per_week":1,"max_per_week":3},"durationSeconds":1200,"intensity":"14°C"}$tgt$::jsonb,
+  $cat$coldExposure$cat$,
+  $ev$singleRct$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -492,9 +492,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Post-Exercise Cold Water Immersion for Soreness and Recovery$n$,
   $desc$Cold water immersion after strenuous exercise can reduce delayed-onset muscle soreness and perceived fatigue, likely via reduced tissue temperature and modulation of inflammatory signaling.$desc$,
-  '{"frequency":{"min_per_week":2,"max_per_week":4},"durationSeconds":600,"intensity":"10-15°C"}'::jsonb,
-  'coldExposure',
-  'multipleRcts'
+  $tgt${"frequency":{"min_per_week":2,"max_per_week":4},"durationSeconds":600,"intensity":"10-15°C"}$tgt$::jsonb,
+  $cat$coldExposure$cat$,
+  $ev$multipleRcts$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -506,9 +506,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Daily Cold-Shower Finish for Sickness Absence Reduction$n$,
   $desc$A brief cold-shower finish applied daily is a repeatable mild stressor that has been associated with reduced sickness absence from work, potentially via improved stress tolerance and immune-related effects.$desc$,
-  '{"frequency":{"min_per_week":5,"max_per_week":7},"durationSeconds":60,"intensity":"10-15°C (cold shower)"}'::jsonb,
-  'coldExposure',
-  'singleRct'
+  $tgt${"frequency":{"min_per_week":5,"max_per_week":7},"durationSeconds":60,"intensity":"10-15°C (cold shower)"}$tgt$::jsonb,
+  $cat$coldExposure$cat$,
+  $ev$singleRct$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -520,9 +520,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Frequent Finnish Sauna Bathing for Cardiovascular Risk Reduction$n$,
   $desc$Higher sauna frequency is associated with lower risks of fatal cardiovascular events and all-cause mortality in cohort data, potentially via improved vascular function, blood pressure, and cardiometabolic resilience.$desc$,
-  '{"frequency":{"min_per_week":4,"max_per_week":7},"durationSeconds":1200,"intensity":"80-100°C (Finnish dry)"}'::jsonb,
-  'heatTherapy',
-  'observational'
+  $tgt${"frequency":{"min_per_week":4,"max_per_week":7},"durationSeconds":1200,"intensity":"80-100°C (Finnish dry)"}$tgt$::jsonb,
+  $cat$heatTherapy$cat$,
+  $ev$observational$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -534,9 +534,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Post-Exercise Sauna Bathing for Endurance Adaptation$n$,
   $desc$Adding sauna exposure after endurance training can improve time-to-exhaustion performance, plausibly through heat-driven plasma volume expansion and thermoregulatory adaptations.$desc$,
-  '{"frequency":{"min_per_week":3,"max_per_week":5},"durationSeconds":1800,"intensity":"85-95°C (sauna)"}'::jsonb,
-  'heatTherapy',
-  'singleRct'
+  $tgt${"frequency":{"min_per_week":3,"max_per_week":5},"durationSeconds":1800,"intensity":"85-95°C (sauna)"}$tgt$::jsonb,
+  $cat$heatTherapy$cat$,
+  $ev$singleRct$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -548,9 +548,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Single-Session Whole-Body Hyperthermia for Depressive Symptoms$n$,
   $desc$A single whole-body hyperthermia session has shown antidepressant effects lasting weeks, potentially via thermoregulatory, inflammatory, and neuroendocrine pathways; this should be done under appropriate clinical supervision.$desc$,
-  '{"frequency":{"min_per_week":1,"max_per_week":1},"durationSeconds":3600,"intensity":"55-65°C (whole-body hyperthermia; target core temp ~38.5°C)"}'::jsonb,
-  'heatTherapy',
-  'singleRct'
+  $tgt${"frequency":{"min_per_week":1,"max_per_week":1},"durationSeconds":3600,"intensity":"55-65°C (whole-body hyperthermia; target core temp ~38.5°C)"}$tgt$::jsonb,
+  $cat$heatTherapy$cat$,
+  $ev$singleRct$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -562,9 +562,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Zone 2 Continuous Endurance Training for Aerobic Base$n$,
   $desc$Regular moderate-intensity continuous training improves aerobic capacity and VO2max, supporting mitochondrial and cardiometabolic health with a sustainable stimulus.$desc$,
-  '{"frequency":{"min_per_week":3,"max_per_week":5},"durationSeconds":2700,"intensity":"Zone 2 (60-70% HRmax)"}'::jsonb,
-  'exercise',
-  'singleRct'
+  $tgt${"frequency":{"min_per_week":3,"max_per_week":5},"durationSeconds":2700,"intensity":"Zone 2 (60-70% HRmax)"}$tgt$::jsonb,
+  $cat$exercise$cat$,
+  $ev$singleRct$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -576,9 +576,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$4x4 Minute HIIT for VO2max$n$,
   $desc$High-intensity intervals performed near 90-95% HRmax provide a strong VO2max stimulus and cardiovascular adaptation with relatively low total work time.$desc$,
-  '{"frequency":{"min_per_week":2,"max_per_week":3},"durationSeconds":2400,"intensity":"4×4 min at 90-95% HRmax (3 min easy between)"}'::jsonb,
-  'exercise',
-  'singleRct'
+  $tgt${"frequency":{"min_per_week":2,"max_per_week":3},"durationSeconds":2400,"intensity":"4×4 min at 90-95% HRmax (3 min easy between)"}$tgt$::jsonb,
+  $cat$exercise$cat$,
+  $ev$singleRct$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -590,9 +590,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Sprint Interval Training for Mitochondrial and Cardiometabolic Adaptation$n$,
   $desc$Very short all-out intervals with long recoveries can drive rapid improvements in skeletal muscle oxidative capacity and cardiometabolic fitness with low total training time.$desc$,
-  '{"frequency":{"min_per_week":2,"max_per_week":3},"durationSeconds":1200,"intensity":"All-out (RPE 9-10)"}'::jsonb,
-  'exercise',
-  'singleRct'
+  $tgt${"frequency":{"min_per_week":2,"max_per_week":3},"durationSeconds":1200,"intensity":"All-out (RPE 9-10)"}$tgt$::jsonb,
+  $cat$exercise$cat$,
+  $ev$singleRct$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -604,9 +604,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Progressive Full-Body Resistance Training for Strength and Functional Longevity$n$,
   $desc$Progressive resistance training improves muscular strength in older adults, supporting functional independence and metabolic health via muscle hypertrophy and neuromuscular adaptation.$desc$,
-  '{"frequency":{"min_per_week":2,"max_per_week":3},"durationSeconds":2700,"intensity":"60-80% 1RM (2-3 sets × 8-12 reps)"}'::jsonb,
-  'exercise',
-  'multipleRcts'
+  $tgt${"frequency":{"min_per_week":2,"max_per_week":3},"durationSeconds":2700,"intensity":"60-80% 1RM (2-3 sets × 8-12 reps)"}$tgt$::jsonb,
+  $cat$exercise$cat$,
+  $ev$multipleRcts$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -618,9 +618,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Morning Bright-Light Exposure for Circadian Alignment$n$,
   $desc$Timed bright-light exposure strengthens circadian entrainment and can improve sleep outcomes by reinforcing the morning light signal that sets daily biological timing.$desc$,
-  '{"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":1800,"intensity":"≥2,500-10,000 lux within 1 hour of waking"}'::jsonb,
-  'sleep',
-  'multipleRcts'
+  $tgt${"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":1800,"intensity":"≥2,500-10,000 lux within 1 hour of waking"}$tgt$::jsonb,
+  $cat$sleep$cat$,
+  $ev$multipleRcts$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -632,9 +632,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Evening Blue-Light Blocking to Improve Insomnia Symptoms$n$,
   $desc$Reducing blue-rich light exposure in the evening can support melatonin signaling and improve sleep in insomnia by lowering the circadian-disrupting effect of nighttime light.$desc$,
-  '{"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":7200,"intensity":"<50 lux blue-rich light; blue-blocking glasses 2-3h pre-bed"}'::jsonb,
-  'sleep',
-  'singleRct'
+  $tgt${"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":7200,"intensity":"<50 lux blue-rich light; blue-blocking glasses 2-3h pre-bed"}$tgt$::jsonb,
+  $cat$sleep$cat$,
+  $ev$singleRct$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -646,9 +646,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Warm Bath or Shower 1-2 Hours Before Bed to Shorten Sleep Onset$n$,
   $desc$Passive body heating before bed can improve sleep onset and sleep efficiency by enhancing the post-bath drop in core temperature and increasing heat loss from the periphery.$desc$,
-  '{"frequency":{"min_per_week":5,"max_per_week":7},"durationSeconds":600,"intensity":"40-42.5°C water, timed 1-2h before bed"}'::jsonb,
-  'sleep',
-  'multipleRcts'
+  $tgt${"frequency":{"min_per_week":5,"max_per_week":7},"durationSeconds":600,"intensity":"40-42.5°C water, timed 1-2h before bed"}$tgt$::jsonb,
+  $cat$sleep$cat$,
+  $ev$multipleRcts$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -660,9 +660,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Sleep Restriction Therapy for Chronic Insomnia$n$,
   $desc$Sleep restriction therapy consolidates sleep by limiting time in bed to increase homeostatic sleep drive and reduce fragmented, wakeful time, improving insomnia severity over time.$desc$,
-  '{"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":21600,"intensity":"Time in bed = average sleep time +30 min (min 5h), adjust weekly by sleep efficiency"}'::jsonb,
-  'sleep',
-  'multipleRcts'
+  $tgt${"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":21600,"intensity":"Time in bed = average sleep time +30 min (min 5h), adjust weekly by sleep efficiency"}$tgt$::jsonb,
+  $cat$sleep$cat$,
+  $ev$multipleRcts$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -674,9 +674,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Early Time-Restricted Eating Window for Insulin Sensitivity$n$,
   $desc$Restricting food intake to an early-day window can improve insulin sensitivity and cardiometabolic markers even without weight loss, aligning eating with circadian metabolic rhythms.$desc$,
-  '{"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":21600,"intensity":"6-hour eating window ending before 15:00 (e.g., 08:00-14:00)"}'::jsonb,
-  'nutrition',
-  'singleRct'
+  $tgt${"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":21600,"intensity":"6-hour eating window ending before 15:00 (e.g., 08:00-14:00)"}$tgt$::jsonb,
+  $cat$nutrition$cat$,
+  $ev$singleRct$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -688,9 +688,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Mediterranean Dietary Pattern With Olive Oil or Nuts for Cardiovascular Prevention$n$,
   $desc$A Mediterranean dietary pattern supplemented with extra-virgin olive oil or mixed nuts reduced major cardiovascular events in a large randomized trial, likely via improvements in lipids, inflammation, and endothelial function.$desc$,
-  '{"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":86400,"intensity":"Mediterranean pattern; add ~30 g mixed nuts/day or ~1 L/week extra-virgin olive oil"}'::jsonb,
-  'nutrition',
-  'singleRct'
+  $tgt${"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":86400,"intensity":"Mediterranean pattern; add ~30 g mixed nuts/day or ~1 L/week extra-virgin olive oil"}$tgt$::jsonb,
+  $cat$nutrition$cat$,
+  $ev$singleRct$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -702,9 +702,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Post-Exercise Carbohydrate+Protein Feeding for Glycogen Recovery$n$,
   $desc$Consuming carbohydrate with added protein soon after exercise can enhance muscle glycogen resynthesis compared with carbohydrate alone, supporting recovery when training sessions are frequent.$desc$,
-  '{"frequency":{"min_per_week":2,"max_per_week":6},"durationSeconds":1800,"intensity":"Carb 0.8-1.2 g/kg + protein 0.2-0.4 g/kg within 2h post-exercise"}'::jsonb,
-  'nutrition',
-  'singleRct'
+  $tgt${"frequency":{"min_per_week":2,"max_per_week":6},"durationSeconds":1800,"intensity":"Carb 0.8-1.2 g/kg + protein 0.2-0.4 g/kg within 2h post-exercise"}$tgt$::jsonb,
+  $cat$nutrition$cat$,
+  $ev$singleRct$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -716,9 +716,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Nightly Magnesium Supplementation for Primary Insomnia$n$,
   $desc$Magnesium may support sleep regulation via effects on GABAergic and NMDA-related signaling; supplementation improved subjective and objective insomnia measures in an elderly insomnia trial.$desc$,
-  '{"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":60,"intensity":"500 mg magnesium daily, taken 1-2h before bed (8 weeks)"}'::jsonb,
-  'supplements',
-  'singleRct'
+  $tgt${"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":60,"intensity":"500 mg magnesium daily, taken 1-2h before bed (8 weeks)"}$tgt$::jsonb,
+  $cat$supplements$cat$,
+  $ev$singleRct$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -730,9 +730,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Daily Creatine Monohydrate for Strength and Lean Mass$n$,
   $desc$Creatine monohydrate increases intramuscular phosphocreatine availability, improving high-intensity performance and supporting greater lean mass gains when paired with training; safety and efficacy are supported across many trials.$desc$,
-  '{"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":60,"intensity":"3-5 g creatine monohydrate daily with meal (optional loading 20 g/day × 5-7 days)"}'::jsonb,
-  'supplements',
-  'multipleRcts'
+  $tgt${"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":60,"intensity":"3-5 g creatine monohydrate daily with meal (optional loading 20 g/day × 5-7 days)"}$tgt$::jsonb,
+  $cat$supplements$cat$,
+  $ev$multipleRcts$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -744,9 +744,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Daily Omega-3 EPA+DHA for Lipid and Cardiovascular Risk Markers$n$,
   $desc$EPA/DHA supplementation can improve cardiovascular risk factors (including triglycerides) across randomized trials and meta-analyses, likely via effects on lipid metabolism and inflammatory pathways.$desc$,
-  '{"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":60,"intensity":"1-4 g/day EPA+DHA with meals"}'::jsonb,
-  'supplements',
-  'multipleRcts'
+  $tgt${"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":60,"intensity":"1-4 g/day EPA+DHA with meals"}$tgt$::jsonb,
+  $cat$supplements$cat$,
+  $ev$multipleRcts$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -758,9 +758,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Ashwagandha Root Extract for Stress and Anxiety Reduction$n$,
   $desc$Ashwagandha root extract has reduced perceived stress and anxiety measures in randomized trials, plausibly via adaptogenic effects on stress-response physiology (including cortisol).$desc$,
-  '{"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":60,"intensity":"300 mg twice daily (root extract) with meals for 60 days"}'::jsonb,
-  'supplements',
-  'singleRct'
+  $tgt${"frequency":{"min_per_week":7,"max_per_week":7},"durationSeconds":60,"intensity":"300 mg twice daily (root extract) with meals for 60 days"}$tgt$::jsonb,
+  $cat$supplements$cat$,
+  $ev$singleRct$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -772,9 +772,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Mindfulness-Based Stress Reduction Daily Practice$n$,
   $desc$Mindfulness-based stress reduction (MBSR) improves stress-related outcomes across populations, likely by strengthening attention regulation, present-moment awareness, and emotion regulation skills.$desc$,
-  '{"frequency":{"min_per_week":6,"max_per_week":7},"durationSeconds":2700,"intensity":"guided mindfulness (MBSR-style body scan/sitting meditation)"}'::jsonb,
-  'mind',
-  'multipleRcts'
+  $tgt${"frequency":{"min_per_week":6,"max_per_week":7},"durationSeconds":2700,"intensity":"guided mindfulness (MBSR-style body scan/sitting meditation)"}$tgt$::jsonb,
+  $cat$mind$cat$,
+  $ev$multipleRcts$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -786,9 +786,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Cyclic Sighing Breathwork for Acute Mood and Arousal Reduction$n$,
   $desc$Brief daily structured breathing (including cyclic sighing) can improve mood and reduce physiological arousal, likely via vagal engagement and altered respiratory chemistry.$desc$,
-  '{"frequency":{"min_per_week":5,"max_per_week":7},"durationSeconds":300,"intensity":"cyclic sighing (double inhale + long slow exhale)"}'::jsonb,
-  'mind',
-  'singleRct'
+  $tgt${"frequency":{"min_per_week":5,"max_per_week":7},"durationSeconds":300,"intensity":"cyclic sighing (double inhale + long slow exhale)"}$tgt$::jsonb,
+  $cat$mind$cat$,
+  $ev$singleRct$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
@@ -800,9 +800,9 @@ INSERT INTO public.protocols (name, description, target, category, evidence_leve
 VALUES (
   $n$Structured Gratitude Journaling for Well-Being$n$,
   $desc$Structured gratitude listing can improve subjective well-being and positive affect by systematically directing attention toward positive experiences and supportive relationships.$desc$,
-  '{"frequency":{"min_per_week":1,"max_per_week":3},"durationSeconds":600,"intensity":"write 5 specific gratitudes (structured list)"}'::jsonb,
-  'mind',
-  'singleRct'
+  $tgt${"frequency":{"min_per_week":1,"max_per_week":3},"durationSeconds":600,"intensity":"write 5 specific gratitudes (structured list)"}$tgt$::jsonb,
+  $cat$mind$cat$,
+  $ev$singleRct$ev$
 )
 ON CONFLICT ((lower(name))) DO UPDATE SET
   description = EXCLUDED.description,
