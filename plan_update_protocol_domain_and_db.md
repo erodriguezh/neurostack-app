@@ -7,15 +7,17 @@
 
 ## Phase 1 — Domain Layer
 
-### 1.1 Add failure constant
+### 1.1 Add failure constant ✅
 - **Edit** `lib/features/protocol/domain/failures/protocol_failures.dart`
   - Add `static const descriptionEmpty = DomainFailure(code: 'Protocol.DescriptionEmpty', message: '...')`
   - Cite: follows existing pattern of `nameEmpty`, `nameTooLong` etc. in same file
+  - **Done:** commit `588988a`
 
-### 1.2 Create `ProtocolDescription` value object
+### 1.2 Create `ProtocolDescription` value object ✅
 - **New** `lib/features/protocol/domain/value_objects/protocol_description.dart`
   - Freezed sealed class, `_internal` factory, static `create(String)` returning `Either<DomainFailure, ProtocolDescription>`
   - Validation: non-empty after trim → returns `ProtocolFailures.descriptionEmpty` on failure
+  - Validation: max length 2000 chars after trim → returns `ProtocolFailures.descriptionTooLong` on failure
   - `@override toString() => value`
   - Cite: follow exact pattern from `lib/features/protocol/domain/value_objects/protocol_name.dart`
 
