@@ -85,6 +85,12 @@ abstract final class ProtocolDtoFactory {
     );
   }
 
+  /// Description fails ProtocolDescription.create validation (empty)
+  /// Triggers Protocol.DescriptionEmpty
+  static ProtocolDto createWithEmptyDescription() {
+    return create(description: TestConstants.protocol.emptyDescription);
+  }
+
   /// Empty citations list
   /// Note: toDomain succeeds, but Protocol.create would fail with NoCitations
   static ProtocolDto createWithEmptyCitations() {

@@ -32,6 +32,10 @@ void main() {
           code: 'Protocol.NameContainsResearcher',
         ),
         (
+          factory: ProtocolDtoFactory.createWithEmptyDescription,
+          code: 'Protocol.DescriptionEmpty',
+        ),
+        (
           factory: ProtocolDtoFactory.createWithInvalidCategory,
           code: 'Dto.InvalidCategory',
         ),
@@ -79,6 +83,7 @@ void main() {
       // instead of throwing. The domain validation catches empty ids.
       final requiredFields = [
         'name',
+        'description',
         'target',
         'category',
         'evidence_level',
@@ -146,6 +151,10 @@ void main() {
           (restored) {
             expect(restored.id, original.id);
             expect(restored.name.value, original.name.value);
+            expect(
+              restored.description.value,
+              original.description.value,
+            );
             expect(restored.category, original.category);
             expect(restored.evidenceLevel, original.evidenceLevel);
             expect(restored.citations.length, original.citations.length);

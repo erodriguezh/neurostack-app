@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-65-phase-21-add-description-to-protocoldto",
+  "created_at": "2026-02-21T19:13:57.106334Z",
+  "depends_on_epics": [],
+  "id": "fn-65-phase-21-add-description-to-protocoldto",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-65-phase-21-add-description-to-protocoldto.md",
+  "status": "open",
+  "title": "Phase 2.1: Add description to ProtocolDto",
+  "updated_at": "2026-02-21T19:13:57.106935Z"
+}
