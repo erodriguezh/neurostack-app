@@ -86,7 +86,7 @@
   - **Generate SQL programmatically:** commit a Dart helper script `tool/generate_seed_sql.dart` that reads `protocols.json` and outputs the migration SQL. Include a SHA-256 checksum of `protocols.json` as a comment in the generated SQL for audit trail. Script is run manually; output is committed.
   - Cite: existing seed pattern at `supabase/seed.sql`; target JSONB format at `lib/features/protocol/data/dtos/target_dto.dart`
 
-### 3.3 Fix `supabase/seed.sql` (test data)
+### 3.3 Fix `supabase/seed.sql` (test data) ✅
 - **Edit** `supabase/seed.sql`
   - **Remove explicit IDs** from protocol INSERTs — stop using `OVERRIDING SYSTEM VALUE` with fixed IDs 1..13. Instead let the DB assign identity values, matching the approach used by the seed migration in 3.2. This avoids PK collisions when `supabase db reset` runs migrations (which insert 57 protocols) before seed.sql (which inserts 13 test protocols).
   - **Resolve citation FKs by name:** replace `protocol_id = <literal int>` with `protocol_id = (SELECT id FROM public.protocols WHERE name = '...')` in research_citations INSERTs.
