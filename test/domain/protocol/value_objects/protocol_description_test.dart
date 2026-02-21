@@ -37,8 +37,7 @@ void main() {
 
         // Assert
         expect(result, isRight<ProtocolDescription>());
-        final description =
-            result.getOrElse((l) => throw Exception('$l'));
+        final description = result.getOrElse((l) => throw Exception('$l'));
         expect(description.value, 'hello');
       });
     });

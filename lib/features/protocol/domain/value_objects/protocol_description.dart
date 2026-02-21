@@ -10,7 +10,7 @@ part 'protocol_description.freezed.dart';
 ///
 /// Validation rules:
 /// - Not empty after trim
-/// - Max 2000 characters
+/// - Max 2000 characters after trim
 @freezed
 sealed class ProtocolDescription with _$ProtocolDescription {
   const ProtocolDescription._();
