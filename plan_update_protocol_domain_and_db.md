@@ -75,7 +75,7 @@
   - Cite: existing comments at `supabase/migrations/20251204192228_initial_schema.sql` lines 33-37
   - **Done:** commit `ba54cea`
 
-### 3.2 Seed migration — upsert 57 protocols + 76 citations
+### 3.2 Seed migration — upsert 57 protocols + 76 citations ✅
 - **New** `supabase/migrations/YYYYMMDDHHMMSS_seed_protocols.sql`
   - Add case-insensitive unique index: `CREATE UNIQUE INDEX IF NOT EXISTS protocols_name_unique ON public.protocols (lower(name))`
   - For each of 57 protocols: `INSERT INTO public.protocols (name, description, target, category, evidence_level) VALUES (...) ON CONFLICT ((lower(name))) DO UPDATE SET description=EXCLUDED.description, target=EXCLUDED.target, category=EXCLUDED.category, evidence_level=EXCLUDED.evidence_level`
