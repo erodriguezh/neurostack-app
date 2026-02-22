@@ -109,19 +109,19 @@
     ```
   - Cite: follows existing `validName`/`emptyName` pattern at lines 35-36
 
-### 4.2 Create `ProtocolDescriptionFactory`
+### 4.2 Create `ProtocolDescriptionFactory` ✅
 - **New** `test/factories/value_objects/protocol_description_factory.dart`
   - `abstract final class ProtocolDescriptionFactory`
   - `valid()` → returns `ProtocolDescription` using `TestConstants.protocol.validDescription`
   - `create(String)` → returns `Either<DomainFailure, ProtocolDescription>`
   - Cite: follow pattern from `test/factories/value_objects/protocol_name_factory.dart`
 
-### 4.3 Update barrel export
+### 4.3 Update barrel export ✅
 - **Edit** `test/factories/factories.dart`
   - Add `export 'value_objects/protocol_description_factory.dart';` (after line ~11, with other VO factories)
   - Cite: existing exports at lines 10-16
 
-### 4.4 Update `ProtocolFactory`
+### 4.4 Update `ProtocolFactory` ✅
 - **Edit** `test/factories/protocol_factory.dart`
   - Add imports for `ProtocolDescription` and `ProtocolDescriptionFactory`
   - Add `ProtocolDescription? description` param to `create()` (line ~17)
@@ -130,7 +130,7 @@
   - Pass `description: description ?? ProtocolDescriptionFactory.valid()` to `Protocol.reconstitute()` (line ~47)
   - Cite: follows existing `name ?? ProtocolNameFactory.valid()` pattern at lines 27, 49
 
-### 4.5 Update `ProtocolDtoFactory`
+### 4.5 Update `ProtocolDtoFactory` ✅
 - **Edit** `test/factories/dtos/protocol_dto_factory.dart`
   - Add `String? description` param to `create()` (line ~18)
   - Pass `description: description ?? TestConstants.protocol.validDescription` to `ProtocolDto()` (line ~28)
@@ -143,9 +143,11 @@
   - Add `'description': TestConstants.protocol.validDescription` to `createValidJson()` (after line ~98, after `'name'` key)
   - Cite: follows `createWithInvalidName()` pattern at lines 44-46; follows `createValidJson()` structure at lines 95-105
 
-### 4.6 Fix `TargetDtoFactory` JSON key mismatch
+### 4.6 Fix `TargetDtoFactory` JSON key mismatch ✅
 - **Edit** `test/factories/dtos/target_dto_factory.dart`
   - Change `'duration_seconds'` → `'durationSeconds'` in `createValidJson()` (line ~52)
+  - Added `createWithNullDuration()` state variation to bypass factory default for nullable path testing
+  - Fixed stale doc comment `"snake_case keys"` → `"matching generated fromJson/toJson keys"` (also fixed in `ProtocolDtoFactory` and `ResearchCitationDtoFactory`)
   - This aligns the test fixture with the actual `TargetDto` serialization key (camelCase)
   - Cite: `lib/features/protocol/data/dtos/target_dto.dart` line ~21
 
@@ -153,40 +155,50 @@
 
 ## Phase 5 — Tests
 
-### 5.1 New: `ProtocolDescription` unit tests
+### 5.1 New: `ProtocolDescription` unit tests ✅
 - **New** `test/domain/protocol/value_objects/protocol_description_test.dart`
   - `create` succeeds: valid string, single char, trims whitespace
   - `create` fails: empty → `ProtocolFailures.descriptionEmpty`, whitespace-only → `ProtocolFailures.descriptionEmpty`
   - `toString` returns underlying value
   - Cite: follow structure from `test/domain/protocol/value_objects/protocol_name_test.dart`
 
-### 5.2 Update `protocol_test.dart`
+### 5.2 Update `protocol_test.dart` ✅
 - **Edit** `test/domain/protocol/protocol_test.dart`
   - Add one explicit test: `create_withDescription_preservesDescription`
   - All existing tests continue to work via factory defaults (no breakage)
   - Cite: existing entity tests in same file
 
-### 5.3 Update `protocol_dto_test.dart`
+### 5.3 Update `protocol_dto_test.dart` ✅
 - **Edit** `test/features/protocol/data/dtos/protocol_dto_test.dart`
   - Add `(factory: ProtocolDtoFactory.createWithEmptyDescription, code: 'Protocol.DescriptionEmpty')` to parameterized `invalidCases` list
   - Add `'description'` to `requiredFields` list for fromJson missing-field tests
   - Add description assertion to roundtrip preservation test
   - Cite: existing parameterized patterns in same file
 
-### 5.4 Add `TargetDto` duration roundtrip assertion
-- **Edit** `test/features/protocol/data/dtos/target_dto_test.dart` (or appropriate test file)
-  - Add assertion that `TargetDto.fromJson(targetDto.toJson())` preserves `durationSeconds` (non-null when set)
-  - This gates against the `duration_seconds` vs `durationSeconds` key mismatch regressing
+### 5.4 Add `TargetDto` duration roundtrip assertion ✅
+- **New** `test/features/protocol/data/dtos/target_dto_test.dart`
+  - toDomain valid, invalid frequency, max < min, null duration
+  - fromJson valid, missing frequency
+  - fromDomain roundtrip preserves durationSeconds
+  - fromJson/toJson roundtrip guards camelCase `durationSeconds` key
   - Cite: existing DTO roundtrip patterns
+- **New** `test/features/protocol/data/dtos/frequency_dto_test.dart`
+  - toDomain valid, invalid min, max < min
+  - fromJson valid, missing fields
+  - fromDomain roundtrip preserves values
+  - fromJson/toJson roundtrip guards snake_case @JsonKey mapping
+- **New** `test/features/protocol/data/dtos/research_citation_dto_test.dart`
+  - toDomain valid, parameterized invalid cases (empty authors/title/journal, invalid year)
+  - fromJson valid, missing fields, null doi, null url
+  - fromDomain roundtrip preserves all fields
 
 ---
 
-## Phase 6 — Verify
+## Phase 6 — Verify ✅
 
-- `dart run build_runner build --delete-conflicting-outputs`
-- `dart format lib test`
-- `flutter analyze`
-- `flutter test`
+- `dart format lib test` — 0 changes needed
+- `flutter analyze` — no issues found
+- `flutter test` — 571 tests passed
 
 ---
 
@@ -210,6 +222,10 @@
 | Edit | `test/factories/dtos/target_dto_factory.dart` | 4.6 |
 | Edit | `test/domain/protocol/protocol_test.dart` | 5.2 |
 | Edit | `test/features/protocol/data/dtos/protocol_dto_test.dart` | 5.3 |
+| New | `test/features/protocol/data/dtos/target_dto_test.dart` | 5.4 |
+| New | `test/features/protocol/data/dtos/frequency_dto_test.dart` | 5.4 |
+| New | `test/features/protocol/data/dtos/research_citation_dto_test.dart` | 5.4 |
+| Edit | `test/factories/dtos/research_citation_dto_factory.dart` | 4.6 |
 | Edit | `supabase/seed.sql` | 3.3 |
 
 ## Not Changed (UI deferred)

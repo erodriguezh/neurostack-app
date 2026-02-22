@@ -16,6 +16,21 @@ void main() {
         expect(result, isRight<Protocol>());
       });
 
+      test('create_withDescription_preservesDescription', () {
+        // Arrange
+        final description = ProtocolDescriptionFactory.valid();
+
+        // Act
+        final result = ProtocolFactory.create(description: description);
+
+        // Assert
+        expect(result, isRight<Protocol>());
+        final protocol = result.getOrElse(
+          (l) => throw Exception('Failed to create protocol: $l'),
+        );
+        expect(protocol.description, description);
+      });
+
       // INV-P1: Must have citation
       test('create_withNoCitations_returnsNoCitations', () {
         // Act

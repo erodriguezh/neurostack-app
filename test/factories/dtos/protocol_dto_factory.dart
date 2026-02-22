@@ -99,7 +99,7 @@ abstract final class ProtocolDtoFactory {
 
   // --- JSON Variations (fromJson failures) ---
 
-  /// Valid JSON map with snake_case keys.
+  /// Valid JSON map matching generated fromJson/toJson keys.
   static Map<String, dynamic> createValidJson({String? id}) {
     return {
       'id': id ?? TestConstants.dto.defaultProtocolId,

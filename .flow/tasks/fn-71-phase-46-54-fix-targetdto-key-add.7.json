@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-02-22T19:51:51.876356Z",
+  "depends_on": [],
+  "epic": "fn-71-phase-46-54-fix-targetdto-key-add",
+  "id": "fn-71-phase-46-54-fix-targetdto-key-add.7",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-71-phase-46-54-fix-targetdto-key-add.7.md",
+  "status": "todo",
+  "title": "Refactor 3: Add FrequencyDto and ResearchCitationDto test files",
+  "updated_at": "2026-02-22T19:51:51.876757Z"
+}

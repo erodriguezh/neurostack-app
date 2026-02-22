@@ -39,9 +39,18 @@ abstract final class TargetDtoFactory {
     );
   }
 
+  /// Null duration — bypasses factory default to test nullable path.
+  static TargetDto createWithNullDuration() {
+    return TargetDto(
+      frequency: FrequencyDtoFactory.create(),
+      durationSeconds: null,
+      intensity: 'moderate',
+    );
+  }
+
   // --- JSON Variations ---
 
-  /// Valid JSON map with snake_case keys.
+  /// Valid JSON map matching generated fromJson/toJson keys.
   static Map<String, dynamic> createValidJson({
     Map<String, dynamic>? frequency,
     int? durationSeconds,
@@ -49,7 +58,7 @@ abstract final class TargetDtoFactory {
   }) {
     return {
       'frequency': frequency ?? FrequencyDtoFactory.createValidJson(),
-      'duration_seconds': durationSeconds ?? 1800,
+      'durationSeconds': durationSeconds ?? 1800,
       'intensity': intensity ?? 'moderate',
     };
   }

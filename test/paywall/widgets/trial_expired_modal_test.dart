@@ -277,8 +277,7 @@ void main() {
           expect(find.text('Keep Everything'), findsOneWidget);
 
           // Act - simulate system back button via pop route
-          final popped = await tester.binding
-              .handlePopRoute();
+          final popped = await tester.binding.handlePopRoute();
           await tester.pumpAndSettle();
 
           // Assert - modal should still be visible (not dismissed)
