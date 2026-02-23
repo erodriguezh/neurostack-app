@@ -42,3 +42,10 @@ This resolves the critical issue: the migration at `20260221193000` added `NOT N
 - [ ] `supabase db reset` succeeds locally (if Supabase CLI available) — migration re-applies cleanly
 - [ ] Spec file updated with rationale for the DEFAULT '' → CHECK transition
 - [ ] No changes to Dart code (pure SQL migration)
+
+## Done summary
+Added Supabase migration 20260223203929 that tightens the protocol description column: safety pre-check for empty rows, idempotent CHECK constraint (length(trim(description)) > 0) matching the domain VO invariant, and DROP DEFAULT '' to force explicit descriptions on INSERT. Updated spec with rationale for the two-phase approach.
+## Evidence
+- Commits: c487f568a5c9400807037d49571a88699baae520
+- Tests: flutter test, flutter analyze
+- PRs:
