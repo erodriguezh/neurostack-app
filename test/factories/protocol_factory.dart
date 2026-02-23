@@ -8,6 +8,7 @@ import 'package:neurostack/features/protocol/domain/value_objects/protocol_name.
 import 'package:neurostack/features/protocol/domain/value_objects/research_citation.dart';
 import 'package:neurostack/features/protocol/domain/value_objects/target.dart';
 import '../constants/test_constants.dart';
+import 'factory_helpers.dart';
 import 'value_objects/protocol_description_factory.dart';
 import 'value_objects/protocol_name_factory.dart';
 import 'value_objects/research_citation_factory.dart';
@@ -65,8 +66,6 @@ abstract final class ProtocolFactory {
   /// Creates a valid Protocol (unwrapped, throws on failure).
   /// Use for setup when you know the protocol is valid.
   static Protocol valid() {
-    return create().getOrElse(
-      (l) => throw Exception('Factory produced invalid Protocol: $l'),
-    );
+    return unwrapOrThrow(create(), 'Protocol');
   }
 }

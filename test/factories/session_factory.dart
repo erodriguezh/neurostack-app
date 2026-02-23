@@ -3,6 +3,7 @@ import 'package:neurostack/core/failures/domain_failure.dart';
 import 'package:neurostack/features/session/domain/entities/session.dart';
 import 'package:neurostack/features/session/domain/value_objects/session_duration.dart';
 import '../constants/test_constants.dart';
+import 'factory_helpers.dart';
 import 'value_objects/session_duration_factory.dart';
 
 abstract final class SessionFactory {
@@ -45,9 +46,7 @@ abstract final class SessionFactory {
   /// Creates a valid Session (unwrapped, throws on failure).
   /// Use for setup when you know the session is valid.
   static Session valid() {
-    return create().getOrElse(
-      (l) => throw Exception('Factory produced invalid Session: $l'),
-    );
+    return unwrapOrThrow(create(), 'Session');
   }
 
   /// Creates a Session with a future timestamp (for testing INV-S2).

@@ -1,3 +1,6 @@
+// Shared factory utilities
+export 'factory_helpers.dart';
+
 // Aggregate factories
 export 'entitlement_snapshot_factory.dart';
 export 'pending_session_factory.dart';

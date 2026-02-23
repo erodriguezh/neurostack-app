@@ -2,12 +2,14 @@ import 'package:fpdart/fpdart.dart';
 import 'package:neurostack/core/failures/domain_failure.dart';
 import 'package:neurostack/features/protocol/domain/value_objects/protocol_name.dart';
 import '../../constants/test_constants.dart';
+import '../factory_helpers.dart';
 
 abstract final class ProtocolNameFactory {
   /// Creates a valid ProtocolName.
   static ProtocolName valid() {
-    return ProtocolName.create(TestConstants.protocol.validName).getOrElse(
-      (l) => throw Exception('Factory produced invalid ProtocolName: $l'),
+    return unwrapOrThrow(
+      ProtocolName.create(TestConstants.protocol.validName),
+      'ProtocolName',
     );
   }
 

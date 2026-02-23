@@ -269,6 +269,7 @@ abstract final class TimeRangeFactory {
 
 ```dart
 // test/factories/factories.dart
+export 'factory_helpers.dart';   // Shared utilities (unwrapOrThrow)
 export 'gym_factory.dart';
 export 'room_factory.dart';
 export 'session_factory.dart';
@@ -281,6 +282,33 @@ export 'time_range_factory.dart';
 ```dart
 import '../factories/factories.dart';
 ```
+
+---
+
+## Shared Utility: `unwrapOrThrow`
+
+Factories that wrap a domain constructor returning `Either<L, T>` need to
+unwrap the result and throw on failure. Instead of duplicating
+`.getOrElse((l) => throw Exception(...))` in every factory, use the shared
+`unwrapOrThrow` helper from `test/factories/factory_helpers.dart`:
+
+```dart
+import '../factory_helpers.dart';
+
+abstract final class FrequencyFactory {
+  static Frequency valid() {
+    return unwrapOrThrow(
+      Frequency.create(minPerWeek: 3, maxPerWeek: 4),
+      'Frequency',  // Context string for the error message
+    );
+  }
+}
+```
+
+The context string is included in the exception message so you can quickly
+identify which factory produced the failure. It is a **top-level function**
+(not an extension on `Either`) to prevent accidental auto-import into
+production code under `lib/`.
 
 ---
 
