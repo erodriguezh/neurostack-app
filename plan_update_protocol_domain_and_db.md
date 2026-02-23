@@ -21,7 +21,7 @@
   - `@override toString() => value`
   - Cite: follow exact pattern from `lib/features/protocol/domain/value_objects/protocol_name.dart`
 
-### 1.3 Add `description` field to Protocol entity
+### 1.3 Add `description` field to Protocol entity ✅
 - **Edit** `lib/features/protocol/domain/entities/protocol.dart`
   - Add import for `protocol_description.dart`
   - Add `required this.description` to `Protocol._()` private constructor (line ~24)

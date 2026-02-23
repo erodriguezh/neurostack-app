@@ -7,4 +7,4 @@ IMPORTANT:
 - When analyze does not return errors, then run tests
 - when the tests pass, review using RepoPrompt
 - when the review returns status SHIP, then commit
-- update the implementation plan when the task is done
+- update the implementation plan and mark the task as done when the task is completed
