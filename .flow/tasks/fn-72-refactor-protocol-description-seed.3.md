@@ -32,3 +32,10 @@ Two small fixes in the seed/generator area:
 - [ ] Generated migration (`20260221200000_seed_protocols.sql`) is NOT modified (out of scope)
 - [ ] `supabase db reset` succeeds locally (if Supabase CLI available)
 - [ ] `flutter analyze` clean
+
+## Done summary
+Fixed misleading comment in generate_seed_sql.dart to accurately describe passthrough from protocols.json. Converted all 22 citation inserts in supabase/seed.sql from scalar subquery pattern (NULL on missing protocol -> FK violation) to INSERT...SELECT...WHERE pattern (zero rows inserted on missing protocol).
+## Evidence
+- Commits: 9705e1ce7b1ada5baa4b3f8b1a8d045b4d9d0040
+- Tests: flutter test, flutter analyze
+- PRs:
