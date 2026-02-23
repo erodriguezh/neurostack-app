@@ -37,3 +37,10 @@ Extract the duplicated `_pascalCase` function from 4 test files into a shared he
 - [ ] AGENTS.md lists `test/helpers/` alongside factories and matchers
 - [ ] `docs/best_practices/test/domain/index.md` file structure includes `helpers/` and uses `either_matchers.dart` (not `result_matchers.dart`)
 - [ ] `docs/best_practices/test/data-layer/data-layer-supabase-testing.md` project structure includes `helpers/`
+
+## Done summary
+Extracted duplicated `_pascalCase` function from 4 test files into a shared public `pascalCase()` helper in `test/helpers/string_helpers.dart` with a barrel export. Updated AGENTS.md and two best-practices docs to reflect the new `test/helpers/` directory and fixed the stale `result_matchers.dart` reference to `either_matchers.dart`.
+## Evidence
+- Commits: 7371a740c63d59d6efa8584a6ec33a5821bcca79
+- Tests: flutter test, flutter analyze
+- PRs:
