@@ -65,18 +65,22 @@ abstract class ProtocolDto with _$ProtocolDto {
       final domainName = $(ProtocolName.create(name));
       final domainDescription = $(ProtocolDescription.create(description));
       final domainTarget = $(target.toDomain());
-      final domainCategory = $(_parseEnum(
-        Category.values,
-        category,
-        'Dto.InvalidCategory',
-        'Invalid category: $category',
-      ));
-      final domainEvidenceLevel = $(_parseEnum(
-        EvidenceLevel.values,
-        evidenceLevel,
-        'Dto.InvalidEvidenceLevel',
-        'Invalid evidence level: $evidenceLevel',
-      ));
+      final domainCategory = $(
+        _parseEnum(
+          Category.values,
+          category,
+          'Dto.InvalidCategory',
+          'Invalid category: $category',
+        ),
+      );
+      final domainEvidenceLevel = $(
+        _parseEnum(
+          EvidenceLevel.values,
+          evidenceLevel,
+          'Dto.InvalidEvidenceLevel',
+          'Invalid evidence level: $evidenceLevel',
+        ),
+      );
 
       final domainCitations = <ResearchCitation>[];
       for (final c in citations) {
