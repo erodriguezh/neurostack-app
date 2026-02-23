@@ -18,9 +18,8 @@ import 'package:fpdart/fpdart.dart';
 /// This is a top-level function (not an extension on `Either`) to prevent
 /// accidental auto-import into `lib/` production code.
 T unwrapOrThrow<L, T>(Either<L, T> result, [String? context]) {
-  return result.getOrElse(
-    (l) => throw Exception(
-      'Factory produced invalid ${context ?? 'value'}: $l',
-    ),
-  );
+  return result.getOrElse((l) {
+    final message = 'Factory produced invalid ${context ?? 'value'}: $l';
+    throw Exception(message);
+  });
 }
