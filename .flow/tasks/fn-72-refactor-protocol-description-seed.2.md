@@ -39,3 +39,10 @@ Extract the duplicated `.getOrElse((l) => throw Exception('Factory produced inva
 - [ ] `flutter test` passes
 - [ ] `flutter analyze` clean (no unused imports, no lint warnings)
 - [ ] `docs/best_practices/test/domain/01-test-factories.md` mentions `factory_helpers.dart` utility
+
+## Done summary
+Extracted a shared `unwrapOrThrow<L, T>()` top-level function into `test/factories/factory_helpers.dart` and replaced all 11 duplicated `.getOrElse((l) => throw Exception(...))` instances across 9 factory files. Updated the barrel export and documented the utility in the test-factories best practices guide.
+## Evidence
+- Commits: 1ee4d8094e45f2465d009ab42b67e86b530aa653
+- Tests: flutter test (exit 0), flutter analyze (no issues)
+- PRs:

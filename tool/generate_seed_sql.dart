@@ -81,8 +81,8 @@ void _writeProtocolUpserts(StringBuffer buf, List<dynamic> protocols) {
     final evidenceLevel = protocol['evidence_level'] as String;
     final target = protocol['target'] as Map<String, dynamic>;
 
-    // Build target JSONB — use only the keys the DTO expects:
-    // frequency (with min_per_week, max_per_week), durationSeconds, intensity
+    // Build target JSONB — passthrough from protocols.json.
+    // Expected shape: { frequency: { min_per_week, max_per_week }, durationSeconds?, intensity? }
     final targetJson = jsonEncode(target);
 
     buf.writeln(
