@@ -45,6 +45,11 @@ abstract class ProtocolDto with _$ProtocolDto {
 
   /// Converts this DTO to the domain [Protocol] aggregate.
   ///
+  /// Uses fpdart `Either.Do` notation (first usage in this codebase) for
+  /// concise short-circuit-on-Left semantics. The `$` extractor unwraps
+  /// `Right` values and automatically short-circuits to `Left` on failure.
+  /// See: https://pub.dev/packages/fpdart#do-notation
+  ///
   /// Uses [Protocol.reconstitute] since data comes from persistence
   /// where invariants were already validated. Does not raise domain events.
   ///
@@ -56,114 +61,45 @@ abstract class ProtocolDto with _$ProtocolDto {
   /// - Any citation validation fails
   /// - Date parsing fails
   Either<DomainFailure, Protocol> toDomain() {
-    try {
-      // Parse name
-      final nameResult = ProtocolName.create(name);
-      if (nameResult.isLeft()) {
-        return left(
-          nameResult.getLeft().getOrElse(() => throw StateError('Unreachable')),
-        );
-      }
-      final domainName = nameResult.getOrElse(
-        (l) => throw StateError('Unreachable'),
-      );
+    return Either<DomainFailure, Protocol>.Do(($) {
+      final domainName = $(ProtocolName.create(name));
+      final domainDescription = $(ProtocolDescription.create(description));
+      final domainTarget = $(target.toDomain());
+      final domainCategory = $(_parseEnum(
+        Category.values,
+        category,
+        'Dto.InvalidCategory',
+        'Invalid category: $category',
+      ));
+      final domainEvidenceLevel = $(_parseEnum(
+        EvidenceLevel.values,
+        evidenceLevel,
+        'Dto.InvalidEvidenceLevel',
+        'Invalid evidence level: $evidenceLevel',
+      ));
 
-      // Parse description
-      final descriptionResult = ProtocolDescription.create(description);
-      if (descriptionResult.isLeft()) {
-        return left(
-          descriptionResult.getLeft().getOrElse(
-            () => throw StateError('Unreachable'),
-          ),
-        );
-      }
-      final domainDescription = descriptionResult.getOrElse(
-        (l) => throw StateError('Unreachable'),
-      );
-
-      // Parse target
-      final targetResult = target.toDomain();
-      if (targetResult.isLeft()) {
-        return left(
-          targetResult.getLeft().getOrElse(
-            () => throw StateError('Unreachable'),
-          ),
-        );
-      }
-      final domainTarget = targetResult.getOrElse(
-        (l) => throw StateError('Unreachable'),
-      );
-
-      // Parse category enum
-      final Category domainCategory;
-      try {
-        domainCategory = Category.values.byName(category);
-      } catch (_) {
-        return left(
-          DomainFailure(
-            code: 'Dto.InvalidCategory',
-            message: 'Invalid category: $category',
-          ),
-        );
-      }
-
-      // Parse evidence level enum
-      final EvidenceLevel domainEvidenceLevel;
-      try {
-        domainEvidenceLevel = EvidenceLevel.values.byName(evidenceLevel);
-      } catch (_) {
-        return left(
-          DomainFailure(
-            code: 'Dto.InvalidEvidenceLevel',
-            message: 'Invalid evidence level: $evidenceLevel',
-          ),
-        );
-      }
-
-      // Parse all citations
       final domainCitations = <ResearchCitation>[];
-      for (final citationDto in citations) {
-        final citationResult = citationDto.toDomain();
-        if (citationResult.isLeft()) {
-          return left(
-            citationResult.getLeft().getOrElse(
-              () => throw StateError('Unreachable'),
-            ),
-          );
-        }
-        domainCitations.add(
-          citationResult.getOrElse((l) => throw StateError('Unreachable')),
-        );
+      for (final c in citations) {
+        domainCitations.add($(c.toDomain()));
       }
 
-      // Parse dates
-      final createdAtDate = DateTime.parse(createdAt);
+      final createdAtDate = $(_parseDateTime(createdAt));
       final deletedAtDate = deletedAt != null
-          ? DateTime.parse(deletedAt!)
+          ? $(_parseDateTime(deletedAt!))
           : null;
 
-      // Reconstitute (not create) to avoid domain events
-      return right(
-        Protocol.reconstitute(
-          id: id,
-          name: domainName,
-          description: domainDescription,
-          target: domainTarget,
-          category: domainCategory,
-          evidenceLevel: domainEvidenceLevel,
-          citations: domainCitations,
-          createdAt: createdAtDate,
-          deletedAt: deletedAtDate,
-        ),
+      return Protocol.reconstitute(
+        id: id,
+        name: domainName,
+        description: domainDescription,
+        target: domainTarget,
+        category: domainCategory,
+        evidenceLevel: domainEvidenceLevel,
+        citations: domainCitations,
+        createdAt: createdAtDate,
+        deletedAt: deletedAtDate,
       );
-    } catch (e) {
-      return left(
-        DomainFailure(
-          code: 'Dto.ParseError',
-          message: 'Failed to parse ProtocolDto: $e',
-        ),
-      );
-    }
+    });
   }
 
   /// Creates a DTO from a domain [Protocol] aggregate.
@@ -180,6 +116,39 @@ abstract class ProtocolDto with _$ProtocolDto {
           .toList(),
       createdAt: protocol.createdAt.toIso8601String(),
       deletedAt: protocol.deletedAt?.toIso8601String(),
+    );
+  }
+}
+
+/// Parses an enum value by name, returning [Left] with the given failure
+/// code and message if the name does not match any enum value.
+Either<DomainFailure, T> _parseEnum<T extends Enum>(
+  List<T> values,
+  String name,
+  String code,
+  String message,
+) {
+  try {
+    return right(values.byName(name));
+  } catch (_) {
+    return left(DomainFailure(code: code, message: message));
+  }
+}
+
+/// Parses an ISO 8601 date string, returning [Left] with `Dto.ParseError`
+/// if parsing fails.
+///
+/// Extracted as a dedicated helper so DateTime parse exceptions are not caught
+/// by the `Either.Do` short-circuit mechanism (which uses internal throws).
+Either<DomainFailure, DateTime> _parseDateTime(String raw) {
+  try {
+    return right(DateTime.parse(raw));
+  } catch (e) {
+    return left(
+      DomainFailure(
+        code: 'Dto.ParseError',
+        message: 'Failed to parse ProtocolDto: $e',
+      ),
     );
   }
 }
