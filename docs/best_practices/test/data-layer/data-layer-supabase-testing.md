@@ -27,6 +27,8 @@ test/
 ├── factories/
 │   └── dtos/
 │       └── session_dto_factory.dart
+├── helpers/
+│   └── string_helpers.dart
 ├── matchers/
 │   └── either_matchers.dart
 ├── mocks/

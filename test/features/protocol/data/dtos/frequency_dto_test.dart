@@ -3,6 +3,7 @@ import 'package:neurostack/features/protocol/data/dtos/frequency_dto.dart';
 import 'package:neurostack/features/protocol/domain/value_objects/frequency.dart';
 
 import '../../../../factories/dtos/dtos.dart';
+import '../../../../helpers/helpers.dart';
 import '../../../../matchers/either_matchers.dart';
 
 void main() {
@@ -61,7 +62,7 @@ void main() {
       final requiredFields = ['min_per_week', 'max_per_week'];
 
       for (final field in requiredFields) {
-        test('fromJson_whenMissing${_pascalCase(field)}_throws', () {
+        test('fromJson_whenMissing${pascalCase(field)}_throws', () {
           // Arrange
           final json = FrequencyDtoFactory.createJsonMissingField(field);
 
@@ -114,12 +115,4 @@ void main() {
       });
     });
   });
-}
-
-/// Converts snake_case to PascalCase for test naming.
-String _pascalCase(String snakeCase) {
-  return snakeCase
-      .split('_')
-      .map((w) => w[0].toUpperCase() + w.substring(1))
-      .join();
 }

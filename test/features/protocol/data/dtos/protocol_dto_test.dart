@@ -5,6 +5,7 @@ import 'package:neurostack/features/protocol/domain/entities/protocol.dart';
 import '../../../../constants/test_constants.dart';
 import '../../../../factories/dtos/dtos.dart';
 import '../../../../factories/protocol_factory.dart';
+import '../../../../helpers/helpers.dart';
 import '../../../../matchers/either_matchers.dart';
 
 void main() {
@@ -92,7 +93,7 @@ void main() {
       ];
 
       for (final field in requiredFields) {
-        test('fromJson_whenMissing${_pascalCase(field)}_throws', () {
+        test('fromJson_whenMissing${pascalCase(field)}_throws', () {
           // Arrange
           final json = ProtocolDtoFactory.createJsonMissingField(field);
 
@@ -180,12 +181,4 @@ void main() {
       });
     });
   });
-}
-
-/// Converts snake_case to PascalCase for test naming.
-String _pascalCase(String snakeCase) {
-  return snakeCase
-      .split('_')
-      .map((w) => w[0].toUpperCase() + w.substring(1))
-      .join();
 }

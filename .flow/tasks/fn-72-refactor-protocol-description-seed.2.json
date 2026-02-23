@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-02-23T19:09:23.723272Z",
+  "depends_on": [],
+  "epic": "fn-72-refactor-protocol-description-seed",
+  "id": "fn-72-refactor-protocol-description-seed.2",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-72-refactor-protocol-description-seed.2.md",
+  "status": "todo",
+  "title": "Extract shared unwrapOrThrow factory helper",
+  "updated_at": "2026-02-23T19:22:35.149658Z"
+}
