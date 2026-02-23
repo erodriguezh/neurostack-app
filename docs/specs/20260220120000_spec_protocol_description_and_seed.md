@@ -37,8 +37,19 @@
 | Type | `String` (non-empty, after trim) |
 | Present in JSON | 57/57 protocols |
 | Domain representation | `ProtocolDescription` value object |
-| DB column | `text NOT NULL DEFAULT ''` |
-| Invariant | Non-empty (validated at domain level) |
+| DB column | `text NOT NULL` (CHECK: non-empty after trim) |
+| Invariant | Non-empty (validated at domain and DB level) |
+
+> **Design decision — DEFAULT '' then CHECK:**
+> Migration `20260221193000` added the column as `NOT NULL DEFAULT ''` so that
+> existing rows (inserted before the description field existed) would not violate
+> the NOT NULL constraint. Migration `20260221200000` then populated all 57
+> protocols with real descriptions via ON CONFLICT upsert. Finally, migration
+> `20260223203929` tightened the constraint by adding
+> `CHECK (length(trim(description)) > 0)` and dropping `DEFAULT ''`. This
+> two-phase approach kept every intermediate migration state valid while
+> ultimately enforcing the same invariant at the DB level that
+> `ProtocolDescription.create()` enforces at the domain level.
 
 ### Categories in JSON (7 values)
 

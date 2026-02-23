@@ -38,3 +38,10 @@ Refactor the `toDomain()` method in `ProtocolDto` from the repeated `isLeft()`/`
 - [ ] All existing tests in `protocol_dto_test.dart` pass unchanged
 - [ ] `flutter test` passes (full suite)
 - [ ] `flutter analyze` clean
+
+## Done summary
+Refactored ProtocolDto.toDomain() from the repeated isLeft/getOrElse(unreachable) pattern (~70 lines) to fpdart Either.Do notation (~30 lines), extracting dedicated _parseEnum and _parseDateTime helpers to preserve failure codes without broad try/catch.
+## Evidence
+- Commits: e1becd5582c7764616544b2994aac6c2e2c41fa6
+- Tests: flutter test test/features/protocol/data/dtos/protocol_dto_test.dart, flutter test, flutter analyze
+- PRs:
