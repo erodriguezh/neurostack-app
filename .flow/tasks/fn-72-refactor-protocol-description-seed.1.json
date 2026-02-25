@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-02-23T19:09:22.088071Z",
+  "depends_on": [],
+  "epic": "fn-72-refactor-protocol-description-seed",
+  "id": "fn-72-refactor-protocol-description-seed.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-72-refactor-protocol-description-seed.1.md",
+  "status": "todo",
+  "title": "Extract shared _pascalCase test helper + update docs",
+  "updated_at": "2026-02-23T19:24:40.909545Z"
+}

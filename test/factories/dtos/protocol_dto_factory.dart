@@ -18,6 +18,7 @@ abstract final class ProtocolDtoFactory {
   static ProtocolDto create({
     String? id,
     String? name,
+    String? description,
     TargetDto? target,
     String category = 'exercise',
     String evidenceLevel = 'multipleRcts',
@@ -28,6 +29,7 @@ abstract final class ProtocolDtoFactory {
     return ProtocolDto(
       id: id ?? TestConstants.dto.defaultProtocolId,
       name: name ?? TestConstants.protocol.validName,
+      description: description ?? TestConstants.protocol.validDescription,
       target: target ?? TargetDtoFactory.create(),
       category: category,
       evidenceLevel: evidenceLevel,
@@ -83,6 +85,12 @@ abstract final class ProtocolDtoFactory {
     );
   }
 
+  /// Description fails ProtocolDescription.create validation (empty)
+  /// Triggers Protocol.DescriptionEmpty
+  static ProtocolDto createWithEmptyDescription() {
+    return create(description: TestConstants.protocol.emptyDescription);
+  }
+
   /// Empty citations list
   /// Note: toDomain succeeds, but Protocol.create would fail with NoCitations
   static ProtocolDto createWithEmptyCitations() {
@@ -91,11 +99,12 @@ abstract final class ProtocolDtoFactory {
 
   // --- JSON Variations (fromJson failures) ---
 
-  /// Valid JSON map with snake_case keys.
+  /// Valid JSON map matching generated fromJson/toJson keys.
   static Map<String, dynamic> createValidJson({String? id}) {
     return {
       'id': id ?? TestConstants.dto.defaultProtocolId,
       'name': TestConstants.protocol.validName,
+      'description': TestConstants.protocol.validDescription,
       'target': TargetDtoFactory.createValidJson(),
       'category': 'exercise',
       'evidence_level': 'multipleRcts',

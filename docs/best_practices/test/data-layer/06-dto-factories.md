@@ -141,6 +141,6 @@ export 'reservation_dto_factory.dart';
 - [ ] `create()` with all optional params + defaults
 - [ ] `createWithInvalid{Field}()` for each parseable field
 - [ ] `createAtCapacity()` for boundary tests
-- [ ] `createValidJson()` returns snake_case keys
+- [ ] `createValidJson()` keys match generated `fromJson`/`toJson` output (check `.g.dart`)
 - [ ] `createJsonMissingField()` for required field tests
 - [ ] Barrel export in `dtos.dart`

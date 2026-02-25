@@ -6,7 +6,7 @@
 
 ## Repo map
 - App code: `lib/` (feature-first: `lib/features/<feature>/{domain,data,presentation}`; shared: `lib/core/`)
-- Tests: `test/` (mirrors `lib/`; helpers in `test/factories/` + `test/matchers/`)
+- Tests: `test/` (mirrors `lib/`; helpers in `test/factories/`, `test/helpers/` + `test/matchers/`)
 - Specs: `docs/specs/` (example: `docs/specs/20260113180000_spec_log_session_modal.md`)
 - Plans: `plan_*.md` at repo root (example: `plan_log_session_modal.md`)
 

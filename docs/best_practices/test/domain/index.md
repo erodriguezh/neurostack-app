@@ -26,7 +26,8 @@ test/
 ├── domain/{aggregate}/{aggregate}_test.dart
 ├── factories/{entity}_factory.dart
 ├── constants/test_constants.dart
-└── matchers/result_matchers.dart
+├── helpers/string_helpers.dart
+└── matchers/either_matchers.dart
 ```
 
 ### Must-Have Patterns

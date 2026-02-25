@@ -338,102 +338,109 @@ void main() {
       });
     });
 
-    group('regression: mismatched snapshot does not influence effective status',
-        () {
-      test(
-        'mismatchedSnapshot_effectiveStatusUsesDbFallback',
-        () async {
-          // Regression guard: After removing _scopedSnapshot from HomeViewModel,
-          // ensure that a mismatched entitlement snapshot (belonging to a
-          // different user) does NOT influence the effective status.
-          // Safety relies on SubscriptionStatusResolver.resolveEffectiveStatus
-          // checking snapshot.isForUser(user.id) internally.
-          final user = UserFactory.create(
-            id: 'user-a',
-            subscriptionStatus: SubscriptionStatus.free,
-            onboardingCompleted: true,
-          );
+    group(
+      'regression: mismatched snapshot does not influence effective status',
+      () {
+        test(
+          'mismatchedSnapshot_effectiveStatusUsesDbFallback',
+          () async {
+            // Regression guard: After removing _scopedSnapshot from HomeViewModel,
+            // ensure that a mismatched entitlement snapshot (belonging to a
+            // different user) does NOT influence the effective status.
+            // Safety relies on SubscriptionStatusResolver.resolveEffectiveStatus
+            // checking snapshot.isForUser(user.id) internally.
+            final user = UserFactory.create(
+              id: 'user-a',
+              subscriptionStatus: SubscriptionStatus.free,
+              onboardingCompleted: true,
+            );
 
-          // Set up a snapshot for a DIFFERENT user with premium status
-          final mismatchedSnapshot =
-              EntitlementSnapshotFactory.activePaidMonthly(
-            userId: 'user-b',
-          );
-          when(
-            () => mockRevenueCatService.entitlementSnapshot,
-          ).thenReturn(ValueNotifier<EntitlementSnapshot?>(mismatchedSnapshot));
+            // Set up a snapshot for a DIFFERENT user with premium status
+            final mismatchedSnapshot =
+                EntitlementSnapshotFactory.activePaidMonthly(
+                  userId: 'user-b',
+                );
+            when(
+              () => mockRevenueCatService.entitlementSnapshot,
+            ).thenReturn(
+              ValueNotifier<EntitlementSnapshot?>(mismatchedSnapshot),
+            );
 
-          when(
-            () => mockAuthService.authState,
-          ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
-          when(
-            () => mockUserRepository.getById(any()),
-          ).thenAnswer((_) async => right(user));
-          when(
-            () => mockSessionRepository.list(
-              from: any(named: 'from'),
-              to: any(named: 'to'),
-            ),
-          ).thenAnswer((_) async => right(<Session>[]));
-          when(
-            () => mockSessionLocalDataSource.listSessions(
-              any(),
-              from: any(named: 'from'),
-              to: any(named: 'to'),
-            ),
-          ).thenAnswer((_) async => <Session>[]);
-          when(
-            () => mockSessionLocalDataSource.upsertSyncedSessions(any(), any()),
-          ).thenAnswer((_) async {});
+            when(
+              () => mockAuthService.authState,
+            ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+            when(
+              () => mockUserRepository.getById(any()),
+            ).thenAnswer((_) async => right(user));
+            when(
+              () => mockSessionRepository.list(
+                from: any(named: 'from'),
+                to: any(named: 'to'),
+              ),
+            ).thenAnswer((_) async => right(<Session>[]));
+            when(
+              () => mockSessionLocalDataSource.listSessions(
+                any(),
+                from: any(named: 'from'),
+                to: any(named: 'to'),
+              ),
+            ).thenAnswer((_) async => <Session>[]);
+            when(
+              () =>
+                  mockSessionLocalDataSource.upsertSyncedSessions(any(), any()),
+            ).thenAnswer((_) async {});
 
-          final viewModel = createViewModel();
-          addTearDown(viewModel.dispose);
+            final viewModel = createViewModel();
+            addTearDown(viewModel.dispose);
 
-          // Act - isTrialOrPremiumExpired uses the raw snapshot
-          final result = viewModel.isTrialOrPremiumExpired(user);
+            // Act - isTrialOrPremiumExpired uses the raw snapshot
+            final result = viewModel.isTrialOrPremiumExpired(user);
 
-          // Assert - should use DB status (free), not the mismatched
-          // snapshot's premiumMonthly. Free status IS considered expired
-          // for paywall purposes, so result is true.
-          expect(result, isTrue);
+            // Assert - should use DB status (free), not the mismatched
+            // snapshot's premiumMonthly. Free status IS considered expired
+            // for paywall purposes, so result is true.
+            expect(result, isTrue);
 
-          // Double-check: if it incorrectly used the mismatched snapshot,
-          // it would resolve to premiumMonthly and return false.
-          // The fact it returns true confirms DB fallback is in effect.
-        },
-      );
+            // Double-check: if it incorrectly used the mismatched snapshot,
+            // it would resolve to premiumMonthly and return false.
+            // The fact it returns true confirms DB fallback is in effect.
+          },
+        );
 
-      test(
-        'mismatchedSnapshot_premiumUserNotDowngraded',
-        () async {
-          // Regression guard: A premium user should NOT be downgraded
-          // because of a mismatched expired snapshot from another user.
-          final user = UserFactory.create(
-            id: 'user-a',
-            subscriptionStatus: SubscriptionStatus.premiumMonthly,
-            onboardingCompleted: true,
-          );
+        test(
+          'mismatchedSnapshot_premiumUserNotDowngraded',
+          () async {
+            // Regression guard: A premium user should NOT be downgraded
+            // because of a mismatched expired snapshot from another user.
+            final user = UserFactory.create(
+              id: 'user-a',
+              subscriptionStatus: SubscriptionStatus.premiumMonthly,
+              onboardingCompleted: true,
+            );
 
-          // Set up an expired snapshot for a DIFFERENT user
-          final mismatchedSnapshot = EntitlementSnapshotFactory.expiredTrial(
-            userId: 'user-b',
-          );
-          when(
-            () => mockRevenueCatService.entitlementSnapshot,
-          ).thenReturn(ValueNotifier<EntitlementSnapshot?>(mismatchedSnapshot));
+            // Set up an expired snapshot for a DIFFERENT user
+            final mismatchedSnapshot = EntitlementSnapshotFactory.expiredTrial(
+              userId: 'user-b',
+            );
+            when(
+              () => mockRevenueCatService.entitlementSnapshot,
+            ).thenReturn(
+              ValueNotifier<EntitlementSnapshot?>(mismatchedSnapshot),
+            );
 
-          final viewModel = createViewModel();
-          addTearDown(viewModel.dispose);
+            final viewModel = createViewModel();
+            addTearDown(viewModel.dispose);
 
-          // Act
-          final result = viewModel.isTrialOrPremiumExpired(user);
+            // Act
+            final result = viewModel.isTrialOrPremiumExpired(user);
 
-          // Assert - should use DB status (premiumMonthly), not the
-          // mismatched snapshot's expired state. Premium = not expired.
-          expect(result, isFalse);
-        },
-      );
-    });
+            // Assert - should use DB status (premiumMonthly), not the
+            // mismatched snapshot's expired state. Premium = not expired.
+            expect(result, isFalse);
+          },
+        );
+      },
+    );
 
     group('isTrialOrPremiumExpired', () {
       // Note: isTrialOrPremiumExpired() is synchronous and checks

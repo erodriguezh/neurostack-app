@@ -50,7 +50,7 @@ abstract final class ResearchCitationDtoFactory {
 
   // --- JSON Variations ---
 
-  /// Valid JSON map with snake_case keys.
+  /// Valid JSON map matching generated fromJson/toJson keys.
   static Map<String, dynamic> createValidJson({
     String? authors,
     int? year,

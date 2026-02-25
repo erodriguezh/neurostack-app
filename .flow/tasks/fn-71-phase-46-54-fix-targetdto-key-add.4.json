@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-02-22T19:46:11.853936Z",
+  "depends_on": [],
+  "epic": "fn-71-phase-46-54-fix-targetdto-key-add",
+  "id": "fn-71-phase-46-54-fix-targetdto-key-add.4",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-71-phase-46-54-fix-targetdto-key-add.4.md",
+  "status": "todo",
+  "title": "Phase 6: Verify \u2014 codegen, format, analyze, test",
+  "updated_at": "2026-02-22T19:46:11.854740Z"
+}

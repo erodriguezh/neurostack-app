@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-71-phase-46-54-fix-targetdto-key-add",
+  "created_at": "2026-02-22T19:46:05.534526Z",
+  "depends_on_epics": [],
+  "id": "fn-71-phase-46-54-fix-targetdto-key-add",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-71-phase-46-54-fix-targetdto-key-add.md",
+  "status": "open",
+  "title": "Phase 4.6-5.4: Fix TargetDto key, add remaining tests, verify",
+  "updated_at": "2026-02-22T19:46:05.535233Z"
+}

@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-02-21T19:14:22.104160Z",
+  "depends_on": [],
+  "epic": "fn-65-phase-21-add-description-to-protocoldto",
+  "id": "fn-65-phase-21-add-description-to-protocoldto.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-65-phase-21-add-description-to-protocoldto.1.md",
+  "status": "todo",
+  "title": "Add description field to ProtocolDto, update toDomain/fromDomain, update test factories, verify",
+  "updated_at": "2026-02-21T19:14:22.104767Z"
+}

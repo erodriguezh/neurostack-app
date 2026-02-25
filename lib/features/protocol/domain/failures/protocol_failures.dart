@@ -21,6 +21,16 @@ abstract final class ProtocolFailures {
     message: 'Protocol name cannot exceed 100 characters',
   );
 
+  static const descriptionEmpty = DomainFailure(
+    code: 'Protocol.DescriptionEmpty',
+    message: 'Protocol description cannot be empty',
+  );
+
+  static const descriptionTooLong = DomainFailure(
+    code: 'Protocol.DescriptionTooLong',
+    message: 'Protocol description cannot exceed 2000 characters',
+  );
+
   static const nameContainsResearcher = DomainFailure(
     code: 'Protocol.NameContainsResearcher',
     message: 'Protocol names must not include researcher names',

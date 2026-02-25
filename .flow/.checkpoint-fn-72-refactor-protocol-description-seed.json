@@ -1,0 +1,123 @@
+{
+  "created_at": "2026-02-23T19:11:27.975325Z",
+  "epic": {
+    "data": {
+      "branch_name": "fn-72-refactor-protocol-description-seed",
+      "completion_review_status": "unknown",
+      "completion_reviewed_at": null,
+      "created_at": "2026-02-23T19:08:32.945320Z",
+      "default_impl": null,
+      "default_review": null,
+      "default_sync": null,
+      "depends_on_epics": [],
+      "id": "fn-72-refactor-protocol-description-seed",
+      "next_task": 1,
+      "plan_review_status": "unknown",
+      "plan_reviewed_at": null,
+      "spec_path": ".flow/specs/fn-72-refactor-protocol-description-seed.md",
+      "status": "open",
+      "title": "Refactor Protocol Description & Seed Migration Code",
+      "updated_at": "2026-02-23T19:09:16.857627Z"
+    },
+    "spec": "# Refactor Protocol Description & Seed Migration Code\n\n## Overview\n\nPost-implementation cleanup of the 18 commits (fn-62 \u2192 fn-71) that added `ProtocolDescription` VO, Protocol/DTO description field, seed migrations, DTO tests & factories. This epic addresses code duplication, a DB/domain invariant mismatch, and seed SQL fragility.\n\n**Stakeholders:** Developers only (no user-facing changes). One DB migration (CHECK constraint) affects operations.\n\n## Scope\n\nFive refactoring items plus one critical data-integrity fix:\n\n1. **Extract `_pascalCase` test helper** \u2014 duplicated in 4 test files \u2192 shared `test/helpers/string_helpers.dart`\n2. **Extract `unwrapOrThrow` factory helper** \u2014 duplicated in 8 factory files (10 instances) \u2192 shared `test/factories/factory_helpers.dart`\n3. **Fix generator comment + resilient seed.sql citations** \u2014 misleading comment at `tool/generate_seed_sql.dart:84-85` + convert 22 scalar-subquery citation INSERTs in `supabase/seed.sql` to `INSERT...SELECT...WHERE`\n4. **Refactor `ProtocolDto.toDomain()` to `Either.Do`** \u2014 replace 5\u00d7 repeated `isLeft`/`getOrElse(unreachable)` blocks with fpdart Do notation\n5. **Tighten DB description constraint** \u2014 add `CHECK (description <> '')` + drop `DEFAULT ''`\n\n### Out of scope\n- Refactoring `TargetDto.toDomain()` or use cases to Either.Do (future consistency pass)\n- Updating `tool/generate_seed_sql.dart` output to use INSERT...SELECT (generator always runs before citations exist)\n- Duplicate protocol names in seed migration (handled by existing `ON CONFLICT` upsert)\n\n## Approach\n\n### Either.Do notation (first usage in codebase)\n- fpdart 1.2.0 supports `Either.Do(($) { ... })` \u2014 the `$` extractor short-circuits to `Left` automatically\n- Reference for multi-value accumulation: `target_dto.dart:32-43` (flatMap), `log_session_use_case.dart:72-82` (pipeline)\n- Enum parsing (`Category.values.byName`, `EvidenceLevel.values.byName`) must be wrapped in helpers returning `Either` to participate in Do notation\n- `DateTime.parse` stays in outer try/catch (non-Either exception)\n- Citations list uses `Either.traverseList` or `$` bind inside map \u2014 verify fpdart 1.2.0 API\n- **This is the first Either.Do usage** \u2014 document the pattern choice in a code comment for future contributors\n\n### Test helper extraction\n- New `test/helpers/` directory with barrel `test/helpers/helpers.dart`\n- `pascalCase()` (drop `_` prefix) as public top-level function\n- `unwrapOrThrow<T>()` as top-level function in `test/factories/factory_helpers.dart` (not an extension \u2014 prevents accidental production imports)\n- Follow existing `test/matchers/either_matchers.dart` precedent for shared test utilities\n\n### Seed SQL resilience\n- `INSERT INTO ... SELECT ... FROM protocols WHERE ...` pattern: if protocol missing, zero rows inserted (no FK violation, no NULL)\n- This is a **different failure mode** than current: silent skip vs. explicit error. Acceptable for seed data.\n\n### DB constraint\n- Migration must run AFTER `20260221200000_seed_protocols.sql` (all 57 protocols already have descriptions)\n- Pre-check: `SELECT count(*) FROM protocols WHERE description = ''` should return 0\n- Add `CHECK (length(trim(description)) > 0)` \u2014 matches domain VO validation exactly\n- Drop `DEFAULT ''` \u2014 forces all INSERT paths to provide explicit description\n\n## Quick commands\n```bash\nflutter test\nflutter analyze\ndart format lib test\n```\n\n## Risks / Dependencies\n\n| Risk | Mitigation |\n|------|-----------|\n| Either.Do is first usage \u2014 two competing patterns | Document pattern choice; plan future consistency pass |\n| CHECK constraint fails if empty descriptions exist | Pre-check query in migration; abort if non-zero |\n| seed.sql INSERT...SELECT silently skips missing protocols | Acceptable for test seed data; production uses ON CONFLICT upsert |\n| fpdart 1.2.0 Either.Do API might differ from docs | Verify exact syntax before implementing; fallback to flatMap if needed |\n\n**Epic dependencies:** None (fn-62 \u2192 fn-71 all done). No blocking open epics.\n\n## Acceptance\n\n- [ ] All 4 `_pascalCase` duplicates removed; single shared helper in `test/helpers/`\n- [ ] All 10 `getOrElse((l) => throw Exception(...))` instances use shared `unwrapOrThrow`\n- [ ] `generate_seed_sql.dart:84-85` comment accurately describes passthrough from `protocols.json`\n- [ ] `supabase/seed.sql` citation inserts use `INSERT...SELECT...WHERE` (no scalar subqueries)\n- [ ] `ProtocolDto.toDomain()` uses Either.Do notation with ~30 lines (down from ~70)\n- [ ] DB CHECK constraint prevents empty descriptions; DEFAULT '' removed\n- [ ] `flutter test` passes\n- [ ] `flutter analyze` clean\n- [ ] Doc structure diagrams updated (AGENTS.md, index.md, data-layer-supabase-testing.md)\n\n## References\n\n- fpdart `Either.Do`: https://pub.dev/packages/fpdart\n- Existing flatMap reference: `lib/features/protocol/data/dtos/target_dto.dart:32-43`\n- Existing pipeline reference: `lib/features/session/domain/use_cases/log_session_use_case.dart:72-82`\n- Shared test matchers precedent: `test/matchers/either_matchers.dart`\n- Factory unwrap pattern: `test/factories/protocol_factory.dart:68-69`\n- DB migration with DEFAULT: `supabase/migrations/20260221193000_add_protocol_description.sql:13-14`\n- Domain VO invariant: `lib/features/protocol/domain/value_objects/protocol_description.dart:28-40`\n- Architecture guide (flatMap recommendation): `docs/best_practices/architecture/mvvm_and_ddd_guide.md:631-634`\n"
+  },
+  "epic_id": "fn-72-refactor-protocol-description-seed",
+  "schema_version": 2,
+  "tasks": [
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-02-23T19:09:22.088071Z",
+        "depends_on": [],
+        "epic": "fn-72-refactor-protocol-description-seed",
+        "id": "fn-72-refactor-protocol-description-seed.1",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-72-refactor-protocol-description-seed.1.md",
+        "status": "todo",
+        "title": "Extract shared _pascalCase test helper + update docs",
+        "updated_at": "2026-02-23T19:09:43.827297Z"
+      },
+      "id": "fn-72-refactor-protocol-description-seed.1",
+      "runtime": null,
+      "spec": "# fn-72-refactor-protocol-description-seed.1 Extract shared _pascalCase test helper + update docs\n\n## Description\nExtract the duplicated `_pascalCase` function from 4 test files into a shared helper. Update documentation to reflect the new `test/helpers/` directory.\n\n**Size:** M\n**Files:**\n- `test/helpers/string_helpers.dart` (NEW)\n- `test/helpers/helpers.dart` (NEW \u2014 barrel)\n- `test/features/protocol/data/dtos/frequency_dto_test.dart` (remove `_pascalCase` at L120-125)\n- `test/features/protocol/data/dtos/research_citation_dto_test.dart` (remove `_pascalCase` at L159-164)\n- `test/features/protocol/data/dtos/protocol_dto_test.dart` (remove `_pascalCase` at L186-191)\n- `test/features/session/data/dtos/pending_session_dto_test.dart` (remove `_pascalCase` at L292-297)\n- `AGENTS.md` line 9 (add `test/helpers/`)\n- `docs/best_practices/test/domain/index.md` (add `helpers/` to file structure diagram)\n- `docs/best_practices/test/data-layer/data-layer-supabase-testing.md` (add `helpers/` to structure block)\n\n## Approach\n\n- Follow `test/matchers/either_matchers.dart` as precedent for shared test utilities\n- Rename from `_pascalCase` (private) to `pascalCase` (public) when extracting\n- Barrel file re-exports all helpers: `export 'string_helpers.dart';`\n- Each test file replaces the local function with an import of the barrel\n\n## Key context\n\n- The 4 test files have identical implementations \u2014 pure string transform, no dependencies\n- `test/helpers/` does not exist yet; `test/matchers/` and `test/factories/` are the existing shared directories\n- AGENTS.md line 9 currently reads: `helpers in test/factories/ + test/matchers/`\n## Acceptance\n- [ ] `test/helpers/string_helpers.dart` exists with public `pascalCase()` function\n- [ ] `test/helpers/helpers.dart` barrel exports `string_helpers.dart`\n- [ ] No `_pascalCase` function in any test file (grep returns 0 hits)\n- [ ] All 4 test files import from `helpers/helpers.dart`\n- [ ] `flutter test` passes\n- [ ] AGENTS.md lists `test/helpers/` alongside factories and matchers\n- [ ] `docs/best_practices/test/domain/index.md` file structure includes `helpers/`\n- [ ] `docs/best_practices/test/data-layer/data-layer-supabase-testing.md` project structure includes `helpers/`\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-02-23T19:09:23.723272Z",
+        "depends_on": [],
+        "epic": "fn-72-refactor-protocol-description-seed",
+        "id": "fn-72-refactor-protocol-description-seed.2",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-72-refactor-protocol-description-seed.2.md",
+        "status": "todo",
+        "title": "Extract shared unwrapOrThrow factory helper",
+        "updated_at": "2026-02-23T19:09:59.193986Z"
+      },
+      "id": "fn-72-refactor-protocol-description-seed.2",
+      "runtime": null,
+      "spec": "# fn-72-refactor-protocol-description-seed.2 Extract shared unwrapOrThrow factory helper\n\n## Description\nExtract the duplicated `.getOrElse((l) => throw Exception('Factory produced invalid X: $l'))` pattern from 8 factory files (10 instances) into a shared top-level `unwrapOrThrow<T>()` function.\n\n**Size:** M\n**Files:**\n- `test/factories/factory_helpers.dart` (NEW)\n- `test/factories/factories.dart` (update barrel to export `factory_helpers.dart`)\n- `test/factories/value_objects/frequency_factory.dart` (L8-10)\n- `test/factories/value_objects/protocol_name_factory.dart` (L9-11)\n- `test/factories/value_objects/protocol_description_factory.dart` (L12-14)\n- `test/factories/value_objects/research_citation_factory.dart` (L15-17)\n- `test/factories/value_objects/target_factory.dart` (L14 + L35 \u2014 2 instances)\n- `test/factories/value_objects/session_duration_factory.dart` (L8-10)\n- `test/factories/protocol_factory.dart` (L68-69)\n- `test/factories/session_factory.dart` (L48-49)\n- `docs/best_practices/test/domain/01-test-factories.md` (mention shared utility in barrel section)\n\n## Approach\n\n- Use a **top-level function** (not an extension on `Either`) \u2014 prevents accidental auto-import into `lib/` production code\n- Signature: `T unwrapOrThrow<L, T>(Either<L, T> result, [String? context])` \u2014 generic on both `L` and `T`\n- Error message format must match existing convention: `'Factory produced invalid $context: $l'`\n- Default context: `'value'` (or the caller provides e.g. `'TargetFactory.valid'`)\n- Add to existing barrel `test/factories/factories.dart`\n\n## Key context\n\n- The 10 instances are identical in structure but differ in the entity name in the error message\n- `test/factories/factories.dart` barrel already re-exports: `protocol_factory.dart`, `session_factory.dart`, `session_draft_factory.dart`, `user_factory.dart`, etc.\n- Some factories (UserFactory, EntitlementSnapshotFactory, PendingSessionFactory, StackFactory) do NOT use this pattern (their constructors don't return Either) \u2014 leave those untouched\n## Acceptance\n- [ ] `test/factories/factory_helpers.dart` exists with `unwrapOrThrow<L, T>()` function\n- [ ] `test/factories/factories.dart` barrel exports `factory_helpers.dart`\n- [ ] All 10 instances of `.getOrElse((l) => throw Exception('Factory produced invalid...'))` replaced with `unwrapOrThrow()` calls\n- [ ] Error messages preserve existing entity-name context (e.g. `'FrequencyFactory.valid'`)\n- [ ] No `throw Exception('Factory produced invalid` string literal in any factory file (grep returns 0 hits)\n- [ ] `flutter test` passes\n- [ ] `flutter analyze` clean (no unused imports, no lint warnings)\n- [ ] `docs/best_practices/test/domain/01-test-factories.md` mentions `factory_helpers.dart` utility\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-02-23T19:09:24.585694Z",
+        "depends_on": [],
+        "epic": "fn-72-refactor-protocol-description-seed",
+        "id": "fn-72-refactor-protocol-description-seed.3",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-72-refactor-protocol-description-seed.3.md",
+        "status": "todo",
+        "title": "Fix generator comment + resilient seed.sql citations",
+        "updated_at": "2026-02-23T19:10:15.152825Z"
+      },
+      "id": "fn-72-refactor-protocol-description-seed.3",
+      "runtime": null,
+      "spec": "# fn-72-refactor-protocol-description-seed.3 Fix generator comment + resilient seed.sql citations\n\n## Description\nTwo small fixes in the seed/generator area:\n\n**A) Fix misleading comment** in `tool/generate_seed_sql.dart` at L84-85. The comment says \"use only the keys the DTO expects\" but the code is a passthrough from `protocols.json` \u2014 it does not reference the DTO at all. Correct the comment to describe the actual behavior.\n\n**B) Convert citation inserts** in `supabase/seed.sql` from scalar subquery pattern to `INSERT...SELECT...WHERE` pattern. Currently 22 citations use `(SELECT id FROM protocols WHERE ...)` inside `VALUES`, which returns NULL if the protocol is missing (causing FK violation). The `INSERT...SELECT...WHERE` pattern silently inserts zero rows instead.\n\n**Size:** M\n**Files:**\n- `tool/generate_seed_sql.dart` (L84-85 comment fix only)\n- `supabase/seed.sql` (L97-240 \u2014 restructure citation inserts)\n\n## Approach\n\n- **Comment fix**: Change L84-85 from \"use only the keys the DTO expects\" to something like \"passthrough from protocols.json \u2014 expected shape: { frequency: { min_per_week, max_per_week }, durationSeconds?, intensity? }\"\n- **seed.sql**: Convert each citation INSERT from:\n  ```sql\n  INSERT INTO ... VALUES ((SELECT id FROM protocols WHERE ...), 'authors', ...);\n  ```\n  to:\n  ```sql\n  INSERT INTO ... SELECT p.id, 'authors', ... FROM protocols p WHERE lower(p.name) = lower('...');\n  ```\n- This is a **different failure mode**: silent skip (zero rows) vs. FK violation. Acceptable for test seed data.\n- The generated migration (`20260221200000_seed_protocols.sql`) uses the same scalar pattern but is NOT in scope \u2014 the generator always runs citations after protocols exist.\n\n## Key context\n\n- `supabase/seed.sql` currently has a single multi-row INSERT block for citations (L97-240). The restructure requires splitting into individual INSERT...SELECT statements (one per citation).\n- fn-68 already fixed seed.sql with `ON CONFLICT DO NOTHING` for protocols; this task extends resilience to citations.\n- The `ON CONFLICT DO NOTHING` on citations (if present) should be preserved.\n## Acceptance\n- [ ] Comment at `tool/generate_seed_sql.dart:84-85` accurately describes passthrough from protocols.json\n- [ ] No `(SELECT id FROM public.protocols WHERE` inside `VALUES(` in `supabase/seed.sql` (grep returns 0 hits)\n- [ ] All citation inserts use `INSERT INTO ... SELECT ... FROM protocols WHERE ...` pattern\n- [ ] Citation count unchanged (same 22 citations inserted when all protocols exist)\n- [ ] `supabase db reset` succeeds locally (if Supabase CLI available)\n- [ ] `flutter analyze` clean\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-02-23T19:09:25.240575Z",
+        "depends_on": [],
+        "epic": "fn-72-refactor-protocol-description-seed",
+        "id": "fn-72-refactor-protocol-description-seed.4",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-72-refactor-protocol-description-seed.4.md",
+        "status": "todo",
+        "title": "Refactor ProtocolDto.toDomain() to Either.Do notation",
+        "updated_at": "2026-02-23T19:10:35.313397Z"
+      },
+      "id": "fn-72-refactor-protocol-description-seed.4",
+      "runtime": null,
+      "spec": "# fn-72-refactor-protocol-description-seed.4 Refactor ProtocolDto.toDomain() to Either.Do notation\n\n## Description\nRefactor the `toDomain()` method in `ProtocolDto` from the repeated `isLeft()`/`getOrElse(unreachable)` pattern (~70 lines) to fpdart `Either.Do` notation (~30 lines). This is the **first** `Either.Do` usage in the codebase.\n\n**Size:** M\n**Files:**\n- `lib/features/protocol/data/dtos/protocol_dto.dart` (L58-167 \u2014 main refactor)\n- Possibly a private helper function within the same file for enum parsing\n\n## Approach\n\n- Use `Either.Do(($) { ... })` \u2014 the `$` extractor short-circuits to `Left` automatically\n- **Value object fields** (name, description): `$(ProtocolName.create(name))` \u2014 direct bind\n- **Nested DTO** (target): `$(target.toDomain())` \u2014 direct bind\n- **Enum parsing** (category, evidenceLevel): Extract a private `_parseEnum<T>()` helper that returns `Either<DomainFailure, T>`, wrapping `T.values.byName()` in try/catch. Must preserve existing failure codes (`Dto.InvalidCategory`, `Dto.InvalidEvidenceLevel`)\n- **Citation list**: Use `Either.traverseList(citations, (c) => c.toDomain())` bound with `$`, OR `citations.map((c) => $(c.toDomain())).toList()` if `$` inside `.map()` works in fpdart 1.2.0. Verify which approach works.\n- **DateTime parsing**: Keep in outer try/catch (non-Either exception). The outer catch returns `left(DomainFailure(code: 'Dto.ParseError', message: ...))` \u2014 same as current behavior\n- **Add a brief code comment** explaining this is Either.Do notation (first usage), pointing to fpdart docs\n\n## Key context\n\n- fpdart 1.2.0 `Either.Do` uses exception-based short-circuiting internally. The `$` function throws `_EitherThrow(leftValue)` which is caught by the `Either.Do` factory. This means `$` inside `.map()` callbacks may work (the throw propagates up to Do) but is an edge case \u2014 test it.\n- Reference patterns in codebase:\n  - `target_dto.dart:32-43` \u2014 clean flatMap chain (4 lines)\n  - `log_session_use_case.dart:72-82` \u2014 multi-step flatMap pipeline\n  - These use `flatMap`, not `Either.Do`. The new approach is the recommended modern fpdart pattern.\n- Existing tests in `protocol_dto_test.dart` cover all failure paths \u2014 they should pass unchanged after refactoring (behavior-preserving)\n- The architecture guide at `docs/best_practices/architecture/mvvm_and_ddd_guide.md:631-634` already recommends flatMap chaining in toDomain(); Either.Do is the evolution of that guidance\n## Acceptance\n- [ ] `ProtocolDto.toDomain()` uses `Either.Do` notation\n- [ ] No `isLeft()` calls in `protocol_dto.dart`\n- [ ] No `getOrElse((l) => throw StateError('Unreachable'))` in `protocol_dto.dart`\n- [ ] Method body is ~30 lines (down from ~70)\n- [ ] Enum parse failure codes preserved: `Dto.InvalidCategory`, `Dto.InvalidEvidenceLevel`\n- [ ] DateTime parse failures still produce `Dto.ParseError`\n- [ ] All existing tests in `protocol_dto_test.dart` pass unchanged\n- [ ] `flutter test` passes (full suite)\n- [ ] `flutter analyze` clean\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-02-23T19:09:26.274725Z",
+        "depends_on": [],
+        "epic": "fn-72-refactor-protocol-description-seed",
+        "id": "fn-72-refactor-protocol-description-seed.5",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-72-refactor-protocol-description-seed.5.md",
+        "status": "todo",
+        "title": "Tighten DB description constraint (CHECK + drop DEFAULT)",
+        "updated_at": "2026-02-23T19:10:49.372342Z"
+      },
+      "id": "fn-72-refactor-protocol-description-seed.5",
+      "runtime": null,
+      "spec": "# fn-72-refactor-protocol-description-seed.5 Tighten DB description constraint (CHECK + drop DEFAULT)\n\n## Description\nAdd a Supabase migration that tightens the `description` column on `public.protocols`:\n1. Add a CHECK constraint ensuring `description` is non-empty (after trim) \u2014 matches the domain VO invariant in `ProtocolDescription.create()`\n2. Drop the `DEFAULT ''` which contradicts the domain invariant\n\nThis resolves the critical issue: the migration at `20260221193000` added `NOT NULL DEFAULT ''` for backward compatibility, but `ProtocolDescription.create('')` rejects empty strings. The seed migration `20260221200000` already populated all 57 protocols with descriptions.\n\n**Size:** S\n**Files:**\n- `supabase/migrations/YYYYMMDDHHMMSS_tighten_protocol_description.sql` (NEW)\n- `docs/specs/20260220120000_spec_protocol_description_and_seed.md` (add rationale note for DEFAULT '' design decision)\n\n## Approach\n\n- New migration (timestamp after `20260221200000`) with:\n  1. Safety check: `DO $$ BEGIN IF EXISTS (SELECT 1 FROM public.protocols WHERE trim(description) = '') THEN RAISE EXCEPTION 'Cannot add CHECK: rows with empty description exist'; END IF; END $$;`\n  2. `ALTER TABLE public.protocols ADD CONSTRAINT protocols_description_not_empty CHECK (length(trim(description)) > 0);`\n  3. `ALTER TABLE public.protocols ALTER COLUMN description DROP DEFAULT;`\n- The safety check prevents migration failure on environments where descriptions weren't backfilled\n- Match the domain VO validation: `trim(input).isEmpty` \u2192 `length(trim(description)) > 0`\n\n## Key context\n\n- Migration `20260221193000` added column: `description text NOT NULL DEFAULT ''`\n- Migration `20260221200000` upserted all 57 protocols with real descriptions via ON CONFLICT\n- `supabase/seed.sql` test data also provides descriptions for all 13 test protocols\n- Domain VO at `protocol_description.dart:28-40` rejects empty strings and strings > 500 chars\n- Consider also adding `CHECK (length(trim(description)) <= 500)` to match the VO max-length constraint \u2014 but only if the spec explicitly requires it (the 500-char limit is in `protocol_description.dart:33`)\n## Acceptance\n- [ ] New migration file exists with CHECK constraint `length(trim(description)) > 0`\n- [ ] DEFAULT '' is dropped from `description` column\n- [ ] Safety pre-check prevents migration from running if empty descriptions exist\n- [ ] `supabase db reset` succeeds locally (if Supabase CLI available)\n- [ ] Spec file updated with rationale for the DEFAULT '' \u2192 CHECK transition\n- [ ] No changes to Dart code (pure SQL migration)\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    }
+  ]
+}

@@ -5,6 +5,7 @@ import 'package:neurostack/features/protocol/domain/entities/protocol.dart';
 import '../../../../constants/test_constants.dart';
 import '../../../../factories/dtos/dtos.dart';
 import '../../../../factories/protocol_factory.dart';
+import '../../../../helpers/helpers.dart';
 import '../../../../matchers/either_matchers.dart';
 
 void main() {
@@ -30,6 +31,10 @@ void main() {
         (
           factory: ProtocolDtoFactory.createWithResearcherName,
           code: 'Protocol.NameContainsResearcher',
+        ),
+        (
+          factory: ProtocolDtoFactory.createWithEmptyDescription,
+          code: 'Protocol.DescriptionEmpty',
         ),
         (
           factory: ProtocolDtoFactory.createWithInvalidCategory,
@@ -79,6 +84,7 @@ void main() {
       // instead of throwing. The domain validation catches empty ids.
       final requiredFields = [
         'name',
+        'description',
         'target',
         'category',
         'evidence_level',
@@ -87,7 +93,7 @@ void main() {
       ];
 
       for (final field in requiredFields) {
-        test('fromJson_whenMissing${_pascalCase(field)}_throws', () {
+        test('fromJson_whenMissing${pascalCase(field)}_throws', () {
           // Arrange
           final json = ProtocolDtoFactory.createJsonMissingField(field);
 
@@ -146,6 +152,10 @@ void main() {
           (restored) {
             expect(restored.id, original.id);
             expect(restored.name.value, original.name.value);
+            expect(
+              restored.description.value,
+              original.description.value,
+            );
             expect(restored.category, original.category);
             expect(restored.evidenceLevel, original.evidenceLevel);
             expect(restored.citations.length, original.citations.length);
@@ -171,12 +181,4 @@ void main() {
       });
     });
   });
-}
-
-/// Converts snake_case to PascalCase for test naming.
-String _pascalCase(String snakeCase) {
-  return snakeCase
-      .split('_')
-      .map((w) => w[0].toUpperCase() + w.substring(1))
-      .join();
 }

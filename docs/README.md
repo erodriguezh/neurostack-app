@@ -59,6 +59,7 @@
 - [Spec: Log Session Modal](./specs/20260113180000_spec_log_session_modal.md) - LogSessionModal, offline-first, SessionSyncService, eligibility check, backdate 7 days, haptic feedback, accessibility announcements
 - [Spec: Trial Expiration Cronjob](./specs/20260122150000_spec_trial_expiration_cronjob.md) - pg_cron, trial_ends_at, trial_expired_at, expire_trials(), idempotent transition, subscription status free, UTC timezone
 - [Spec: Paywall Modal](./specs/20260123220000_spec_paywall_modal.md) - RevenueCat integration, entitlement mapping, customer identification, webhook architecture, trial reminder
+- [Spec: Protocol Description & Seed](./specs/20260220120000_spec_protocol_description_and_seed.md) - ProtocolDescription VO, description field, protocols.json seed, 57 protocols, idempotent upsert, stale enum fix
 
 ## Investigations
 - [Investigation: Protocol Names Missing](./investigations/20260108223900_investigation_progress_protocol_names.md) - ProgressGrid, layout collapse, nameWidth, narrow screen, responsive, horizontal scroll, widget overflow
@@ -69,6 +70,7 @@
 - [Plan: Trial Expiration Modal](../plan_trial_expiration_modal.md) - trial expired modal, TrialExpiredChoice, blocking dialog, upgrade card, downgrade card, CachedUserStore, free tier transition
 - [Plan: Trial Expiration Cronjob](../plan_trial_expiration_cron_job.md) - pg_cron, trial_ends_at, expire_trials(), CHECK constraint, TrialPeriodDto endDate, TrialExpirationDecisionStore, SharedPreferences, race condition fix
 - [Plan: Paywall Modal](../plan_paywall_modal.md) - RevenueCat SDK setup, auth integration, subscription sync, paywall presentation, webhook edge function, trial reminder
+- [Plan: Update Protocol Domain & DB](../plan_update_protocol_domain_and_db.md) - ProtocolDescription VO, description field, DB migration, seed 57 protocols, fix stale enums, test factories
 
 ## Changelogs
 - [Changelog: Home Screen](./changelogs/20260106153900_home_screen_changelog.md) - HomeViewModel, HomeViewState, status banner, protocol card, bottom nav, connectivity, route config

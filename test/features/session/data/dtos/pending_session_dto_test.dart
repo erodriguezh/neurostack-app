@@ -7,6 +7,7 @@ import '../../../../factories/dtos/pending_session_dto_factory.dart';
 import '../../../../factories/pending_session_factory.dart';
 import '../../../../factories/session_draft_factory.dart';
 import '../../../../factories/value_objects/session_duration_factory.dart';
+import '../../../../helpers/helpers.dart';
 
 void main() {
   group('PendingSessionDto', () {
@@ -135,7 +136,7 @@ void main() {
       ];
 
       for (final field in requiredFields) {
-        test('fromJson_whenMissing${_pascalCase(field)}_throws', () {
+        test('fromJson_whenMissing${pascalCase(field)}_throws', () {
           // Arrange
           final json = PendingSessionDtoFactory.createJsonMissingField(field);
 
@@ -286,12 +287,4 @@ void main() {
       });
     });
   });
-}
-
-/// Converts snake_case to PascalCase for test naming.
-String _pascalCase(String snakeCase) {
-  return snakeCase
-      .split('_')
-      .map((w) => w[0].toUpperCase() + w.substring(1))
-      .join();
 }

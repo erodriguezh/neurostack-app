@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-02-23T19:09:26.274725Z",
+  "depends_on": [],
+  "epic": "fn-72-refactor-protocol-description-seed",
+  "id": "fn-72-refactor-protocol-description-seed.5",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-72-refactor-protocol-description-seed.5.md",
+  "status": "todo",
+  "title": "Tighten DB description constraint (CHECK + drop DEFAULT)",
+  "updated_at": "2026-02-23T19:23:33.910455Z"
+}

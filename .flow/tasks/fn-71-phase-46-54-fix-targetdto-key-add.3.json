@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-02-22T19:46:11.620387Z",
+  "depends_on": [],
+  "epic": "fn-71-phase-46-54-fix-targetdto-key-add",
+  "id": "fn-71-phase-46-54-fix-targetdto-key-add.3",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-71-phase-46-54-fix-targetdto-key-add.3.md",
+  "status": "todo",
+  "title": "Phase 5.4: Create target_dto_test.dart with duration roundtrip assertion",
+  "updated_at": "2026-02-22T19:46:11.620858Z"
+}

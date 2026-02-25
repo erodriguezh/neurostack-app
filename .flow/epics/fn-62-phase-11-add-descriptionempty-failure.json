@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-62-phase-11-add-descriptionempty-failure",
+  "created_at": "2026-02-20T20:19:46.349579Z",
+  "depends_on_epics": [],
+  "id": "fn-62-phase-11-add-descriptionempty-failure",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-62-phase-11-add-descriptionempty-failure.md",
+  "status": "open",
+  "title": "Phase 1.1: Add descriptionEmpty failure constant",
+  "updated_at": "2026-02-20T20:19:57.702962Z"
+}

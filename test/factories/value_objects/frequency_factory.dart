@@ -2,11 +2,14 @@ import 'package:fpdart/fpdart.dart';
 import 'package:neurostack/core/failures/domain_failure.dart';
 import 'package:neurostack/features/protocol/domain/value_objects/frequency.dart';
 
+import '../factory_helpers.dart';
+
 abstract final class FrequencyFactory {
   /// Creates a valid Frequency (3-4x/week, standard for many protocols).
   static Frequency valid() {
-    return Frequency.create(minPerWeek: 3, maxPerWeek: 4).getOrElse(
-      (l) => throw Exception('Factory produced invalid Frequency: $l'),
+    return unwrapOrThrow(
+      Frequency.create(minPerWeek: 3, maxPerWeek: 4),
+      'Frequency',
     );
   }
 

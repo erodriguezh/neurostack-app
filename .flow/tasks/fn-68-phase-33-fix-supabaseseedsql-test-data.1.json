@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-02-21T20:15:01.684073Z",
+  "depends_on": [],
+  "epic": "fn-68-phase-33-fix-supabaseseedsql-test-data",
+  "id": "fn-68-phase-33-fix-supabaseseedsql-test-data.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-68-phase-33-fix-supabaseseedsql-test-data.1.md",
+  "status": "todo",
+  "title": "Fix supabase/seed.sql: remove explicit IDs, resolve FKs by name, add description, fix enums and JSONB keys",
+  "updated_at": "2026-02-21T20:15:01.684473Z"
+}

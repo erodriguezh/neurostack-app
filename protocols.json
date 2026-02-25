@@ -1,0 +1,1885 @@
+[
+  {
+    "name": "Deliberate Cold Water Immersion for Dopamine and Norepinephrine",
+    "description": "Immersion in cold water (10–15°C) triggers sustained release of norepinephrine (up to 530%) and dopamine (up to 250%) via sympathetic nervous system activation,  enhancing alertness, mood, and focus for hours post-exposure.",
+    "target": {
+      "frequency": {
+        "min_per_week": 2,
+        "max_per_week": 4
+      },
+      "durationSeconds": 180,
+      "intensity": "10-15°C"
+    },
+    "category": "coldExposure",
+    "evidence_level": "singleRct",
+    "research_citations": [
+      {
+        "authors": "Srámek, Simecková, Janský, Savlíková, Vybíral",
+        "year": 2000,
+        "title": "Human physiological responses to immersion into water of different temperatures",
+        "journal": "European Journal of Applied Physiology",
+        "doi": "10.1007/s004210050065",
+        "url": "https://doi.org/10.1007/s004210050065",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Springer/Eur J Appl Physiol record; DOI matches paper."
+      },
+      {
+        "authors": "Leppäluoto, Westerlund, Huttunen, Oksa, Smolander, Dugué, Mikkelsson",
+        "year": 2008,
+        "title": "Effects of long-term whole-body cold exposures on plasma concentrations of ACTH, beta-endorphin, cortisol, catecholamines and cytokines in healthy females",
+        "journal": "Scandinavian Journal of Clinical and Laboratory Investigation",
+        "doi": "10.1080/00365510701516350",
+        "url": "https://doi.org/10.1080/00365510701516350",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via journal record (Scand J Clin Lab Invest); DOI matches paper."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Post-Exercise Cold Water Immersion for Recovery",
+    "description": "Cold water immersion at 10–15°C for 10–15 minutes after high-intensity exercise reduces delayed-onset muscle soreness and creatine kinase levels  via vasoconstriction-mediated inflammation reduction and decreased nerve conduction velocity.",
+    "target": {
+      "frequency": {
+        "min_per_week": 1,
+        "max_per_week": 4
+      },
+      "durationSeconds": 720,
+      "intensity": "10-15°C"
+    },
+    "category": "coldExposure",
+    "evidence_level": "multipleRcts",
+    "research_citations": [
+      {
+        "authors": "Moore, Fuller, Buckley, Saunders, Halson, Broatch, Bellenger",
+        "year": 2022,
+        "title": "Impact of Cold-Water Immersion Compared with Passive Recovery Following a Single Bout of Strenuous Exercise on Athletic Performance in Physically Active Participants: A Systematic Review with Meta-analysis and Meta-regression",
+        "journal": "Sports Medicine",
+        "doi": "10.1007/s40279-022-01644-9",
+        "url": "https://doi.org/10.1007/s40279-022-01644-9",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Springer Sports Medicine; DOI matches systematic review/meta-analysis."
+      },
+      {
+        "authors": "Xiao, Kabachkova, Jiao, Zhao, Kapilevich",
+        "year": 2023,
+        "title": "Effects of cold water immersion after exercise on fatigue recovery and exercise performance—meta analysis",
+        "journal": "Frontiers in Physiology",
+        "doi": "10.3389/fphys.2023.1006512",
+        "url": "https://doi.org/10.3389/fphys.2023.1006512",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Frontiers in Physiology; DOI matches meta-analysis."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Daily Cold Shower for Illness Resilience",
+    "description": "Ending a regular shower with 30–90 seconds of cold water activates the sympathetic nervous system  and, when practiced daily for 30+ days, reduces self-reported sickness absence from work by 29%.",
+    "target": {
+      "frequency": {
+        "min_per_week": 5,
+        "max_per_week": 7
+      },
+      "durationSeconds": 60,
+      "intensity": "10-12°C (coldest tap water)"
+    },
+    "category": "coldExposure",
+    "evidence_level": "singleRct",
+    "research_citations": [
+      {
+        "authors": "Buijze, Sierevelt, van der Heijden, Dijkgraaf, Frings-Dresen",
+        "year": 2016,
+        "title": "The Effect of Cold Showering on Health and Work: A Randomized Controlled Trial",
+        "journal": "PLoS ONE",
+        "doi": "10.1371/journal.pone.0161749",
+        "url": "https://doi.org/10.1371/journal.pone.0161749",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via PLOS ONE; DOI matches RCT on cold showering."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Regular Cold Exposure for Brown Fat Activation",
+    "description": "Repeated brief cold water immersion (0–10°C) activates brown adipose tissue thermogenesis via norepinephrine-mediated β-adrenergic signaling, increasing cold-induced energy expenditure and improving thermoregulatory capacity.",
+    "target": {
+      "frequency": {
+        "min_per_week": 2,
+        "max_per_week": 3
+      },
+      "durationSeconds": 120,
+      "intensity": "0-10°C (ice water or cold outdoor water)"
+    },
+    "category": "coldExposure",
+    "evidence_level": "observational",
+    "research_citations": [
+      {
+        "authors": "Søberg, Löfgren, Philipsen, Jensen, Hansen, Ahrens, Nystrup, Nielsen, Sølling, Wedell-Neergaard, Berntsen, Loft, Kjær, Gerhart-Hines, Johannesen, Pedersen, Karstoft, Scheele",
+        "year": 2021,
+        "title": "Altered brown fat thermoregulation and enhanced cold-induced thermogenesis in young, healthy, winter-swimming men",
+        "journal": "Cell Reports Medicine",
+        "doi": "10.1016/j.xcrm.2021.100408",
+        "url": "https://doi.org/10.1016/j.xcrm.2021.100408",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Cell Reports Medicine; DOI matches winter swimmers brown fat/thermogenesis paper."
+      }
+    ],
+    "source_models": [
+      "model_a"
+    ]
+  },
+  {
+    "name": "Finnish Sauna for Cardiovascular Health and Longevity",
+    "description": "Regular Finnish dry sauna bathing (80–100°C) improves endothelial function, reduces arterial stiffness, and lowers blood pressure,  with 4–7 sessions per week associated with 50% lower fatal cardiovascular disease risk and 40% lower all-cause mortality over 20 years of follow-up.",
+    "target": {
+      "frequency": {
+        "min_per_week": 4,
+        "max_per_week": 7
+      },
+      "durationSeconds": 1200,
+      "intensity": "80-100°C (Finnish dry sauna)"
+    },
+    "category": "heatTherapy",
+    "evidence_level": "observational",
+    "research_citations": [
+      {
+        "authors": "Laukkanen, Khan, Zaccardi, Laukkanen",
+        "year": 2015,
+        "title": "Association Between Sauna Bathing and Fatal Cardiovascular and All-Cause Mortality Events",
+        "journal": "JAMA Internal Medicine",
+        "doi": "10.1001/jamainternmed.2014.8187",
+        "url": "https://doi.org/10.1001/jamainternmed.2014.8187",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via JAMA Network article page; corrected DOI to match sauna mortality cohort paper."
+      },
+      {
+        "authors": "Laukkanen, Kunutsor, Khan, et al.",
+        "year": 2018,
+        "title": "Sauna bathing is associated with reduced cardiovascular mortality and improves risk prediction in men and women: a prospective cohort study",
+        "journal": "BMC Medicine",
+        "doi": "10.1186/s12916-018-1198-0",
+        "url": "https://doi.org/10.1186/s12916-018-1198-0",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via BMC Medicine; DOI matches prospective cohort on sauna bathing."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Far-Infrared Sauna for Mood and Depression",
+    "description": "Repeated far-infrared sauna sessions at moderate temperature activate thermoregulatory pathways and increase endorphin and serotonin release, reducing depressive symptoms, appetite loss, and somatic complaints in mildly depressed patients.",
+    "target": {
+      "frequency": {
+        "min_per_week": 5,
+        "max_per_week": 5
+      },
+      "durationSeconds": 900,
+      "intensity": "60°C (far-infrared dry sauna)"
+    },
+    "category": "heatTherapy",
+    "evidence_level": "singleRct",
+    "research_citations": [
+      {
+        "authors": "Masuda, Nakazato, Kihara, Minagoe, Tei",
+        "year": 2005,
+        "title": "Repeated Thermal Therapy Diminishes Appetite Loss and Subjective Complaints in Mildly Depressed Patients",
+        "journal": "Psychosomatic Medicine",
+        "doi": "10.1097/01.psy.0000171812.67767.8f",
+        "url": "https://doi.org/10.1097/01.psy.0000171812.67767.8f",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via journal record; DOI matches thermal therapy trial in mildly depressed patients."
+      }
+    ],
+    "source_models": [
+      "model_a"
+    ]
+  },
+  {
+    "name": "Post-Exercise Sauna for Endurance Enhancement",
+    "description": "Sauna bathing immediately after endurance exercise induces heat acclimation adaptations including expanded plasma volume (~7%) and improved oxygen delivery, resulting in meaningful improvements in  VO2max (~8%) and time-to-exhaustion.",
+    "target": {
+      "frequency": {
+        "min_per_week": 3,
+        "max_per_week": 4
+      },
+      "durationSeconds": 1800,
+      "intensity": "89-101°C (Finnish dry sauna, post-exercise)"
+    },
+    "category": "heatTherapy",
+    "evidence_level": "singleRct",
+    "research_citations": [
+      {
+        "authors": "Scoon, Hopkins, Mayhew, Cotter",
+        "year": 2007,
+        "title": "Effect of post-exercise sauna bathing on the endurance performance of competitive male runners",
+        "journal": "Journal of Science and Medicine in Sport",
+        "doi": "10.1016/j.jsams.2006.06.009",
+        "url": "https://doi.org/10.1016/j.jsams.2006.06.009",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Journal of Science and Medicine in Sport/ScienceDirect; DOI matches post-exercise sauna study."
+      },
+      {
+        "authors": "Kirby, Lucas, Armstrong, Weaver, Lucas",
+        "year": 2021,
+        "title": "Intermittent post-exercise sauna bathing improves markers of exercise capacity in hot and temperate conditions in trained middle-distance runners",
+        "journal": "European Journal of Applied Physiology",
+        "doi": "10.1007/s00421-020-04541-z",
+        "url": "https://doi.org/10.1007/s00421-020-04541-z",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Springer Eur J Appl Physiol; DOI matches intermittent post-exercise sauna study (online 2020; issue 2021)."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Whole-Body Hyperthermia for Major Depression",
+    "description": "A single session raising core body temperature to ~38.5°C stimulates thermoafferent pathways projecting to serotonergic nuclei, producing a rapid antidepressant effect  lasting up to 6 weeks in a double-blind sham-controlled trial.",
+    "target": {
+      "frequency": {
+        "min_per_week": 1,
+        "max_per_week": 1
+      },
+      "durationSeconds": 2820,
+      "intensity": "Infrared device raising core temperature to 38.5°C"
+    },
+    "category": "heatTherapy",
+    "evidence_level": "singleRct",
+    "research_citations": [
+      {
+        "authors": "Janssen, Lowry, Mehl, Allen, Kelly, Gartner, Medrano, Begay, Rentscher, White, Fridman, Roberts, Robbins, Hanusch, Cole, Raison",
+        "year": 2016,
+        "title": "Whole-Body Hyperthermia for the Treatment of Major Depressive Disorder: A Randomized Clinical Trial",
+        "journal": "JAMA Psychiatry",
+        "doi": "10.1001/jamapsychiatry.2016.1031",
+        "url": "https://doi.org/10.1001/jamapsychiatry.2016.1031",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via JAMA Psychiatry; DOI matches whole-body hyperthermia RCT for major depressive disorder."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Zone 2 Sustained Aerobic Training for Metabolic Health",
+    "description": "Low-intensity aerobic exercise performed below the lactate threshold  primarily stresses the mitochondrial oxidative system, enhancing fat oxidation capacity, metabolic flexibility, capillary density, and insulin sensitivity for long-term cardiometabolic health.",
+    "target": {
+      "frequency": {
+        "min_per_week": 3,
+        "max_per_week": 5
+      },
+      "durationSeconds": 2700,
+      "intensity": "Zone 2 (60-70% HRmax, RPE 2-3, blood lactate <2 mmol/L)"
+    },
+    "category": "exercise",
+    "evidence_level": "observational",
+    "research_citations": [
+      {
+        "authors": "San-Millán, Brooks",
+        "year": 2018,
+        "title": "Assessment of Metabolic Flexibility by Means of Measuring Blood Lactate, Fat, and Carbohydrate Oxidation Responses to Exercise in Professional Endurance Athletes and Less-Fit Individuals",
+        "journal": "Sports Medicine",
+        "doi": "10.1007/s40279-017-0751-x",
+        "url": "https://doi.org/10.1007/s40279-017-0751-x",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Springer Sports Medicine; DOI matches San-Millán & Brooks metabolic flexibility paper."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "4x4 High-Intensity Interval Training for VO2max",
+    "description": "Four 4-minute intervals at 90–95% maximum heart rate with 3-minute active recovery periods  maximize cardiovascular stress to increase stroke volume and VO2max by ~7%, the strongest independent predictor of cardiovascular health and longevity.",
+    "target": {
+      "frequency": {
+        "min_per_week": 2,
+        "max_per_week": 3
+      },
+      "durationSeconds": 2100,
+      "intensity": "90-95% HRmax during intervals, 60-70% HRmax during recovery (RPE 7-8)"
+    },
+    "category": "exercise",
+    "evidence_level": "multipleRcts",
+    "research_citations": [
+      {
+        "authors": "Helgerud, Høydal, Wang, Karlsen, Berg, Bjerkaas, Simonsen, Helgesen, Hjorth, Bach, Hoff",
+        "year": 2007,
+        "title": "Aerobic high-intensity intervals improve VO2max more than moderate training",
+        "journal": "Medicine & Science in Sports & Exercise",
+        "doi": "10.1249/mss.0b013e3180304570",
+        "url": "https://doi.org/10.1249/mss.0b013e3180304570",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via journal record; DOI matches Helgerud et al. 2007 HIIT vs moderate training trial."
+      },
+      {
+        "authors": "Rognmo, Hetland, Helgerud, Hoff, Slørdahl",
+        "year": 2004,
+        "title": "High intensity aerobic interval exercise is superior to moderate intensity exercise for increasing aerobic capacity in patients with coronary artery disease",
+        "journal": "European Journal of Cardiovascular Prevention & Rehabilitation",
+        "doi": "10.1097/01.hjr.0000131677.96762.0c",
+        "url": "https://doi.org/10.1097/01.hjr.0000131677.96762.0c",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via journal record (Eur J Cardiovasc Prev Rehabil); DOI matches Rognmo et al. CAD interval training paper."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Progressive Resistance Training for Longevity",
+    "description": "Structured strength training targeting all major muscle groups reduces all-cause mortality by 15–27% through improvements in muscle mass, strength, insulin sensitivity, and bone density, with maximum mortality risk reduction at approximately 60 minutes per week.",
+    "target": {
+      "frequency": {
+        "min_per_week": 2,
+        "max_per_week": 3
+      },
+      "durationSeconds": 1800,
+      "intensity": "70-85% 1RM (RPE 6-8, 2-4 sets of 8-12 reps per exercise)"
+    },
+    "category": "exercise",
+    "evidence_level": "observational",
+    "research_citations": [
+      {
+        "authors": "Shailendra, Baldock, Li, Bennie, Boyle",
+        "year": 2022,
+        "title": "Resistance Training and Mortality Risk: A Systematic Review and Meta-Analysis",
+        "journal": "American Journal of Preventive Medicine",
+        "doi": "10.1016/j.amepre.2022.03.020",
+        "url": "https://doi.org/10.1016/j.amepre.2022.03.020",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via American Journal of Preventive Medicine; DOI matches resistance training & mortality meta-analysis."
+      },
+      {
+        "authors": "Saeidifard, Medina-Inojosa, West, et al.",
+        "year": 2019,
+        "title": "The association of resistance training with mortality: a systematic review and meta-analysis",
+        "journal": "European Journal of Preventive Cardiology",
+        "doi": "10.1177/2047487319850718",
+        "url": "https://doi.org/10.1177/2047487319850718",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via journal/PubMed listing; corrected DOI for Saeidifard et al. resistance training & mortality meta-analysis."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Supramaximal Interval Training for Dual Aerobic-Anaerobic Fitness",
+    "description": "Ultra-short supramaximal intervals (8 x 20 seconds all-out with 10-second rest) uniquely improve both aerobic capacity (VO2max +15%) and anaerobic capacity (+28%) simultaneously in just 6 weeks,  despite only 4 minutes of total exercise per session.",
+    "target": {
+      "frequency": {
+        "min_per_week": 3,
+        "max_per_week": 4
+      },
+      "durationSeconds": 240,
+      "intensity": "RPE 9-10 (maximal effort, ~170% VO2max equivalent)"
+    },
+    "category": "exercise",
+    "evidence_level": "singleRct",
+    "research_citations": [
+      {
+        "authors": "Tabata, Nishimura, Kouzaki, Hirai, Ogita, Miyachi, Yamamoto",
+        "year": 1996,
+        "title": "Effects of moderate-intensity endurance and high-intensity intermittent training on anaerobic capacity and VO2max",
+        "journal": "Medicine and Science in Sports and Exercise",
+        "doi": "10.1097/00005768-199610000-00018",
+        "url": "https://doi.org/10.1097/00005768-199610000-00018",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via journal record; DOI matches Tabata et al. 1996 intermittent training study."
+      }
+    ],
+    "source_models": [
+      "model_a"
+    ]
+  },
+  {
+    "name": "Combined Aerobic and Resistance Training for Mortality Reduction",
+    "description": "Meeting both aerobic (≥150 min/week moderate) and resistance training (≥2 days/week) guidelines yields a synergistic 40% all-cause mortality reduction,  exceeding either modality alone by targeting complementary cardiovascular, metabolic, and musculoskeletal systems.",
+    "target": {
+      "frequency": {
+        "min_per_week": 4,
+        "max_per_week": 5
+      },
+      "durationSeconds": 2700,
+      "intensity": "Aerobic: 60-70% HRmax; Resistance: 60-80% 1RM (RPE 5-8)"
+    },
+    "category": "exercise",
+    "evidence_level": "observational",
+    "research_citations": [
+      {
+        "authors": "Zhao, Veeranki, Magnussen, Xi",
+        "year": 2020,
+        "title": "Recommended physical activity and all cause and cause specific mortality in US adults: prospective cohort study",
+        "journal": "BMJ",
+        "doi": "10.1136/bmj.m2031",
+        "url": "https://doi.org/10.1136/bmj.m2031",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via BMJ; DOI matches Zhao et al. 2020 prospective cohort on physical activity and mortality."
+      }
+    ],
+    "source_models": [
+      "model_a"
+    ]
+  },
+  {
+    "name": "Morning Bright Light Exposure for Circadian Entrainment",
+    "description": "Exposure to bright light (≥2,000 lux) within 30–60 minutes of waking activates melanopsin-containing retinal ganglion cells and the suprachiasmatic nucleus, advancing circadian phase, strengthening the sleep-wake cycle, and improving sleep onset and daytime alertness.",
+    "target": {
+      "frequency": {
+        "min_per_week": 5,
+        "max_per_week": 7
+      },
+      "durationSeconds": 1800,
+      "intensity": "≥2,000-10,000 lux within 60 min of waking"
+    },
+    "category": "sleep",
+    "evidence_level": "multipleRcts",
+    "research_citations": [
+      {
+        "authors": "Blume, Garbazza, Spitschan",
+        "year": 2019,
+        "title": "Effects of light on human circadian rhythms, sleep and mood",
+        "journal": "Somnologie",
+        "doi": "10.1007/s11818-019-00215-x",
+        "url": "https://doi.org/10.1007/s11818-019-00215-x",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Somnologie (Springer); DOI matches review on light, circadian rhythms, sleep, mood."
+      },
+      {
+        "authors": "Crowley, Eastman",
+        "year": 2015,
+        "title": "Phase advancing human circadian rhythms with morning bright light, afternoon melatonin, and gradually shifted sleep: can we reduce morning bright-light duration?",
+        "journal": "Sleep Medicine",
+        "doi": "10.1016/j.sleep.2014.12.004",
+        "url": "https://doi.org/10.1016/j.sleep.2014.12.004",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Sleep Medicine; DOI matches Crowley & Eastman phase-advancing bright-light study."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Cool Bedroom Temperature for Sleep Quality",
+    "description": "A cool bedroom environment (18–19°C) facilitates the natural 1–2°C core temperature drop required for sleep initiation, supporting deeper slow-wave sleep, fewer nighttime awakenings, and improved overall sleep efficiency.",
+    "target": {
+      "frequency": {
+        "min_per_week": 7,
+        "max_per_week": 7
+      },
+      "durationSeconds": 28800,
+      "intensity": "18-19°C room temperature"
+    },
+    "category": "sleep",
+    "evidence_level": "observational",
+    "research_citations": [
+      {
+        "authors": "Baniassadi, Manor, Yu, Travison, Lipsitz",
+        "year": 2023,
+        "title": "Nighttime ambient temperature and sleep in community-dwelling older adults",
+        "journal": "Science of the Total Environment",
+        "doi": "10.1016/j.scitotenv.2023.165623",
+        "url": "https://doi.org/10.1016/j.scitotenv.2023.165623",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Science of the Total Environment; DOI matches ambient temperature and sleep study."
+      },
+      {
+        "authors": "Harding, Franks, Wisden",
+        "year": 2019,
+        "title": "The Temperature Dependence of Sleep",
+        "journal": "Frontiers in Neuroscience",
+        "doi": "10.3389/fnins.2019.00336",
+        "url": "https://doi.org/10.3389/fnins.2019.00336",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Frontiers in Neuroscience; DOI matches review on temperature dependence of sleep."
+      }
+    ],
+    "source_models": [
+      "model_a"
+    ]
+  },
+  {
+    "name": "Sleep Restriction Therapy for Insomnia",
+    "description": "Limiting time in bed to match actual sleep time creates mild sleep deprivation that strengthens homeostatic sleep pressure, consolidating sleep and reducing sleep-onset latency and nighttime wakefulness,  with effects comparable to full CBT-I.",
+    "target": {
+      "frequency": {
+        "min_per_week": 7,
+        "max_per_week": 7
+      },
+      "durationSeconds": 18000,
+      "intensity": "Time in bed = actual sleep time (min 5h), adjust by 15-30 min weekly based on ≥85% sleep efficiency"
+    },
+    "category": "sleep",
+    "evidence_level": "multipleRcts",
+    "research_citations": [
+      {
+        "authors": "Maurer, Schneider, Miller, Espie, Kyle",
+        "year": 2021,
+        "title": "The clinical effects of sleep restriction therapy for insomnia: A meta-analysis of randomised controlled trials",
+        "journal": "Sleep Medicine Reviews",
+        "doi": "10.1016/j.smrv.2021.101493",
+        "url": "https://doi.org/10.1016/j.smrv.2021.101493",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Sleep Medicine Reviews; DOI matches meta-analysis of sleep restriction therapy RCTs."
+      },
+      {
+        "authors": "Kyle, Siriwardena, Espie, et al.",
+        "year": 2023,
+        "title": "Clinical and cost-effectiveness of nurse-delivered sleep restriction therapy for insomnia in primary care (HABIT): a pragmatic, superiority, open-label, randomised controlled trial",
+        "journal": "The Lancet",
+        "doi": "10.1016/S0140-6736(23)00683-9",
+        "url": "https://doi.org/10.1016/S0140-6736(23)00683-9",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via The Lancet; DOI matches HABIT sleep restriction therapy RCT."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Consistent Sleep-Wake Timing Protocol",
+    "description": "Maintaining a consistent wake time (±30 minutes daily, including weekends) strengthens circadian entrainment through predictable light and behavioral cues,  with irregular sleep timing associated with poorer sleep quality, metabolic dysfunction, and increased mortality risk.",
+    "target": {
+      "frequency": {
+        "min_per_week": 7,
+        "max_per_week": 7
+      },
+      "durationSeconds": 60,
+      "intensity": "Wake time variation ≤30 min day-to-day, weekday-weekend ≤1 hour"
+    },
+    "category": "sleep",
+    "evidence_level": "expertConsensus",
+    "research_citations": [
+      {
+        "authors": "Sletten, Weaver, Foster, Gozal, Klerman, Rajaratnam, Roenneberg, Takahashi, Turek, Vitiello, Young, Czeisler",
+        "year": 2023,
+        "title": "The importance of sleep regularity: a consensus statement of the National Sleep Foundation sleep timing and variability panel",
+        "journal": "Sleep Health",
+        "doi": "10.1016/j.sleh.2023.07.016",
+        "url": "https://doi.org/10.1016/j.sleh.2023.07.016",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Sleep Health; DOI matches National Sleep Foundation sleep regularity consensus statement."
+      },
+      {
+        "authors": "Chaput, Dutil, Featherstone, Ross, Giangregorio, Saunders, Janssen, Poitras, Kho, Ross-White, Zankar, Carrier",
+        "year": 2020,
+        "title": "Sleep timing, sleep consistency, and health in adults: a systematic review",
+        "journal": "Applied Physiology, Nutrition, and Metabolism",
+        "doi": "10.1139/apnm-2020-0032",
+        "url": "https://doi.org/10.1139/apnm-2020-0032",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Applied Physiology, Nutrition, and Metabolism; DOI matches systematic review on sleep timing/consistency."
+      }
+    ],
+    "source_models": [
+      "model_a"
+    ]
+  },
+  {
+    "name": "Evening Dim Light Protocol for Melatonin Preservation",
+    "description": "Restricting ambient light to <10 lux for 1–2 hours before bedtime preserves endogenous melatonin onset, as ordinary room light (~200 lux) suppresses melatonin production by up to 71% and shortens melatonin duration by ~90 minutes.",
+    "target": {
+      "frequency": {
+        "min_per_week": 5,
+        "max_per_week": 7
+      },
+      "durationSeconds": 5400,
+      "intensity": "<10 lux ambient light 1-2 hours before bed"
+    },
+    "category": "sleep",
+    "evidence_level": "multipleRcts",
+    "research_citations": [
+      {
+        "authors": "Gooley, Chamberlain, Smith, Khalsa, Rajaratnam, Van Reen, Zeitzer, Czeisler, Lockley",
+        "year": 2011,
+        "title": "Exposure to room light before bedtime suppresses melatonin onset and shortens melatonin duration in humans",
+        "journal": "The Journal of Clinical Endocrinology & Metabolism",
+        "doi": "10.1210/jc.2010-2098",
+        "url": "https://doi.org/10.1210/jc.2010-2098",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via JCEM; DOI matches Gooley et al. room light melatonin suppression study."
+      },
+      {
+        "authors": "Burgess, Molina",
+        "year": 2014,
+        "title": "Home lighting before usual bedtime impacts circadian timing: a field study",
+        "journal": "Photochemistry and Photobiology",
+        "doi": "10.1111/php.12241",
+        "url": "https://doi.org/10.1111/php.12241",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Photochemistry and Photobiology / PubMed Central; DOI matches Burgess & Molina field study on home lighting."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Time-Restricted Eating for Metabolic Health",
+    "description": "Confining all daily caloric intake to an 8–10 hour window with 14–16 hours fasting  promotes weight loss, improved glucose regulation, and reduced blood pressure by leveraging fasting-mediated metabolic switching from glycogen to fat oxidation.",
+    "target": {
+      "frequency": {
+        "min_per_week": 5,
+        "max_per_week": 7
+      },
+      "durationSeconds": 1,
+      "intensity": "8-10 hour eating window"
+    },
+    "category": "nutrition",
+    "evidence_level": "multipleRcts",
+    "research_citations": [
+      {
+        "authors": "Liu, Huang, Huang, et al.",
+        "year": 2022,
+        "title": "Calorie Restriction with or without Time-Restricted Eating in Weight Loss",
+        "journal": "New England Journal of Medicine",
+        "doi": "10.1056/NEJMoa2114833",
+        "url": "https://doi.org/10.1056/NEJMoa2114833",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via NEJM; DOI matches RCT on calorie restriction with/without time-restricted eating."
+      },
+      {
+        "authors": "Xie, Sun, Ye, et al.",
+        "year": 2022,
+        "title": "Randomized controlled trial for time-restricted eating in healthy volunteers without obesity",
+        "journal": "Nature Communications",
+        "doi": "10.1038/s41467-022-28662-5",
+        "url": "https://doi.org/10.1038/s41467-022-28662-5",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Nature Communications; DOI matches TRE RCT in non-obese volunteers."
+      }
+    ],
+    "source_models": [
+      "model_a"
+    ]
+  },
+  {
+    "name": "Mediterranean Dietary Pattern for Cardiovascular Protection",
+    "description": "A whole-diet pattern emphasizing extra-virgin olive oil, vegetables, fruits, nuts, legumes, and fish  reduces major cardiovascular events by ~30%  through anti-inflammatory, antioxidant, and lipid-modifying mechanisms as demonstrated in the PREDIMED trial.",
+    "target": {
+      "frequency": {
+        "min_per_week": 7,
+        "max_per_week": 7
+      },
+      "durationSeconds": 1,
+      "intensity": "14-point Mediterranean adherence score ≥9; ≥4 tbsp EVOO/day, ≥3 servings fruit/day"
+    },
+    "category": "nutrition",
+    "evidence_level": "multipleRcts",
+    "research_citations": [
+      {
+        "authors": "Estruch, Ros, Salas-Salvadó, et al.",
+        "year": 2018,
+        "title": "Primary Prevention of Cardiovascular Disease with a Mediterranean Diet Supplemented with Extra-Virgin Olive Oil or Nuts",
+        "journal": "New England Journal of Medicine",
+        "doi": "10.1056/NEJMoa1800389",
+        "url": "https://doi.org/10.1056/NEJMoa1800389",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via NEJM; DOI matches PREDIMED primary prevention paper (2018 republication)."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "High-Protein Intake for Body Composition",
+    "description": "Increasing daily protein intake to 1.6–2.2 g/kg body weight during resistance training enhances lean mass accretion and strength gains, with a meta-analytic breakpoint at 1.62 g/kg/day beyond which no further fat-free mass benefits were observed.",
+    "target": {
+      "frequency": {
+        "min_per_week": 7,
+        "max_per_week": 7
+      },
+      "durationSeconds": 1,
+      "intensity": "1.6-2.2g protein/kg/day distributed across 3-4 meals"
+    },
+    "category": "nutrition",
+    "evidence_level": "multipleRcts",
+    "research_citations": [
+      {
+        "authors": "Morton, Murphy, McKellar, et al.",
+        "year": 2018,
+        "title": "A systematic review, meta-analysis and meta-regression of the effect of protein supplementation on resistance training-induced gains in muscle mass and strength in healthy adults",
+        "journal": "British Journal of Sports Medicine",
+        "doi": "10.1136/bjsports-2017-097608",
+        "url": "https://doi.org/10.1136/bjsports-2017-097608",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via British Journal of Sports Medicine; DOI matches Morton et al. protein supplementation meta-analysis."
+      },
+      {
+        "authors": "Nunes, Colenso-Semple, McKellar, et al.",
+        "year": 2022,
+        "title": "Systematic review and meta-analysis of protein intake to support muscle mass and function in healthy adults",
+        "journal": "Journal of Cachexia, Sarcopenia and Muscle",
+        "doi": "10.1002/jcsm.12922",
+        "url": "https://doi.org/10.1002/jcsm.12922",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Journal of Cachexia, Sarcopenia and Muscle; DOI matches protein intake systematic review/meta-analysis."
+      }
+    ],
+    "source_models": [
+      "model_a"
+    ]
+  },
+  {
+    "name": "Peri-Workout Protein for Muscle Protein Synthesis",
+    "description": "Consuming 20–40g protein within ~2 hours of resistance exercise supports muscle protein synthesis, though meta-analytic evidence indicates total daily protein intake is the primary driver of muscular adaptations rather than precise timing.",
+    "target": {
+      "frequency": {
+        "min_per_week": 3,
+        "max_per_week": 6
+      },
+      "durationSeconds": 1,
+      "intensity": "20-40g protein (≥0.4g/kg) within 2 hours pre- or post-exercise"
+    },
+    "category": "nutrition",
+    "evidence_level": "multipleRcts",
+    "research_citations": [
+      {
+        "authors": "Schoenfeld, Aragon, Krieger",
+        "year": 2013,
+        "title": "The effect of protein timing on muscle strength and hypertrophy: a meta-analysis",
+        "journal": "Journal of the International Society of Sports Nutrition",
+        "doi": "10.1186/1550-2783-10-53",
+        "url": "https://doi.org/10.1186/1550-2783-10-53",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via JISSN; DOI matches Schoenfeld et al. 2013 protein timing meta-analysis."
+      }
+    ],
+    "source_models": [
+      "model_a"
+    ]
+  },
+  {
+    "name": "Early Time-Restricted Eating for Insulin Sensitivity",
+    "description": "Restricting the eating window to early daytime hours (ending by 3–4 PM) aligns food intake with circadian peaks in insulin sensitivity and β-cell responsiveness, improving blood pressure, oxidative stress, and metabolic markers even without weight loss.",
+    "target": {
+      "frequency": {
+        "min_per_week": 5,
+        "max_per_week": 7
+      },
+      "durationSeconds": 1,
+      "intensity": "6-8 hour eating window ending by 3-4 PM"
+    },
+    "category": "nutrition",
+    "evidence_level": "multipleRcts",
+    "research_citations": [
+      {
+        "authors": "Sutton, Beyl, Early, Cefalu, Ravussin, Peterson",
+        "year": 2018,
+        "title": "Early Time-Restricted Feeding Improves Insulin Sensitivity, Blood Pressure, and Oxidative Stress Even without Weight Loss in Men with Prediabetes",
+        "journal": "Cell Metabolism",
+        "doi": "10.1016/j.cmet.2018.04.010",
+        "url": "https://doi.org/10.1016/j.cmet.2018.04.010",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Cell Metabolism; DOI matches Sutton et al. early time-restricted feeding trial."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Creatine Monohydrate for Strength and Cognition",
+    "description": "Creatine monohydrate replenishes ATP in muscle and brain tissue, enhancing muscular strength and power output while improving memory, processing speed, and attention, particularly under conditions of mental fatigue or in older adults.",
+    "target": {
+      "frequency": {
+        "min_per_week": 7,
+        "max_per_week": 7
+      },
+      "durationSeconds": 60,
+      "intensity": "5g daily with water or meal"
+    },
+    "category": "supplements",
+    "evidence_level": "multipleRcts",
+    "research_citations": [
+      {
+        "authors": "Prokopidis, Giannos, Triantafyllidis, Kechagias, Forbes, Candow",
+        "year": 2023,
+        "title": "Effects of creatine supplementation on memory in healthy individuals: a systematic review and meta-analysis of randomized controlled trials",
+        "journal": "Nutrition Reviews",
+        "doi": "10.1093/nutrit/nuac064",
+        "url": "https://doi.org/10.1093/nutrit/nuac064",
+        "verification_status": "unverified",
+        "verification_note": "Could not confirm this DOI resolves to the stated Nutrition Reviews meta-analysis with available searches."
+      },
+      {
+        "authors": "Xu, Bi, Zhang, Luo",
+        "year": 2024,
+        "title": "The effects of creatine supplementation on cognitive function in adults: a systematic review and meta-analysis",
+        "journal": "Frontiers in Nutrition",
+        "doi": "10.3389/fnut.2024.1424972",
+        "url": "https://doi.org/10.3389/fnut.2024.1424972",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Frontiers in Nutrition; DOI matches creatine supplementation cognitive function meta-analysis."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Omega-3 EPA/DHA for Cardiovascular Health",
+    "description": "Long-chain omega-3 fatty acids reduce triglycerides, lower blood pressure, and decrease systemic inflammation, with dose-dependent reductions in myocardial infarction risk (13%), coronary heart disease events (10%), and cardiovascular mortality (7%).",
+    "target": {
+      "frequency": {
+        "min_per_week": 7,
+        "max_per_week": 7
+      },
+      "durationSeconds": 60,
+      "intensity": "1000-3000mg combined EPA/DHA daily with fat-containing meal"
+    },
+    "category": "supplements",
+    "evidence_level": "multipleRcts",
+    "research_citations": [
+      {
+        "authors": "Bernasconi, Wiest, Lavie, Milani, Laukkanen",
+        "year": 2021,
+        "title": "Effect of Omega-3 Dosage on Cardiovascular Outcomes: An Updated Meta-Analysis and Meta-Regression of Interventional Trials",
+        "journal": "Mayo Clinic Proceedings",
+        "doi": "10.1016/j.mayocp.2020.08.034",
+        "url": "https://doi.org/10.1016/j.mayocp.2020.08.034",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Mayo Clinic Proceedings; DOI matches omega-3 dose meta-analysis/meta-regression."
+      },
+      {
+        "authors": "Khan, Lone, Khan, et al.",
+        "year": 2021,
+        "title": "Effect of omega-3 fatty acids on cardiovascular outcomes: A systematic review and meta-analysis",
+        "journal": "eClinicalMedicine",
+        "doi": "10.1016/j.eclinm.2021.100997",
+        "url": "https://doi.org/10.1016/j.eclinm.2021.100997",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via eClinicalMedicine/ScienceDirect; DOI matches omega-3 fatty acids cardiovascular outcomes meta-analysis."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Vitamin D3 for Immune Function and Cancer Mortality Reduction",
+    "description": "Vitamin D3 supplementation corrects widespread deficiency (~40% of adults), supports immune and bone health, and reduces cancer mortality by 16% in meta-analyses of RCTs, with 2,000–5,000 IU daily sufficient to maintain optimal serum levels.",
+    "target": {
+      "frequency": {
+        "min_per_week": 7,
+        "max_per_week": 7
+      },
+      "durationSeconds": 60,
+      "intensity": "2000-5000 IU (50-125µg) daily with fat-containing meal"
+    },
+    "category": "supplements",
+    "evidence_level": "multipleRcts",
+    "research_citations": [
+      {
+        "authors": "Zhang, Fang, Tang, Jia, Feng, Xu, Faramand",
+        "year": 2019,
+        "title": "Association between vitamin D supplementation and mortality: systematic review and meta-analysis",
+        "journal": "BMJ",
+        "doi": "10.1136/bmj.l4673",
+        "url": "https://doi.org/10.1136/bmj.l4673",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via BMJ; DOI matches vitamin D supplementation and mortality systematic review/meta-analysis."
+      }
+    ],
+    "source_models": [
+      "model_a"
+    ]
+  },
+  {
+    "name": "Magnesium Supplementation for Sleep Quality",
+    "description": "Magnesium acts as a natural NMDA receptor antagonist and GABA agonist, reducing sleep onset latency by ~17 minutes, increasing melatonin levels, and decreasing cortisol when supplemented before bed in older adults.",
+    "target": {
+      "frequency": {
+        "min_per_week": 7,
+        "max_per_week": 7
+      },
+      "durationSeconds": 60,
+      "intensity": "200-400mg elemental magnesium (glycinate or threonate) 30-60 min before bed"
+    },
+    "category": "supplements",
+    "evidence_level": "singleRct",
+    "research_citations": [
+      {
+        "authors": "Abbasi, Kimiagar, Sadeghniiat, Shirazi, Hedayati, Rashidkhani",
+        "year": 2012,
+        "title": "The effect of magnesium supplementation on primary insomnia in elderly: A double-blind placebo-controlled clinical trial",
+        "journal": "Journal of Research in Medical Sciences",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3703169/",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via PubMed Central/Europe PMC entry for JRMS trial (Abbasi et al., 2012)."
+      },
+      {
+        "authors": "Mah, Pitre",
+        "year": 2021,
+        "title": "Oral magnesium supplementation for insomnia in older adults: a Systematic Review & Meta-Analysis",
+        "journal": "BMC Complementary Medicine and Therapies",
+        "doi": "10.1186/s12906-021-03297-z",
+        "url": "https://doi.org/10.1186/s12906-021-03297-z",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via BMC Complementary Medicine and Therapies; DOI matches magnesium supplementation insomnia meta-analysis."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Ashwagandha Root Extract for Stress and Cortisol Reduction",
+    "description": "Ashwagandha’s withanolides modulate the hypothalamic-pituitary-adrenal axis and exert GABAergic activity, significantly reducing serum cortisol levels and perceived stress scores in a dose-dependent manner across multiple RCTs.",
+    "target": {
+      "frequency": {
+        "min_per_week": 7,
+        "max_per_week": 7
+      },
+      "durationSeconds": 60,
+      "intensity": "300-600mg standardized root extract (≥5% withanolides) daily with food"
+    },
+    "category": "supplements",
+    "evidence_level": "multipleRcts",
+    "research_citations": [
+      {
+        "authors": "Chandrasekhar, Kapoor, Anishetty",
+        "year": 2012,
+        "title": "A prospective, randomized double-blind, placebo-controlled study of safety and efficacy of a high-concentration full-spectrum extract of ashwagandha root in reducing stress and anxiety in adults",
+        "journal": "Indian Journal of Psychological Medicine",
+        "doi": "10.4103/0253-7176.106022",
+        "url": "https://doi.org/10.4103/0253-7176.106022",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via journal record; DOI matches Chandrasekhar et al. 2012 ashwagandha stress/anxiety RCT."
+      },
+      {
+        "authors": "Salve, Pate, Debnath, Langade",
+        "year": 2019,
+        "title": "Adaptogenic and Anxiolytic Effects of Ashwagandha Root Extract in Healthy Adults: A Double-blind, Randomized, Placebo-controlled Clinical Study",
+        "journal": "Cureus",
+        "doi": "10.7759/cureus.6466",
+        "url": "https://doi.org/10.7759/cureus.6466",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Cureus; DOI matches ashwagandha root extract RCT in healthy adults."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Mindfulness-Based Stress Reduction Program",
+    "description": "An 8-week structured program combining seated meditation, body scanning, and gentle yoga that cultivates present-moment awareness, producing moderate effects (Hedge’s g = 0.53) on stress, anxiety, depression, and quality of life.",
+    "target": {
+      "frequency": {
+        "min_per_week": 6,
+        "max_per_week": 7
+      },
+      "durationSeconds": 2700,
+      "intensity": "Guided meditation + body scan + gentle yoga (instructor-led 8-week program)"
+    },
+    "category": "mind",
+    "evidence_level": "multipleRcts",
+    "research_citations": [
+      {
+        "authors": "Khoury, Sharma, Rush, Fournier",
+        "year": 2015,
+        "title": "Mindfulness-based stress reduction for healthy individuals: A meta-analysis",
+        "journal": "Journal of Psychosomatic Research",
+        "doi": "10.1016/j.jpsychores.2015.03.009",
+        "url": "https://doi.org/10.1016/j.jpsychores.2015.03.009",
+        "verification_status": "unverified",
+        "verification_note": "Unable to confirm via web search in this run (DOI lookup/open failed); citation not verified here."
+      },
+      {
+        "authors": "Galante, et al.",
+        "year": 2023,
+        "title": "Systematic review and individual participant data meta-analysis of randomized controlled trials assessing mindfulness-based programs for mental health promotion",
+        "journal": "Nature Mental Health",
+        "doi": "10.1038/s44220-023-00081-5",
+        "url": "https://doi.org/10.1038/s44220-023-00081-5",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Nature Mental Health; DOI matches IPD meta-analysis of mindfulness-based programs."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Guided Body Scan Deep Relaxation",
+    "description": "A guided meditation performed lying down that systematically directs awareness through the body to induce deep parasympathetic relaxation while maintaining consciousness, reducing stress and improving sleep quality and well-being.",
+    "target": {
+      "frequency": {
+        "min_per_week": 3,
+        "max_per_week": 7
+      },
+      "durationSeconds": 660,
+      "intensity": "Guided audio body scan + breath awareness (lying down)"
+    },
+    "category": "mind",
+    "evidence_level": "singleRct",
+    "research_citations": [
+      {
+        "authors": "Moszeik, von Oertzen, Renner",
+        "year": 2022,
+        "title": "Effectiveness of a short Yoga Nidra meditation on stress, sleep, and well-being in a large and diverse sample",
+        "journal": "Current Psychology",
+        "doi": "10.1007/s12144-020-01042-2",
+        "url": "https://doi.org/10.1007/s12144-020-01042-2",
+        "verification_status": "unverified",
+        "verification_note": "Unable to confirm via web search in this run (DOI lookup/open failed); citation not verified here."
+      }
+    ],
+    "source_models": [
+      "model_a"
+    ]
+  },
+  {
+    "name": "Cyclic Sighing Breathwork for Mood Enhancement",
+    "description": "A structured breathing technique (double nasal inhale followed by prolonged oral exhale) activates the parasympathetic nervous system via respiratory sinus arrhythmia, producing greater improvement in positive affect than mindfulness meditation in just 5 minutes daily.",
+    "target": {
+      "frequency": {
+        "min_per_week": 7,
+        "max_per_week": 7
+      },
+      "durationSeconds": 300,
+      "intensity": "Self-guided cyclic sighing (double inhale nose, long exhale mouth)"
+    },
+    "category": "mind",
+    "evidence_level": "singleRct",
+    "research_citations": [
+      {
+        "authors": "Balban, Neri, Kogon, Weed, Nouriani, Jo, Holl, Zeitzer, Spiegel, Huberman",
+        "year": 2023,
+        "title": "Brief structured respiration practices enhance mood and reduce physiological arousal",
+        "journal": "Cell Reports Medicine",
+        "doi": "10.1016/j.xcrm.2022.100895",
+        "url": "https://doi.org/10.1016/j.xcrm.2022.100895",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Cell Reports Medicine/ScienceDirect; DOI matches structured respiration practices trial."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Structured Gratitude Journaling for Well-Being",
+    "description": "Listing 3–5 things one is grateful for with brief reflection shifts attentional focus toward positive experiences through cognitive reappraisal, enhancing positive affect, life satisfaction, and subjective well-being (Hedges’ g = 0.22 across 25 RCTs).",
+    "target": {
+      "frequency": {
+        "min_per_week": 3,
+        "max_per_week": 7
+      },
+      "durationSeconds": 600,
+      "intensity": "Self-guided structured writing (3-5 items with reflection)"
+    },
+    "category": "mind",
+    "evidence_level": "multipleRcts",
+    "research_citations": [
+      {
+        "authors": "Emmons, McCullough",
+        "year": 2003,
+        "title": "Counting blessings versus burdens: An experimental investigation of gratitude and subjective well-being in daily life",
+        "journal": "Journal of Personality and Social Psychology",
+        "doi": "10.1037/0022-3514.84.2.377",
+        "url": "https://doi.org/10.1037/0022-3514.84.2.377",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via journal record (JPSP); DOI matches Emmons & McCullough gratitude intervention study."
+      },
+      {
+        "authors": "Malouff, Meynadier",
+        "year": 2023,
+        "title": "The effect of expressed gratitude interventions on psychological wellbeing: A meta-analysis of randomised controlled studies",
+        "journal": "International Journal of Applied Positive Psychology",
+        "doi": "10.1007/s41042-023-00086-6",
+        "url": "https://doi.org/10.1007/s41042-023-00086-6",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Springer; DOI matches meta-analysis of gratitude interventions."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Focused Attention Meditation for Cognitive Enhancement",
+    "description": "Sustained concentration on a single object (typically the breath) while redirecting attention from distractions strengthens executive control and attention networks, producing small-to-moderate improvements in working memory, sustained attention, and cognitive flexibility.",
+    "target": {
+      "frequency": {
+        "min_per_week": 3,
+        "max_per_week": 7
+      },
+      "durationSeconds": 900,
+      "intensity": "Guided or unguided single-point breath concentration"
+    },
+    "category": "mind",
+    "evidence_level": "multipleRcts",
+    "research_citations": [
+      {
+        "authors": "Zainal, Newman",
+        "year": 2024,
+        "title": "Mindfulness enhances cognitive functioning: A meta-analysis of 111 randomized controlled trials",
+        "journal": "Health Psychology Review",
+        "doi": "10.1080/17437199.2023.2248222",
+        "url": "https://doi.org/10.1080/17437199.2023.2248222",
+        "verification_status": "unverified",
+        "verification_note": "Unable to confirm via web search in this run (DOI lookup/open failed); citation not verified here."
+      }
+    ],
+    "source_models": [
+      "model_a"
+    ]
+  },
+  {
+    "name": "14°C Cold Water Immersion for Catecholamine Response",
+    "description": "Immersion in cold water (~14°C) can acutely increase plasma norepinephrine and dopamine, which may transiently boost alertness and support stress resilience via sympathetic activation.",
+    "target": {
+      "frequency": {
+        "min_per_week": 1,
+        "max_per_week": 3
+      },
+      "durationSeconds": 1200,
+      "intensity": "14°C"
+    },
+    "category": "coldExposure",
+    "evidence_level": "singleRct",
+    "research_citations": [
+      {
+        "authors": "Srámek, Šimečková, Janský, Savlíková, Vybíral",
+        "year": 2000,
+        "title": "Human physiological responses to immersion into water of different temperatures",
+        "journal": "European Journal of Applied Physiology",
+        "doi": "10.1007/s004210050065",
+        "url": "https://doi.org/10.1007/s004210050065",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Springer/Eur J Appl Physiol record; DOI matches paper."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Post-Exercise Cold Water Immersion for Soreness and Recovery",
+    "description": "Cold water immersion after strenuous exercise can reduce delayed-onset muscle soreness and perceived fatigue, likely via reduced tissue temperature and modulation of inflammatory signaling.",
+    "target": {
+      "frequency": {
+        "min_per_week": 2,
+        "max_per_week": 4
+      },
+      "durationSeconds": 600,
+      "intensity": "10-15°C"
+    },
+    "category": "coldExposure",
+    "evidence_level": "multipleRcts",
+    "research_citations": [
+      {
+        "authors": "Leeder, Gissane, et al.",
+        "year": 2012,
+        "title": "Cold water immersion and recovery from strenuous exercise: a meta-analysis",
+        "journal": "British Journal of Sports Medicine",
+        "doi": "10.1136/bjsports-2011-090061",
+        "url": "https://doi.org/10.1136/bjsports-2011-090061",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via BJSM page/metadata; DOI matches Leeder et al. cold water immersion recovery meta-analysis."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Daily Cold-Shower Finish for Sickness Absence Reduction",
+    "description": "A brief cold-shower finish applied daily is a repeatable mild stressor that has been associated with reduced sickness absence from work, potentially via improved stress tolerance and immune-related effects.",
+    "target": {
+      "frequency": {
+        "min_per_week": 5,
+        "max_per_week": 7
+      },
+      "durationSeconds": 60,
+      "intensity": "10-15°C (cold shower)"
+    },
+    "category": "coldExposure",
+    "evidence_level": "singleRct",
+    "research_citations": [
+      {
+        "authors": "Buijze, Siem, et al.",
+        "year": 2016,
+        "title": "The Effect of Cold Showering on Health and Work: A Randomized Controlled Trial",
+        "journal": "PLOS ONE",
+        "doi": "10.1371/journal.pone.0161749",
+        "url": "https://doi.org/10.1371/journal.pone.0161749",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via PLOS ONE; DOI matches RCT on cold showering."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Frequent Finnish Sauna Bathing for Cardiovascular Risk Reduction",
+    "description": "Higher sauna frequency is associated with lower risks of fatal cardiovascular events and all-cause mortality in cohort data, potentially via improved vascular function, blood pressure, and cardiometabolic resilience.",
+    "target": {
+      "frequency": {
+        "min_per_week": 4,
+        "max_per_week": 7
+      },
+      "durationSeconds": 1200,
+      "intensity": "80-100°C (Finnish dry)"
+    },
+    "category": "heatTherapy",
+    "evidence_level": "observational",
+    "research_citations": [
+      {
+        "authors": "Laukkanen, Kunutsor, et al.",
+        "year": 2015,
+        "title": "Association Between Sauna Bathing and Fatal Cardiovascular and All-Cause Mortality Events",
+        "journal": "JAMA Internal Medicine",
+        "url": "https://doi.org/10.1001/jamainternmed.2014.8187",
+        "doi": "10.1001/jamainternmed.2014.8187",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via JAMA Network article page; corrected DOI to match sauna mortality cohort paper."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Post-Exercise Sauna Bathing for Endurance Adaptation",
+    "description": "Adding sauna exposure after endurance training can improve time-to-exhaustion performance, plausibly through heat-driven plasma volume expansion and thermoregulatory adaptations.",
+    "target": {
+      "frequency": {
+        "min_per_week": 3,
+        "max_per_week": 5
+      },
+      "durationSeconds": 1800,
+      "intensity": "85-95°C (sauna)"
+    },
+    "category": "heatTherapy",
+    "evidence_level": "singleRct",
+    "research_citations": [
+      {
+        "authors": "Scoon, Hopkins, et al.",
+        "year": 2007,
+        "title": "Effect of post-exercise sauna bathing on the endurance performance of competitive male runners",
+        "journal": "Journal of Science and Medicine in Sport",
+        "doi": "10.1016/j.jsams.2006.06.009",
+        "url": "https://doi.org/10.1016/j.jsams.2006.06.009",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Journal of Science and Medicine in Sport/ScienceDirect; DOI matches post-exercise sauna study."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Single-Session Whole-Body Hyperthermia for Depressive Symptoms",
+    "description": "A single whole-body hyperthermia session has shown antidepressant effects lasting weeks, potentially via thermoregulatory, inflammatory, and neuroendocrine pathways; this should be done under appropriate clinical supervision.",
+    "target": {
+      "frequency": {
+        "min_per_week": 1,
+        "max_per_week": 1
+      },
+      "durationSeconds": 3600,
+      "intensity": "55-65°C (whole-body hyperthermia; target core temp ~38.5°C)"
+    },
+    "category": "heatTherapy",
+    "evidence_level": "singleRct",
+    "research_citations": [
+      {
+        "authors": "Janssen, Lowry, et al.",
+        "year": 2016,
+        "title": "Whole-Body Hyperthermia for the Treatment of Major Depressive Disorder: A Randomized Clinical Trial",
+        "journal": "JAMA Psychiatry",
+        "url": "https://doi.org/10.1001/jamapsychiatry.2016.1031",
+        "doi": "10.1001/jamapsychiatry.2016.1031",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via JAMA Psychiatry; DOI matches whole-body hyperthermia RCT for major depressive disorder."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Zone 2 Continuous Endurance Training for Aerobic Base",
+    "description": "Regular moderate-intensity continuous training improves aerobic capacity and VO2max, supporting mitochondrial and cardiometabolic health with a sustainable stimulus.",
+    "target": {
+      "frequency": {
+        "min_per_week": 3,
+        "max_per_week": 5
+      },
+      "durationSeconds": 2700,
+      "intensity": "Zone 2 (60-70% HRmax)"
+    },
+    "category": "exercise",
+    "evidence_level": "singleRct",
+    "research_citations": [
+      {
+        "authors": "Helgerud, Høydal, et al.",
+        "year": 2007,
+        "title": "Aerobic high-intensity intervals improve VO2max more than moderate training",
+        "journal": "Medicine & Science in Sports & Exercise",
+        "doi": "10.1249/mss.0b013e3180304570",
+        "url": "https://doi.org/10.1249/mss.0b013e3180304570",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via journal record; DOI matches Helgerud et al. 2007 HIIT vs moderate training trial."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "4x4 Minute HIIT for VO2max",
+    "description": "High-intensity intervals performed near 90-95% HRmax provide a strong VO2max stimulus and cardiovascular adaptation with relatively low total work time.",
+    "target": {
+      "frequency": {
+        "min_per_week": 2,
+        "max_per_week": 3
+      },
+      "durationSeconds": 2400,
+      "intensity": "4×4 min at 90-95% HRmax (3 min easy between)"
+    },
+    "category": "exercise",
+    "evidence_level": "singleRct",
+    "research_citations": [
+      {
+        "authors": "Helgerud, Høydal, et al.",
+        "year": 2007,
+        "title": "Aerobic high-intensity intervals improve VO2max more than moderate training",
+        "journal": "Medicine & Science in Sports & Exercise",
+        "doi": "10.1249/mss.0b013e3180304570",
+        "url": "https://doi.org/10.1249/mss.0b013e3180304570",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via journal record; DOI matches Helgerud et al. 2007 HIIT vs moderate training trial."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Sprint Interval Training for Mitochondrial and Cardiometabolic Adaptation",
+    "description": "Very short all-out intervals with long recoveries can drive rapid improvements in skeletal muscle oxidative capacity and cardiometabolic fitness with low total training time.",
+    "target": {
+      "frequency": {
+        "min_per_week": 2,
+        "max_per_week": 3
+      },
+      "durationSeconds": 1200,
+      "intensity": "All-out (RPE 9-10)"
+    },
+    "category": "exercise",
+    "evidence_level": "singleRct",
+    "research_citations": [
+      {
+        "authors": "Burgomaster, Howarth, et al.",
+        "year": 2008,
+        "title": "Similar metabolic adaptations during exercise after low volume sprint interval and traditional endurance training in humans",
+        "journal": "The Journal of Physiology",
+        "doi": "10.1113/jphysiol.2007.142109",
+        "url": "https://doi.org/10.1113/jphysiol.2007.142109",
+        "verification_status": "unverified",
+        "verification_note": "Unable to confirm via web search in this run (DOI lookup/open failed); citation not verified here."
+      }
+    ],
+    "source_models": [
+      "model_c"
+    ]
+  },
+  {
+    "name": "Progressive Full-Body Resistance Training for Strength and Functional Longevity",
+    "description": "Progressive resistance training improves muscular strength in older adults, supporting functional independence and metabolic health via muscle hypertrophy and neuromuscular adaptation.",
+    "target": {
+      "frequency": {
+        "min_per_week": 2,
+        "max_per_week": 3
+      },
+      "durationSeconds": 2700,
+      "intensity": "60-80% 1RM (2-3 sets × 8-12 reps)"
+    },
+    "category": "exercise",
+    "evidence_level": "multipleRcts",
+    "research_citations": [
+      {
+        "authors": "Peterson, Rhea, et al.",
+        "year": 2010,
+        "title": "Resistance exercise for muscular strength in older adults: a meta-analysis",
+        "journal": "Ageing Research Reviews",
+        "doi": "10.1016/j.arr.2010.03.004",
+        "url": "https://doi.org/10.1016/j.arr.2010.03.004",
+        "verification_status": "unverified",
+        "verification_note": "Unable to confirm via web search in this run (DOI lookup/open failed); citation not verified here."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Morning Bright-Light Exposure for Circadian Alignment",
+    "description": "Timed bright-light exposure strengthens circadian entrainment and can improve sleep outcomes by reinforcing the morning light signal that sets daily biological timing.",
+    "target": {
+      "frequency": {
+        "min_per_week": 7,
+        "max_per_week": 7
+      },
+      "durationSeconds": 1800,
+      "intensity": "≥2,500-10,000 lux within 1 hour of waking"
+    },
+    "category": "sleep",
+    "evidence_level": "multipleRcts",
+    "research_citations": [
+      {
+        "authors": "van Maanen, Meijer, et al.",
+        "year": 2016,
+        "title": "The effects of light therapy on sleep problems: A systematic review and meta-analysis",
+        "journal": "Sleep Medicine Reviews",
+        "doi": "10.1016/j.smrv.2015.08.009",
+        "url": "https://doi.org/10.1016/j.smrv.2015.08.009",
+        "verification_status": "unverified",
+        "verification_note": "Unable to confirm via web search in this run (DOI lookup/open failed); citation not verified here."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Evening Blue-Light Blocking to Improve Insomnia Symptoms",
+    "description": "Reducing blue-rich light exposure in the evening can support melatonin signaling and improve sleep in insomnia by lowering the circadian-disrupting effect of nighttime light.",
+    "target": {
+      "frequency": {
+        "min_per_week": 7,
+        "max_per_week": 7
+      },
+      "durationSeconds": 7200,
+      "intensity": "<50 lux blue-rich light; blue-blocking glasses 2-3h pre-bed"
+    },
+    "category": "sleep",
+    "evidence_level": "singleRct",
+    "research_citations": [
+      {
+        "authors": "Shechter, Kim, et al.",
+        "year": 2018,
+        "title": "Blocking nocturnal blue light for insomnia: A randomized controlled trial",
+        "journal": "Journal of Psychiatric Research",
+        "doi": "10.1016/j.jpsychires.2017.10.015",
+        "url": "https://doi.org/10.1016/j.jpsychires.2017.10.015",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Journal of Psychiatric Research/ScienceDirect; DOI matches blue-light blocking insomnia RCT."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Warm Bath or Shower 1-2 Hours Before Bed to Shorten Sleep Onset",
+    "description": "Passive body heating before bed can improve sleep onset and sleep efficiency by enhancing the post-bath drop in core temperature and increasing heat loss from the periphery.",
+    "target": {
+      "frequency": {
+        "min_per_week": 5,
+        "max_per_week": 7
+      },
+      "durationSeconds": 600,
+      "intensity": "40-42.5°C water, timed 1-2h before bed"
+    },
+    "category": "sleep",
+    "evidence_level": "multipleRcts",
+    "research_citations": [
+      {
+        "authors": "Haghayegh, Khoshnevis, et al.",
+        "year": 2019,
+        "title": "Before-bedtime passive body heating by warm shower or bath to improve sleep: A systematic review and meta-analysis",
+        "journal": "Sleep Medicine Reviews",
+        "doi": "10.1016/j.smrv.2019.04.008",
+        "url": "https://doi.org/10.1016/j.smrv.2019.04.008",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Sleep Medicine Reviews/ScienceDirect; DOI matches warm shower/bath passive heating meta-analysis."
+      }
+    ],
+    "source_models": [
+      "model_c"
+    ]
+  },
+  {
+    "name": "Sleep Restriction Therapy for Chronic Insomnia",
+    "description": "Sleep restriction therapy consolidates sleep by limiting time in bed to increase homeostatic sleep drive and reduce fragmented, wakeful time, improving insomnia severity over time.",
+    "target": {
+      "frequency": {
+        "min_per_week": 7,
+        "max_per_week": 7
+      },
+      "durationSeconds": 21600,
+      "intensity": "Time in bed = average sleep time +30 min (min 5h), adjust weekly by sleep efficiency"
+    },
+    "category": "sleep",
+    "evidence_level": "multipleRcts",
+    "research_citations": [
+      {
+        "authors": "Maurer, Espie, et al.",
+        "year": 2021,
+        "title": "The clinical effects of sleep restriction therapy for insomnia: A meta-analysis of randomised controlled trials",
+        "journal": "Sleep Medicine Reviews",
+        "doi": "10.1016/j.smrv.2021.101493",
+        "url": "https://doi.org/10.1016/j.smrv.2021.101493",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Sleep Medicine Reviews; DOI matches meta-analysis of sleep restriction therapy RCTs."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Early Time-Restricted Eating Window for Insulin Sensitivity",
+    "description": "Restricting food intake to an early-day window can improve insulin sensitivity and cardiometabolic markers even without weight loss, aligning eating with circadian metabolic rhythms.",
+    "target": {
+      "frequency": {
+        "min_per_week": 7,
+        "max_per_week": 7
+      },
+      "durationSeconds": 21600,
+      "intensity": "6-hour eating window ending before 15:00 (e.g., 08:00-14:00)"
+    },
+    "category": "nutrition",
+    "evidence_level": "singleRct",
+    "research_citations": [
+      {
+        "authors": "Sutton, Beyl, et al.",
+        "year": 2018,
+        "title": "Early Time-Restricted Feeding Improves Insulin Sensitivity, Blood Pressure, and Oxidative Stress Even without Weight Loss in Men with Prediabetes",
+        "journal": "Cell Metabolism",
+        "doi": "10.1016/j.cmet.2018.04.010",
+        "url": "https://doi.org/10.1016/j.cmet.2018.04.010",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Cell Metabolism; DOI matches Sutton et al. early time-restricted feeding trial."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Mediterranean Dietary Pattern With Olive Oil or Nuts for Cardiovascular Prevention",
+    "description": "A Mediterranean dietary pattern supplemented with extra-virgin olive oil or mixed nuts reduced major cardiovascular events in a large randomized trial, likely via improvements in lipids, inflammation, and endothelial function.",
+    "target": {
+      "frequency": {
+        "min_per_week": 7,
+        "max_per_week": 7
+      },
+      "durationSeconds": 86400,
+      "intensity": "Mediterranean pattern; add ~30 g mixed nuts/day or ~1 L/week extra-virgin olive oil"
+    },
+    "category": "nutrition",
+    "evidence_level": "singleRct",
+    "research_citations": [
+      {
+        "authors": "Estruch, Ros, et al.",
+        "year": 2013,
+        "title": "Primary Prevention of Cardiovascular Disease with a Mediterranean Diet",
+        "journal": "The New England Journal of Medicine",
+        "doi": "10.1056/NEJMoa1200303",
+        "url": "https://doi.org/10.1056/NEJMoa1200303",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via NEJM; DOI matches original PREDIMED trial paper (2013)."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Post-Exercise Carbohydrate+Protein Feeding for Glycogen Recovery",
+    "description": "Consuming carbohydrate with added protein soon after exercise can enhance muscle glycogen resynthesis compared with carbohydrate alone, supporting recovery when training sessions are frequent.",
+    "target": {
+      "frequency": {
+        "min_per_week": 2,
+        "max_per_week": 6
+      },
+      "durationSeconds": 1800,
+      "intensity": "Carb 0.8-1.2 g/kg + protein 0.2-0.4 g/kg within 2h post-exercise"
+    },
+    "category": "nutrition",
+    "evidence_level": "singleRct",
+    "research_citations": [
+      {
+        "authors": "Ivy, Goforth, et al.",
+        "year": 2002,
+        "title": "Early postexercise muscle glycogen recovery is enhanced with a carbohydrate-protein supplement",
+        "journal": "Journal of Applied Physiology",
+        "doi": "10.1152/japplphysiol.00394.2002",
+        "url": "https://doi.org/10.1152/japplphysiol.00394.2002",
+        "verification_status": "unverified",
+        "verification_note": "Unable to confirm via web search in this run (DOI lookup/open failed); citation not verified here."
+      }
+    ],
+    "source_models": [
+      "model_c"
+    ]
+  },
+  {
+    "name": "Nightly Magnesium Supplementation for Primary Insomnia",
+    "description": "Magnesium may support sleep regulation via effects on GABAergic and NMDA-related signaling; supplementation improved subjective and objective insomnia measures in an elderly insomnia trial.",
+    "target": {
+      "frequency": {
+        "min_per_week": 7,
+        "max_per_week": 7
+      },
+      "durationSeconds": 60,
+      "intensity": "500 mg magnesium daily, taken 1-2h before bed (8 weeks)"
+    },
+    "category": "supplements",
+    "evidence_level": "singleRct",
+    "research_citations": [
+      {
+        "authors": "Abbasi, Kimiagar, et al.",
+        "year": 2012,
+        "title": "The effect of magnesium supplementation on primary insomnia in elderly: A double-blind placebo-controlled clinical trial",
+        "journal": "Journal of Research in Medical Sciences",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3703169/",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via PubMed Central/Europe PMC entry for JRMS trial (Abbasi et al., 2012)."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Daily Creatine Monohydrate for Strength and Lean Mass",
+    "description": "Creatine monohydrate increases intramuscular phosphocreatine availability, improving high-intensity performance and supporting greater lean mass gains when paired with training; safety and efficacy are supported across many trials.",
+    "target": {
+      "frequency": {
+        "min_per_week": 7,
+        "max_per_week": 7
+      },
+      "durationSeconds": 60,
+      "intensity": "3-5 g creatine monohydrate daily with meal (optional loading 20 g/day × 5-7 days)"
+    },
+    "category": "supplements",
+    "evidence_level": "multipleRcts",
+    "research_citations": [
+      {
+        "authors": "Kreider, Kalman, et al.",
+        "year": 2017,
+        "title": "International Society of Sports Nutrition position stand: safety and efficacy of creatine supplementation in exercise, sport, and medicine",
+        "journal": "Journal of the International Society of Sports Nutrition",
+        "doi": "10.1186/s12970-017-0173-z",
+        "url": "https://doi.org/10.1186/s12970-017-0173-z",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Journal of the International Society of Sports Nutrition; DOI matches ISSN creatine position stand."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Daily Omega-3 EPA+DHA for Lipid and Cardiovascular Risk Markers",
+    "description": "EPA/DHA supplementation can improve cardiovascular risk factors (including triglycerides) across randomized trials and meta-analyses, likely via effects on lipid metabolism and inflammatory pathways.",
+    "target": {
+      "frequency": {
+        "min_per_week": 7,
+        "max_per_week": 7
+      },
+      "durationSeconds": 60,
+      "intensity": "1-4 g/day EPA+DHA with meals"
+    },
+    "category": "supplements",
+    "evidence_level": "multipleRcts",
+    "research_citations": [
+      {
+        "authors": "Choi, Calder, et al.",
+        "year": 2024,
+        "title": "The differential effects of eicosapentaenoic acid and docosahexaenoic acid on cardiovascular risk factors: an updated systematic review of randomized controlled trials",
+        "journal": "Frontiers in Nutrition",
+        "doi": "10.3389/fnut.2024.1423228",
+        "url": "https://doi.org/10.3389/fnut.2024.1423228",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Frontiers in Nutrition; DOI matches updated EPA vs DHA cardiovascular risk factors systematic review."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Ashwagandha Root Extract for Stress and Anxiety Reduction",
+    "description": "Ashwagandha root extract has reduced perceived stress and anxiety measures in randomized trials, plausibly via adaptogenic effects on stress-response physiology (including cortisol).",
+    "target": {
+      "frequency": {
+        "min_per_week": 7,
+        "max_per_week": 7
+      },
+      "durationSeconds": 60,
+      "intensity": "300 mg twice daily (root extract) with meals for 60 days"
+    },
+    "category": "supplements",
+    "evidence_level": "singleRct",
+    "research_citations": [
+      {
+        "authors": "Chandrasekhar, Kapoor, et al.",
+        "year": 2012,
+        "title": "A Prospective, Randomized Double-Blind, Placebo-Controlled Study of Safety and Efficacy of a High-Concentration Full-Spectrum Extract of Ashwagandha Root in Reducing Stress and Anxiety in Adults",
+        "journal": "Indian Journal of Psychological Medicine",
+        "url": "https://doi.org/10.4103/0253-7176.106022",
+        "doi": "10.4103/0253-7176.106022",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via journal record; DOI matches Chandrasekhar et al. 2012 ashwagandha stress/anxiety RCT."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Mindfulness-Based Stress Reduction Daily Practice",
+    "description": "Mindfulness-based stress reduction (MBSR) improves stress-related outcomes across populations, likely by strengthening attention regulation, present-moment awareness, and emotion regulation skills.",
+    "target": {
+      "frequency": {
+        "min_per_week": 6,
+        "max_per_week": 7
+      },
+      "durationSeconds": 2700,
+      "intensity": "guided mindfulness (MBSR-style body scan/sitting meditation)"
+    },
+    "category": "mind",
+    "evidence_level": "multipleRcts",
+    "research_citations": [
+      {
+        "authors": "Grossman, Niemann, et al.",
+        "year": 2004,
+        "title": "Mindfulness-based stress reduction and health benefits. A meta-analysis",
+        "journal": "Journal of Psychosomatic Research",
+        "doi": "10.1016/S0022-3999(03)00573-7",
+        "url": "https://doi.org/10.1016/S0022-3999(03)00573-7",
+        "verification_status": "unverified",
+        "verification_note": "Unable to confirm via web search in this run (DOI lookup/open failed); citation not verified here."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Cyclic Sighing Breathwork for Acute Mood and Arousal Reduction",
+    "description": "Brief daily structured breathing (including cyclic sighing) can improve mood and reduce physiological arousal, likely via vagal engagement and altered respiratory chemistry.",
+    "target": {
+      "frequency": {
+        "min_per_week": 5,
+        "max_per_week": 7
+      },
+      "durationSeconds": 300,
+      "intensity": "cyclic sighing (double inhale + long slow exhale)"
+    },
+    "category": "mind",
+    "evidence_level": "singleRct",
+    "research_citations": [
+      {
+        "authors": "Balban, Neri, et al.",
+        "year": 2023,
+        "title": "Brief structured respiration practices enhance mood and reduce physiological arousal",
+        "journal": "Cell Reports Medicine",
+        "doi": "10.1016/j.xcrm.2022.100895",
+        "url": "https://doi.org/10.1016/j.xcrm.2022.100895",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Cell Reports Medicine/ScienceDirect; DOI matches structured respiration practices trial."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  },
+  {
+    "name": "Structured Gratitude Journaling for Well-Being",
+    "description": "Structured gratitude listing can improve subjective well-being and positive affect by systematically directing attention toward positive experiences and supportive relationships.",
+    "target": {
+      "frequency": {
+        "min_per_week": 1,
+        "max_per_week": 3
+      },
+      "durationSeconds": 600,
+      "intensity": "write 5 specific gratitudes (structured list)"
+    },
+    "category": "mind",
+    "evidence_level": "singleRct",
+    "research_citations": [
+      {
+        "authors": "Emmons, McCullough",
+        "year": 2003,
+        "title": "Counting Blessings Versus Burdens: An Experimental Investigation of Gratitude and Subjective Well-Being in Daily Life",
+        "journal": "Journal of Personality and Social Psychology",
+        "doi": "10.1037/0022-3514.84.2.377",
+        "url": "https://doi.org/10.1037/0022-3514.84.2.377",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via journal record (JPSP); DOI matches Emmons & McCullough gratitude intervention study."
+      }
+    ],
+    "source_models": [
+      "model_a",
+      "model_c"
+    ]
+  }
+]

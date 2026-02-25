@@ -3,6 +3,7 @@ import 'package:neurostack/core/failures/domain_failure.dart';
 import 'package:neurostack/features/session/domain/entities/session_draft.dart';
 import 'package:neurostack/features/session/domain/value_objects/session_duration.dart';
 import '../constants/test_constants.dart';
+import 'factory_helpers.dart';
 
 abstract final class SessionDraftFactory {
   /// Creates a valid SessionDraft with all invariants satisfied.
@@ -31,14 +32,15 @@ abstract final class SessionDraftFactory {
     SessionDuration? duration,
     String? notes,
   }) {
-    return create(
-      protocolId: protocolId,
-      completedAt: completedAt,
-      currentTime: currentTime,
-      duration: duration,
-      notes: notes,
-    ).getOrElse(
-      (l) => throw Exception('Factory produced invalid SessionDraft: $l'),
+    return unwrapOrThrow(
+      create(
+        protocolId: protocolId,
+        completedAt: completedAt,
+        currentTime: currentTime,
+        duration: duration,
+        notes: notes,
+      ),
+      'SessionDraft',
     );
   }
 }
