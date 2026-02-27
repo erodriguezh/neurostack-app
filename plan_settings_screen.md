@@ -23,7 +23,7 @@
   - `lib/library/library_state.dart` — `activeTab` default is `HomeBottomTab.library` (no change needed, but verify)
 - **Action:** Run `flutter analyze` after adding the enum value to catch any remaining exhaustiveness errors before proceeding.
 
-### 1.3 Add Settings tab to `HomeBottomNav` widget
+### 1.3 Add Settings tab to `HomeBottomNav` widget ✅
 
 - **File:** `lib/home/widgets/home_bottom_nav.dart`
 - Add a 4th `_NavItem` after the Progress entry (around line 50):
