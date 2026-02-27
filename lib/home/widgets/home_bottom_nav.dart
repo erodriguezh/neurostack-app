@@ -52,6 +52,12 @@ class HomeBottomNav extends StatelessWidget {
                 isActive: activeTab == HomeBottomTab.progress,
                 onTap: () => onSelect(HomeBottomTab.progress),
               ),
+              _NavItem(
+                label: 'Settings',
+                icon: LucideIcons.settings,
+                isActive: activeTab == HomeBottomTab.settings,
+                onTap: () => onSelect(HomeBottomTab.settings),
+              ),
             ],
           ),
         ),
