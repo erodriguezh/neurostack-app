@@ -35,6 +35,7 @@
 - [Protocol Selection Modal](./best_practices/design/screen-prompts/08-protocol-selection-modal.md) - protocol selection, deactivation, choose two, downgrade, checkbox, session count
 - [Auth Screen](./best_practices/design/screen-prompts/09-auth-screen.md) - auth, login, sign in, email input, magic link, passwordless
 - [Auth Check Email](./best_practices/design/screen-prompts/10-auth-check-email.md) - check email, inbox, magic link sent, resend link, cooldown timer, verification
+- [Settings Screen](./best_practices/design/screen-prompts/11-settings-screen.md) - settings, support, contact, upgrade banner, cancel subscription, rate app, feedback
 
 ## Testing
 - [Testing Rules Index](./best_practices/test/domain/index.md) - quick reference, test naming, file structure, boundary testing, factory pattern, hard rules, adoption guide, test checklist
@@ -60,6 +61,7 @@
 - [Spec: Trial Expiration Cronjob](./specs/20260122150000_spec_trial_expiration_cronjob.md) - pg_cron, trial_ends_at, trial_expired_at, expire_trials(), idempotent transition, subscription status free, UTC timezone
 - [Spec: Paywall Modal](./specs/20260123220000_spec_paywall_modal.md) - RevenueCat integration, entitlement mapping, customer identification, webhook architecture, trial reminder
 - [Spec: Protocol Description & Seed](./specs/20260220120000_spec_protocol_description_and_seed.md) - ProtocolDescription VO, description field, protocols.json seed, 57 protocols, idempotent upsert, stale enum fix
+- [Spec: Settings Screen](./specs/20260227120000_spec_settings_screen.md) - SettingsView, 4th bottom tab, upgrade banner, support tiles, contact page, subscription management
 
 ## Investigations
 - [Investigation: Protocol Names Missing](./investigations/20260108223900_investigation_progress_protocol_names.md) - ProgressGrid, layout collapse, nameWidth, narrow screen, responsive, horizontal scroll, widget overflow
@@ -71,6 +73,7 @@
 - [Plan: Trial Expiration Cronjob](../plan_trial_expiration_cron_job.md) - pg_cron, trial_ends_at, expire_trials(), CHECK constraint, TrialPeriodDto endDate, TrialExpirationDecisionStore, SharedPreferences, race condition fix
 - [Plan: Paywall Modal](../plan_paywall_modal.md) - RevenueCat SDK setup, auth integration, subscription sync, paywall presentation, webhook edge function, trial reminder
 - [Plan: Update Protocol Domain & DB](../plan_update_protocol_domain_and_db.md) - ProtocolDescription VO, description field, DB migration, seed 57 protocols, fix stale enums, test factories
+- [Plan: Settings Screen](../plan_settings_screen.md) - Settings tab, upgrade CTA, support tiles, contact page, url_launcher, bottom nav 4th tab
 
 ## Changelogs
 - [Changelog: Home Screen](./changelogs/20260106153900_home_screen_changelog.md) - HomeViewModel, HomeViewState, status banner, protocol card, bottom nav, connectivity, route config
