@@ -13,7 +13,7 @@
 - **File:** `lib/core/models/home_bottom_tab.dart`
 - Add `settings` as the 4th value: `enum HomeBottomTab { stack, library, progress, settings }`
 
-### 1.2 Fix enum exhaustiveness across codebase
+### 1.2 Fix enum exhaustiveness across codebase ✅
 
 - Search for all exhaustive switch/map usage of `HomeBottomTab` and add the `settings` case.
 - **Known impacted files:**
