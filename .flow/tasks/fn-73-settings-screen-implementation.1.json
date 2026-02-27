@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-02-27T19:32:44.726977Z",
+  "depends_on": [],
+  "epic": "fn-73-settings-screen-implementation",
+  "id": "fn-73-settings-screen-implementation.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-73-settings-screen-implementation.1.md",
+  "status": "todo",
+  "title": "Phase 1.1: Add settings to the bottom tab enum",
+  "updated_at": "2026-02-27T19:32:44.727609Z"
+}
