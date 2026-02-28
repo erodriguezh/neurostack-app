@@ -189,8 +189,6 @@ void main() {
         when(
           () => mockAuthService.authState,
         ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
-        when(() => mockRouterService.goTo(any())).thenReturn(null);
-
         final vm = createViewModel();
         addTearDown(vm.dispose);
 
@@ -208,8 +206,6 @@ void main() {
         when(
           () => mockAuthService.authState,
         ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
-        when(() => mockRouterService.goTo(any())).thenReturn(null);
-
         final vm = createViewModel();
         addTearDown(vm.dispose);
 
@@ -229,13 +225,6 @@ void main() {
         when(
           () => mockAuthService.authState,
         ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
-        when(
-          () => mockTabCoordinator.onSelect(
-            any(),
-            currentTab: any(named: 'currentTab'),
-          ),
-        ).thenReturn(null);
-
         final vm = createViewModel();
         addTearDown(vm.dispose);
 

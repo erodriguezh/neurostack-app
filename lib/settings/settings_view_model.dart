@@ -64,6 +64,8 @@ class SettingsViewModel with EntitlementListenerMixin {
 
   @override
   void onEntitlementChanged() {
+    if (_isDisposed) return;
+
     final user = _resolveUser();
     if (user != null) {
       _updateIsPremium(user);
@@ -143,7 +145,10 @@ class SettingsViewModel with EntitlementListenerMixin {
   // --- Private helpers ---
 
   /// Updates [isPremium] from the given [user] and current entitlement snapshot.
+  ///
+  /// No-ops if the ViewModel has been disposed.
   void _updateIsPremium(User user) {
+    if (_isDisposed) return;
     final snapshot = _revenueCatService.entitlementSnapshot.value;
     final status = _resolver.resolveEffectiveStatus(
       user: user,

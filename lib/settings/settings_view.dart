@@ -116,22 +116,23 @@ class _SettingsViewState extends State<SettingsView> {
                 ),
               ),
 
-              // Fake home indicator pill
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: bottomInset > 0 ? bottomInset / 2 : 4,
-                child: Center(
-                  child: Container(
-                    width: 134,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: kitColors.white90.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(999),
+              // Fake home indicator pill (only on devices with system inset)
+              if (bottomInset > 0)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: bottomInset / 2,
+                  child: Center(
+                    child: Container(
+                      width: 134,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: kitColors.white90.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
                     ),
                   ),
                 ),
-              ),
             ],
           ),
         ),
