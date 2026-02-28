@@ -32,7 +32,7 @@
   - `isActive: activeTab == HomeBottomTab.settings`
   - `onTap: () => onSelect(HomeBottomTab.settings)`
 
-### 1.4 Add routing case to `HomeBottomTabCoordinator`
+### 1.4 Add routing case to `HomeBottomTabCoordinator` ✅
 
 - **File:** `lib/home/home_bottom_tab_coordinator.dart`
 - Add case in `onSelect` switch (after line 25):
