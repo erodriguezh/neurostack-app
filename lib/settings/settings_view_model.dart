@@ -111,27 +111,27 @@ class SettingsViewModel with EntitlementListenerMixin {
   ///
   /// On iOS/macOS, opens the App Store subscriptions page.
   /// On Android, opens the Play Store subscriptions page.
-  /// No-ops on unsupported platforms (Windows, Linux).
-  /// On web, falls back to `LaunchMode.platformDefault`.
+  /// No-ops on unsupported platforms (Windows, Linux, Fuchsia).
   Future<void> openSubscriptionManagement() async {
-    final Uri uri;
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-        uri = Uri.parse('https://play.google.com/store/account/subscriptions');
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        uri = Uri.parse('https://apps.apple.com/account/subscriptions');
-      case TargetPlatform.windows:
-      case TargetPlatform.linux:
-      case TargetPlatform.fuchsia:
-        return; // Subscriptions not supported on these platforms
-    }
+    final uri = switch (defaultTargetPlatform) {
+      TargetPlatform.android =>
+        Uri.parse('https://play.google.com/store/account/subscriptions'),
+      TargetPlatform.iOS || TargetPlatform.macOS =>
+        Uri.parse('https://apps.apple.com/account/subscriptions'),
+      _ => null, // Unsupported platform
+    };
+
+    if (uri == null) return;
 
     const mode = kIsWeb
         ? LaunchMode.platformDefault
         : LaunchMode.externalApplication;
 
-    await _launch(uri, mode: mode);
+    try {
+      await _launch(uri, mode: mode);
+    } catch (_) {
+      // Best-effort: launchUrl can throw on some platforms/embedders.
+    }
   }
 
   void dispose() {
