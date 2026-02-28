@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-02-28T12:29:10.353845Z",
+  "depends_on": [],
+  "epic": "fn-73-settings-screen-implementation",
+  "id": "fn-73-settings-screen-implementation.5",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-73-settings-screen-implementation.5.md",
+  "status": "todo",
+  "title": "Phase 1.5: Remove gear icon from Progress screen",
+  "updated_at": "2026-02-28T12:29:10.354285Z"
+}
