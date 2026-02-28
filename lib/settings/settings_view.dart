@@ -25,7 +25,7 @@ class _SettingsViewState extends State<SettingsView> {
   late final SettingsViewModel _viewModel = SettingsViewModel(
     routerService: locator<RouterService>(),
     authService: locator<AuthService>(),
-    subscriptionStatusResolver: const SubscriptionStatusResolver(),
+    subscriptionStatusResolver: locator<SubscriptionStatusResolver>(),
     revenueCatService: locator<RevenueCatService>(),
     cachedUserStore: locator<CachedUserStore>(),
   );

@@ -30,6 +30,7 @@ class SettingsViewModel with EntitlementListenerMixin {
        _authService = authService,
        _resolver = subscriptionStatusResolver,
        _revenueCatService = revenueCatService,
+       _cachedUserStore = cachedUserStore,
        _tabCoordinator =
            tabCoordinator ??
            HomeBottomTabCoordinator(routerService: routerService),
@@ -44,6 +45,7 @@ class SettingsViewModel with EntitlementListenerMixin {
   final AuthService _authService;
   final SubscriptionStatusResolver _resolver;
   final RevenueCatService _revenueCatService;
+  final CachedUserStore? _cachedUserStore;
   final HomeBottomTabCoordinator _tabCoordinator;
   final Future<bool> Function(Uri, {LaunchMode mode}) _launch;
 
@@ -61,14 +63,19 @@ class SettingsViewModel with EntitlementListenerMixin {
   @override
   void onEntitlementChanged() {
     final user = _resolveUser();
-    if (user == null) return;
+    if (user != null) {
+      _updateIsPremium(user);
+      return;
+    }
 
-    final snapshot = _revenueCatService.entitlementSnapshot.value;
-    final status = _resolver.resolveEffectiveStatus(
-      user: user,
-      snapshot: snapshot,
-    );
-    isPremium.value = status.isPremium;
+    // Defensive fallback: auth state is unexpectedly non-authenticated on an
+    // auth-required route. Try CachedUserStore (async, best-effort).
+    _cachedUserStore
+        ?.loadUser()
+        .then((cached) {
+          if (cached != null) _updateIsPremium(cached);
+        })
+        .catchError((_) {});
   }
 
   // --- Public API ---
@@ -78,6 +85,9 @@ class SettingsViewModel with EntitlementListenerMixin {
   /// Must be called from the view's `initState()`.
   void init() {
     initEntitlementListener();
+    // Sync once after wiring the listener to close the window between
+    // construction (which computes isPremium) and listener attachment.
+    onEntitlementChanged();
   }
 
   /// Navigates to a different bottom tab.
@@ -119,11 +129,20 @@ class SettingsViewModel with EntitlementListenerMixin {
 
   // --- Private helpers ---
 
+  /// Updates [isPremium] from the given [user] and current entitlement snapshot.
+  void _updateIsPremium(User user) {
+    final snapshot = _revenueCatService.entitlementSnapshot.value;
+    final status = _resolver.resolveEffectiveStatus(
+      user: user,
+      snapshot: snapshot,
+    );
+    isPremium.value = status.isPremium;
+  }
+
   /// Resolves the current user synchronously from [AuthService.authState].
   ///
-  /// Returns `null` if the auth state is not authenticated.
-  /// Falls back to [CachedUserStore] only if authState is unexpectedly
-  /// unauthenticated (defensive, since the settings route requires auth).
+  /// Returns `null` if the auth state is not authenticated. When `null`,
+  /// callers should fall back to [CachedUserStore] if available.
   User? _resolveUser() {
     final authState = _authService.authState.value;
     return switch (authState) {
