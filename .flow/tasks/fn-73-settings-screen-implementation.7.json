@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-02-28T19:47:36.777699Z",
+  "depends_on": [],
+  "epic": "fn-73-settings-screen-implementation",
+  "id": "fn-73-settings-screen-implementation.7",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-73-settings-screen-implementation.7.md",
+  "status": "todo",
+  "title": "Refactor: Extract shared PremiumAwareViewModel base class",
+  "updated_at": "2026-02-28T19:47:36.777960Z"
+}
