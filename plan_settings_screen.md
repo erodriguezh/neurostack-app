@@ -52,7 +52,7 @@
 
 ## Phase 2 — SettingsViewModel Refactor
 
-### 2.1 Add tab coordination and subscription awareness to `SettingsViewModel`
+### 2.1 Add tab coordination and subscription awareness to `SettingsViewModel` ✅
 
 - **File:** `lib/settings/settings_view_model.dart`
 - Mix in `EntitlementListenerMixin` (same pattern as `LibraryViewModel` line 36):
@@ -106,7 +106,7 @@
   ```
 - This avoids async SharedPreferences reads and the premium-state flicker on a screen with "no loading states"
 
-### 2.2 Product decision: Restore Purchases
+### 2.2 Product decision: Restore Purchases ✅
 
 - **Decision:** Restore Purchases is removed from Settings per spec.
 - **Rationale:** RevenueCat SDK automatically restores on app launch via `configure()`. Manual restore is only needed as a recovery path for edge cases (device change, reinstall). The spec explicitly lists it as out of scope.
@@ -199,7 +199,7 @@
 
 ## Phase 4 — Contact Us Placeholder Page
 
-### 4.1 Create `ContactView`
+### 4.1 Create `ContactView` ✅
 
 - **File:** `lib/settings/contact_view.dart` (new)
 - Bare scaffold: `AppGridBackground` > `Scaffold` > `SafeArea`
@@ -208,7 +208,7 @@
 - No bottom nav (pushed route)
 - Body: empty (placeholder for future content)
 
-### 4.2 Register `/settings/contact` route
+### 4.2 Register `/settings/contact` route ✅
 
 - **File:** `lib/config/route_config.dart`
 - Add import: `import 'package:neurostack/settings/contact_view.dart';`
@@ -225,13 +225,13 @@
 
 ## Phase 5 — Add `url_launcher` Dependency
 
-### 5.1 Add package
+### 5.1 Add package ✅
 
 - **File:** `pubspec.yaml`
 - Add `url_launcher: ^6.3.1` under dependencies
 - Run `flutter pub get`
 
-### 5.2 Use in ViewModel
+### 5.2 Use in ViewModel ✅
 
 - **File:** `lib/settings/settings_view_model.dart`
 - `openSubscriptionManagement()` with platform branching, delegates to injected `_launch`:
