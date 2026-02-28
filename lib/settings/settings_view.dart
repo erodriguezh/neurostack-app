@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:neurostack/core/models/home_bottom_tab.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
 import 'package:neurostack/core/ui/widgets/app_grid_background.dart';
 import 'package:neurostack/core/utils/locator.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
 import 'package:neurostack/features/auth/data/cached_user_store.dart';
+import 'package:neurostack/home/widgets/home_bottom_nav.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 import 'package:neurostack/settings/settings_view_model.dart';
 
-/// Settings view providing user account actions.
+/// Settings tab screen.
 ///
-/// Placeholder layout until Phase 3 rewrites this as a tab screen
-/// with upgrade banner, support tiles, and bottom nav.
+/// Phase 3 will add upgrade banner, support tiles, and full content.
+/// Currently shows the header and bottom nav (tab-screen shell).
 class SettingsView extends StatefulWidget {
   const SettingsView({super.key});
 
@@ -46,34 +47,30 @@ class _SettingsViewState extends State<SettingsView> {
   Widget build(BuildContext context) {
     final spacing = context.spacing;
     final kitColors = context.kitColors;
+    final bottomInset = MediaQuery.of(context).padding.bottom;
 
     return AppGridBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: SafeArea(
-          child: CustomScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: [
-              // Header with back button
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    spacing.sm,
-                    spacing.sm,
-                    spacing.lg,
-                    0,
-                  ),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: Icon(
-                          LucideIcons.chevronLeft,
-                          color: kitColors.white90,
-                        ),
-                        onPressed: () => locator<RouterService>().back(),
+          bottom: false,
+          child: Stack(
+            children: [
+              // Scrollable content area
+              CustomScrollView(
+                key: const PageStorageKey('settings-scroll'),
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  // Header (no back button -- this is a tab screen)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        spacing.lg,
+                        spacing.lg,
+                        spacing.lg,
+                        0,
                       ),
-                      const SizedBox(width: 8),
-                      Text(
+                      child: Text(
                         'Settings',
                         style: context.theme.textTheme.headlineLarge?.copyWith(
                           fontSize: 32,
@@ -82,22 +79,55 @@ class _SettingsViewState extends State<SettingsView> {
                           color: kitColors.white90,
                         ),
                       ),
-                    ],
+                    ),
                   ),
+                  SliverToBoxAdapter(child: SizedBox(height: spacing.lg)),
+
+                  // Placeholder content (Phase 3 will add upgrade banner + tiles)
+                  SliverPadding(
+                    padding: EdgeInsets.symmetric(horizontal: spacing.lg),
+                    sliver: SliverToBoxAdapter(
+                      child: Center(
+                        child: Text(
+                          'Settings content coming in Phase 3',
+                          style: context.theme.textTheme.bodyMedium?.copyWith(
+                            color: kitColors.white40,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Bottom spacer to prevent content under nav bar
+                  SliverToBoxAdapter(
+                    child: SizedBox(height: 120 + bottomInset),
+                  ),
+                ],
+              ),
+
+              // Bottom navigation
+              Positioned(
+                left: spacing.sm,
+                right: spacing.sm,
+                bottom: spacing.sm + bottomInset,
+                child: HomeBottomNav(
+                  activeTab: HomeBottomTab.settings,
+                  onSelect: _viewModel.onSelectBottomTab,
                 ),
               ),
-              SliverToBoxAdapter(child: SizedBox(height: spacing.lg)),
 
-              // Placeholder content (Phase 3 will rewrite as tab screen)
-              SliverPadding(
-                padding: EdgeInsets.symmetric(horizontal: spacing.lg),
-                sliver: SliverToBoxAdapter(
-                  child: Center(
-                    child: Text(
-                      'Settings content coming in Phase 3',
-                      style: context.theme.textTheme.bodyMedium?.copyWith(
-                        color: kitColors.white40,
-                      ),
+              // Fake home indicator pill
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: bottomInset > 0 ? bottomInset / 2 : 4,
+                child: Center(
+                  child: Container(
+                    width: 134,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: kitColors.white90.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(999),
                     ),
                   ),
                 ),

@@ -49,6 +49,8 @@ class SettingsViewModel with EntitlementListenerMixin {
   final HomeBottomTabCoordinator _tabCoordinator;
   final Future<bool> Function(Uri, {LaunchMode mode}) _launch;
 
+  bool _isDisposed = false;
+
   /// Whether the current user has a premium subscription.
   ///
   /// Computed synchronously on construction to avoid flicker, then kept
@@ -73,7 +75,7 @@ class SettingsViewModel with EntitlementListenerMixin {
     _cachedUserStore
         ?.loadUser()
         .then((cached) {
-          if (cached != null) _updateIsPremium(cached);
+          if (cached != null && !_isDisposed) _updateIsPremium(cached);
         })
         .catchError((_) {});
   }
@@ -107,13 +109,23 @@ class SettingsViewModel with EntitlementListenerMixin {
 
   /// Opens the platform-specific subscription management page.
   ///
-  /// On iOS, opens the App Store subscriptions page.
+  /// On iOS/macOS, opens the App Store subscriptions page.
   /// On Android, opens the Play Store subscriptions page.
+  /// No-ops on unsupported platforms (Windows, Linux).
   /// On web, falls back to `LaunchMode.platformDefault`.
   Future<void> openSubscriptionManagement() async {
-    final uri = defaultTargetPlatform == TargetPlatform.android
-        ? Uri.parse('https://play.google.com/store/account/subscriptions')
-        : Uri.parse('https://apps.apple.com/account/subscriptions');
+    final Uri uri;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        uri = Uri.parse('https://play.google.com/store/account/subscriptions');
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        uri = Uri.parse('https://apps.apple.com/account/subscriptions');
+      case TargetPlatform.windows:
+      case TargetPlatform.linux:
+      case TargetPlatform.fuchsia:
+        return; // Subscriptions not supported on these platforms
+    }
 
     const mode = kIsWeb
         ? LaunchMode.platformDefault
@@ -123,6 +135,7 @@ class SettingsViewModel with EntitlementListenerMixin {
   }
 
   void dispose() {
+    _isDisposed = true;
     disposeEntitlementListener();
     isPremium.dispose();
   }
