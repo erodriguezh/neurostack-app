@@ -4,14 +4,16 @@ import 'package:neurostack/core/ui/app_theme.dart';
 import 'package:neurostack/core/ui/widgets/app_grid_background.dart';
 import 'package:neurostack/core/utils/locator.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
+import 'package:neurostack/features/auth/data/auth_service.dart';
+import 'package:neurostack/features/auth/data/cached_user_store.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
+import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 import 'package:neurostack/settings/settings_view_model.dart';
 
 /// Settings view providing user account actions.
 ///
-/// Currently includes:
-/// - Restore Purchases: Critical for subscription correctness after device
-///   change, app reinstall, or family sharing setup.
+/// Placeholder layout until Phase 3 rewrites this as a tab screen
+/// with upgrade banner, support tiles, and bottom nav.
 class SettingsView extends StatefulWidget {
   const SettingsView({super.key});
 
@@ -21,8 +23,18 @@ class SettingsView extends StatefulWidget {
 
 class _SettingsViewState extends State<SettingsView> {
   late final SettingsViewModel _viewModel = SettingsViewModel(
+    routerService: locator<RouterService>(),
+    authService: locator<AuthService>(),
+    subscriptionStatusResolver: const SubscriptionStatusResolver(),
     revenueCatService: locator<RevenueCatService>(),
+    cachedUserStore: locator<CachedUserStore>(),
   );
+
+  @override
+  void initState() {
+    super.initState();
+    _viewModel.init();
+  }
 
   @override
   void dispose() {
@@ -76,24 +88,16 @@ class _SettingsViewState extends State<SettingsView> {
               ),
               SliverToBoxAdapter(child: SizedBox(height: spacing.lg)),
 
-              // Settings list
+              // Placeholder content (Phase 3 will rewrite as tab screen)
               SliverPadding(
                 padding: EdgeInsets.symmetric(horizontal: spacing.lg),
                 sliver: SliverToBoxAdapter(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: kitColors.panel,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: kitColors.white10),
-                    ),
-                    child: ValueListenableBuilder<bool>(
-                      valueListenable: _viewModel.isRestoring,
-                      builder: (context, isRestoring, child) {
-                        return _RestorePurchasesTile(
-                          isRestoring: isRestoring,
-                          onTap: () => _handleRestorePurchases(context),
-                        );
-                      },
+                  child: Center(
+                    child: Text(
+                      'Settings content coming in Phase 3',
+                      style: context.theme.textTheme.bodyMedium?.copyWith(
+                        color: kitColors.white40,
+                      ),
                     ),
                   ),
                 ),
@@ -102,71 +106,6 @@ class _SettingsViewState extends State<SettingsView> {
           ),
         ),
       ),
-    );
-  }
-
-  Future<void> _handleRestorePurchases(BuildContext context) async {
-    // Capture messenger before async gap
-    final messenger = ScaffoldMessenger.of(context);
-    final result = await _viewModel.restorePurchases();
-    if (!mounted) return;
-
-    switch (result) {
-      case RestoreResult.success:
-        messenger.showSnackBar(
-          const SnackBar(content: Text('Purchases restored successfully')),
-        );
-      case RestoreResult.failure:
-        messenger.showSnackBar(
-          const SnackBar(
-            content: Text('Unable to restore purchases. Try again later.'),
-          ),
-        );
-      case RestoreResult.alreadyInProgress:
-        // Ignore - first request will complete and show feedback
-        break;
-    }
-  }
-}
-
-class _RestorePurchasesTile extends StatelessWidget {
-  const _RestorePurchasesTile({
-    required this.isRestoring,
-    required this.onTap,
-  });
-
-  final bool isRestoring;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final kitColors = context.kitColors;
-
-    return ListTile(
-      leading: isRestoring
-          ? SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation(kitColors.white60),
-              ),
-            )
-          : Icon(LucideIcons.rotateCcw, color: kitColors.white60),
-      title: Text(
-        'Restore Purchases',
-        style: context.theme.textTheme.bodyLarge?.copyWith(
-          color: kitColors.white90,
-        ),
-      ),
-      subtitle: Text(
-        'Recover purchases from another device',
-        style: context.theme.textTheme.bodySmall?.copyWith(
-          color: kitColors.white40,
-        ),
-      ),
-      enabled: !isRestoring,
-      onTap: isRestoring ? null : onTap,
     );
   }
 }

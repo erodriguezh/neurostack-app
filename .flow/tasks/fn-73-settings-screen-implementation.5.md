@@ -7,9 +7,8 @@ TBD
 - [ ] TBD
 
 ## Done summary
-TBD
-
+Removed the gear/settings IconButton and Row wrapper from the Progress screen header, replacing it with a standalone Column for the title and subtitle. Cleaned up unused lucide_icons and route_data imports.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: eccb83b, 8f5ee30
+- Tests: flutter analyze, flutter test
 - PRs:
