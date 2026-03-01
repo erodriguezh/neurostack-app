@@ -125,7 +125,7 @@
 
 ## Phase 3 — SettingsView Rewrite
 
-### 3.1 Restructure `SettingsView` as a tab screen
+### 3.1 Restructure `SettingsView` as a tab screen ✅
 
 - **File:** `lib/settings/settings_view.dart`
 - Replace current pushed-route layout (back button header) with tab-screen layout
@@ -138,7 +138,7 @@
 - Update `_viewModel` initialization to pass all new constructor dependencies from `locator<>()`
 - In `initState()`, call `_viewModel.init()` to start entitlement listener; in `dispose()`, call `_viewModel.dispose()` (mirrors Home/Library pattern)
 
-### 3.2 Screen header
+### 3.2 Screen header ✅
 
 - **File:** `lib/settings/settings_view.dart`
 - Title: "Settings" using `textTheme.headlineLarge` with `fontSize: 32, fontStyle: FontStyle.italic, letterSpacing: -0.8, color: kitColors.white90`
