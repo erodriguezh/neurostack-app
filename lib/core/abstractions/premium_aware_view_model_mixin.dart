@@ -89,6 +89,7 @@ mixin PremiumAwareViewModelMixin on EntitlementListenerMixin {
 
   /// Disposes the [isPremium] notifier. Safe to call multiple times.
   void disposePremiumAwareness() {
+    if (_premiumDisposed) return;
     _premiumDisposed = true;
     isPremium.dispose();
   }
