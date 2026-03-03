@@ -11,12 +11,14 @@ import 'package:neurostack/home/widgets/home_bottom_nav.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 import 'package:neurostack/settings/settings_view_model.dart';
+import 'package:neurostack/settings/widgets/settings_support_section.dart';
 import 'package:neurostack/settings/widgets/settings_upgrade_banner.dart';
 
 /// Settings tab screen.
 ///
 /// Shows the screen header, an upgrade banner (for non-premium users),
-/// and bottom navigation.
+/// a support & resources section with interactive tiles, and bottom
+/// navigation.
 class SettingsView extends StatefulWidget {
   const SettingsView({super.key});
 
@@ -93,6 +95,27 @@ class _SettingsViewState extends State<SettingsView> {
                           index: 0,
                           child: SettingsUpgradeBanner(
                             onTap: _viewModel.goToPaywall,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+
+                  // Support & Resources section
+                  SliverToBoxAdapter(
+                    child: ValueListenableBuilder<bool>(
+                      valueListenable: _viewModel.isPremium,
+                      builder: (context, isPremium, _) {
+                        return StaggeredFadeIn(
+                          index: 1,
+                          child: SettingsSupportSection(
+                            isPremium: isPremium,
+                            onContactTap: _viewModel.goToContact,
+                            onFeedbackTap: () {}, // TODO: Wiredash
+                            onRateAppTap: () {}, // TODO: App Store
+                            onFeatureRequestTap: () {}, // TODO: Wiredash
+                            onCancelSubscriptionTap:
+                                _viewModel.openSubscriptionManagement,
                           ),
                         );
                       },

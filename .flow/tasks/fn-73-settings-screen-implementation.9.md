@@ -7,9 +7,8 @@ TBD
 - [ ] TBD
 
 ## Done summary
-TBD
-
+Created SettingsUpgradeBanner widget with crown icon glow, headline/subtitle text, and trailing chevron. Wired into SettingsView with conditional rendering via ValueListenableBuilder on isPremium (hidden for premium users), wrapped in StaggeredFadeIn for entrance animation.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: a2bb688, 83caec8
+- Tests: flutter analyze, flutter test
 - PRs:
