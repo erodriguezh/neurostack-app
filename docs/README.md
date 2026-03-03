@@ -126,6 +126,7 @@
 - **Progress UI Module** - `lib/progress/` - progress view model, grid widgets, week cache store
 - **Startup UI Module** - `lib/startup/` - splash/startup routing and bootstrap logic
 - **Offline UI Module** - `lib/offline/` - offline retry view and view model
+- **Settings UI Module** - `lib/settings/` - settings view model, upgrade banner, support tiles, contact page
 - **Paywall UI Module** - `lib/paywall/` - paywall view and view model
 - **Not Found UI Module** - `lib/not_found/` - fallback routing view and view model
 

@@ -252,7 +252,7 @@
 
 ## Phase 6 — Update `docs/README.md`
 
-### 6.1 Add spec link
+### 6.1 Add spec link ✅
 
 - **File:** `docs/README.md`
 - Under `## Feature Specs`, add:
@@ -260,7 +260,7 @@
   - [Spec: Settings Screen](./specs/20260227120000_spec_settings_screen.md) - SettingsView, 4th bottom tab, upgrade banner, support tiles, contact page, subscription management
   ```
 
-### 6.2 Add screen prompt link
+### 6.2 Add screen prompt link ✅
 
 - **File:** `docs/README.md`
 - Under `### Screen Prompts`, add:
@@ -268,7 +268,7 @@
   - [Settings Screen](./best_practices/design/screen-prompts/11-settings-screen.md) - settings, support, contact, upgrade banner, cancel subscription, rate app, feedback
   ```
 
-### 6.3 Add plan link
+### 6.3 Add plan link ✅
 
 - **File:** `docs/README.md`
 - Under `## Implementation Plans`, add:
