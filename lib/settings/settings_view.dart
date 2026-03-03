@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:neurostack/core/models/home_bottom_tab.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
 import 'package:neurostack/core/ui/widgets/app_grid_background.dart';
+import 'package:neurostack/core/ui/widgets/staggered_fade_in.dart';
 import 'package:neurostack/core/utils/locator.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
@@ -10,11 +11,12 @@ import 'package:neurostack/home/widgets/home_bottom_nav.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 import 'package:neurostack/settings/settings_view_model.dart';
+import 'package:neurostack/settings/widgets/settings_upgrade_banner.dart';
 
 /// Settings tab screen.
 ///
-/// Phase 3 will add upgrade banner, support tiles, and full content.
-/// Currently shows the header and bottom nav (tab-screen shell).
+/// Shows the screen header, an upgrade banner (for non-premium users),
+/// and bottom navigation.
 class SettingsView extends StatefulWidget {
   const SettingsView({super.key});
 
@@ -81,20 +83,19 @@ class _SettingsViewState extends State<SettingsView> {
                       ),
                     ),
                   ),
-                  SliverToBoxAdapter(child: SizedBox(height: spacing.lg)),
-
-                  // Placeholder content (Phase 3 will add upgrade banner + tiles)
-                  SliverPadding(
-                    padding: EdgeInsets.symmetric(horizontal: spacing.lg),
-                    sliver: SliverToBoxAdapter(
-                      child: Center(
-                        child: Text(
-                          'Settings content coming in Phase 3',
-                          style: context.theme.textTheme.bodyMedium?.copyWith(
-                            color: kitColors.white40,
+                  // Upgrade banner (hidden for premium users)
+                  SliverToBoxAdapter(
+                    child: ValueListenableBuilder<bool>(
+                      valueListenable: _viewModel.isPremium,
+                      builder: (context, isPremium, _) {
+                        if (isPremium) return const SizedBox.shrink();
+                        return StaggeredFadeIn(
+                          index: 0,
+                          child: SettingsUpgradeBanner(
+                            onTap: _viewModel.goToPaywall,
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
                   ),
 
