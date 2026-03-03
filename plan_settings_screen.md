@@ -148,7 +148,7 @@
 ### Source reference
 - Existing header style: `lib/settings/settings_view.dart` (lines 56-63) — reuse the text style, drop the `Row` + `IconButton`
 
-### 3.3 Upgrade banner widget
+### 3.3 Upgrade banner widget ✅
 
 - **File:** `lib/settings/widgets/settings_upgrade_banner.dart` (new)
 - Conditional: only render when `!isPremium`
