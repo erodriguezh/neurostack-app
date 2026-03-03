@@ -157,14 +157,14 @@
 - Wrap in `GestureDetector` or `InkWell` → calls `_viewModel.goToPaywall()`
 - Padding: `EdgeInsets.symmetric(horizontal: spacing.lg)`, top margin: `spacing.xl` (mt-8 = 32)
 
-### 3.4 Support & Resources section
+### 3.4 Support & Resources section ✅
 
 - **File:** `lib/settings/widgets/settings_support_section.dart` (new)
 - Section header: uppercase "SUPPORT & RESOURCES" label with `textTheme.labelSmall` or custom Inter mono style, `kitColors.white40`, letterSpacing 0.15em
 - Tile container: `BoxDecoration` with `color: Colors.white.withOpacity(0.02)`, `borderRadius: BorderRadius.circular(24)`, `border: Border.all(color: kitColors.white10)`
 - Contains a `Column` of `SettingsTile` widgets with dividers between (1px `white5`, mx-5)
 
-### 3.5 Settings tile widget
+### 3.5 Settings tile widget ✅
 
 - **File:** `lib/settings/widgets/settings_tile.dart` (new)
 - Reusable tile: accepts `icon` (leading), `label`, `trailing` (chevron or external-link), `onTap`, `isVisible` (defaults true)
@@ -174,7 +174,7 @@
 - Padding: `px-5, py-4` (20h, 16v)
 - Settings-only widget, not extracted to core/shared
 
-### 3.6 Wire up the 5 tiles
+### 3.6 Wire up the 5 tiles ✅
 
 | Tile | Leading Icon | `onTap` | Trailing | Visibility |
 |------|-------------|---------|----------|------------|
@@ -184,7 +184,7 @@
 | Feature Request | `LucideIcons.lightbulb` | no-op (TODO) | `LucideIcons.chevronRight` | Always |
 | Cancel Subscription | `LucideIcons.creditCard` | `_viewModel.openSubscriptionManagement()` | `LucideIcons.externalLink` | `isPremium` only |
 
-### 3.7 Animations
+### 3.7 Animations ✅
 
 - Use existing `StaggeredFadeIn` widget (`lib/core/ui/widgets/staggered_fade_in.dart`) for entrance animations:
   - Wrap upgrade banner in `StaggeredFadeIn(index: 0, child: ...)`
