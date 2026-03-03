@@ -5,9 +5,10 @@ import 'package:neurostack/core/ui/app_theme.dart';
 /// A single interactive tile in the Settings support section.
 ///
 /// Displays a leading [icon], a text [label], and a [trailing] icon
-/// (typically a chevron or external-link indicator). Provides a subtle
-/// press animation (`scale(0.99)` over 150 ms) and a highlight overlay
-/// (`bg-white/[0.03]`).
+/// (typically a chevron or external-link indicator). Uses [InkWell] for
+/// Material semantics and accessibility, with a subtle press animation
+/// (`scale(0.99)` over 150 ms) driven by highlight state and a
+/// `bg-white/[0.03]` highlight overlay.
 ///
 /// This widget is specific to the Settings screen and intentionally
 /// not extracted into `core/ui`.
