@@ -35,7 +35,7 @@
 - [Protocol Selection Modal](./best_practices/design/screen-prompts/08-protocol-selection-modal.md) - protocol selection, deactivation, choose two, downgrade, checkbox, session count
 - [Auth Screen](./best_practices/design/screen-prompts/09-auth-screen.md) - auth, login, sign in, email input, magic link, passwordless
 - [Auth Check Email](./best_practices/design/screen-prompts/10-auth-check-email.md) - check email, inbox, magic link sent, resend link, cooldown timer, verification
-- [Settings Screen](./best_practices/design/screen-prompts/11-settings-screen.md) - settings, support, contact, upgrade banner, cancel subscription, rate app, feedback
+- [Settings Screen](./best_practices/design/screen-prompts/11-settings-screen.md) - settings, support, contact, upgrade banner, cancel subscription
 
 ## Testing
 - [Testing Rules Index](./best_practices/test/domain/index.md) - quick reference, test naming, file structure, boundary testing, factory pattern, hard rules, adoption guide, test checklist
@@ -92,6 +92,7 @@
 - **App Environment** - `lib/core/utils/app_environment.dart` - environment flags and config access
 - **App Lifecycle Service** - `lib/core/utils/app_lifecycle_service.dart` - app lifecycle hooks and foreground/background handling
 - **Service Locator** - `lib/core/utils/locator.dart` - locator access helpers and instance lookup
+- **Core Abstractions** - `lib/core/abstractions/` - `EntitlementListenerMixin` (entitlement change subscription), `PremiumAwareViewModelMixin` (isPremium computation + listener), `ConnectivityListenerMixin` (online/offline listener), `LoggingAbstraction` (structured logging)
 
 ### App Configuration (Implemented)
 - **Route Configuration** - `lib/config/route_config.dart` - route definitions, screen wiring, navigation entry points

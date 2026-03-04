@@ -79,10 +79,9 @@ This screen has no loading, error, or empty states — all content is static/loc
 | # | Label | Icon | Trailing | Action | Visibility |
 |---|-------|------|----------|--------|------------|
 | 1 | Contact Us | `LucideIcons.mail` | Chevron | Navigate to `/settings/contact` | Always |
-| 2 | Send Feedback | `LucideIcons.messageSquare` | Chevron | TODO — Wiredash integration | Always |
-| 3 | Rate the App | `LucideIcons.star` | External-link | TODO — App Store (iOS only) | Always |
-| 4 | Feature Request | `LucideIcons.lightbulb` | Chevron | TODO — Wiredash integration | Always |
-| 5 | Cancel Subscription | `LucideIcons.creditCard` | External-link | Opens platform subscription mgmt | Premium only |
+| 2 | Cancel Subscription | `LucideIcons.creditCard` | External-link | Opens platform subscription mgmt | Premium only |
+
+> **Note:** Send Feedback, Rate the App, and Feature Request tiles were originally specified but removed during post-implementation cleanup (fn-74). They can be re-added when Wiredash integration and App Store rating are implemented.
 
 **Cancel Subscription visibility:** Inverse of upgrade banner — only shown when `subscriptionStatus.isPremium`.
 
@@ -138,7 +137,7 @@ See: [`docs/design_screenshots/11-settings.png`](../design_screenshots/11-settin
 ## Out of Scope
 
 - Restore Purchases tile (not included)
-- Wiredash integration (Send Feedback / Feature Request tiles visible but stubbed)
-- App Store rating integration (Rate the App tile visible but stubbed)
+- Wiredash integration (Send Feedback / Feature Request tiles removed; re-add when integration is ready)
+- App Store rating integration (Rate the App tile removed; re-add when integration is ready)
 - Sign out / account deletion
 - App version display

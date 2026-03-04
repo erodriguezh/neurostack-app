@@ -52,6 +52,8 @@
 
 ## Phase 2 — SettingsViewModel Refactor
 
+> **Implementation note (fn-74):** The actual implementation uses `PremiumAwareViewModelMixin` (extracted in commit `e0bcc9e`) instead of wiring `EntitlementListenerMixin` directly. The mixin encapsulates `isPremium` computation, entitlement listening, and user resolution into a reusable abstraction at `lib/core/abstractions/premium_aware_view_model_mixin.dart`. The instructions below describe the original plan; see the mixin for the actual pattern used.
+
 ### 2.1 Add tab coordination and subscription awareness to `SettingsViewModel` ✅
 
 - **File:** `lib/settings/settings_view_model.dart`
@@ -174,14 +176,13 @@
 - Padding: `px-5, py-4` (20h, 16v)
 - Settings-only widget, not extracted to core/shared
 
-### 3.6 Wire up the 5 tiles ✅
+### 3.6 Wire up the tiles ✅
+
+> **Implementation note (fn-74):** Post-implementation cleanup removed Send Feedback, Rate the App, and Feature Request tiles (stub `() {}` callbacks with no backend integration). The current tile set is Contact Us + Cancel Subscription only. See spec for current tile definitions.
 
 | Tile | Leading Icon | `onTap` | Trailing | Visibility |
 |------|-------------|---------|----------|------------|
 | Contact Us | `LucideIcons.mail` | `_viewModel.goToContact()` | `LucideIcons.chevronRight` | Always |
-| Send Feedback | `LucideIcons.messageSquare` | no-op (TODO) | `LucideIcons.chevronRight` | Always |
-| Rate the App | `LucideIcons.star` | no-op (TODO) | `LucideIcons.externalLink` | Always |
-| Feature Request | `LucideIcons.lightbulb` | no-op (TODO) | `LucideIcons.chevronRight` | Always |
 | Cancel Subscription | `LucideIcons.creditCard` | `_viewModel.openSubscriptionManagement()` | `LucideIcons.externalLink` | `isPremium` only |
 
 ### 3.7 Animations ✅

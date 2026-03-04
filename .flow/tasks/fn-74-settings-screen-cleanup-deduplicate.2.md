@@ -60,9 +60,8 @@ Rather than creating a new `screenTitle` token (which would bake colors into `Cu
 - [ ] `flutter analyze` passes
 - [ ] `flutter test` passes (all existing tests green)
 ## Done summary
-TBD
-
+Extracted HomeIndicatorPill shared widget replacing inline pill code in all 4 tab screens, updated CustomTextStyles.h1.letterSpacing from -0.5 to -0.8, and replaced all inline headlineLarge?.copyWith() calls with direct theme usage in settings, contact, library, progress, and home header views.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: c48e436, 0660618
+- Tests: flutter analyze, flutter test
 - PRs:
