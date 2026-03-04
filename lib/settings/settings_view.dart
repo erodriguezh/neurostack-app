@@ -85,38 +85,31 @@ class _SettingsViewState extends State<SettingsView> {
                       ),
                     ),
                   ),
-                  // Upgrade banner (hidden for premium users)
+                  // Upgrade banner + Support & Resources section
                   SliverToBoxAdapter(
                     child: ValueListenableBuilder<bool>(
                       valueListenable: _viewModel.isPremium,
                       builder: (context, isPremium, _) {
-                        if (isPremium) return const SizedBox.shrink();
-                        return StaggeredFadeIn(
-                          index: 0,
-                          child: SettingsUpgradeBanner(
-                            onTap: _viewModel.goToPaywall,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-
-                  // Support & Resources section
-                  SliverToBoxAdapter(
-                    child: ValueListenableBuilder<bool>(
-                      valueListenable: _viewModel.isPremium,
-                      builder: (context, isPremium, _) {
-                        return StaggeredFadeIn(
-                          index: 1,
-                          child: SettingsSupportSection(
-                            isPremium: isPremium,
-                            onContactTap: _viewModel.goToContact,
-                            onFeedbackTap: () {}, // TODO: Wiredash
-                            onRateAppTap: () {}, // TODO: App Store
-                            onFeatureRequestTap: () {}, // TODO: Wiredash
-                            onCancelSubscriptionTap:
-                                _viewModel.openSubscriptionManagement,
-                          ),
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (!isPremium)
+                              StaggeredFadeIn(
+                                index: 0,
+                                child: SettingsUpgradeBanner(
+                                  onTap: _viewModel.goToPaywall,
+                                ),
+                              ),
+                            StaggeredFadeIn(
+                              index: isPremium ? 0 : 1,
+                              child: SettingsSupportSection(
+                                isPremium: isPremium,
+                                onContactTap: _viewModel.goToContact,
+                                onCancelSubscriptionTap:
+                                    _viewModel.openSubscriptionManagement,
+                              ),
+                            ),
+                          ],
                         );
                       },
                     ),

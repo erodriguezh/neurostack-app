@@ -8,8 +8,9 @@ import 'package:neurostack/core/ui/app_theme.dart';
 /// Displays a crown icon with a glow, headline text ("Unlock All Protocols"),
 /// subtitle text, and a trailing chevron. Tapping navigates to the paywall.
 ///
-/// Hidden when [isPremium] is `true`.
-class SettingsUpgradeBanner extends StatelessWidget {
+/// Visibility is controlled by the parent widget via a
+/// `ValueListenableBuilder` on the premium status.
+class SettingsUpgradeBanner extends StatefulWidget {
   const SettingsUpgradeBanner({
     super.key,
     required this.onTap,
@@ -17,6 +18,13 @@ class SettingsUpgradeBanner extends StatelessWidget {
 
   /// Called when the user taps the banner. Typically navigates to `/paywall`.
   final VoidCallback onTap;
+
+  @override
+  State<SettingsUpgradeBanner> createState() => _SettingsUpgradeBannerState();
+}
+
+class _SettingsUpgradeBannerState extends State<SettingsUpgradeBanner> {
+  bool _pressed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -29,74 +37,86 @@ class SettingsUpgradeBanner extends StatelessWidget {
         right: spacing.lg,
         top: spacing.xl,
       ),
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          constraints: const BoxConstraints(minHeight: 72),
-          padding: EdgeInsets.all(spacing.lg),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.02),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: kitColors.brandSky.withValues(alpha: 0.3),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: widget.onTap,
+          onHighlightChanged: (highlighted) =>
+              setState(() => _pressed = highlighted),
+          highlightColor: Colors.white.withValues(alpha: 0.03),
+          splashFactory: NoSplash.splashFactory,
+          borderRadius: BorderRadius.circular(24),
+          child: AnimatedScale(
+            scale: _pressed ? 0.99 : 1.0,
+            duration: const Duration(milliseconds: 150),
+            child: Container(
+              constraints: const BoxConstraints(minHeight: 72),
+              padding: EdgeInsets.all(spacing.lg),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.02),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: kitColors.brandSky.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Row(
+                children: [
+                  // Crown icon with glow shadow
+                  Container(
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color: kitColors.brandSky.withValues(alpha: 0.25),
+                          blurRadius: 15,
+                          spreadRadius: 0,
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      LucideIcons.crown,
+                      size: 32,
+                      color: kitColors.brandSky,
+                    ),
+                  ),
+                  SizedBox(width: spacing.md),
+
+                  // Headline + subtitle
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Unlock All Protocols',
+                          style: GoogleFonts.inter(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w500,
+                            color: kitColors.white90,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Unlimited protocols, all future updates',
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w300,
+                            color: kitColors.white50,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: spacing.sm),
+
+                  // Trailing chevron
+                  Icon(
+                    LucideIcons.chevronRight,
+                    size: 18,
+                    color: kitColors.white30,
+                  ),
+                ],
+              ),
             ),
-          ),
-          child: Row(
-            children: [
-              // Crown icon with glow shadow
-              Container(
-                decoration: BoxDecoration(
-                  boxShadow: [
-                    BoxShadow(
-                      color: kitColors.brandSky.withValues(alpha: 0.25),
-                      blurRadius: 15,
-                      spreadRadius: 0,
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  LucideIcons.crown,
-                  size: 32,
-                  color: kitColors.brandSky,
-                ),
-              ),
-              SizedBox(width: spacing.md),
-
-              // Headline + subtitle
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Unlock All Protocols',
-                      style: GoogleFonts.inter(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w500,
-                        color: kitColors.white90,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Unlimited protocols, all future updates',
-                      style: GoogleFonts.inter(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w300,
-                        color: kitColors.white50,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(width: spacing.sm),
-
-              // Trailing chevron
-              Icon(
-                LucideIcons.chevronRight,
-                size: 18,
-                color: kitColors.white30,
-              ),
-            ],
           ),
         ),
       ),

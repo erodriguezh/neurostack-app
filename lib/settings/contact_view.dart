@@ -5,7 +5,7 @@ import 'package:neurostack/core/ui/widgets/app_grid_background.dart';
 import 'package:neurostack/core/utils/locator.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 
-/// Contact Us page (placeholder until Phase 4 adds full content).
+/// Contact Us page with a back button and screen title.
 class ContactView extends StatelessWidget {
   const ContactView({super.key});
 
