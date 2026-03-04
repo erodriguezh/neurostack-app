@@ -2,7 +2,7 @@
 
 **Spec:** `docs/specs/20260227120000_spec_settings_screen.md`
 **UI Design:** `docs/best_practices/design/screen-prompts/11-settings-screen.md`
-**Figma:** `docs/design_screenshots/11-settings.png`
+**Figma / Screenshot (if present):** `docs/design_screenshots/11-settings.png`
 
 ---
 
@@ -143,7 +143,7 @@
 ### 3.2 Screen header ✅
 
 - **File:** `lib/settings/settings_view.dart`
-- Title: "Settings" using `textTheme.headlineLarge` with `fontSize: 32, fontStyle: FontStyle.italic, letterSpacing: -0.8, color: kitColors.white90`
+- Title: "Settings" using `context.theme.textTheme.headlineLarge` (no inline `letterSpacing` overrides; typography comes from the theme)
 - Padding: `EdgeInsets.fromLTRB(spacing.lg, spacing.lg, spacing.lg, 0)` (px-6, pt-6)
 - No back button, no row — standalone `Text` widget
 
@@ -156,7 +156,7 @@
 - Conditional: only render when `!isPremium`
 - Container: `BoxDecoration` with `color: Colors.white.withOpacity(0.02)`, `borderRadius: BorderRadius.circular(24)`, `border: Border.all(color: kitColors.brandSky.withOpacity(0.3))`
 - Content row: crown icon (32px, brandSky, shadow glow) + column (headline + subtitle) + chevron
-- Wrap in `GestureDetector` or `InkWell` → calls `_viewModel.goToPaywall()`
+- Wrap in `InkWell` (press feedback) → calls `_viewModel.goToPaywall()`
 - Padding: `EdgeInsets.symmetric(horizontal: spacing.lg)`, top margin: `spacing.xl` (mt-8 = 32)
 
 ### 3.4 Support & Resources section ✅
@@ -266,7 +266,7 @@
 - **File:** `docs/README.md`
 - Under `### Screen Prompts`, add:
   ```
-  - [Settings Screen](./best_practices/design/screen-prompts/11-settings-screen.md) - settings, support, contact, upgrade banner, cancel subscription, rate app, feedback
+  - [Settings Screen](./best_practices/design/screen-prompts/11-settings-screen.md) - settings, support, contact, upgrade banner, cancel subscription
   ```
 
 ### 6.3 Add plan link ✅
@@ -307,6 +307,6 @@
   - Verify `goToPaywall` calls router with `/paywall`
   - Verify `openSubscriptionManagement` calls injected `launch` function with correct platform-specific URI and `LaunchMode.externalApplication`
   - **Live subscription update:** start as free user (isPremium = false), flip entitlement notifier to premium snapshot, assert `isPremium.value` updates to `true` without recreating the VM (mirrors `LibraryViewModel` test pattern in `test/library/library_view_model_test.dart`)
-- **Widget test `SettingsView`:** verify upgrade banner shown/hidden based on subscription, 5 tiles render with correct leading icons, Cancel Subscription conditional on premium
+- **Widget test `SettingsView`:** verify upgrade banner shown/hidden based on subscription, Contact Us tile always renders, Cancel Subscription tile only renders for premium users
 - **Widget test `HomeBottomNav`:** verify 4 tabs render, Settings tab active state
 - **Enum exhaustiveness:** `flutter analyze` must pass after Phase 1.1 changes before proceeding

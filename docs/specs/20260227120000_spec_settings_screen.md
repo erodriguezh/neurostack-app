@@ -130,7 +130,7 @@ This screen has no loading, error, or empty states — all content is static/loc
 ## UI Specification
 
 See: [`docs/best_practices/design/screen-prompts/11-settings-screen.md`](../best_practices/design/screen-prompts/11-settings-screen.md)
-See: [`docs/design_screenshots/11-settings.png`](../design_screenshots/11-settings.png)
+Screenshot (if present): [`docs/design_screenshots/11-settings.png`](../design_screenshots/11-settings.png)
 
 ---
 

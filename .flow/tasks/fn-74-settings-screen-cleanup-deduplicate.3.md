@@ -12,12 +12,9 @@ Fix documentation issues introduced or revealed during settings screen implement
 
 ## Approach
 
-### 1. Create missing settings screen prompt file
+### 1. Ensure settings screen prompt file exists
 
-`11-settings-screen.md` is referenced by THREE documents but does not exist:
-- `docs/README.md` line 38
-- `docs/specs/20260227120000_spec_settings_screen.md` (UI Specification link)
-- `plan_settings_screen.md` (UI Design link at top)
+Ensure `docs/best_practices/design/screen-prompts/11-settings-screen.md` exists and that all references to it resolve (README, spec, plan).
 
 Create `docs/best_practices/design/screen-prompts/11-settings-screen.md` with minimal content consistent with the Settings spec + `docs/design_screenshots/11-settings.png` (if screenshot exists). Follow the pattern of existing prompts (`00-splash-screen.md` through `10-auth-check-email.md`). Keep it concise — a minimal prompt, not a full design doc.
 
