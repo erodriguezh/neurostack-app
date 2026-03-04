@@ -47,9 +47,8 @@ Add a bullet for the abstractions directory.
 - [ ] `docs/README.md` Core Infrastructure section mentions core abstractions (mixins)
 - [ ] No broken links in `docs/README.md`
 ## Done summary
-TBD
-
+Created missing settings screen prompt file, updated spec tile definitions to match implementation (2 tiles), fixed README prompt descriptor and added core abstractions to Core Infrastructure section, and added implementation divergence notes to the settings plan.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: adedaadd6f98e2371e8e3e51b9e7e57f65eba70c, 1123d23c76a7e64666bfc91db113c9bd2c394725
+- Tests: flutter analyze
 - PRs:
