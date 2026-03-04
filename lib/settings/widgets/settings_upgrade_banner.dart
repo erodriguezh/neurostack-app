@@ -39,6 +39,8 @@ class _SettingsUpgradeBannerState extends State<SettingsUpgradeBanner> {
       ),
       child: Material(
         color: Colors.transparent,
+        borderRadius: BorderRadius.circular(24),
+        clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: widget.onTap,
           onHighlightChanged: (highlighted) =>
@@ -49,72 +51,74 @@ class _SettingsUpgradeBannerState extends State<SettingsUpgradeBanner> {
           child: AnimatedScale(
             scale: _pressed ? 0.99 : 1.0,
             duration: const Duration(milliseconds: 150),
-            child: Container(
+            child: ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 72),
-              padding: EdgeInsets.all(spacing.lg),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.02),
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(
-                  color: kitColors.brandSky.withValues(alpha: 0.3),
+              child: Ink(
+                padding: EdgeInsets.all(spacing.lg),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.02),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: kitColors.brandSky.withValues(alpha: 0.3),
+                  ),
                 ),
-              ),
-              child: Row(
-                children: [
-                  // Crown icon with glow shadow
-                  Container(
-                    decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                          color: kitColors.brandSky.withValues(alpha: 0.25),
-                          blurRadius: 15,
-                          spreadRadius: 0,
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      LucideIcons.crown,
-                      size: 32,
-                      color: kitColors.brandSky,
-                    ),
-                  ),
-                  SizedBox(width: spacing.md),
-
-                  // Headline + subtitle
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Unlock All Protocols',
-                          style: GoogleFonts.inter(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w500,
-                            color: kitColors.white90,
+                child: Row(
+                  children: [
+                    // Crown icon with glow shadow
+                    Container(
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: kitColors.brandSky.withValues(alpha: 0.25),
+                            blurRadius: 15,
+                            spreadRadius: 0,
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Unlimited protocols, all future updates',
-                          style: GoogleFonts.inter(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w300,
-                            color: kitColors.white50,
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
+                      child: Icon(
+                        LucideIcons.crown,
+                        size: 32,
+                        color: kitColors.brandSky,
+                      ),
                     ),
-                  ),
-                  SizedBox(width: spacing.sm),
+                    SizedBox(width: spacing.md),
 
-                  // Trailing chevron
-                  Icon(
-                    LucideIcons.chevronRight,
-                    size: 18,
-                    color: kitColors.white30,
-                  ),
-                ],
+                    // Headline + subtitle
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Unlock All Protocols',
+                            style: GoogleFonts.inter(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w500,
+                              color: kitColors.white90,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Unlimited protocols, all future updates',
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w300,
+                              color: kitColors.white50,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: spacing.sm),
+
+                    // Trailing chevron
+                    Icon(
+                      LucideIcons.chevronRight,
+                      size: 18,
+                      color: kitColors.white30,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
