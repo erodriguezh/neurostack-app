@@ -37,12 +37,7 @@ class ContactView extends StatelessWidget {
                 const SizedBox(width: 8),
                 Text(
                   'Contact Us',
-                  style: context.theme.textTheme.headlineLarge?.copyWith(
-                    fontSize: 32,
-                    fontStyle: FontStyle.italic,
-                    letterSpacing: -0.8,
-                    color: kitColors.white90,
-                  ),
+                  style: context.theme.textTheme.headlineLarge,
                 ),
               ],
             ),

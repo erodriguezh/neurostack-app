@@ -9,20 +9,13 @@ class HomeHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kitColors = context.kitColors;
-    final textStyles = context.textStyles;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           'Your Stack',
-          style: context.theme.textTheme.headlineLarge?.copyWith(
-            fontSize: textStyles.h1.fontSize,
-            fontStyle: textStyles.h1.fontStyle,
-            fontWeight: textStyles.h1.fontWeight,
-            letterSpacing: -0.5,
-            color: kitColors.white90,
-          ),
+          style: context.theme.textTheme.headlineLarge,
         ),
         TextButton(
           onPressed: onAdd,

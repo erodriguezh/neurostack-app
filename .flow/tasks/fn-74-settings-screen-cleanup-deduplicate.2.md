@@ -19,7 +19,8 @@ Extract two patterns that are copy-pasted across all 4 tab screens into shared w
 ### 1. Extract home indicator pill widget
 
 The identical ~15-line `Positioned` + `Container` widget appears in all 4 tab screens:
-- `lib/settings/settings_view.dart:144-158`
+- `lib/settings/settings_view.dart:139-153`
+<!-- Updated by plan-sync: fn-74.1 merged duplicate ValueListenableBuilder blocks, shifting pill lines from 144-158 to 139-153 -->
 - `lib/home/home_view.dart:116-132`
 - `lib/library/library_view.dart:114-130`
 - `lib/progress/progress_view.dart:125-141`

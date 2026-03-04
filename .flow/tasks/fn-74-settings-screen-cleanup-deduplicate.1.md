@@ -52,9 +52,8 @@ The merged builder should also fix StaggeredFadeIn indices for premium users: wh
 - [ ] `flutter analyze` passes
 - [ ] `flutter test test/settings/` passes
 ## Done summary
-TBD
-
+Cleaned up settings module: removed 3 stub tiles with no-op callbacks from SettingsSupportSection, merged duplicate ValueListenableBuilder blocks into a single builder with dynamic StaggeredFadeIn indices, switched SettingsUpgradeBanner from GestureDetector to Material+InkWell+Ink for proper press feedback, added ValueKeys to prevent element state swaps, and fixed stale doc comments across 4 files.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: ef05356, 1084d6b, 09a2a6c
+- Tests: flutter analyze, flutter test test/settings/
 - PRs:

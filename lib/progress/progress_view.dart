@@ -6,6 +6,7 @@ import 'package:neurostack/core/models/home_bottom_tab.dart';
 import 'package:neurostack/core/ui/constants/spacing.dart';
 import 'package:neurostack/core/ui/widgets/app_grid_background.dart';
 import 'package:neurostack/core/ui/widgets/error_state_view.dart';
+import 'package:neurostack/core/ui/widgets/home_indicator_pill.dart';
 import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
 import 'package:neurostack/core/utils/internal_notification/notify_service.dart';
 import 'package:neurostack/core/utils/internal_notification/toast/toast_event.dart';
@@ -122,23 +123,7 @@ class _ProgressViewState extends State<ProgressView>
                       onSelect: _viewModel.onSelectBottomTab,
                     ),
                   ),
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: bottomInset > 0 ? bottomInset / 2 : 4,
-                    child: Center(
-                      child: Container(
-                        width: 134,
-                        height: 5,
-                        decoration: BoxDecoration(
-                          color: context.kitColors.white90.withValues(
-                            alpha: 0.3,
-                          ),
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                      ),
-                    ),
-                  ),
+                  HomeIndicatorPill(bottomInset: bottomInset),
                 ],
               );
             },
@@ -192,12 +177,7 @@ class _ProgressViewState extends State<ProgressView>
               children: [
                 Text(
                   'This Week',
-                  style: context.theme.textTheme.headlineLarge?.copyWith(
-                    fontSize: 32,
-                    fontStyle: FontStyle.italic,
-                    letterSpacing: -0.8,
-                    color: context.kitColors.white90,
-                  ),
+                  style: context.theme.textTheme.headlineLarge,
                 ),
                 SizedBox(height: spacing.xs),
                 Text(

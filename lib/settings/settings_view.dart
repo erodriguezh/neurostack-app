@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:neurostack/core/models/home_bottom_tab.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
 import 'package:neurostack/core/ui/widgets/app_grid_background.dart';
+import 'package:neurostack/core/ui/widgets/home_indicator_pill.dart';
 import 'package:neurostack/core/ui/widgets/staggered_fade_in.dart';
 import 'package:neurostack/core/utils/locator.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
@@ -50,7 +51,6 @@ class _SettingsViewState extends State<SettingsView> {
   @override
   Widget build(BuildContext context) {
     final spacing = context.spacing;
-    final kitColors = context.kitColors;
     final bottomInset = MediaQuery.of(context).padding.bottom;
 
     return AppGridBackground(
@@ -76,12 +76,7 @@ class _SettingsViewState extends State<SettingsView> {
                       ),
                       child: Text(
                         'Settings',
-                        style: context.theme.textTheme.headlineLarge?.copyWith(
-                          fontSize: 32,
-                          fontStyle: FontStyle.italic,
-                          letterSpacing: -0.8,
-                          color: kitColors.white90,
-                        ),
+                        style: context.theme.textTheme.headlineLarge,
                       ),
                     ),
                   ),
@@ -136,21 +131,7 @@ class _SettingsViewState extends State<SettingsView> {
               ),
 
               // Fake home indicator pill
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: bottomInset > 0 ? bottomInset / 2 : 4,
-                child: Center(
-                  child: Container(
-                    width: 134,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: kitColors.white90.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                  ),
-                ),
-              ),
+              HomeIndicatorPill(bottomInset: bottomInset),
             ],
           ),
         ),
