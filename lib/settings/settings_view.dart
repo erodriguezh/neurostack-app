@@ -95,12 +95,14 @@ class _SettingsViewState extends State<SettingsView> {
                           children: [
                             if (!isPremium)
                               StaggeredFadeIn(
+                                key: const ValueKey('settings-upgrade-banner'),
                                 index: 0,
                                 child: SettingsUpgradeBanner(
                                   onTap: _viewModel.goToPaywall,
                                 ),
                               ),
                             StaggeredFadeIn(
+                              key: const ValueKey('settings-support-section'),
                               index: isPremium ? 0 : 1,
                               child: SettingsSupportSection(
                                 isPremium: isPremium,
