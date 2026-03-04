@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
 
-/// A fake home indicator pill rendered at the bottom of tab screens.
+/// A [Positioned] home-indicator pill for use as a direct [Stack] child.
 ///
-/// Placed inside a [Positioned] at the bottom of a [Stack], it mimics
-/// the iOS home indicator with a semi-transparent capsule shape.
-/// Used by Home, Library, Progress, and Settings views.
+/// Returns a [Positioned] widget pinned to the bottom of the screen that
+/// mimics the iOS home indicator with a semi-transparent capsule shape.
+/// Used by Home, Library, Progress, and Settings tab views.
 class HomeIndicatorPill extends StatelessWidget {
   const HomeIndicatorPill({super.key, required this.bottomInset});
 
