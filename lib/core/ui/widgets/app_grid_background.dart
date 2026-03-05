@@ -7,16 +7,16 @@ import 'package:neurostack/core/ui/app_theme.dart';
 ///
 /// - [legacyDark]: Fixed dark palette from [KitColorsExtension]. Current
 ///   default -- no visual change from pre-migration behavior.
-/// - [adaptive]: Brightness-aware palette derived from [ColorScheme].
-///   Fill uses `ColorScheme.surface`, lines use `ColorScheme.outlineVariant`,
-///   and glow uses `ColorScheme.primary` with low alpha.
+/// - [adaptive]: Brightness-aware palette derived from [AppSemanticColors].
+///   Fill uses `semanticColors.gridBackground`, lines use
+///   `semanticColors.gridLine`, and glow uses `semanticColors.gridGlow`.
 ///
 /// See `docs/best_practices/design/brightness_theming.md` for the full policy.
 enum AppGridBackgroundMode {
   /// Fixed dark palette -- uses kitColors.background / white02 / brandSky.
   legacyDark,
 
-  /// Brightness-aware -- resolves from the ambient [ColorScheme].
+  /// Brightness-aware -- resolves from the ambient [AppSemanticColors].
   adaptive,
 }
 

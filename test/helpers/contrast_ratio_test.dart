@@ -19,7 +19,7 @@ void main() {
       expect(ratio, closeTo(1.0, 0.01));
     });
 
-    test('is symmetric (order does not matter)', () {
+    test('is symmetric for fully opaque colors', () {
       const a = Color(0xFF333333);
       const b = Color(0xFFCCCCCC);
       expect(contrastRatio(a, b), equals(contrastRatio(b, a)));
@@ -58,6 +58,64 @@ void main() {
         lessThan(wcagAANormalText),
         reason: 'light gray on white should fail WCAG AA',
       );
+    });
+  });
+
+  group('alpha compositing', () {
+    test('semi-transparent foreground is composited before contrast check', () {
+      // Black at 50% alpha on white background composites to gray
+      const semiBlack = Color(0x80000000);
+      const white = Color(0xFFFFFFFF);
+
+      final ratio = contrastRatio(semiBlack, white);
+      // Composited color is ~#808080, ratio ~= 4.0 (not 21.0 as with raw RGB)
+      expect(ratio, lessThan(5.0));
+      expect(ratio, greaterThan(3.0));
+    });
+
+    test('fully opaque foreground is not affected by compositing', () {
+      const opaque = Color(0xFF000000);
+      const white = Color(0xFFFFFFFF);
+      final ratio = contrastRatio(opaque, white);
+      expect(ratio, closeTo(21.0, 0.1));
+    });
+
+    test('very low alpha foreground has near 1:1 contrast', () {
+      // White at 5% alpha on white background is still white -> 1:1
+      const lowAlphaWhite = Color(0x0DFFFFFF);
+      const white = Color(0xFFFFFFFF);
+      final ratio = contrastRatio(lowAlphaWhite, white);
+      expect(ratio, closeTo(1.0, 0.1));
+    });
+
+    test('is directional for semi-transparent colors', () {
+      // Semi-transparent dark on light != semi-transparent light on dark
+      const semiDark = Color(0x80000000);
+      const light = Color(0xFFFFFFFF);
+      const dark = Color(0xFF000000);
+
+      final darkOnLight = contrastRatio(semiDark, light);
+      final darkOnDark = contrastRatio(semiDark, dark);
+      // Dark on light should have more contrast than dark on dark
+      expect(darkOnLight, greaterThan(darkOnDark));
+    });
+  });
+
+  group('compositedOver', () {
+    test('returns foreground unchanged when fully opaque', () {
+      const opaque = Color(0xFF123456);
+      const bg = Color(0xFFFFFFFF);
+      expect(compositedOver(opaque, bg), equals(opaque));
+    });
+
+    test('returns background when foreground is fully transparent', () {
+      const transparent = Color(0x00000000);
+      const bg = Color(0xFFABCDEF);
+      final result = compositedOver(transparent, bg);
+      // Alpha-blending fully transparent over bg should yield bg
+      expect(result.r, closeTo(bg.r, 0.01));
+      expect(result.g, closeTo(bg.g, 0.01));
+      expect(result.b, closeTo(bg.b, 0.01));
     });
   });
 

@@ -31,10 +31,10 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       inkSubtle: colorScheme.onSurfaceVariant,
       border: colorScheme.outline,
       borderSubtle: colorScheme.outlineVariant,
-      // Use onSurfaceVariant with low alpha for light-mode grid lines.
-      // The dark ink base provides sufficient contrast ratio against the light
-      // surface while keeping lines visually subtle.
-      gridLine: colorScheme.onSurfaceVariant.withValues(alpha: 0.15),
+      // Use onSurfaceVariant with moderate alpha for light-mode grid lines.
+      // Alpha 0.35 composited over the light surface meets the 1.5:1 contrast
+      // threshold while keeping lines visually subtle.
+      gridLine: colorScheme.onSurfaceVariant.withValues(alpha: 0.35),
       gridBackground: colorScheme.surface,
       gridGlow: colorScheme.primary.withValues(alpha: 0.05),
     );

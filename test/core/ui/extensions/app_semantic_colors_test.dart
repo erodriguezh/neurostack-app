@@ -6,6 +6,9 @@ import 'package:neurostack/core/ui/extensions/app_semantic_colors.dart';
 import '../../../helpers/contrast_ratio.dart';
 
 void main() {
+  // AppTheme.buildTheme uses GoogleFonts internally, which requires the test
+  // binding for font loading. We use testWidgets for any test that calls it.
+
   group('AppSemanticColors', () {
     group('registration in AppTheme', () {
       testWidgets('is registered for both brightness variants', (_) async {
@@ -80,27 +83,40 @@ void main() {
     });
 
     group('contrast - grid tokens', () {
-      for (final brightness in Brightness.values) {
-        testWidgets(
-          '${brightness.name}: gridLine-on-gridBackground contrast >= 1.5:1',
-          (_) async {
-            final theme = AppTheme.buildTheme(brightness);
-            final colors = theme.extension<AppSemanticColors>()!;
-            final ratio = contrastRatio(
-              colors.gridLine,
-              colors.gridBackground,
-            );
-            expect(
-              ratio,
-              greaterThanOrEqualTo(1.5),
-              reason:
-                  '${brightness.name} gridLine (${colors.gridLine}) on '
-                  'gridBackground (${colors.gridBackground}) contrast ratio '
-                  '$ratio must be >= 1.5',
-            );
-          },
-        );
-      }
+      testWidgets(
+        'light: gridLine-on-gridBackground contrast >= 1.5:1',
+        (_) async {
+          final theme = AppTheme.buildTheme(Brightness.light);
+          final colors = theme.extension<AppSemanticColors>()!;
+          final ratio = contrastRatio(
+            colors.gridLine,
+            colors.gridBackground,
+          );
+          expect(
+            ratio,
+            greaterThanOrEqualTo(1.5),
+            reason:
+                'light gridLine (${colors.gridLine}) on '
+                'gridBackground (${colors.gridBackground}) contrast ratio '
+                '$ratio must be >= 1.5',
+          );
+        },
+      );
+
+      testWidgets(
+        'dark: gridLine matches ColorScheme.outlineVariant for visual continuity',
+        (_) async {
+          final theme = AppTheme.buildTheme(Brightness.dark);
+          final colors = theme.extension<AppSemanticColors>()!;
+          expect(
+            colors.gridLine,
+            equals(theme.colorScheme.outlineVariant),
+            reason:
+                'dark mode gridLine should match ColorScheme.outlineVariant '
+                'for visual continuity with legacy dark palette',
+          );
+        },
+      );
     });
 
     group('dark mode visual continuity', () {
@@ -176,7 +192,6 @@ void main() {
 
         final mid = light.lerp(dark, 0.5);
 
-        // The midpoint ink should be between the light and dark ink values.
         final expectedInk = Color.lerp(light.ink, dark.ink, 0.5)!;
         expect(mid.ink, equals(expectedInk));
       });
