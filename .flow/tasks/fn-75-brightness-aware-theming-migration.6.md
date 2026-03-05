@@ -33,4 +33,6 @@ Migrate library tab widgets from `kitColors.whiteXX` to semantic tokens, includi
 - [x] Existing `library_protocol_card_test.dart` updated to test both brightness modes
 - [x] New sheet brightness test validates light+dark rendering
 
+## Evidence
+
 ## Done summary
