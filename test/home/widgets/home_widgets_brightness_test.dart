@@ -70,15 +70,17 @@ void main() {
               final semanticColors =
                   theme.extension<AppSemanticColors>()!;
 
-              // Find the 64px-tall container within the HomeBottomNav subtree
+              // Find the nav pill container by its distinctive decoration
+              // (BoxDecoration with border + boxShadow within HomeBottomNav)
               final navContainer = tester.widget<Container>(
                 find.descendant(
                   of: find.byType(HomeBottomNav),
                   matching: find.byWidgetPredicate(
                     (w) =>
                         w is Container &&
-                        w.constraints?.maxHeight == 64 &&
-                        w.decoration is BoxDecoration,
+                        w.decoration is BoxDecoration &&
+                        (w.decoration as BoxDecoration).boxShadow != null &&
+                        (w.decoration as BoxDecoration).border != null,
                   ),
                 ),
               );
