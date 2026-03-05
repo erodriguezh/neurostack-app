@@ -1,0 +1,262 @@
+{
+  "created_at": "2026-03-05T08:44:40.620579Z",
+  "epic": {
+    "data": {
+      "branch_name": "fn-75-brightness-aware-theming-migration",
+      "completion_review_status": "unknown",
+      "completion_reviewed_at": null,
+      "created_at": "2026-03-05T08:40:05.863567Z",
+      "default_impl": null,
+      "default_review": null,
+      "default_sync": null,
+      "depends_on_epics": [],
+      "id": "fn-75-brightness-aware-theming-migration",
+      "next_task": 1,
+      "plan_review_status": "unknown",
+      "plan_reviewed_at": null,
+      "spec_path": ".flow/specs/fn-75-brightness-aware-theming-migration.md",
+      "status": "open",
+      "title": "Brightness-aware theming migration",
+      "updated_at": "2026-03-05T08:41:06.649481Z"
+    },
+    "spec": "# Brightness-Aware Theming Migration\n\n## Overview\n\nThe app currently mixes brightness-adaptive typography (`ColorScheme`, `textTheme`) with fixed dark-only surfaces (`AppGridBackground`, `KitColorsExtension.whiteXX`). This causes light-mode contrast failures \u2014 headers become unreadable on dark backgrounds when the system theme is light.\n\nThis epic migrates the app to coherent brightness-aware theming:\n- **Adaptive routes** (home/library/progress/settings/contact) follow system brightness\n- **Dark-first routes** (auth/onboarding/paywall/offline/splash) stay dark via local scope\n- Shared primitives and feature widgets migrate from `whiteXX` tokens to semantic `AppSemanticColors`\n\n### Scope\n- 214+ `whiteXX` usages across ~40 files under `lib/`\n- Hotspots: `protocol_detail_sheet.dart` (25+), `log_session_view.dart` (26+), `library_protocol_card.dart` (15+), `home_protocol_card.dart` (12+)\n- All 4 tab routes, contact view, and modal/sheet presentations\n- Core shared widgets: `app_primary_cta`, `dismiss_button`, `error_state_view`, `home_indicator_pill`, `toast_view`, `home_bottom_nav`\n\n## Architecture\n\n### Two Route Policies\n```\n\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502 MaterialApp (ThemeMode.system)                  \u2502\n\u2502 \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510  \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510 \u2502\n\u2502 \u2502 Adaptive Routes \u2502  \u2502 Dark-First Routes      \u2502 \u2502\n\u2502 \u2502 (system theme)  \u2502  \u2502 (DarkThemeScope)       \u2502 \u2502\n\u2502 \u2502                 \u2502  \u2502                        \u2502 \u2502\n\u2502 \u2502 Home            \u2502  \u2502 Auth                   \u2502 \u2502\n\u2502 \u2502 Library         \u2502  \u2502 Onboarding             \u2502 \u2502\n\u2502 \u2502 Progress        \u2502  \u2502 Offline                \u2502 \u2502\n\u2502 \u2502 Settings        \u2502  \u2502 Paywall                \u2502 \u2502\n\u2502 \u2502 Contact         \u2502  \u2502 Splash                 \u2502 \u2502\n\u2502 \u2502 Log Session*    \u2502  \u2502                        \u2502 \u2502\n\u2502 \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518  \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518 \u2502\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n* Log session modal inherits caller's theme\n```\n\n### Palette Layering\n```\n\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502 AppSemanticColors (ThemeExtension) [NEW] \u2502\n\u2502 - Brightness-aware surface/ink/border    \u2502\n\u2502 - Grid tokens for AppGridBackground     \u2502\n\u2502 - Derived from ColorScheme              \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502 KitColorsExtension (ThemeExtension)     \u2502\n\u2502 - Brand colors (brandSky, etc.)         \u2502\n\u2502 - whiteXX (dark-first only, legacy)     \u2502\n\u2502 - NOT brightness-parameterized          \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502 ColorScheme (Material 3)                \u2502\n\u2502 - Brightness-branched (already exists)  \u2502\n\u2502 - surface/onSurface/primary/etc.        \u2502\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n```\n\n### AppGridBackground Modes\n- `legacyDark` (default): current behavior, fixed dark palette \u2014 no visual change\n- `adaptive`: reads `AppSemanticColors` for fill/grid/glow, adapts to brightness\n\n### Key Architectural Decisions\n\n1. **`KitColorsExtension` stays dark-only**: Not brightness-parameterized. `whiteXX` tokens remain for dark-first routes. New adaptive code uses `AppSemanticColors` or `ColorScheme`.\n\n2. **`DarkThemeScope` re-registers ALL extensions**: Must explicitly include `KitColorsExtension`, `AppSemanticColors`, `CustomTextStyles`, `CustomBorderRadius`, `CustomShadows` in the override `ThemeData`. `Theme.copyWith` does NOT carry extensions.\n\n3. **Modal/sheet theme inheritance**: `showModalBottomSheet`/`showDialog` create new routes inheriting `Navigator` theme, NOT local `Theme` overrides. Strategy: modal/sheet content wraps itself with theme-aware tokens (reads ambient theme). For dark-first modals (e.g., `trial_expired_modal`), wrap content in `DarkThemeScope`.\n\n4. **Grid lines in light mode**: Invert to dark lines on light surface. The `Colors.white` radial mask in `_GridPainter` becomes brightness-aware (white mask for dark, black mask for light).\n\n5. **`log_session_view.dart` is in scope**: 26 `whiteXX` usages, shown as modal from home/library. Gets its own migration task.\n\n6. **Splash stays dark-first**: Uses `GridPattern` + shader (`beam.frag`) directly. Wrap in `DarkThemeScope`.\n\n## Quick commands\n```bash\n# Run all tests\nflutter test\n\n# Check whiteXX usage count (migration progress metric)\nrg \"kitColors\\.white(90|80|70|60|50|40|30|20|10|05|02)\" lib | wc -l\n\n# Analyze for lint errors\nflutter analyze\n\n# Update golden files after visual changes\nflutter test --update-goldens\n```\n\n## Migration Phases\n\n### Phase 1: Infrastructure (Tasks 1-3)\nBuild the foundation without changing any existing visuals.\n- Task 1: Policy docs + AppGridBackground adaptive mode\n- Task 2: DarkThemeScope + dark-first route containment\n- Task 3: AppSemanticColors ThemeExtension\n\n**Checkpoint**: Dark-first routes insulated. Semantic tokens available. Zero visual changes.\n\n### Phase 2: Core Migration (Tasks 4-5)\nMigrate shared primitives and home widgets.\n- Task 4: Core shared widget migration\n- Task 5: Home widgets migration\n\n**Checkpoint**: Shared primitives brightness-safe. Home tab adaptive.\n\n### Phase 3: Feature Migration (Tasks 6-9)\nMigrate remaining feature domains.\n- Task 6: Library widgets migration\n- Task 7: Progress widgets migration\n- Task 8: Settings + contact migration\n- Task 9: Session/modal migration\n\n**Checkpoint**: All adaptive-route widgets brightness-safe in isolation.\n\n### Phase 4: Activation + Enforcement (Tasks 10-11)\nFlip the switch and lock it down.\n- Task 10: Flip adaptive routes to adaptive background\n- Task 11: Enforcement, cleanup, docs\n\n**Checkpoint**: Light mode fully functional. CI guard active.\n\n## Risks & Mitigations\n\n| Risk | Likelihood | Impact | Mitigation |\n|------|-----------|--------|------------|\n| Grid lines invisible in light mode | High | Medium | Task 1 implements brightness-aware line/mask colors; test validates contrast |\n| Modal sheets inherit wrong theme | High | Medium | Task 2 documents strategy; task 9 applies it to session modals |\n| `DarkThemeScope` missing extension re-registration | High | High (crash) | Task 2 acceptance: verify all 5 extensions accessible under scope |\n| Golden test platform divergence | Medium | Low | Pin `devicePixelRatio = 1.0`, use Ahem font in test theme |\n| Partial migration leaves inconsistent UI | Medium | Medium | Each task is self-contained; rollback = revert single PR |\n| `protocol_detail_sheet.dart` regression (25+ changes) | Medium | High | Dedicated coverage in task 6; light+dark contrast assertions |\n\n## Rollout & Rollback\n\n- Each task maps to one PR, independently revertable\n- Default `legacyDark` mode means no visual change until task 10 flips routes\n- Task 10 rollback: revert route opt-ins back to `legacyDark`, keep all infrastructure\n- Emergency: revert task 10 only; all other tasks remain safe\n\n## Alternatives Considered\n\n1. **Brightness-parameterize `KitColorsExtension`**: Rejected \u2014 would require touching all 214 call sites at once. Incremental migration via new `AppSemanticColors` is safer.\n2. **`ColorScheme.fromSeed` for everything**: Rejected \u2014 brand colors need exact hex values. Use `fromSeed` base with `copyWith` for critical brand slots.\n3. **Single big-bang PR**: Rejected \u2014 too risky, untestable, unreviewable.\n\n## Acceptance\n\n- [ ] Light mode: titles/text/icons on adaptive routes clearly readable\n- [ ] Dark mode: no regressions from current visuals\n- [ ] Adaptive routes use `AppSemanticColors`, not `kitColors.whiteXX` for legibility\n- [ ] Dark-first routes visually identical under both system themes\n- [ ] `whiteXX` usage on adaptive surfaces reduced to near-zero\n- [ ] CI lint guard blocks new `whiteXX` in adaptive areas\n- [ ] Light+dark contrast tests for all tab routes\n- [ ] Investigation docs closed out with resolution notes\n\n## References\n\n- Investigation: `docs/investigations/20260304133000_investigation_brightness_aware_theming_plan.md`\n- Symptom diagnosis: `docs/investigations/20260304120000_investigation_invisible_screen_titles.md`\n- Design tokens doc: `docs/best_practices/design/visual-design.md`\n- Theme builder: `lib/core/ui/app_theme.dart`\n- Color constants: `lib/core/ui/constants/kit_colors.dart`\n- Background widget: `lib/core/ui/widgets/app_grid_background.dart`\n- Flutter ThemeExtension API: https://api.flutter.dev/flutter/material/ThemeExtension-class.html\n- WCAG contrast ratio: https://www.w3.org/WAI/GL/wiki/Contrast_ratio\n"
+  },
+  "epic_id": "fn-75-brightness-aware-theming-migration",
+  "schema_version": 2,
+  "tasks": [
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-03-05T08:41:14.249083Z",
+        "depends_on": [],
+        "epic": "fn-75-brightness-aware-theming-migration",
+        "id": "fn-75-brightness-aware-theming-migration.1",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-75-brightness-aware-theming-migration.1.md",
+        "status": "todo",
+        "title": "Policy docs + AppGridBackground adaptive mode",
+        "updated_at": "2026-03-05T08:41:52.122315Z"
+      },
+      "id": "fn-75-brightness-aware-theming-migration.1",
+      "runtime": null,
+      "spec": "# fn-75-brightness-aware-theming-migration.1 Policy docs + AppGridBackground adaptive mode\n\n## Description\nAdd `AppGridBackgroundMode` enum and adaptive color resolution to `AppGridBackground`, plus document the brightness theming policy. No call-site changes \u2014 existing behavior unchanged via `legacyDark` default.\n\n**Size:** M\n**Files:**\n- `lib/core/ui/widgets/app_grid_background.dart` \u2014 add mode enum + color resolver\n- `test/core/ui/widgets/app_grid_background_test.dart` (new) \u2014 light/dark behavior tests\n- `docs/best_practices/design/brightness_theming.md` (new) \u2014 route policy + token rules\n\n## Approach\n- Follow existing `_GridPainter` pattern at `app_grid_background.dart:27` \u2014 colors already injected via constructor with `shouldRepaint`\n- Add `AppGridBackgroundMode { legacyDark, adaptive }` enum\n- Add `mode` parameter defaulting to `legacyDark`\n- In `adaptive` mode: resolve fill/grid/glow from theme brightness (dark lines on light surface, light lines on dark surface)\n- The `Colors.white` radial mask in `_GridPainter` (line ~143) must become brightness-aware \u2014 use white mask for dark, black mask for light\n- Policy doc: document adaptive vs dark-first route classification, when to use `whiteXX` vs semantic tokens\n\n## Key context\n- `_GridPainter` uses `BlendMode.dstIn` with a `Colors.white` radial gradient for the glow mask \u2014 this creates the circular fade effect. On a light background, `white02` grid lines would be invisible; adaptive mode needs inverted line colors\n- No `AppSemanticColors` exists yet (task 3) \u2014 adaptive mode can initially read from `ColorScheme` directly, then be updated to use semantic tokens in task 3\n## Acceptance\n- [ ] `AppGridBackgroundMode` enum exists with `legacyDark` and `adaptive` values\n- [ ] `AppGridBackground` accepts `mode` parameter, defaults to `legacyDark`\n- [ ] Legacy mode: visuals identical to current behavior in both light and dark system themes\n- [ ] Adaptive mode: grid lines visible on both light and dark backgrounds (contrast ratio >= 1.5:1)\n- [ ] Adaptive mode: fill color follows theme brightness (light surface in light mode, dark in dark)\n- [ ] Test: legacy mode renders identically in light/dark themes\n- [ ] Test: adaptive mode renders differently by brightness\n- [ ] `docs/best_practices/design/brightness_theming.md` documents route policy and token usage rules\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-03-05T08:41:29.866068Z",
+        "depends_on": [
+          "fn-75-brightness-aware-theming-migration.4",
+          "fn-75-brightness-aware-theming-migration.5",
+          "fn-75-brightness-aware-theming-migration.6",
+          "fn-75-brightness-aware-theming-migration.7",
+          "fn-75-brightness-aware-theming-migration.8",
+          "fn-75-brightness-aware-theming-migration.9"
+        ],
+        "epic": "fn-75-brightness-aware-theming-migration",
+        "id": "fn-75-brightness-aware-theming-migration.10",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-75-brightness-aware-theming-migration.10.md",
+        "status": "todo",
+        "title": "Flip adaptive routes to adaptive background",
+        "updated_at": "2026-03-05T08:43:58.437318Z"
+      },
+      "id": "fn-75-brightness-aware-theming-migration.10",
+      "runtime": null,
+      "spec": "# fn-75-brightness-aware-theming-migration.10 Flip adaptive routes to adaptive background\n\n## Description\nFlip all adaptive routes from `AppGridBackground` `legacyDark` mode to `adaptive` mode. This is the \"big switch\" \u2014 all widget migrations must be complete before this task.\n\n**Size:** M\n**Files:**\n- `lib/home/home_view.dart` \u2014 set `mode: AppGridBackgroundMode.adaptive`\n- `lib/library/library_view.dart` \u2014 set `mode: AppGridBackgroundMode.adaptive`\n- `lib/progress/progress_view.dart` \u2014 set `mode: AppGridBackgroundMode.adaptive`\n- `lib/settings/settings_view.dart` \u2014 set `mode: AppGridBackgroundMode.adaptive`\n- `lib/settings/contact_view.dart` \u2014 set `mode: AppGridBackgroundMode.adaptive`\n- `test/theming/adaptive_routes_contrast_test.dart` (new) \u2014 light+dark route contrast tests\n\n## Approach\n- Each route change is a one-line `mode:` parameter addition \u2014 minimal diff per file\n- The adaptive mode (built in task 1) resolves fill/grid/glow colors from `AppSemanticColors` (task 3)\n- All child widgets already use semantic tokens (tasks 4-9) \u2014 flipping the background is the final step\n- Add comprehensive contrast tests: render each tab route in both brightness modes, assert title text contrast >= 4.5:1\n\n## Key context\n- **Rollback**: revert only these 5 route changes back to `legacyDark` \u2014 all infrastructure and widget migrations remain safe\n- `home_bottom_nav.dart` is shared across all 4 tab routes \u2014 already migrated in task 5\n- `highlightColor: Colors.white.withValues(alpha: .1)` in `app_theme.dart:157` is another hardcoded white that may look wrong on light surfaces \u2014 check and fix if visible\n## Acceptance\n- [ ] All 5 adaptive routes use `AppGridBackgroundMode.adaptive`\n- [ ] Light mode: background is light-colored on all adaptive routes\n- [ ] Dark mode: background matches current dark appearance (no regression)\n- [ ] Title text visible in both modes on all adaptive routes\n- [ ] Grid lines visible in both modes on all adaptive routes\n- [ ] Test: each tab route contrast >= 4.5:1 for title text in both modes\n- [ ] No visual artifacts from `highlightColor` or other hardcoded whites in adaptive context\n- [ ] `flutter analyze` passes\n- [ ] `flutter test` passes\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-03-05T08:41:30.087234Z",
+        "depends_on": [
+          "fn-75-brightness-aware-theming-migration.10"
+        ],
+        "epic": "fn-75-brightness-aware-theming-migration",
+        "id": "fn-75-brightness-aware-theming-migration.11",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-75-brightness-aware-theming-migration.11.md",
+        "status": "todo",
+        "title": "Enforcement, cleanup, and docs close-out",
+        "updated_at": "2026-03-05T08:44:15.803495Z"
+      },
+      "id": "fn-75-brightness-aware-theming-migration.11",
+      "runtime": null,
+      "spec": "# fn-75-brightness-aware-theming-migration.11 Enforcement, cleanup, and docs close-out\n\n## Description\nAdd CI enforcement against new `whiteXX` usage in adaptive areas, update design docs, and close out investigation documents.\n\n**Size:** M\n**Files:**\n- `lib/core/ui/constants/kit_colors.dart` \u2014 add deprecation annotations/comments on whiteXX tokens for adaptive usage\n- `docs/best_practices/design/brightness_theming.md` \u2014 finalize with migration results\n- `docs/best_practices/design/visual-design.md` \u2014 add AppSemanticColors to Token Hierarchy, update PR checklist, add Surface Mode Policy subsection\n- `docs/README.md` \u2014 add DarkThemeScope + AppSemanticColors to widget/token registry\n- `docs/best_practices/design/screen-prompts/02-home-and-stack-screen.md` \u2014 add note about semantic token mapping\n- `docs/best_practices/design/screen-prompts/03-library-screen.md` \u2014 add note\n- `docs/best_practices/design/screen-prompts/04-progress-screen.md` \u2014 add note\n- `docs/best_practices/design/screen-prompts/11-settings-screen.md` \u2014 add note\n- `docs/investigations/20260304133000_investigation_brightness_aware_theming_plan.md` \u2014 add Resolution section\n- `docs/investigations/20260304120000_investigation_invisible_screen_titles.md` \u2014 add resolution note\n- CI config or script for whiteXX grep guard\n\n## Approach\n- CI guard: add a shell script or CI step that greps for `kitColors.white` in adaptive areas (`lib/home/`, `lib/library/`, `lib/progress/`, `lib/settings/`, adaptive core widgets) and fails if found\n- Doc updates follow existing templates \u2014 see `docs/README.md` registry format and `visual-design.md` code block style\n- Screen prompt docs: add header note clarifying `white/XX` values map to `AppSemanticColors` tokens post-migration\n- Investigation close-outs: append `## Resolution` section with link to this epic and `brightness_theming.md`\n\n## Key context\n- `visual-design.md` uses fenced dart blocks with \"correct vs wrong\" comment pairs \u2014 follow that format\n- README widget registry format: `**WidgetName** - \\`path\\` - descriptor, keywords`\n- Investigation docs use 4-phase structure \u2014 add `## Resolution` as final section\n## Acceptance\n- [ ] CI guard fails on new `whiteXX` usage in `lib/home/`, `lib/library/`, `lib/progress/`, `lib/settings/` adaptive widget paths\n- [ ] `visual-design.md` documents AppSemanticColors in Token Hierarchy and PR checklist\n- [ ] `visual-design.md` has Surface Mode Policy subsection (adaptive vs dark-first)\n- [ ] `docs/README.md` has DarkThemeScope and AppSemanticColors registry entries\n- [ ] Screen prompt docs (02, 03, 04, 11) have semantic token mapping note\n- [ ] Investigation `20260304133000` has Resolution section\n- [ ] Investigation `20260304120000` has resolution note linking to policy doc\n- [ ] `brightness_theming.md` finalized with migration results and token reference\n- [ ] `flutter analyze` passes\n- [ ] `flutter test` passes\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-03-05T08:41:14.436079Z",
+        "depends_on": [],
+        "epic": "fn-75-brightness-aware-theming-migration",
+        "id": "fn-75-brightness-aware-theming-migration.2",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-75-brightness-aware-theming-migration.2.md",
+        "status": "todo",
+        "title": "DarkThemeScope + dark-first route containment",
+        "updated_at": "2026-03-05T08:42:07.749992Z"
+      },
+      "id": "fn-75-brightness-aware-theming-migration.2",
+      "runtime": null,
+      "spec": "# fn-75-brightness-aware-theming-migration.2 DarkThemeScope + dark-first route containment\n\n## Description\nCreate `DarkThemeScope` widget that forces a subtree to dark theme. Wrap all dark-first routes (auth, onboarding, offline, paywall, splash) so they remain visually dark regardless of system brightness.\n\n**Size:** M\n**Files:**\n- `lib/core/ui/widgets/dark_theme_scope.dart` (new) \u2014 scope widget\n- `lib/features/auth/presentation/widgets/auth_background.dart` \u2014 wrap in scope\n- `lib/features/onboarding/presentation/widgets/onboarding_scaffold.dart` \u2014 wrap in scope\n- `lib/features/offline/offline_retry_view.dart` \u2014 wrap in scope\n- `lib/paywall/paywall_view.dart` \u2014 wrap in scope\n- `lib/startup/splash_screen.dart` \u2014 wrap in scope\n- `test/theming/dark_first_scope_test.dart` (new) \u2014 verify scope behavior\n\n## Approach\n- `DarkThemeScope` wraps child in `Theme(data: darkTheme)` where `darkTheme` = `AppTheme.buildTheme(Brightness.dark)`\n- **CRITICAL**: Must re-register ALL ThemeExtensions explicitly \u2014 `Theme.copyWith` does NOT carry extensions. Include: `KitColorsExtension`, `CustomTextStyles`, `CustomBorderRadius`, `CustomShadows`, and (once created) `AppSemanticColors`\n- Use `Theme.of(context).brightness` inside descendants (NOT `MediaQuery.platformBrightness`) to check brightness\n- Auth route uses `AuthBackground` which wraps `AppGridBackground` \u2014 add scope at `AuthBackground` level\n- Onboarding uses `OnboardingScaffold` \u2014 add scope there\n- Offline/paywall/splash: wrap at view level\n\n## Key context\n- `showModalBottomSheet`/`showDialog` do NOT inherit local Theme overrides \u2014 they inherit from Navigator. Dark-first modals (e.g., `trial_expired_modal.dart`) will need their content wrapped in `DarkThemeScope` individually (handled in task 9)\n- Splash uses `GridPattern` directly (not `AppGridBackground`) + `beam.frag` shader \u2014 the shader renders absolute colors, scope ensures surrounding widgets stay dark\n## Acceptance\n- [ ] `DarkThemeScope` widget exists in `lib/core/ui/widgets/dark_theme_scope.dart`\n- [ ] All 5 ThemeExtensions accessible under `DarkThemeScope` (KitColors, CustomTextStyles, CustomBorderRadius, CustomShadows + AppSemanticColors when available)\n- [ ] Auth routes visually identical in light and dark system themes\n- [ ] Onboarding routes visually identical in light and dark system themes\n- [ ] Offline route visually identical in light and dark system themes\n- [ ] Paywall route visually identical in light and dark system themes\n- [ ] Splash screen visually identical in light and dark system themes\n- [ ] Test: `Theme.of(context).brightness` returns `Brightness.dark` inside `DarkThemeScope` regardless of system theme\n- [ ] Test: `context.kitColors` accessible (not null) inside scope\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-03-05T08:41:14.633232Z",
+        "depends_on": [
+          "fn-75-brightness-aware-theming-migration.1"
+        ],
+        "epic": "fn-75-brightness-aware-theming-migration",
+        "id": "fn-75-brightness-aware-theming-migration.3",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-75-brightness-aware-theming-migration.3.md",
+        "status": "todo",
+        "title": "AppSemanticColors ThemeExtension",
+        "updated_at": "2026-03-05T08:42:21.990709Z"
+      },
+      "id": "fn-75-brightness-aware-theming-migration.3",
+      "runtime": null,
+      "spec": "# fn-75-brightness-aware-theming-migration.3 AppSemanticColors ThemeExtension\n\n## Description\nCreate `AppSemanticColors` ThemeExtension with brightness-aware surface/ink/border/grid tokens. Wire it into `AppTheme.buildTheme` and add a context accessor.\n\n**Size:** M\n**Files:**\n- `lib/core/ui/theme/app_semantic_colors.dart` (new) \u2014 ThemeExtension definition\n- `lib/core/ui/app_theme.dart` \u2014 register extension + add context accessor\n- `test/core/ui/theme/app_semantic_colors_test.dart` (new) \u2014 contrast validation\n- `test/helpers/contrast_ratio.dart` (new) \u2014 WCAG contrast ratio helper\n\n## Approach\n- Follow existing `KitColorsExtension` pattern at `kit_colors.dart:4-408` for structure\n- Semantic tokens to include: `surface`, `surfaceElevated`, `ink`, `inkSubtle`, `border`, `borderSubtle`, `gridLine`, `gridBackground`, `gridGlow`\n- Light mode: derive from `ColorScheme` light values (dark ink on light surface)\n- Dark mode: map to existing `KitColors` dark palette equivalents for visual continuity\n- Add `context.semanticColors` accessor following pattern at `app_theme.dart:231-253`\n- Must implement `copyWith` and `lerp` for animated theme transitions\n- Contrast helper: use `Color.computeLuminance()` (built-in WCAG relative luminance)\n\n## Key context\n- `Color.computeLuminance()` already implements WCAG 2.0 relative luminance formula \u2014 no need for manual sRGB linearization\n- WCAG AA: 4.5:1 for normal text, 3.0:1 for large text (18pt+ or 14pt+ bold)\n- `AppTheme.buildTheme` at line 35 accepts `Brightness` \u2014 semantic colors should derive from this parameter\n- Update `DarkThemeScope` (task 2) to include `AppSemanticColors` in its extension list once available\n## Acceptance\n- [ ] `AppSemanticColors` ThemeExtension exists with surface, ink, border, and grid token families\n- [ ] Registered in `AppTheme.buildTheme` for both `Brightness.light` and `Brightness.dark`\n- [ ] `context.semanticColors` accessor works\n- [ ] `copyWith` and `lerp` implemented correctly\n- [ ] Light mode: ink-on-surface contrast ratio >= 4.5:1 (WCAG AA)\n- [ ] Dark mode: ink-on-surface contrast ratio >= 4.5:1 (WCAG AA)\n- [ ] Light mode: gridLine-on-gridBackground contrast >= 1.5:1\n- [ ] Dark mode: values visually consistent with current `whiteXX` equivalents\n- [ ] Test: contrast ratio helper validates WCAG thresholds\n- [ ] Test: both brightness variants pass minimum contrast assertions\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-03-05T08:41:21.984434Z",
+        "depends_on": [
+          "fn-75-brightness-aware-theming-migration.2",
+          "fn-75-brightness-aware-theming-migration.3"
+        ],
+        "epic": "fn-75-brightness-aware-theming-migration",
+        "id": "fn-75-brightness-aware-theming-migration.4",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-75-brightness-aware-theming-migration.4.md",
+        "status": "todo",
+        "title": "Migrate core shared primitives to semantic tokens",
+        "updated_at": "2026-03-05T08:42:42.507412Z"
+      },
+      "id": "fn-75-brightness-aware-theming-migration.4",
+      "runtime": null,
+      "spec": "# fn-75-brightness-aware-theming-migration.4 Migrate core shared primitives to semantic tokens\n\n## Description\nMigrate core shared primitives from `kitColors.whiteXX` to `AppSemanticColors`/`ColorScheme` tokens. These widgets are used across both adaptive and dark-first routes, so they must read from the ambient theme (which `DarkThemeScope` controls for dark-first contexts).\n\n**Size:** M\n**Files:**\n- `lib/core/ui/widgets/app_primary_cta.dart` \u2014 replace `white05`, `white30`, `white10` (lines 89-104)\n- `lib/core/ui/widgets/dismiss_button.dart` \u2014 replace `white60` (line 24)\n- `lib/core/ui/widgets/error_state_view.dart` \u2014 replace `white60`, `white40` (lines 25, 33)\n- `lib/core/ui/widgets/home_indicator_pill.dart` \u2014 replace `white90.withValues(alpha: 0.3)` (line 28)\n- `lib/core/utils/internal_notification/toast/toast_view.dart` \u2014 remove ad-hoc `isDark` branching (lines 116-145), use semantic tokens instead\n- Tests: add/update widget tests for all above in light+dark\n\n## Approach\n- Replace `kitColors.whiteXX` with `context.semanticColors.inkSubtle`, `.border`, `.surface`, etc. as appropriate\n- Toast already has `isDark` branching \u2014 simplify by using semantic tokens that handle brightness automatically\n- Each widget should be testable in both `Brightness.light` and `Brightness.dark` using `AppTheme.buildTheme(brightness)`\n- These shared widgets work correctly in dark-first routes because `DarkThemeScope` sets the ambient theme to dark, so `context.semanticColors` returns dark values\n\n## Key context\n- `home_indicator_pill.dart` was recently extracted by fn-74 to `lib/core/ui/widgets/`\n- `app_primary_cta.dart` disabled state uses `white05` background + `white30` text \u2014 semantic equivalents: `semanticColors.surface` + `semanticColors.inkSubtle`\n## Acceptance\n- [ ] `app_primary_cta.dart` uses no `whiteXX` tokens\n- [ ] `dismiss_button.dart` uses no `whiteXX` tokens\n- [ ] `error_state_view.dart` uses no `whiteXX` tokens\n- [ ] `home_indicator_pill.dart` uses no `whiteXX` tokens\n- [ ] `toast_view.dart` uses semantic tokens instead of manual `isDark` branching\n- [ ] All 5 widgets readable in light mode (ink-on-surface contrast >= 3.0:1)\n- [ ] All 5 widgets visually unchanged in dark mode (no regression)\n- [ ] Tests: each widget tested in both Brightness.light and Brightness.dark\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-03-05T08:41:22.159334Z",
+        "depends_on": [
+          "fn-75-brightness-aware-theming-migration.3"
+        ],
+        "epic": "fn-75-brightness-aware-theming-migration",
+        "id": "fn-75-brightness-aware-theming-migration.5",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-75-brightness-aware-theming-migration.5.md",
+        "status": "todo",
+        "title": "Home widgets brightness migration",
+        "updated_at": "2026-03-05T08:42:54.437723Z"
+      },
+      "id": "fn-75-brightness-aware-theming-migration.5",
+      "runtime": null,
+      "spec": "# fn-75-brightness-aware-theming-migration.5 Home widgets brightness migration\n\n## Description\nMigrate home tab widgets from `kitColors.whiteXX` to `AppSemanticColors` tokens. The home tab is an adaptive route \u2014 these widgets must be readable in both light and dark modes.\n\n**Size:** M\n**Files:**\n- `lib/home/widgets/home_bottom_nav.dart` \u2014 replace `background.withValues(alpha: 0.85)`, `white10` border, `white40` inactive (lines 30-86)\n- `lib/home/widgets/home_header.dart` \u2014 replace whiteXX usages\n- `lib/home/widgets/home_empty_state.dart` \u2014 replace whiteXX usages\n- `lib/home/widgets/home_protocol_card.dart` \u2014 replace 12+ whiteXX usages for borders/fills/text\n- `lib/home/widgets/home_status_banner.dart` \u2014 replace `white10` border, `white05`/`white60`/`white70` (lines 49-136)\n- `lib/home/widgets/home_status_dot.dart` \u2014 replace whiteXX usages\n- `test/home/widgets/home_widgets_brightness_test.dart` (new)\n\n## Approach\n- `home_bottom_nav.dart` is the most impactful: its `kitColors.background.withValues(alpha: 0.85)` hardcodes a near-black pill. Replace with `semanticColors.surface` at appropriate opacity\n- `home_protocol_card.dart` is the heaviest (12+ usages) \u2014 map each whiteXX to its semantic equivalent\n- Follow the pattern established in task 4 for shared primitives\n- Test all widgets in both brightness modes\n\n## Key context\n- `home_bottom_nav.dart` is shown on ALL tab routes (home/library/progress/settings) \u2014 high visual impact\n- `home_status_banner.dart` uses `SpotlightCard` which takes `spotlightColor` as param \u2014 callers typically pass `kitColors.white05`, update call sites\n## Acceptance\n- [ ] No `whiteXX` usage in any `lib/home/widgets/` file for legibility-critical tokens\n- [ ] `home_bottom_nav.dart` background adapts to brightness (light surface in light mode)\n- [ ] `home_protocol_card.dart` text and borders readable in both modes\n- [ ] All home widgets visually unchanged in dark mode\n- [ ] Test: home widgets rendered in both Brightness.light and Brightness.dark\n- [ ] Test: header text contrast >= 4.5:1 in both modes\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-03-05T08:41:22.333883Z",
+        "depends_on": [
+          "fn-75-brightness-aware-theming-migration.3"
+        ],
+        "epic": "fn-75-brightness-aware-theming-migration",
+        "id": "fn-75-brightness-aware-theming-migration.6",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-75-brightness-aware-theming-migration.6.md",
+        "status": "todo",
+        "title": "Library widgets brightness migration",
+        "updated_at": "2026-03-05T08:43:05.609992Z"
+      },
+      "id": "fn-75-brightness-aware-theming-migration.6",
+      "runtime": null,
+      "spec": "# fn-75-brightness-aware-theming-migration.6 Library widgets brightness migration\n\n## Description\nMigrate library tab widgets from `kitColors.whiteXX` to semantic tokens. Library is an adaptive route. `protocol_detail_sheet.dart` is the heaviest migration target in the entire codebase (25+ whiteXX usages).\n\n**Size:** M\n**Files:**\n- `lib/library/widgets/library_category_header.dart` \u2014 replace whiteXX usages\n- `lib/library/widgets/library_protocol_card.dart` \u2014 replace 15+ whiteXX usages\n- `lib/library/widgets/protocol_detail_sheet.dart` \u2014 replace 25+ whiteXX usages (heaviest file)\n- Update existing `test/library/widgets/library_protocol_card_test.dart` for light+dark\n- `test/library/widgets/protocol_detail_sheet_brightness_test.dart` (new)\n\n## Approach\n- `protocol_detail_sheet.dart` is the highest-risk file \u2014 map each whiteXX systematically (borders, fills, text, dividers)\n- `library_protocol_card.dart` follows similar patterns to `home_protocol_card.dart` \u2014 apply same mapping\n- Bottom sheets opened via `showModalBottomSheet` inherit Navigator theme (not local Theme) \u2014 but since library is an adaptive route (not wrapped in DarkThemeScope), the sheet inherits the correct system theme naturally\n- Update existing test at `library_protocol_card_test.dart:85` which currently only tests dark mode\n\n## Key context\n- `protocol_detail_sheet.dart` is opened from `library_view.dart` line ~299 via `showModalBottomSheet` \u2014 it inherits the app-level theme\n- Existing test at `library_protocol_card_test.dart:85` uses `Brightness.dark` only \u2014 add `Brightness.light` variant\n## Acceptance\n- [ ] No `whiteXX` usage in `library_protocol_card.dart` for legibility tokens\n- [ ] No `whiteXX` usage in `protocol_detail_sheet.dart` for legibility tokens\n- [ ] No `whiteXX` usage in `library_category_header.dart` for legibility tokens\n- [ ] `protocol_detail_sheet.dart` readable in light mode (all text >= 4.5:1 contrast)\n- [ ] All library widgets visually unchanged in dark mode\n- [ ] Existing `library_protocol_card_test.dart` updated to test both brightness modes\n- [ ] New sheet brightness test validates light+dark rendering\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-03-05T08:41:22.498067Z",
+        "depends_on": [
+          "fn-75-brightness-aware-theming-migration.3"
+        ],
+        "epic": "fn-75-brightness-aware-theming-migration",
+        "id": "fn-75-brightness-aware-theming-migration.7",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-75-brightness-aware-theming-migration.7.md",
+        "status": "todo",
+        "title": "Progress widgets brightness migration",
+        "updated_at": "2026-03-05T08:43:13.013517Z"
+      },
+      "id": "fn-75-brightness-aware-theming-migration.7",
+      "runtime": null,
+      "spec": "# fn-75-brightness-aware-theming-migration.7 Progress widgets brightness migration\n\n## Description\nMigrate progress tab widgets from `kitColors.whiteXX` to semantic tokens. Progress is an adaptive route.\n\n**Size:** M\n**Files:**\n- `lib/progress/widgets/progress_grid.dart` \u2014 replace 6 whiteXX usages\n- `lib/progress/widgets/progress_day_cell.dart` \u2014 replace 4 whiteXX usages\n- `lib/progress/widgets/backdate_session_sheet.dart` \u2014 replace whiteXX usages\n- Update `test/progress/widgets/progress_grid_test.dart` for light+dark (currently dark-only at line 47)\n- `test/progress/widgets/progress_brightness_test.dart` (new) \u2014 day cell + sheet tests\n\n## Approach\n- `progress_grid.dart` and `progress_day_cell.dart` are simpler migrations (fewer usages) \u2014 follow same mapping pattern from tasks 4-6\n- `backdate_session_sheet.dart` is shown via `showModalBottomSheet` \u2014 inherits Navigator theme, which is correct for adaptive routes\n- Update existing dark-only test at `progress_grid_test.dart:47` to parameterize both brightness modes\n\n## Key context\n- `progress_day_cell.dart` uses whiteXX for cell borders and fill states \u2014 map to `semanticColors.border`/`semanticColors.surface`\n- This is one of the lighter migration tasks \u2014 consider completing quickly\n## Acceptance\n- [ ] No `whiteXX` usage in `progress_grid.dart` for legibility tokens\n- [ ] No `whiteXX` usage in `progress_day_cell.dart` for legibility tokens\n- [ ] No `whiteXX` usage in `backdate_session_sheet.dart` for legibility tokens\n- [ ] All progress widgets visually unchanged in dark mode\n- [ ] Existing `progress_grid_test.dart` updated to test both brightness modes\n- [ ] New brightness test covers day cell and sheet in light+dark\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-03-05T08:41:22.661210Z",
+        "depends_on": [
+          "fn-75-brightness-aware-theming-migration.3"
+        ],
+        "epic": "fn-75-brightness-aware-theming-migration",
+        "id": "fn-75-brightness-aware-theming-migration.8",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-75-brightness-aware-theming-migration.8.md",
+        "status": "todo",
+        "title": "Settings and contact widgets brightness migration",
+        "updated_at": "2026-03-05T08:43:28.758665Z"
+      },
+      "id": "fn-75-brightness-aware-theming-migration.8",
+      "runtime": null,
+      "spec": "# fn-75-brightness-aware-theming-migration.8 Settings and contact widgets brightness migration\n\n## Description\nMigrate settings and contact view widgets from `kitColors.whiteXX` to semantic tokens. Settings and contact are adaptive routes.\n\n**Size:** M\n**Files:**\n- `lib/settings/widgets/settings_support_section.dart` \u2014 replace `white40`, `white10`, `white05` (lines 107-130)\n- `lib/settings/widgets/settings_tile.dart` \u2014 replace `white40`, `white80`, `white20` (lines 67-88)\n- `lib/settings/widgets/settings_upgrade_banner.dart` \u2014 replace `white90`, `white50`, `white30` (lines 97-118)\n- `lib/settings/contact_view.dart` \u2014 replace whiteXX usages + chevron icon color\n- `test/settings/widgets/settings_brightness_test.dart` (new)\n\n## Approach\n- These widgets were recently created/modified by fn-73 and fn-74 \u2014 use their settled patterns as migration baseline\n- `settings_tile.dart` uses whiteXX for title (`white80`), subtitle (`white40`), and divider (`white20`) \u2014 map to `semanticColors.ink`, `semanticColors.inkSubtle`, `semanticColors.borderSubtle`\n- `contact_view.dart` chevron uses hardcoded color \u2014 switch to `semanticColors.inkSubtle`\n\n## Key context\n- All settings files were modified by fn-73/fn-74 (both complete) \u2014 migration builds on their settled state\n- `settings_support_section.dart` uses `SpotlightCard` with `kitColors.white05` \u2014 update call site to use semantic surface\n## Acceptance\n- [ ] No `whiteXX` usage in `settings_tile.dart` for legibility tokens\n- [ ] No `whiteXX` usage in `settings_support_section.dart` for legibility tokens\n- [ ] No `whiteXX` usage in `settings_upgrade_banner.dart` for legibility tokens\n- [ ] No `whiteXX` usage in `contact_view.dart` for legibility tokens\n- [ ] All settings widgets readable in light mode\n- [ ] All settings widgets visually unchanged in dark mode\n- [ ] Test: settings widgets rendered in both Brightness.light and Brightness.dark\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-03-05T08:41:22.840943Z",
+        "depends_on": [
+          "fn-75-brightness-aware-theming-migration.2",
+          "fn-75-brightness-aware-theming-migration.3"
+        ],
+        "epic": "fn-75-brightness-aware-theming-migration",
+        "id": "fn-75-brightness-aware-theming-migration.9",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-75-brightness-aware-theming-migration.9.md",
+        "status": "todo",
+        "title": "Session and modal widgets brightness migration",
+        "updated_at": "2026-03-05T08:43:43.873513Z"
+      },
+      "id": "fn-75-brightness-aware-theming-migration.9",
+      "runtime": null,
+      "spec": "# fn-75-brightness-aware-theming-migration.9 Session and modal widgets brightness migration\n\n## Description\nMigrate session-related views and modal/dialog presentations from `kitColors.whiteXX` to semantic tokens. This task covers the **missing scope** identified in gap analysis: `log_session_view.dart` (26+ whiteXX usages, 3rd heaviest file) and modal theme inheritance for dark-first dialogs.\n\n**Size:** M (borderline L due to `log_session_view.dart` density, but single-file focus)\n**Files:**\n- `lib/features/session/presentation/views/log_session_view.dart` \u2014 replace 26+ whiteXX usages\n- `lib/features/session/presentation/log_session_modal.dart` \u2014 fix hardcoded dark `barrierColor` (line 68)\n- `lib/paywall/widgets/trial_expired_modal.dart` \u2014 wrap content in `DarkThemeScope` (7 whiteXX usages, dark-first modal)\n- `test/features/session/presentation/log_session_brightness_test.dart` (new)\n\n## Approach\n- `log_session_view.dart` is shown as a modal from home and library views \u2014 it inherits the app-level theme (adaptive), so it needs semantic tokens\n- `log_session_modal.dart` has `barrierColor: const Color(0xCC030303)` \u2014 replace with `ColorScheme.scrim` or brightness-derived equivalent\n- `trial_expired_modal.dart` is a `showDialog` from paywall (dark-first route) \u2014 wrap its builder content in `DarkThemeScope` so it stays dark regardless of system theme\n- The `DatePicker` in `log_session_view.dart` already uses `colorScheme.copyWith(onSurface:...)` \u2014 verify this still works with semantic tokens\n\n## Key context\n- `showModalBottomSheet`/`showDialog` create new Route objects inheriting Navigator theme, NOT local Theme overrides \u2014 this is why `trial_expired_modal` needs explicit `DarkThemeScope` wrapping\n- `log_session_view.dart` is the 3rd heaviest whiteXX file in the codebase \u2014 systematic mapping required\n## Acceptance\n- [ ] No `whiteXX` usage in `log_session_view.dart` for legibility tokens\n- [ ] `log_session_modal.dart` barrier color derived from theme (not hardcoded)\n- [ ] `trial_expired_modal.dart` stays dark under light system theme (wrapped in DarkThemeScope)\n- [ ] Log session modal readable in both light and dark modes\n- [ ] DatePicker text visible in both modes (existing `colorScheme` fix preserved)\n- [ ] Test: log session view rendered in both Brightness.light and Brightness.dark\n- [ ] Existing `trial_expired_modal_test.dart` still passes\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    }
+  ]
+}

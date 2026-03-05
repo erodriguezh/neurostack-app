@@ -32,19 +32,21 @@ class _HomeProtocolCardState extends State<HomeProtocolCard> {
   @override
   Widget build(BuildContext context) {
     final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
+    final colorScheme = context.theme.colorScheme;
     final spacing = context.spacing;
     final isCompact =
         MediaQuery.of(context).size.width < context.breakpoints.sm;
     final borderColor = widget.model.isUnavailable
         ? kitColors.warning.withValues(alpha: 0.4)
-        : (_isHovering ? kitColors.white20 : kitColors.white10);
+        : (_isHovering ? semanticColors.border : semanticColors.borderSubtle);
     final backgroundColor = widget.model.isUnavailable
         ? kitColors.warning.withValues(alpha: 0.08)
-        : kitColors.white02;
+        : colorScheme.outlineVariant;
 
     return SpotlightCard(
       borderRadius: BorderRadius.circular(24),
-      spotlightColor: kitColors.white05,
+      spotlightColor: semanticColors.borderSubtle,
       duration: const Duration(milliseconds: 200),
       enabled: !widget.model.isUnavailable,
       onHoverChanged: widget.model.isUnavailable ? null : _setHovering,
@@ -75,8 +77,8 @@ class _HomeProtocolCardState extends State<HomeProtocolCard> {
                   fontSize: 18,
                   fontWeight: FontWeight.w500,
                   color: widget.model.isUnavailable
-                      ? kitColors.white60
-                      : kitColors.white90,
+                      ? colorScheme.onSurfaceVariant
+                      : semanticColors.ink,
                 ),
               ),
               SizedBox(height: spacing.xs),
@@ -86,7 +88,7 @@ class _HomeProtocolCardState extends State<HomeProtocolCard> {
                   fontSize: 13,
                   fontWeight: FontWeight.w300,
                   height: 1.6,
-                  color: kitColors.white50,
+                  color: semanticColors.inkSubtle,
                 ),
               ),
               if (!widget.model.isUnavailable) ...[
@@ -114,19 +116,19 @@ class _CategoryPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
     final textStyle = context.textStyles.mono.copyWith(
       fontSize: 10,
-      color: kitColors.white50,
+      color: semanticColors.inkSubtle,
       letterSpacing: 1.5,
     );
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: kitColors.white05,
+        color: semanticColors.borderSubtle,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: kitColors.white05),
+        border: Border.all(color: semanticColors.borderSubtle),
       ),
       child: Text(label, style: textStyle),
     );
@@ -154,6 +156,8 @@ class _LogButtonState extends State<_LogButton> {
   @override
   Widget build(BuildContext context) {
     final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
+    final colorScheme = context.theme.colorScheme;
 
     return MouseRegion(
       onEnter: (_) => _setHovered(true),
@@ -167,12 +171,14 @@ class _LogButtonState extends State<_LogButton> {
             duration: const Duration(milliseconds: 200),
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
             decoration: BoxDecoration(
-              color: _isHovered ? kitColors.white10 : kitColors.white05,
+              color: _isHovered
+                  ? semanticColors.border
+                  : semanticColors.borderSubtle,
               borderRadius: BorderRadius.circular(999),
               border: Border.all(
                 color: _isHovered
                     ? kitColors.brandSky.withValues(alpha: 0.3)
-                    : kitColors.white10,
+                    : semanticColors.border,
               ),
             ),
             child: Row(
@@ -186,7 +192,9 @@ class _LogButtonState extends State<_LogButton> {
                   style: context.theme.textTheme.bodySmall?.copyWith(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: _isHovered ? kitColors.white90 : kitColors.white70,
+                    color: _isHovered
+                        ? semanticColors.ink
+                        : colorScheme.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(width: 6),
@@ -196,7 +204,9 @@ class _LogButtonState extends State<_LogButton> {
                   child: Icon(
                     LucideIcons.arrowRight,
                     size: 14,
-                    color: _isHovered ? kitColors.brandSky : kitColors.white40,
+                    color: _isHovered
+                        ? kitColors.brandSky
+                        : semanticColors.inkSubtle,
                   ),
                 ),
               ],

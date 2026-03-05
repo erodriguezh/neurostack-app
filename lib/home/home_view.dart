@@ -384,13 +384,13 @@ class _HomeViewState extends State<HomeView> {
   }
 
   Future<void> _showGraceDialog() async {
-    final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
 
     await showDialog<void>(
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: kitColors.panel,
+          backgroundColor: semanticColors.surfaceElevated,
           title: const Text('Payment Issue'),
           content: const Text(
             'We are having trouble with your payment method. Please update it.',
@@ -407,13 +407,13 @@ class _HomeViewState extends State<HomeView> {
   }
 
   Future<void> _showDeactivationDialog() async {
-    final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
 
     await showDialog<void>(
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: kitColors.panel,
+          backgroundColor: semanticColors.surfaceElevated,
           title: const Text('Choose 2 Protocols to Keep'),
           content: const Text(
             'Deactivation flow coming soon. You will be able to pick two '

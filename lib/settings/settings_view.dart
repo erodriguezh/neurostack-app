@@ -102,6 +102,9 @@ class _SettingsViewState extends State<SettingsView> {
                               child: SettingsSupportSection(
                                 isPremium: isPremium,
                                 onContactTap: _viewModel.goToContact,
+                                onFeedbackTap: () {}, // TODO: Wiredash
+                                onRateAppTap: () {}, // TODO: App Store
+                                onFeatureRequestTap: () {}, // TODO: Wiredash
                                 onCancelSubscriptionTap:
                                     _viewModel.openSubscriptionManagement,
                               ),

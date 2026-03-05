@@ -7,14 +7,17 @@ import 'package:neurostack/settings/widgets/settings_tile.dart';
 /// The "SUPPORT & RESOURCES" section of the Settings screen.
 ///
 /// Contains an uppercase section header and a rounded tile container
-/// holding two settings tiles (Contact Us, Cancel Subscription). The
-/// Cancel Subscription tile is only visible for premium users. Tiles
-/// are separated by 1 px dividers.
+/// holding five settings tiles (Contact Us, Send Feedback, Rate the App,
+/// Feature Request, Cancel Subscription). The Cancel Subscription tile is
+/// only visible for premium users. Tiles are separated by 1 px dividers.
 class SettingsSupportSection extends StatelessWidget {
   const SettingsSupportSection({
     super.key,
     required this.isPremium,
     required this.onContactTap,
+    required this.onFeedbackTap,
+    required this.onRateAppTap,
+    required this.onFeatureRequestTap,
     required this.onCancelSubscriptionTap,
   });
 
@@ -24,6 +27,15 @@ class SettingsSupportSection extends StatelessWidget {
 
   /// Navigate to the Contact Us page.
   final VoidCallback onContactTap;
+
+  /// Placeholder action for Send Feedback (TODO: Wiredash).
+  final VoidCallback onFeedbackTap;
+
+  /// Placeholder action for Rate the App (TODO: App Store).
+  final VoidCallback onRateAppTap;
+
+  /// Placeholder action for Feature Request (TODO: Wiredash).
+  final VoidCallback onFeatureRequestTap;
 
   /// Opens platform subscription management.
   final VoidCallback onCancelSubscriptionTap;
@@ -40,6 +52,27 @@ class SettingsSupportSection extends StatelessWidget {
         label: 'Contact Us',
         trailing: LucideIcons.chevronRight,
         onTap: onContactTap,
+        isVisible: true,
+      ),
+      _TileEntry(
+        icon: LucideIcons.messageSquare,
+        label: 'Send Feedback',
+        trailing: LucideIcons.chevronRight,
+        onTap: onFeedbackTap,
+        isVisible: true,
+      ),
+      _TileEntry(
+        icon: LucideIcons.star,
+        label: 'Rate the App',
+        trailing: LucideIcons.externalLink,
+        onTap: onRateAppTap,
+        isVisible: true,
+      ),
+      _TileEntry(
+        icon: LucideIcons.lightbulb,
+        label: 'Feature Request',
+        trailing: LucideIcons.chevronRight,
+        onTap: onFeatureRequestTap,
         isVisible: true,
       ),
       _TileEntry(

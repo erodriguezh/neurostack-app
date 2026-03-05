@@ -1,0 +1,21 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-03-05T08:41:29.866068Z",
+  "depends_on": [
+    "fn-75-brightness-aware-theming-migration.4",
+    "fn-75-brightness-aware-theming-migration.5",
+    "fn-75-brightness-aware-theming-migration.6",
+    "fn-75-brightness-aware-theming-migration.7",
+    "fn-75-brightness-aware-theming-migration.8",
+    "fn-75-brightness-aware-theming-migration.9"
+  ],
+  "epic": "fn-75-brightness-aware-theming-migration",
+  "id": "fn-75-brightness-aware-theming-migration.10",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-75-brightness-aware-theming-migration.10.md",
+  "status": "todo",
+  "title": "Flip adaptive routes to adaptive background",
+  "updated_at": "2026-03-05T09:01:57.401124Z"
+}
