@@ -412,9 +412,16 @@ class _ActionSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kitColors = context.kitColors;
     final semanticColors = context.semanticColors;
-    final colorScheme = context.theme.colorScheme;
+    final isLight = context.theme.brightness == Brightness.light;
     final spacing = context.spacing;
+
+    // Destructive color: kitColors.warning in dark mode for brand
+    // consistency; a dark red in light mode for WCAG AA contrast
+    // against surfaceElevated.
+    final destructiveColor =
+        isLight ? const Color(0xFFB71C1C) : kitColors.warning;
 
     switch (status) {
       case LibraryCardStatus.inStack:
@@ -430,7 +437,7 @@ class _ActionSection extends StatelessWidget {
             TextButton(
               onPressed: isOffline ? null : onRemove,
               style: TextButton.styleFrom(
-                foregroundColor: colorScheme.error,
+                foregroundColor: destructiveColor,
               ),
               child: const Text('Remove from Stack'),
             ),
