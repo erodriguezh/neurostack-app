@@ -24,11 +24,13 @@ Migrate library tab widgets from `kitColors.whiteXX` to semantic tokens, includi
 - Dialog surfaces and empty state text using `kitColors` are critical light-mode breaks
 
 ## Acceptance
-- [ ] No `whiteXX` usage in `library_protocol_card.dart` for legibility tokens
-- [ ] No `whiteXX` usage in `protocol_detail_sheet.dart` for legibility tokens
-- [ ] No `whiteXX` usage in `library_category_header.dart` for legibility tokens
-- [ ] No `whiteXX` in `library_view.dart` (dialogs + empty state)
-- [ ] `protocol_detail_sheet.dart` readable in light mode (all text >= 4.5:1 contrast)
-- [ ] All library widgets visually unchanged in dark mode
-- [ ] Existing `library_protocol_card_test.dart` updated to test both brightness modes
-- [ ] New sheet brightness test validates light+dark rendering
+- [x] No `whiteXX` usage in `library_protocol_card.dart` for legibility tokens
+- [x] No `whiteXX` usage in `protocol_detail_sheet.dart` for legibility tokens
+- [x] No `whiteXX` usage in `library_category_header.dart` for legibility tokens
+- [x] No `whiteXX` in `library_view.dart` (dialogs + empty state)
+- [x] `protocol_detail_sheet.dart` readable in light mode (all text >= 4.5:1 contrast)
+- [x] All library widgets visually unchanged in dark mode
+- [x] Existing `library_protocol_card_test.dart` updated to test both brightness modes
+- [x] New sheet brightness test validates light+dark rendering
+
+## Done summary
