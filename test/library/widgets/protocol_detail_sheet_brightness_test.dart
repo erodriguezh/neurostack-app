@@ -93,17 +93,11 @@ void main() {
             final theme = AppTheme.buildTheme(brightness);
             final semanticColors = theme.extension<AppSemanticColors>()!;
 
-            // Find the sheet Container (has rounded top border)
+            // Find the sheet Container by its key
             final sheetContainer = tester.widget<Container>(
-              find.descendant(
-                of: find.byType(ProtocolDetailSheet),
-                matching: find.byWidgetPredicate(
-                  (w) =>
-                      w is Container &&
-                      w.decoration is BoxDecoration &&
-                      (w.decoration as BoxDecoration).borderRadius != null,
-                ),
-              ).first,
+              find.byKey(
+                const ValueKey('protocol-detail-sheet-surface'),
+              ),
             );
             final decoration = sheetContainer.decoration as BoxDecoration;
             expect(
@@ -364,8 +358,13 @@ void main() {
       'library_view.dart AppGridBackground mode is tracked for Task 10',
       () {
         final source = File('lib/library/library_view.dart').readAsStringSync();
+        // Check that AppGridBackground is not constructed with adaptive mode.
+        // The pattern "mode: AppGridBackgroundMode.adaptive" would indicate
+        // the switch was flipped early. Comments referencing the mode name
+        // are expected and should not trigger this assertion.
         expect(
-          source.contains('AppGridBackgroundMode.adaptive'),
+          RegExp(r'mode:\s*AppGridBackgroundMode\.adaptive')
+              .hasMatch(source),
           isFalse,
           reason:
               'AppGridBackground adaptive mode should be enabled in '

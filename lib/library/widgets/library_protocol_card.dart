@@ -167,8 +167,12 @@ class _CategoryPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final semanticColors = context.semanticColors;
-    final textColor =
-        isMuted ? semanticColors.inkSubtle : semanticColors.inkSubtle;
+    final textColor = isMuted
+        ? semanticColors.inkSubtle.withValues(alpha: 0.7)
+        : semanticColors.inkSubtle;
+    final pillBackground = isMuted
+        ? semanticColors.borderSubtle.withValues(alpha: 0.5)
+        : semanticColors.borderSubtle;
     final textStyle = context.textStyles.mono.copyWith(
       fontSize: 10,
       color: textColor,
@@ -178,7 +182,7 @@ class _CategoryPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: semanticColors.borderSubtle,
+        color: pillBackground,
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: semanticColors.borderSubtle),
       ),

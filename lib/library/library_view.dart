@@ -73,6 +73,11 @@ class _LibraryViewState extends State<LibraryView> {
     final spacing = context.spacing;
     final bottomInset = MediaQuery.of(context).padding.bottom;
 
+    // Note: legacyDark mode is intentional here. Library route uses semantic
+    // tokens that resolve correctly for both brightness modes, but the
+    // background flip to AppGridBackgroundMode.adaptive is deferred to
+    // Task 10 (fn-75...10) to avoid partial visual migration. Until then,
+    // the route renders dark backgrounds with dark-mode semantic token values.
     return AppGridBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,

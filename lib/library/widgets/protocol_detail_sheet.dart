@@ -56,6 +56,7 @@ class _ProtocolDetailSheetState extends State<ProtocolDetailSheet> {
       maxChildSize: 0.95,
       builder: (context, controller) {
         return Container(
+          key: const ValueKey('protocol-detail-sheet-surface'),
           decoration: BoxDecoration(
             color: semanticColors.surfaceElevated,
             borderRadius: const BorderRadius.vertical(
@@ -411,8 +412,8 @@ class _ActionSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final kitColors = context.kitColors;
     final semanticColors = context.semanticColors;
+    final colorScheme = context.theme.colorScheme;
     final spacing = context.spacing;
 
     switch (status) {
@@ -429,7 +430,7 @@ class _ActionSection extends StatelessWidget {
             TextButton(
               onPressed: isOffline ? null : onRemove,
               style: TextButton.styleFrom(
-                foregroundColor: kitColors.warning,
+                foregroundColor: colorScheme.error,
               ),
               child: const Text('Remove from Stack'),
             ),
