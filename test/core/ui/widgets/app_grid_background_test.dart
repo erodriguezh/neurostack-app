@@ -6,11 +6,11 @@ import 'package:neurostack/core/ui/widgets/app_grid_background.dart';
 
 void main() {
   group('AppGridBackgroundMode enum', () {
-    test('has exactly two values', () {
+    testWidgets('has exactly two values', (_) async {
       expect(AppGridBackgroundMode.values.length, 2);
     });
 
-    test('contains legacyDark and adaptive', () {
+    testWidgets('contains legacyDark and adaptive', (_) async {
       expect(
         AppGridBackgroundMode.values,
         containsAll([
