@@ -52,7 +52,7 @@ class AppPrimaryCta extends StatelessWidget {
                   height: 20,
                   width: 20,
                   child: CircularProgressIndicator(
-                    color: enabled
+                    color: isEnabled
                         ? kitColors.background
                         : semanticColors.inkSubtle,
                     strokeWidth: 2,

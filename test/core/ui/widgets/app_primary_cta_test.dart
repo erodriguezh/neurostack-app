@@ -122,6 +122,35 @@ void main() {
       });
     }
 
+    for (final brightness in Brightness.values) {
+      testWidgets(
+        'loading spinner uses inkSubtle in ${brightness.name} mode',
+        (tester) async {
+          await tester.pumpWidget(
+            wrap(
+              brightness: brightness,
+              child: AppPrimaryCta(
+                label: 'Continue',
+                onPressed: () {},
+                loading: true,
+              ),
+            ),
+          );
+
+          final theme = AppTheme.buildTheme(brightness);
+          final semanticColors =
+              theme.extension<AppSemanticColors>()!;
+
+          final spinner = tester.widget<CircularProgressIndicator>(
+            find.byType(CircularProgressIndicator),
+          );
+          // When loading, isEnabled is false, so spinner should use
+          // semanticColors.inkSubtle (visible against disabled surface).
+          expect(spinner.color, equals(semanticColors.inkSubtle));
+        },
+      );
+    }
+
     test('source contains no kitColors.whiteXX references', () {
       final source = File(
         'lib/core/ui/widgets/app_primary_cta.dart',
