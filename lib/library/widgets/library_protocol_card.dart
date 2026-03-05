@@ -51,11 +51,14 @@ class _LibraryProtocolCardState extends State<LibraryProtocolCard> {
         ? kitColors.brandSky.withValues(alpha: 0.3)
         : (_isHovering ? semanticColors.border : semanticColors.borderSubtle);
 
+    final baseCardBg = colorScheme.outlineVariant;
     final backgroundColor = switch (status) {
-      LibraryCardStatus.inStack => colorScheme.outlineVariant,
-      LibraryCardStatus.available => colorScheme.outlineVariant,
+      LibraryCardStatus.inStack => baseCardBg,
+      LibraryCardStatus.available => baseCardBg,
+      // Scale existing alpha by 0.5 to dim locked cards without overriding
+      // the dark-mode semi-transparent base.
       LibraryCardStatus.locked =>
-        colorScheme.outlineVariant.withValues(alpha: 0.5),
+        baseCardBg.withValues(alpha: baseCardBg.a * 0.5),
     };
 
     final cardContent = Padding(

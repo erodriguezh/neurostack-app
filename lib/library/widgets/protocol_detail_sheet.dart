@@ -436,8 +436,13 @@ class _ActionSection extends StatelessWidget {
             SizedBox(height: spacing.sm),
             TextButton(
               onPressed: isOffline ? null : onRemove,
-              style: TextButton.styleFrom(
-                foregroundColor: destructiveColor,
+              style: TextButton.styleFrom().copyWith(
+                foregroundColor: WidgetStateProperty.resolveWith((states) {
+                  if (states.contains(WidgetState.disabled)) {
+                    return semanticColors.inkSubtle;
+                  }
+                  return destructiveColor;
+                }),
               ),
               child: const Text('Remove from Stack'),
             ),
