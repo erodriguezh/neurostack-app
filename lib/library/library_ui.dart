@@ -5,11 +5,17 @@ import 'package:neurostack/library/library_state.dart';
 
 Color libraryEvidenceColor(BuildContext context, EvidenceLevel level) {
   final kitColors = context.kitColors;
+  final semanticColors = context.semanticColors;
+  final isLight = context.theme.brightness == Brightness.light;
+
   return switch (level) {
     EvidenceLevel.multipleRcts => kitColors.evidenceStrong,
     EvidenceLevel.singleRct => kitColors.evidenceStrong,
     EvidenceLevel.observational => kitColors.evidenceModerate,
-    EvidenceLevel.expertConsensus => kitColors.evidenceWeak,
+    // evidenceWeak is white/50 — unreadable on light surfaces.
+    // Fall back to inkSubtle in light mode for WCAG compliance.
+    EvidenceLevel.expertConsensus =>
+      isLight ? semanticColors.inkSubtle : kitColors.evidenceWeak,
   };
 }
 
