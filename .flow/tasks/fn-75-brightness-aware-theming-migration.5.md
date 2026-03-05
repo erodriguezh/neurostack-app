@@ -26,10 +26,13 @@ Migrate home tab widgets from `kitColors.whiteXX` to `AppSemanticColors` tokens,
 - Dialog surfaces using `kitColors.panel` are a critical light-mode break — dark text on dark panel makes dialogs unreadable
 
 ## Acceptance
-- [ ] No `whiteXX` usage in any `lib/home/widgets/` file for legibility-critical tokens
-- [ ] `home_bottom_nav.dart` background adapts to brightness (light surface in light mode)
-- [ ] `home_protocol_card.dart` text and borders readable in both modes
-- [ ] `home_view.dart` dialog backgrounds use semantic surfaces (no `kitColors.panel`)
-- [ ] All home widgets visually unchanged in dark mode
-- [ ] Test: home widgets rendered in both Brightness.light and Brightness.dark
-- [ ] Test: header text contrast >= 4.5:1 in both modes (using shared contrast helper)
+- [x] No `whiteXX` usage in any `lib/home/widgets/` file for legibility-critical tokens
+- [x] `home_bottom_nav.dart` background adapts to brightness (light surface in light mode)
+- [x] `home_protocol_card.dart` text and borders readable in both modes
+- [x] `home_view.dart` dialog backgrounds use semantic surfaces (no `kitColors.panel`)
+- [x] All home widgets visually unchanged in dark mode
+- [x] Test: home widgets rendered in both Brightness.light and Brightness.dark
+- [x] Test: header text contrast >= 4.5:1 in both modes (using shared contrast helper)
+
+## Done summary
+Migrated all home tab widgets (HomeBottomNav, HomeEmptyState, HomeProtocolCard, HomeStatusBanner, HomeStatusDot) from kitColors.whiteXX to AppSemanticColors tokens, and replaced kitColors.panel dialog backgrounds in HomeView with semanticColors.surfaceElevated. Added 43 brightness tests covering both light and dark modes with WCAG contrast assertions.
