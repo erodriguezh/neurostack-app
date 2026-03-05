@@ -330,12 +330,13 @@ class _LibraryViewState extends State<LibraryView> {
       return;
     }
 
-    final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: kitColors.panel,
+          backgroundColor: semanticColors.surfaceElevated,
+          surfaceTintColor: Colors.transparent,
           title: Text('Remove ${protocol.name.value}?'),
           content: const Text("This won't delete your session history."),
           actions: [
@@ -370,7 +371,7 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
 
     return Padding(
       padding: EdgeInsets.only(top: context.spacing.xxl),
@@ -380,7 +381,7 @@ class _EmptyState extends StatelessWidget {
             'No protocols available right now.',
             textAlign: TextAlign.center,
             style: context.theme.textTheme.bodyMedium?.copyWith(
-              color: kitColors.white60,
+              color: semanticColors.inkSubtle,
             ),
           ),
           SizedBox(height: context.spacing.sm),
@@ -388,7 +389,7 @@ class _EmptyState extends StatelessWidget {
             'Pull to refresh to retry.',
             textAlign: TextAlign.center,
             style: context.theme.textTheme.bodySmall?.copyWith(
-              color: kitColors.white40,
+              color: semanticColors.inkSubtle,
             ),
           ),
         ],

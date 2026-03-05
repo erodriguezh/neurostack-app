@@ -9,80 +9,82 @@ import 'package:neurostack/library/widgets/library_protocol_card.dart';
 import '../../constants/test_constants.dart';
 
 void main() {
-  testWidgets(
-    'libraryProtocolCard_whenInStack_rendersInYourStackLabel',
-    (tester) async {
-      // Arrange
-      final model = _buildModel(status: LibraryCardStatus.inStack);
+  for (final brightness in Brightness.values) {
+    group('LibraryProtocolCard (${brightness.name} mode)', () {
+      testWidgets(
+        'whenInStack_rendersInYourStackLabel',
+        (tester) async {
+          final model = _buildModel(status: LibraryCardStatus.inStack);
 
-      // Act
-      await tester.pumpWidget(
-        _wrap(
-          LibraryProtocolCard(
-            model: model,
-            onTapCard: () {},
-          ),
-        ),
+          await tester.pumpWidget(
+            _wrap(
+              brightness: brightness,
+              child: LibraryProtocolCard(
+                model: model,
+                onTapCard: () {},
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          expect(find.text('In your stack'), findsOneWidget);
+          expect(find.byIcon(LucideIcons.check), findsOneWidget);
+          expect(find.byIcon(LucideIcons.dumbbell), findsOneWidget);
+        },
       );
-      await tester.pumpAndSettle();
 
-      // Assert
-      expect(find.text('In your stack'), findsOneWidget);
-      expect(find.byIcon(LucideIcons.check), findsOneWidget);
-      expect(find.byIcon(LucideIcons.dumbbell), findsOneWidget);
-    },
-  );
+      testWidgets(
+        'whenAvailable_rendersTapToAddLabel',
+        (tester) async {
+          final model = _buildModel(status: LibraryCardStatus.available);
 
-  testWidgets(
-    'libraryProtocolCard_whenAvailable_rendersTapToAddLabel',
-    (tester) async {
-      // Arrange
-      final model = _buildModel(status: LibraryCardStatus.available);
+          await tester.pumpWidget(
+            _wrap(
+              brightness: brightness,
+              child: LibraryProtocolCard(
+                model: model,
+                onTapCard: () {},
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
 
-      // Act
-      await tester.pumpWidget(
-        _wrap(
-          LibraryProtocolCard(
-            model: model,
-            onTapCard: () {},
-          ),
-        ),
+          expect(find.text('Tap to add'), findsOneWidget);
+          expect(find.byIcon(LucideIcons.plus), findsOneWidget);
+        },
       );
-      await tester.pumpAndSettle();
 
-      // Assert
-      expect(find.text('Tap to add'), findsOneWidget);
-      expect(find.byIcon(LucideIcons.plus), findsOneWidget);
-    },
-  );
+      testWidgets(
+        'whenLocked_rendersUpgradeLabelAndLockIcon',
+        (tester) async {
+          final model = _buildModel(status: LibraryCardStatus.locked);
 
-  testWidgets(
-    'libraryProtocolCard_whenLocked_rendersUpgradeLabelAndLockIcon',
-    (tester) async {
-      // Arrange
-      final model = _buildModel(status: LibraryCardStatus.locked);
+          await tester.pumpWidget(
+            _wrap(
+              brightness: brightness,
+              child: LibraryProtocolCard(
+                model: model,
+                onTapCard: () {},
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
 
-      // Act
-      await tester.pumpWidget(
-        _wrap(
-          LibraryProtocolCard(
-            model: model,
-            onTapCard: () {},
-          ),
-        ),
+          expect(find.text('Upgrade to unlock'), findsOneWidget);
+          expect(find.byIcon(LucideIcons.lock), findsOneWidget);
+        },
       );
-      await tester.pumpAndSettle();
-
-      // Assert
-      expect(find.text('Upgrade to unlock'), findsOneWidget);
-      expect(find.byIcon(LucideIcons.lock), findsOneWidget);
-    },
-  );
+    });
+  }
 }
 
-Widget _wrap(Widget child) {
+Widget _wrap({
+  required Brightness brightness,
+  required Widget child,
+}) {
   return MaterialApp(
-    theme: AppTheme.buildTheme(Brightness.dark),
+    key: ValueKey(brightness),
+    theme: AppTheme.buildTheme(brightness),
     home: Scaffold(body: child),
   );
 }

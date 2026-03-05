@@ -23,9 +23,10 @@ String libraryStatusLabel(LibraryCardStatus status) {
 
 Color libraryStatusColor(BuildContext context, LibraryCardStatus status) {
   final kitColors = context.kitColors;
+  final semanticColors = context.semanticColors;
   return switch (status) {
     LibraryCardStatus.inStack => kitColors.brandSky,
-    LibraryCardStatus.available => kitColors.white40,
+    LibraryCardStatus.available => semanticColors.inkSubtle,
     LibraryCardStatus.locked => kitColors.yellow400.withValues(alpha: 0.8),
   };
 }

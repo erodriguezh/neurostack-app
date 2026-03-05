@@ -36,8 +36,7 @@ Migrate home tab widgets from `kitColors.whiteXX` to `AppSemanticColors` tokens,
 
 ## Done summary
 Migrated all home tab widgets (HomeBottomNav, HomeEmptyState, HomeProtocolCard, HomeStatusBanner, HomeStatusDot) from kitColors.whiteXX to AppSemanticColors tokens, and replaced kitColors.panel dialog backgrounds in HomeView with semanticColors.surfaceElevated. Added 43 brightness tests covering both light and dark modes with WCAG contrast assertions.
-
 ## Evidence
-- Commits: e74034b, 47e7f6b, 30c16a5, 046f3fa
-- Tests: `flutter test` (all pass), `flutter analyze` (no issues)
-- Review: SHIP verdict from RepoPrompt impl review
+- Commits: e74034b, 47e7f6b, 30c16a5
+- Tests: flutter test, flutter analyze
+- PRs:
