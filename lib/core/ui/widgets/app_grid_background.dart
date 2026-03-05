@@ -29,7 +29,7 @@ class GridPattern extends StatelessWidget {
     super.key,
     required this.lineColor,
     this.spacing = 40.0,
-  });
+  }) : assert(spacing > 0, 'spacing must be positive to avoid infinite loops');
 
   /// Color of the grid lines (typically white with very low opacity).
   final Color lineColor;
@@ -72,7 +72,10 @@ class AppGridBackground extends StatelessWidget {
     this.glowColor,
     this.lineColor,
     this.gridSpacing = 40.0,
-  });
+  }) : assert(
+          gridSpacing > 0,
+          'gridSpacing must be positive to avoid infinite loops',
+        );
 
   final Widget child;
 
@@ -96,24 +99,24 @@ class AppGridBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color effectiveFill;
-    final Color effectiveLine;
-    final Color effectiveGlow;
-
-    switch (mode) {
-      case AppGridBackgroundMode.legacyDark:
-        final kitColors = context.kitColors;
-        effectiveFill = fillColor ?? kitColors.background;
-        effectiveLine = lineColor ?? kitColors.white02;
-        effectiveGlow =
-            glowColor ?? kitColors.brandSky.withValues(alpha: 0.05);
-      case AppGridBackgroundMode.adaptive:
-        final colorScheme = Theme.of(context).colorScheme;
-        effectiveFill = fillColor ?? colorScheme.surface;
-        effectiveLine = lineColor ?? colorScheme.outlineVariant;
-        effectiveGlow =
-            glowColor ?? colorScheme.primary.withValues(alpha: 0.05);
-    }
+    final (effectiveFill, effectiveLine, effectiveGlow) = switch (mode) {
+      AppGridBackgroundMode.legacyDark => () {
+          final kitColors = context.kitColors;
+          return (
+            fillColor ?? kitColors.background,
+            lineColor ?? kitColors.white02,
+            glowColor ?? kitColors.brandSky.withValues(alpha: 0.05),
+          );
+        }(),
+      AppGridBackgroundMode.adaptive => () {
+          final colorScheme = Theme.of(context).colorScheme;
+          return (
+            fillColor ?? colorScheme.surface,
+            lineColor ?? colorScheme.outlineVariant,
+            glowColor ?? colorScheme.primary.withValues(alpha: 0.05),
+          );
+        }(),
+    };
 
     return SizedBox.expand(
       child: Stack(
@@ -152,7 +155,7 @@ class _GridPainter extends CustomPainter {
   _GridPainter({
     required this.lineColor,
     required this.spacing,
-  });
+  }) : assert(spacing > 0, 'spacing must be positive to avoid infinite loops');
 
   final Color lineColor;
   final double spacing;
