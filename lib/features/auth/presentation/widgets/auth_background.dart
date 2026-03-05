@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:neurostack/core/ui/widgets/app_grid_background.dart';
+import 'package:neurostack/core/ui/widgets/dark_theme_scope.dart';
 
 class AuthBackground extends StatelessWidget {
   const AuthBackground({
@@ -13,9 +14,11 @@ class AuthBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppGridBackground(
-      showTopGlow: showTopGlow,
-      child: child,
+    return DarkThemeScope(
+      child: AppGridBackground(
+        showTopGlow: showTopGlow,
+        child: child,
+      ),
     );
   }
 }

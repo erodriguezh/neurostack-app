@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
 import 'package:neurostack/core/ui/widgets/app_grid_background.dart';
+import 'package:neurostack/core/ui/widgets/dark_theme_scope.dart';
 import 'package:neurostack/core/utils/internal_notification/notify_service.dart';
 import 'package:neurostack/core/utils/internal_notification/toast/toast_event.dart';
 import 'package:neurostack/core/utils/locator.dart';
@@ -54,14 +55,16 @@ class _PaywallViewState extends State<PaywallView> {
   Widget build(BuildContext context) {
     // Show loading indicator while RevenueCat paywall is being presented.
     // The native paywall UI will appear on top of this.
-    return AppGridBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: SafeArea(
-          child: Center(
-            child: Padding(
-              padding: EdgeInsets.all(context.spacing.lg),
-              child: const CircularProgressIndicator(),
+    return DarkThemeScope(
+      child: AppGridBackground(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: SafeArea(
+            child: Center(
+              child: Padding(
+                padding: EdgeInsets.all(context.spacing.lg),
+                child: const CircularProgressIndicator(),
+              ),
             ),
           ),
         ),
