@@ -14,8 +14,6 @@ class HomeIndicatorPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final kitColors = context.kitColors;
-
     return Positioned(
       left: 0,
       right: 0,
@@ -25,7 +23,7 @@ class HomeIndicatorPill extends StatelessWidget {
           width: 134,
           height: 5,
           decoration: BoxDecoration(
-            color: kitColors.white90.withValues(alpha: 0.3),
+            color: context.semanticColors.ink.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(999),
           ),
         ),

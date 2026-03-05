@@ -113,7 +113,7 @@ class _Toast extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final semanticColors = context.semanticColors;
     final radius = context.borderRadius.lg;
 
     final iconData = switch (toastEvent) {
@@ -134,13 +134,9 @@ class _Toast extends StatelessWidget {
             child: Container(
               margin: EdgeInsets.all(context.spacing.md),
               decoration: BoxDecoration(
-                color: isDark
-                    ? context.kitColors.neutral800
-                    : context.kitColors.neutral100,
+                color: semanticColors.surfaceElevated,
                 border: Border.all(
-                  color: isDark
-                      ? context.kitColors.neutral700
-                      : context.kitColors.neutral300,
+                  color: semanticColors.border,
                   width: 1,
                 ),
                 borderRadius: radius,
@@ -161,9 +157,7 @@ class _Toast extends StatelessWidget {
                           children: [
                             Icon(
                               iconData,
-                              color: isDark
-                                  ? context.kitColors.neutral100
-                                  : context.kitColors.neutral900,
+                              color: semanticColors.ink,
                             ),
                             SizedBox(width: context.spacing.sm),
                           ],

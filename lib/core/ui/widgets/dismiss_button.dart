@@ -10,7 +10,6 @@ class DismissButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final kitColors = context.kitColors;
     return SizedBox(
       width: 24,
       height: 24,
@@ -21,7 +20,7 @@ class DismissButton extends StatelessWidget {
         constraints: const BoxConstraints(),
         icon: Icon(
           LucideIcons.x,
-          color: kitColors.white60,
+          color: context.semanticColors.inkSubtle,
         ),
       ),
     );

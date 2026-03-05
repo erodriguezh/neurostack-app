@@ -76,6 +76,7 @@ class AppPrimaryCta extends StatelessWidget {
 
   ButtonStyle _buildStyle(BuildContext context) {
     final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
 
     return FilledButton.styleFrom(
       minimumSize: const Size.fromHeight(56),
@@ -87,19 +88,19 @@ class AppPrimaryCta extends StatelessWidget {
     ).copyWith(
       backgroundColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.disabled)) {
-          return kitColors.white05;
+          return semanticColors.surface;
         }
         return kitColors.brandSky;
       }),
       foregroundColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.disabled)) {
-          return kitColors.white30;
+          return semanticColors.inkSubtle;
         }
         return kitColors.background;
       }),
       side: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.disabled)) {
-          return BorderSide(color: kitColors.white10);
+          return BorderSide(color: semanticColors.borderSubtle);
         }
         return BorderSide(color: kitColors.brandSky);
       }),

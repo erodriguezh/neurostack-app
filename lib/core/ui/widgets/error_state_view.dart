@@ -11,7 +11,7 @@ class ErrorStateView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: context.spacing.lg),
       child: Center(
@@ -22,7 +22,7 @@ class ErrorStateView extends StatelessWidget {
               message ?? 'Something went wrong.',
               textAlign: TextAlign.center,
               style: context.theme.textTheme.bodyMedium?.copyWith(
-                color: kitColors.white60,
+                color: semanticColors.inkSubtle,
                 height: 1.5,
               ),
             ),
@@ -31,7 +31,7 @@ class ErrorStateView extends StatelessWidget {
               'Pull to refresh to retry.',
               textAlign: TextAlign.center,
               style: context.theme.textTheme.bodySmall?.copyWith(
-                color: kitColors.white40,
+                color: semanticColors.inkSubtle,
               ),
             ),
           ],
