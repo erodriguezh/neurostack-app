@@ -70,21 +70,21 @@ void main() {
               final semanticColors =
                   theme.extension<AppSemanticColors>()!;
 
-              // Find the container with the nav background decoration
-              final containers = tester.widgetList<Container>(
-                find.byType(Container),
+              // Find the 64px-tall container within the HomeBottomNav subtree
+              final navContainer = tester.widget<Container>(
+                find.descendant(
+                  of: find.byType(HomeBottomNav),
+                  matching: find.byWidgetPredicate(
+                    (w) =>
+                        w is Container &&
+                        w.constraints?.maxHeight == 64 &&
+                        w.decoration is BoxDecoration,
+                  ),
+                ),
               );
-              final navContainer = containers.firstWhere(
-                (c) =>
-                    c.constraints?.maxHeight == 64 ||
-                    (c.decoration is BoxDecoration &&
-                        (c.decoration as BoxDecoration).color ==
-                            semanticColors.surface.withValues(alpha: 0.85)),
-                orElse: () => containers.first,
-              );
-              final decoration = navContainer.decoration as BoxDecoration?;
+              final decoration = navContainer.decoration as BoxDecoration;
               expect(
-                decoration?.color,
+                decoration.color,
                 equals(semanticColors.surface.withValues(alpha: 0.85)),
               );
             },
@@ -272,22 +272,47 @@ void main() {
           );
 
           testWidgets(
-            'title text contrast >= 4.5:1',
+            'title text contrast >= 4.5:1 against card background',
             (tester) async {
+              await tester.pumpWidget(
+                wrap(
+                  brightness: brightness,
+                  child: HomeProtocolCard(
+                    model: makeModel(),
+                    onLogSession: () {},
+                  ),
+                ),
+              );
+
               final theme = AppTheme.buildTheme(brightness);
               final semanticColors =
                   theme.extension<AppSemanticColors>()!;
 
-              final ratio = contrastRatio(
-                semanticColors.ink,
+              // Read the actual card background color from the
+              // AnimatedContainer within HomeProtocolCard
+              final cardContainer = tester.widget<AnimatedContainer>(
+                find.descendant(
+                  of: find.byType(HomeProtocolCard),
+                  matching: find.byType(AnimatedContainer),
+                ).first,
+              );
+              final decoration =
+                  cardContainer.decoration as BoxDecoration;
+              // Card bg may be semi-transparent (e.g. outlineVariant in
+              // dark mode is white05). Composite over the page surface
+              // to get the effective rendered color.
+              final cardBg = compositedOver(
+                decoration.color!,
                 semanticColors.surface,
               );
+
+              final ratio = contrastRatio(semanticColors.ink, cardBg);
               expect(
                 ratio,
                 greaterThanOrEqualTo(wcagAANormalText),
                 reason:
-                    'Protocol card title contrast in ${brightness.name} '
-                    'mode (got $ratio)',
+                    'Protocol card title contrast against card bg in '
+                    '${brightness.name} mode (got $ratio)',
               );
             },
           );
@@ -364,17 +389,21 @@ void main() {
               final semanticColors =
                   theme.extension<AppSemanticColors>()!;
 
-              // Find the single Container with a BoxDecoration (the dot)
-              final containers = tester.widgetList<Container>(
-                find.byType(Container),
+              // Find the circle-shaped Container within HomeStatusDot
+              final dotContainer = tester.widget<Container>(
+                find.descendant(
+                  of: find.byType(HomeStatusDot),
+                  matching: find.byWidgetPredicate(
+                    (w) =>
+                        w is Container &&
+                        w.decoration is BoxDecoration &&
+                        (w.decoration as BoxDecoration).shape ==
+                            BoxShape.circle,
+                  ),
+                ),
               );
-              final dotContainer = containers.firstWhere(
-                (c) =>
-                    c.decoration is BoxDecoration &&
-                    (c.decoration as BoxDecoration).shape ==
-                        BoxShape.circle,
-              );
-              final decoration = dotContainer.decoration as BoxDecoration;
+              final decoration =
+                  dotContainer.decoration as BoxDecoration;
               expect(decoration.color, equals(semanticColors.borderSubtle));
             },
           );
@@ -392,16 +421,21 @@ void main() {
               final theme = AppTheme.buildTheme(brightness);
               final kitColors = theme.extension<KitColorsExtension>()!;
 
-              final containers = tester.widgetList<Container>(
-                find.byType(Container),
+              // Find the first circle-shaped Container (the static dot)
+              final dotContainers = tester.widgetList<Container>(
+                find.descendant(
+                  of: find.byType(HomeStatusDot),
+                  matching: find.byWidgetPredicate(
+                    (w) =>
+                        w is Container &&
+                        w.decoration is BoxDecoration &&
+                        (w.decoration as BoxDecoration).shape ==
+                            BoxShape.circle,
+                  ),
+                ),
               );
-              final dotContainer = containers.firstWhere(
-                (c) =>
-                    c.decoration is BoxDecoration &&
-                    (c.decoration as BoxDecoration).shape ==
-                        BoxShape.circle,
-              );
-              final decoration = dotContainer.decoration as BoxDecoration;
+              final decoration =
+                  dotContainers.first.decoration as BoxDecoration;
               expect(decoration.color, equals(kitColors.success));
             },
           );
@@ -448,6 +482,25 @@ void main() {
               'for dialog backgrounds',
         );
       });
+
+      // Note: AppGridBackground mode flip from legacyDark to adaptive is
+      // explicitly deferred to Task 10 (fn-75...10). This audit documents
+      // that the home route still uses legacyDark until Task 10 lands.
+      test(
+        'home_view.dart AppGridBackground mode is tracked for Task 10',
+        () {
+          final source = File('lib/home/home_view.dart').readAsStringSync();
+          // Currently legacyDark (default). Task 10 will flip to adaptive.
+          // If someone flips it early, this test catches it so we know.
+          expect(
+            source.contains('AppGridBackgroundMode.adaptive'),
+            isFalse,
+            reason:
+                'AppGridBackground adaptive mode should be enabled in '
+                'Task 10, not Task 5',
+          );
+        },
+      );
     });
   });
 }

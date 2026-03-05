@@ -391,6 +391,7 @@ class _HomeViewState extends State<HomeView> {
       builder: (context) {
         return AlertDialog(
           backgroundColor: semanticColors.surfaceElevated,
+          surfaceTintColor: Colors.transparent,
           title: const Text('Payment Issue'),
           content: const Text(
             'We are having trouble with your payment method. Please update it.',
@@ -414,6 +415,7 @@ class _HomeViewState extends State<HomeView> {
       builder: (context) {
         return AlertDialog(
           backgroundColor: semanticColors.surfaceElevated,
+          surfaceTintColor: Colors.transparent,
           title: const Text('Choose 2 Protocols to Keep'),
           content: const Text(
             'Deactivation flow coming soon. You will be able to pick two '

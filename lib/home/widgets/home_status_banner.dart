@@ -63,7 +63,7 @@ class HomeStatusBanner extends StatelessWidget {
                             ),
                           ),
                         ),
-                        if (banner.isTappable)
+                        if (isTappable)
                           Icon(
                             LucideIcons.chevronRight,
                             size: 16,
