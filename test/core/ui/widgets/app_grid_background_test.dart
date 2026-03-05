@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
 import 'package:neurostack/core/ui/constants/kit_colors.dart';
+import 'package:neurostack/core/ui/extensions/app_semantic_colors.dart';
 import 'package:neurostack/core/ui/widgets/app_grid_background.dart';
 
 void main() {
@@ -94,7 +95,7 @@ void main() {
 
   group('AppGridBackground - adaptive mode', () {
     testWidgets(
-      'resolves fill to ColorScheme.surface in dark mode',
+      'resolves fill to AppSemanticColors.gridBackground in dark mode',
       (tester) async {
         await tester.pumpWidget(
           _wrap(
@@ -107,18 +108,21 @@ void main() {
         );
 
         final fillColor = _findFillColor(tester);
-        final expectedSurface =
-            AppTheme.buildTheme(Brightness.dark).colorScheme.surface;
+        final expectedFill = AppTheme.buildTheme(Brightness.dark)
+            .extension<AppSemanticColors>()!
+            .gridBackground;
         expect(
           fillColor,
-          equals(expectedSurface),
-          reason: 'adaptive fill should be ColorScheme.surface in dark mode',
+          equals(expectedFill),
+          reason:
+              'adaptive fill should be AppSemanticColors.gridBackground '
+              'in dark mode',
         );
       },
     );
 
     testWidgets(
-      'resolves fill to ColorScheme.surface in light mode',
+      'resolves fill to AppSemanticColors.gridBackground in light mode',
       (tester) async {
         await tester.pumpWidget(
           _wrap(
@@ -131,12 +135,15 @@ void main() {
         );
 
         final fillColor = _findFillColor(tester);
-        final expectedSurface =
-            AppTheme.buildTheme(Brightness.light).colorScheme.surface;
+        final expectedFill = AppTheme.buildTheme(Brightness.light)
+            .extension<AppSemanticColors>()!
+            .gridBackground;
         expect(
           fillColor,
-          equals(expectedSurface),
-          reason: 'adaptive fill should be ColorScheme.surface in light mode',
+          equals(expectedFill),
+          reason:
+              'adaptive fill should be AppSemanticColors.gridBackground '
+              'in light mode',
         );
       },
     );
@@ -159,7 +166,7 @@ void main() {
     );
 
     testWidgets(
-      'resolves line color to ColorScheme.outlineVariant',
+      'resolves line color to AppSemanticColors.gridLine',
       (tester) async {
         for (final brightness in Brightness.values) {
           await tester.pumpWidget(
@@ -175,13 +182,14 @@ void main() {
           final gridPattern = tester.widget<GridPattern>(
             find.byType(GridPattern),
           );
-          final expectedLine =
-              AppTheme.buildTheme(brightness).colorScheme.outlineVariant;
+          final expectedLine = AppTheme.buildTheme(brightness)
+              .extension<AppSemanticColors>()!
+              .gridLine;
           expect(
             gridPattern.lineColor,
             equals(expectedLine),
             reason:
-                'adaptive lines should be ColorScheme.outlineVariant in '
+                'adaptive lines should be AppSemanticColors.gridLine in '
                 '$brightness mode',
           );
         }
@@ -189,7 +197,7 @@ void main() {
     );
 
     testWidgets(
-      'resolves glow from ColorScheme.primary with low alpha',
+      'resolves glow from AppSemanticColors.gridGlow',
       (tester) async {
         await tester.pumpWidget(
           _wrap(
@@ -202,15 +210,15 @@ void main() {
           ),
         );
 
-        final expectedPrimary =
-            AppTheme.buildTheme(Brightness.dark).colorScheme.primary;
-        final expectedGlow = expectedPrimary.withValues(alpha: 0.05);
+        final expectedGlow = AppTheme.buildTheme(Brightness.dark)
+            .extension<AppSemanticColors>()!
+            .gridGlow;
 
         final glowColor = _findGlowColor(tester);
         expect(
           glowColor,
           equals(expectedGlow),
-          reason: 'adaptive glow should derive from ColorScheme.primary',
+          reason: 'adaptive glow should be AppSemanticColors.gridGlow',
         );
       },
     );

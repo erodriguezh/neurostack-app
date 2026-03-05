@@ -109,11 +109,11 @@ class AppGridBackground extends StatelessWidget {
           );
         }(),
       AppGridBackgroundMode.adaptive => () {
-          final colorScheme = Theme.of(context).colorScheme;
+          final semanticColors = context.semanticColors;
           return (
-            fillColor ?? colorScheme.surface,
-            lineColor ?? colorScheme.outlineVariant,
-            glowColor ?? colorScheme.primary.withValues(alpha: 0.05),
+            fillColor ?? semanticColors.gridBackground,
+            lineColor ?? semanticColors.gridLine,
+            glowColor ?? semanticColors.gridGlow,
           );
         }(),
     };
