@@ -3,6 +3,23 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
 
+/// Controls how [AppGridBackground] resolves its fill, line, and glow colors.
+///
+/// - [legacyDark]: Fixed dark palette from [KitColorsExtension]. Current
+///   default -- no visual change from pre-migration behavior.
+/// - [adaptive]: Brightness-aware palette derived from [ColorScheme].
+///   Fill uses `ColorScheme.surface`, lines use `ColorScheme.outlineVariant`,
+///   and glow uses `ColorScheme.primary` with low alpha.
+///
+/// See `docs/best_practices/design/brightness_theming.md` for the full policy.
+enum AppGridBackgroundMode {
+  /// Fixed dark palette -- uses kitColors.background / white02 / brandSky.
+  legacyDark,
+
+  /// Brightness-aware -- resolves from the ambient [ColorScheme].
+  adaptive,
+}
+
 /// A standalone grid pattern widget - just the painting, no wrapper.
 ///
 /// Use this directly when you need to compose the grid with other layers.
@@ -38,11 +55,20 @@ class GridPattern extends StatelessWidget {
 ///
 /// Used by auth, startup, and onboarding screens for consistent branding.
 /// For just the grid without the wrapper, use [GridPattern].
+///
+/// By default, [mode] is [AppGridBackgroundMode.legacyDark] which preserves
+/// the original fixed-dark behavior. Pass [AppGridBackgroundMode.adaptive] to
+/// resolve colors from the ambient [ColorScheme] (brightness-aware).
+///
+/// Explicit [lineColor], [glowColor], and [fillColor] overrides take priority
+/// over both modes.
 class AppGridBackground extends StatelessWidget {
   const AppGridBackground({
     super.key,
     required this.child,
+    this.mode = AppGridBackgroundMode.legacyDark,
     this.showTopGlow = false,
+    this.fillColor,
     this.glowColor,
     this.lineColor,
     this.gridSpacing = 40.0,
@@ -50,13 +76,19 @@ class AppGridBackground extends StatelessWidget {
 
   final Widget child;
 
+  /// How fill / line / glow colors are resolved. Defaults to [legacyDark].
+  final AppGridBackgroundMode mode;
+
   /// Whether to show the radial glow at the top of the screen.
   final bool showTopGlow;
 
-  /// Color of the top glow (defaults to brandSky at 5% opacity).
+  /// Explicit fill color override. When null, resolved from [mode].
+  final Color? fillColor;
+
+  /// Explicit glow color override. When null, resolved from [mode].
   final Color? glowColor;
 
-  /// Color of the grid lines (defaults to white02 from theme).
+  /// Explicit line color override. When null, resolved from [mode].
   final Color? lineColor;
 
   /// Spacing between grid lines in logical pixels.
@@ -64,17 +96,31 @@ class AppGridBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final kitColors = context.kitColors;
-    final effectiveLineColor = lineColor ?? kitColors.white02;
-    final effectiveGlowColor =
-        glowColor ?? kitColors.brandSky.withValues(alpha: 0.05);
+    final Color effectiveFill;
+    final Color effectiveLine;
+    final Color effectiveGlow;
+
+    switch (mode) {
+      case AppGridBackgroundMode.legacyDark:
+        final kitColors = context.kitColors;
+        effectiveFill = fillColor ?? kitColors.background;
+        effectiveLine = lineColor ?? kitColors.white02;
+        effectiveGlow =
+            glowColor ?? kitColors.brandSky.withValues(alpha: 0.05);
+      case AppGridBackgroundMode.adaptive:
+        final colorScheme = Theme.of(context).colorScheme;
+        effectiveFill = fillColor ?? colorScheme.surface;
+        effectiveLine = lineColor ?? colorScheme.outlineVariant;
+        effectiveGlow =
+            glowColor ?? colorScheme.primary.withValues(alpha: 0.05);
+    }
 
     return SizedBox.expand(
       child: Stack(
         fit: StackFit.expand,
         children: [
-          ColoredBox(color: kitColors.background),
-          GridPattern(lineColor: effectiveLineColor, spacing: gridSpacing),
+          ColoredBox(color: effectiveFill),
+          GridPattern(lineColor: effectiveLine, spacing: gridSpacing),
           if (showTopGlow)
             IgnorePointer(
               child: Align(
@@ -87,7 +133,7 @@ class AppGridBackground extends StatelessWidget {
                       center: Alignment.topCenter,
                       radius: 0.8,
                       colors: [
-                        effectiveGlowColor,
+                        effectiveGlow,
                         Colors.transparent,
                       ],
                     ),
