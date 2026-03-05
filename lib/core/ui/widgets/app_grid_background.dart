@@ -58,7 +58,7 @@ class GridPattern extends StatelessWidget {
 ///
 /// By default, [mode] is [AppGridBackgroundMode.legacyDark] which preserves
 /// the original fixed-dark behavior. Pass [AppGridBackgroundMode.adaptive] to
-/// resolve colors from the ambient [ColorScheme] (brightness-aware).
+/// resolve colors from the ambient [AppSemanticColors] (brightness-aware).
 ///
 /// Explicit [lineColor], [glowColor], and [fillColor] overrides take priority
 /// over both modes.
