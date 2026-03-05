@@ -36,39 +36,59 @@ void main() {
     );
   }
 
+  /// Shows a toast and pumps, then runs [verify], then cleans up the
+  /// pending auto-dismiss timer by clearing the event and pumping.
+  Future<void> withToast(
+    WidgetTester tester, {
+    required Brightness brightness,
+    required ToastEvent event,
+    required Future<void> Function() verify,
+  }) async {
+    await tester.pumpWidget(wrap(brightness: brightness));
+    notifyService.setToastEvent(event);
+    await tester.pump(); // trigger rebuild with toast visible
+    await tester.pump(const Duration(milliseconds: 200)); // animation settle
+
+    await verify();
+
+    // Clean up: clear the toast event so the pending Future.delayed timer
+    // finds the event already cleared and does nothing.
+    notifyService.clearToastEvent();
+    await tester.pump(); // process the clear
+    await tester.pump(const Duration(seconds: 5)); // elapse past timer
+  }
+
   group('Toast semantic token migration', () {
     for (final brightness in Brightness.values) {
       group('in ${brightness.name} mode', () {
         testWidgets(
           'toast container uses semantic surfaceElevated and border',
           (tester) async {
-            notifyService.setToastEvent(
-              ToastEventSuccess(message: 'Done!'),
-            );
+            await withToast(
+              tester,
+              brightness: brightness,
+              event: ToastEventSuccess(message: 'Done!'),
+              verify: () async {
+                final theme = AppTheme.buildTheme(brightness);
+                final semanticColors =
+                    theme.extension<AppSemanticColors>()!;
 
-            await tester.pumpWidget(wrap(brightness: brightness));
-            await tester.pumpAndSettle();
-
-            final theme = AppTheme.buildTheme(brightness);
-            final semanticColors =
-                theme.extension<AppSemanticColors>()!;
-
-            // Find the decorated container for the toast
-            final containers = tester.widgetList<Container>(
-              find.byType(Container),
-            );
-            // The toast container has a BoxDecoration with color + border
-            final toastContainer = containers.firstWhere(
-              (c) {
-                final dec = c.decoration;
-                return dec is BoxDecoration && dec.border != null;
+                final containers = tester.widgetList<Container>(
+                  find.byType(Container),
+                );
+                final toastContainer = containers.firstWhere(
+                  (c) {
+                    final dec = c.decoration;
+                    return dec is BoxDecoration && dec.border != null;
+                  },
+                );
+                final decoration =
+                    toastContainer.decoration! as BoxDecoration;
+                expect(
+                  decoration.color,
+                  equals(semanticColors.surfaceElevated),
+                );
               },
-            );
-            final decoration =
-                toastContainer.decoration! as BoxDecoration;
-            expect(
-              decoration.color,
-              equals(semanticColors.surfaceElevated),
             );
           },
         );
@@ -76,19 +96,39 @@ void main() {
         testWidgets(
           'toast icon uses semantic ink color',
           (tester) async {
-            notifyService.setToastEvent(
-              ToastEventSuccess(message: 'Done!'),
+            await withToast(
+              tester,
+              brightness: brightness,
+              event: ToastEventSuccess(message: 'Done!'),
+              verify: () async {
+                final theme = AppTheme.buildTheme(brightness);
+                final semanticColors =
+                    theme.extension<AppSemanticColors>()!;
+
+                final icon = tester.widget<Icon>(find.byType(Icon));
+                expect(icon.color, equals(semanticColors.ink));
+              },
             );
+          },
+        );
 
-            await tester.pumpWidget(wrap(brightness: brightness));
-            await tester.pumpAndSettle();
+        testWidgets(
+          'toast text uses semantic ink color explicitly',
+          (tester) async {
+            await withToast(
+              tester,
+              brightness: brightness,
+              event: ToastEventSuccess(message: 'Hello'),
+              verify: () async {
+                final theme = AppTheme.buildTheme(brightness);
+                final semanticColors =
+                    theme.extension<AppSemanticColors>()!;
 
-            final theme = AppTheme.buildTheme(brightness);
-            final semanticColors =
-                theme.extension<AppSemanticColors>()!;
-
-            final icon = tester.widget<Icon>(find.byType(Icon));
-            expect(icon.color, equals(semanticColors.ink));
+                final text =
+                    tester.widgetList<Text>(find.byType(Text)).last;
+                expect(text.style?.color, equals(semanticColors.ink));
+              },
+            );
           },
         );
 

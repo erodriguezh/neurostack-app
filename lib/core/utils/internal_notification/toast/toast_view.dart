@@ -143,6 +143,7 @@ class _Toast extends StatelessWidget {
                 boxShadow: context.shadows.md,
               ),
               child: Material(
+                type: MaterialType.transparency,
                 borderRadius: radius,
                 child: Padding(
                   padding: EdgeInsets.symmetric(
@@ -165,7 +166,9 @@ class _Toast extends StatelessWidget {
                       Expanded(
                         child: Text(
                           toastEvent.message,
-                          style: context.textStyles.standard,
+                          style: context.textStyles.standard.copyWith(
+                            color: semanticColors.ink,
+                          ),
                         ),
                       ),
                     ],

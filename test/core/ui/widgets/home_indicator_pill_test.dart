@@ -60,11 +60,9 @@ void main() {
               ),
             );
 
-            final container = tester.widget<Container>(
-              find.byType(Container),
-            );
-            expect(container.constraints?.maxWidth, equals(134));
-            expect(container.constraints?.maxHeight, equals(5));
+            final size = tester.getSize(find.byType(Container));
+            expect(size.width, equals(134));
+            expect(size.height, equals(5));
           },
         );
       });

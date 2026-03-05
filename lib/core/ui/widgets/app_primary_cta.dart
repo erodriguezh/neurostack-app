@@ -33,6 +33,7 @@ class AppPrimaryCta extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
     final isEnabled = enabled && !loading;
 
     return DecoratedBox(
@@ -51,7 +52,9 @@ class AppPrimaryCta extends StatelessWidget {
                   height: 20,
                   width: 20,
                   child: CircularProgressIndicator(
-                    color: kitColors.background,
+                    color: enabled
+                        ? kitColors.background
+                        : semanticColors.inkSubtle,
                     strokeWidth: 2,
                   ),
                 )
