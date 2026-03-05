@@ -275,12 +275,9 @@ void main() {
             final theme = AppTheme.buildTheme(brightness);
             final semanticColors = theme.extension<AppSemanticColors>()!;
 
-            // Read actual card background color
+            // Read actual card background color via key
             final cardContainer = tester.widget<AnimatedContainer>(
-              find.descendant(
-                of: find.byType(LibraryProtocolCard),
-                matching: find.byType(AnimatedContainer),
-              ).first,
+              find.byKey(const ValueKey('library-card-surface')),
             );
             final decoration = cardContainer.decoration as BoxDecoration;
             final cardBg = compositedOver(

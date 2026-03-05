@@ -108,6 +108,7 @@ class _LibraryProtocolCardState extends State<LibraryProtocolCard> {
     );
 
     final decoratedCard = AnimatedContainer(
+      key: const ValueKey('library-card-surface'),
       duration: context.durations.duration200,
       decoration: BoxDecoration(
         color: backgroundColor,
@@ -218,7 +219,12 @@ class _Badge extends StatelessWidget {
     final kitColors = context.kitColors;
     final semanticColors = context.semanticColors;
     final background = _badgeBackground(kitColors, semanticColors);
-    final iconColor = semanticColors.ink;
+    // In-stack badge uses brandSky background — use dark icon for contrast.
+    // Other badges use neutral backgrounds where semantic ink works.
+    final iconColor = switch (status) {
+      LibraryCardStatus.inStack => kitColors.background,
+      _ => semanticColors.ink,
+    };
 
     return GestureDetector(
       onTap: isOfflineDisabled ? null : onTap,
