@@ -299,11 +299,14 @@ Color _findFillColor(WidgetTester tester) {
 /// Finds the first color of the [RadialGradient] used for the top glow.
 Color _findGlowColor(WidgetTester tester) {
   final container = tester.widget<Container>(
-    find.byWidgetPredicate(
-      (w) =>
-          w is Container &&
-          w.decoration is BoxDecoration &&
-          (w.decoration! as BoxDecoration).gradient is RadialGradient,
+    find.descendant(
+      of: find.byType(AppGridBackground),
+      matching: find.byWidgetPredicate(
+        (w) =>
+            w is Container &&
+            w.decoration is BoxDecoration &&
+            (w.decoration! as BoxDecoration).gradient is RadialGradient,
+      ),
     ),
   );
   final gradient =
