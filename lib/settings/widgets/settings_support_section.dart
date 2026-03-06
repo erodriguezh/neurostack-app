@@ -42,7 +42,7 @@ class SettingsSupportSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
     final spacing = context.spacing;
 
     // Build the list of tiles, filtering out invisible ones for divider logic.
@@ -104,7 +104,7 @@ class SettingsSupportSection extends StatelessWidget {
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
                 letterSpacing: 11 * 0.15, // 0.15em
-                color: kitColors.white40,
+                color: semanticColors.inkSubtle,
               ),
             ),
           ),
@@ -113,9 +113,9 @@ class SettingsSupportSection extends StatelessWidget {
           Container(
             clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.02),
+              color: semanticColors.surfaceElevated,
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: kitColors.white10),
+              border: Border.all(color: semanticColors.borderSubtle),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -127,7 +127,7 @@ class SettingsSupportSection extends StatelessWidget {
                       child: Divider(
                         height: 1,
                         thickness: 1,
-                        color: kitColors.white05,
+                        color: semanticColors.borderSubtle,
                       ),
                     ),
                   SettingsTile(

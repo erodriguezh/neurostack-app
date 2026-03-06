@@ -42,7 +42,8 @@ class _SettingsTileState extends State<SettingsTile> {
 
   @override
   Widget build(BuildContext context) {
-    final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Material(
       color: Colors.transparent,
@@ -50,7 +51,7 @@ class _SettingsTileState extends State<SettingsTile> {
         onTap: widget.onTap,
         onHighlightChanged: (highlighted) =>
             setState(() => _pressed = highlighted),
-        highlightColor: Colors.white.withValues(alpha: 0.03),
+        highlightColor: colorScheme.onSurface.withValues(alpha: 0.03),
         splashFactory: NoSplash.splashFactory,
         child: AnimatedScale(
           scale: _pressed ? 0.99 : 1.0,
@@ -64,7 +65,7 @@ class _SettingsTileState extends State<SettingsTile> {
                 Icon(
                   widget.icon,
                   size: 20,
-                  color: kitColors.white40,
+                  color: semanticColors.inkSubtle,
                 ),
                 const SizedBox(width: 16),
 
@@ -75,7 +76,7 @@ class _SettingsTileState extends State<SettingsTile> {
                     style: GoogleFonts.inter(
                       fontSize: 15,
                       fontWeight: FontWeight.w400,
-                      color: kitColors.white80,
+                      color: semanticColors.ink,
                     ),
                   ),
                 ),
@@ -85,7 +86,7 @@ class _SettingsTileState extends State<SettingsTile> {
                 Icon(
                   widget.trailing,
                   size: 16,
-                  color: kitColors.white20,
+                  color: semanticColors.borderSubtle,
                 ),
               ],
             ),

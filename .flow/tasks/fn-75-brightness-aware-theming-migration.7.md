@@ -31,8 +31,8 @@ Migrate progress tab widgets from `kitColors.whiteXX` to semantic tokens, includ
 - [x] New brightness test covers day cell, sheet, and view in light+dark
 
 ## Done summary
-Migrated progress widgets from kitColors.whiteXX/panel to semantic tokens. Added brightness tests with WCAG contrast assertions.
-
+Migrated progress widgets (progress_view, progress_grid, progress_day_cell, backdate_session_sheet) from kitColors.whiteXX/panel to semantic tokens. Added brightness tests with WCAG contrast assertions.
 ## Evidence
-- Commits: 2e0842f, dff8355, 37d2ee0, 645cbb5, db09d4f
-- Tests: `flutter test test/progress/` (45 pass), `flutter analyze` (0 issues)
+- Commits: 2e0842f, dff8355, 37d2ee0, 645cbb5, db09d4f, b3f41ae
+- Tests: flutter test test/progress/, flutter analyze
+- PRs:

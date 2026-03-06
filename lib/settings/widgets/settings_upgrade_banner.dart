@@ -29,6 +29,8 @@ class _SettingsUpgradeBannerState extends State<SettingsUpgradeBanner> {
   @override
   Widget build(BuildContext context) {
     final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
+    final colorScheme = Theme.of(context).colorScheme;
     final spacing = context.spacing;
 
     return Padding(
@@ -45,7 +47,7 @@ class _SettingsUpgradeBannerState extends State<SettingsUpgradeBanner> {
           onTap: widget.onTap,
           onHighlightChanged: (highlighted) =>
               setState(() => _pressed = highlighted),
-          highlightColor: Colors.white.withValues(alpha: 0.03),
+          highlightColor: colorScheme.onSurface.withValues(alpha: 0.03),
           splashFactory: NoSplash.splashFactory,
           borderRadius: BorderRadius.circular(24),
           child: AnimatedScale(
@@ -56,7 +58,7 @@ class _SettingsUpgradeBannerState extends State<SettingsUpgradeBanner> {
               child: Ink(
                 padding: EdgeInsets.all(spacing.lg),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.02),
+                  color: semanticColors.surfaceElevated,
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
                     color: kitColors.brandSky.withValues(alpha: 0.3),
@@ -94,7 +96,7 @@ class _SettingsUpgradeBannerState extends State<SettingsUpgradeBanner> {
                             style: GoogleFonts.inter(
                               fontSize: 17,
                               fontWeight: FontWeight.w500,
-                              color: kitColors.white90,
+                              color: semanticColors.ink,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -103,7 +105,7 @@ class _SettingsUpgradeBannerState extends State<SettingsUpgradeBanner> {
                             style: GoogleFonts.inter(
                               fontSize: 13,
                               fontWeight: FontWeight.w300,
-                              color: kitColors.white50,
+                              color: semanticColors.inkSubtle,
                             ),
                           ),
                         ],
@@ -115,7 +117,7 @@ class _SettingsUpgradeBannerState extends State<SettingsUpgradeBanner> {
                     Icon(
                       LucideIcons.chevronRight,
                       size: 18,
-                      color: kitColors.white30,
+                      color: semanticColors.inkSubtle,
                     ),
                   ],
                 ),

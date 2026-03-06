@@ -11,7 +11,7 @@ class ContactView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
     final spacing = context.spacing;
 
     return AppGridBackground(
@@ -30,7 +30,7 @@ class ContactView extends StatelessWidget {
                 IconButton(
                   icon: Icon(
                     LucideIcons.chevronLeft,
-                    color: kitColors.white90,
+                    color: semanticColors.ink,
                   ),
                   onPressed: () => locator<RouterService>().back(),
                 ),
