@@ -497,7 +497,7 @@ class _DurationField extends StatelessWidget {
                     hintStyle: GoogleFonts.inter(
                       fontSize: 16,
                       fontWeight: FontWeight.w400,
-                      color: semanticColors.border,
+                      color: semanticColors.inkSubtle,
                     ),
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.symmetric(vertical: spacing.sm),
@@ -629,7 +629,7 @@ class _NotesFieldState extends State<_NotesField> {
                   hintStyle: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
-                    color: semanticColors.border,
+                    color: semanticColors.inkSubtle,
                   ),
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.zero,
@@ -689,19 +689,19 @@ class _InlineErrorBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final kitColors = context.kitColors;
     final colorScheme = Theme.of(context).colorScheme;
     final spacing = context.spacing;
 
-    // Error colors use the colorScheme.error slot for adaptive theming.
+    // Derive all error-banner colors from the same colorScheme.error slot
+    // so the palette stays consistent across light/dark modes.
     final errorColor = colorScheme.error;
 
     return Container(
       padding: EdgeInsets.all(spacing.md),
       decoration: BoxDecoration(
-        color: kitColors.red500.withValues(alpha: 0.12),
+        color: errorColor.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: kitColors.red500.withValues(alpha: 0.35)),
+        border: Border.all(color: errorColor.withValues(alpha: 0.35)),
       ),
       child: Row(
         children: [

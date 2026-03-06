@@ -473,11 +473,12 @@ void main() {
             findsNothing,
           );
 
-          // Border should return to normal (white10)
+          // Border should return to normal (semantic border)
           container = tester.widget<Container>(decoratedContainerFinder);
           decoration = container.decoration! as BoxDecoration;
           border = decoration.border! as Border;
-          expect(border.top.color, kitColors.white10);
+          final semanticColors = element.semanticColors;
+          expect(border.top.color, semanticColors.border);
 
           viewModel.dispose();
         },
