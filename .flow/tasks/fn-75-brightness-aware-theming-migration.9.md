@@ -31,7 +31,7 @@ Migrate session-related views and modal/dialog presentations from `kitColors.whi
 
 ## Done summary
 Migrated session and modal widgets to semantic tokens: replaced 26+ kitColors.whiteXX usages in log_session_view.dart with semantic/colorScheme equivalents, derived log_session_modal.dart barrier color from colorScheme.scrim, wrapped trial_expired_modal.dart in DarkThemeScope, removed forced-dark date picker override, and added brightness tests for both light/dark modes.
-
 ## Evidence
-- Commits: 008b189, 3280167
-- Tests: flutter test (35 tests pass), flutter analyze (no issues)
+- Commits: 008b1891d6e5e4e0f13e0e2f3e4f4b6c9dfb34e7, 3280167a2f20884aa464cbb2b0016789aed03fb9
+- Tests: flutter test test/features/session/presentation/log_session_brightness_test.dart, flutter test test/features/session/presentation/views/log_session_view_test.dart, flutter test test/paywall/widgets/trial_expired_modal_test.dart, flutter analyze
+- PRs:
