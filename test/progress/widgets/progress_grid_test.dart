@@ -6,45 +6,55 @@ import 'package:neurostack/progress/widgets/progress_day_cell.dart';
 import 'package:neurostack/progress/widgets/progress_grid.dart';
 
 void main() {
-  testWidgets('progressGrid_narrowWidth_doesNotOverflow', (tester) async {
-    final errors = <FlutterErrorDetails>[];
-    final previousOnError = FlutterError.onError;
-    FlutterError.onError = errors.add;
-    addTearDown(() => FlutterError.onError = previousOnError);
+  for (final brightness in Brightness.values) {
+    testWidgets(
+      'progressGrid_narrowWidth_doesNotOverflow (${brightness.name})',
+      (tester) async {
+        final errors = <FlutterErrorDetails>[];
+        final previousOnError = FlutterError.onError;
+        FlutterError.onError = errors.add;
+        addTearDown(() => FlutterError.onError = previousOnError);
 
-    final weekStart = DateTime(2025, 1, 6);
-    final rows = _buildRows(weekStart);
+        final weekStart = DateTime(2025, 1, 6);
+        final rows = _buildRows(weekStart);
 
-    await tester.pumpWidget(
-      _wrap(
-        Center(
-          child: SizedBox(
-            width: 200,
-            child: ProgressGrid(
-              rows: rows,
-              weekRange: DateTimeRange(
-                start: weekStart,
-                end: weekStart.add(const Duration(days: 6)),
+        await tester.pumpWidget(
+          _wrap(
+            brightness: brightness,
+            child: Center(
+              child: SizedBox(
+                width: 200,
+                child: ProgressGrid(
+                  rows: rows,
+                  weekRange: DateTimeRange(
+                    start: weekStart,
+                    end: weekStart.add(const Duration(days: 6)),
+                  ),
+                  todayIndex: 2,
+                  isOffline: false,
+                  onTapMissedCell: (_, __, ___) {},
+                ),
               ),
-              todayIndex: 2,
-              isOffline: false,
-              onTapMissedCell: (_, __, ___) {},
             ),
           ),
-        ),
-      ),
+        );
+
+        await tester.pumpAndSettle();
+
+        expect(errors, isEmpty);
+        expect(find.byType(ProgressDayCell), findsNWidgets(7 * rows.length));
+      },
     );
-
-    await tester.pumpAndSettle();
-
-    expect(errors, isEmpty);
-    expect(find.byType(ProgressDayCell), findsNWidgets(7 * rows.length));
-  });
+  }
 }
 
-Widget _wrap(Widget child) {
+Widget _wrap({
+  required Brightness brightness,
+  required Widget child,
+}) {
   return MaterialApp(
-    theme: AppTheme.buildTheme(Brightness.dark),
+    key: ValueKey(brightness),
+    theme: AppTheme.buildTheme(brightness),
     home: Scaffold(body: child),
   );
 }

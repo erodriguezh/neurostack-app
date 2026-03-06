@@ -34,5 +34,8 @@ Migrate library tab widgets from `kitColors.whiteXX` to semantic tokens, includi
 - [x] New sheet brightness test validates light+dark rendering
 
 ## Evidence
-
+- Commits: 56d18a7, 126c85c, 85d8adb, dad76a1, 737918b, 5b19a73, 11fd6e2, fd4eeb64ca056b2e034a12ed62f705cb1cef5826
+- Tests: flutter test test/library/
+- PRs:
 ## Done summary
+Migrated library widgets (category header, protocol card, protocol detail sheet, library view dialogs/empty state) from kitColors.whiteXX to semantic color tokens. Made evidence/status color helpers brightness-aware, fixed badge icon contrast, destructive button disabled state, and locked card alpha handling.

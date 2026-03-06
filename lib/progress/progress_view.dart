@@ -185,7 +185,7 @@ class _ProgressViewState extends State<ProgressView>
                   style: context.theme.textTheme.bodyMedium?.copyWith(
                     fontSize: 14,
                     fontWeight: FontWeight.w300,
-                    color: context.kitColors.white40,
+                    color: context.semanticColors.inkSubtle,
                   ),
                 ),
               ],

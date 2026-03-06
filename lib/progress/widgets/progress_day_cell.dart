@@ -41,6 +41,7 @@ class ProgressDayCell extends StatelessWidget {
 
   Widget _buildCell(BuildContext context) {
     final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
     final borderRadius = context.borderRadius.xxl;
 
     switch (state) {
@@ -76,16 +77,16 @@ class ProgressDayCell extends StatelessWidget {
           width: size,
           height: size,
           decoration: BoxDecoration(
-            color: kitColors.white02,
+            color: semanticColors.surface,
             borderRadius: borderRadius,
-            border: Border.all(color: kitColors.white05),
+            border: Border.all(color: semanticColors.borderSubtle),
           ),
         );
       case CellState.future:
         return DashedRoundedBorder(
           key: const ValueKey('cell-future'),
           borderRadius: borderRadius,
-          color: kitColors.white10,
+          color: semanticColors.borderSubtle,
           strokeWidth: 1,
           child: SizedBox(width: size, height: size),
         );
