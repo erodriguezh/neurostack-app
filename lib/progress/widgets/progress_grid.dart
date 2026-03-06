@@ -35,7 +35,7 @@ class ProgressGrid extends StatelessWidget {
       decoration: BoxDecoration(
         color: semanticColors.surfaceElevated,
         borderRadius: context.borderRadius.r24,
-        border: Border.all(color: semanticColors.borderSubtle),
+        border: Border.all(color: semanticColors.border),
       ),
       padding: EdgeInsets.all(spacing.lg),
       child: LayoutBuilder(

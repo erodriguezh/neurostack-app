@@ -164,7 +164,7 @@ void main() {
           );
 
           testWidgets(
-            'grid container uses semantic surfaceElevated and borderSubtle',
+            'grid container uses semantic surfaceElevated and border',
             (tester) async {
               await tester.pumpWidget(
                 wrap(brightness: brightness, child: makeGrid()),
@@ -196,7 +196,7 @@ void main() {
               );
               expect(
                 (decoration.border as Border).top.color,
-                equals(semanticColors.borderSubtle),
+                equals(semanticColors.border),
               );
             },
           );

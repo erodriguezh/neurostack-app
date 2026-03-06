@@ -57,7 +57,7 @@ class _BackdateSessionSheetState extends State<_BackdateSessionSheet> {
         decoration: BoxDecoration(
           color: semanticColors.surfaceElevated,
           borderRadius: context.borderRadius.r32,
-          border: Border.all(color: semanticColors.borderSubtle),
+          border: Border.all(color: semanticColors.border),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,

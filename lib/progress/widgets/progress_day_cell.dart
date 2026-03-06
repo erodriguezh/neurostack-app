@@ -86,7 +86,7 @@ class ProgressDayCell extends StatelessWidget {
         return DashedRoundedBorder(
           key: const ValueKey('cell-future'),
           borderRadius: borderRadius,
-          color: semanticColors.borderSubtle,
+          color: semanticColors.border,
           strokeWidth: 1,
           child: SizedBox(width: size, height: size),
         );
