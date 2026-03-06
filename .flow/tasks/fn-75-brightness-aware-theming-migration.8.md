@@ -20,10 +20,13 @@ Migrate settings and contact view widgets from `kitColors.whiteXX` to semantic t
 - `settings_support_section.dart` uses `SpotlightCard` with `kitColors.white05` — update call site to use semantic surface
 
 ## Acceptance
-- [ ] No `whiteXX` usage in `settings_tile.dart` for legibility tokens
-- [ ] No `whiteXX` usage in `settings_support_section.dart` for legibility tokens
-- [ ] No `whiteXX` usage in `settings_upgrade_banner.dart` for legibility tokens
-- [ ] No `whiteXX` usage in `contact_view.dart` for legibility tokens
-- [ ] All settings widgets readable in light mode
-- [ ] All settings widgets visually unchanged in dark mode
-- [ ] Test: settings widgets rendered in both Brightness.light and Brightness.dark
+- [x] No `whiteXX` usage in `settings_tile.dart` for legibility tokens
+- [x] No `whiteXX` usage in `settings_support_section.dart` for legibility tokens
+- [x] No `whiteXX` usage in `settings_upgrade_banner.dart` for legibility tokens
+- [x] No `whiteXX` usage in `contact_view.dart` for legibility tokens
+- [x] All settings widgets readable in light mode
+- [x] All settings widgets visually unchanged in dark mode
+- [x] Test: settings widgets rendered in both Brightness.light and Brightness.dark
+
+## Done summary
+Migrated settings_tile, settings_support_section, settings_upgrade_banner, and contact_view from kitColors.whiteXX to AppSemanticColors tokens. Added 27 brightness tests with WCAG contrast and whiteXX source audits.
