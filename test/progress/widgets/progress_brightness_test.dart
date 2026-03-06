@@ -350,9 +350,9 @@ void main() {
         },
       );
 
-      test(
+      testWidgets(
         'progress_view.dart subtitle contrast >= 3.0:1 in both modes',
-        () {
+        (_) async {
           for (final brightness in Brightness.values) {
             final theme = AppTheme.buildTheme(brightness);
             final semanticColors =
@@ -371,6 +371,26 @@ void main() {
                   'mode (got $ratio)',
             );
           }
+        },
+      );
+
+      // Note: AppGridBackground mode flip from legacyDark to adaptive is
+      // explicitly deferred to Task 10 (fn-75...10). This audit documents
+      // that the progress route still uses legacyDark until Task 10 lands.
+      test(
+        'progress_view.dart AppGridBackground mode is tracked for Task 10',
+        () {
+          final source =
+              File('lib/progress/progress_view.dart').readAsStringSync();
+          // Currently legacyDark (default). Task 10 will flip to adaptive.
+          // If someone flips it early, this test catches it so we know.
+          expect(
+            source.contains('AppGridBackgroundMode.adaptive'),
+            isFalse,
+            reason:
+                'AppGridBackground adaptive mode should be enabled in '
+                'Task 10, not Task 7',
+          );
         },
       );
     });
