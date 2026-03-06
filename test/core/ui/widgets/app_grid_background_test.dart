@@ -108,9 +108,9 @@ void main() {
         );
 
         final fillColor = _findFillColor(tester);
-        final expectedFill = AppTheme.buildTheme(Brightness.dark)
-            .extension<AppSemanticColors>()!
-            .gridBackground;
+        final expectedFill = AppTheme.buildTheme(
+          Brightness.dark,
+        ).extension<AppSemanticColors>()!.gridBackground;
         expect(
           fillColor,
           equals(expectedFill),
@@ -135,9 +135,9 @@ void main() {
         );
 
         final fillColor = _findFillColor(tester);
-        final expectedFill = AppTheme.buildTheme(Brightness.light)
-            .extension<AppSemanticColors>()!
-            .gridBackground;
+        final expectedFill = AppTheme.buildTheme(
+          Brightness.light,
+        ).extension<AppSemanticColors>()!.gridBackground;
         expect(
           fillColor,
           equals(expectedFill),
@@ -151,10 +151,12 @@ void main() {
     testWidgets(
       'adaptive dark fill differs from adaptive light fill',
       (tester) async {
-        final darkSurface =
-            AppTheme.buildTheme(Brightness.dark).colorScheme.surface;
-        final lightSurface =
-            AppTheme.buildTheme(Brightness.light).colorScheme.surface;
+        final darkSurface = AppTheme.buildTheme(
+          Brightness.dark,
+        ).colorScheme.surface;
+        final lightSurface = AppTheme.buildTheme(
+          Brightness.light,
+        ).colorScheme.surface;
         expect(
           darkSurface,
           isNot(equals(lightSurface)),
@@ -182,9 +184,9 @@ void main() {
           final gridPattern = tester.widget<GridPattern>(
             find.byType(GridPattern),
           );
-          final expectedLine = AppTheme.buildTheme(brightness)
-              .extension<AppSemanticColors>()!
-              .gridLine;
+          final expectedLine = AppTheme.buildTheme(
+            brightness,
+          ).extension<AppSemanticColors>()!.gridLine;
           expect(
             gridPattern.lineColor,
             equals(expectedLine),
@@ -193,6 +195,35 @@ void main() {
                 '$brightness mode',
           );
         }
+      },
+    );
+
+    testWidgets(
+      'adaptive dark mode matches legacyDark fill/line/glow tokens',
+      (tester) async {
+        await tester.pumpWidget(
+          _wrap(
+            brightness: Brightness.dark,
+            child: const AppGridBackground(
+              mode: AppGridBackgroundMode.adaptive,
+              showTopGlow: true,
+              child: SizedBox.shrink(),
+            ),
+          ),
+        );
+
+        final fillColor = _findFillColor(tester);
+        final gridPattern = tester.widget<GridPattern>(
+          find.byType(GridPattern),
+        );
+        final glowColor = _findGlowColor(tester);
+
+        expect(fillColor, equals(KitColors.background));
+        expect(gridPattern.lineColor, equals(KitColors.white02));
+        expect(
+          glowColor,
+          equals(KitColors.brandSky.withValues(alpha: 0.05)),
+        );
       },
     );
 
@@ -210,9 +241,9 @@ void main() {
           ),
         );
 
-        final expectedGlow = AppTheme.buildTheme(Brightness.dark)
-            .extension<AppSemanticColors>()!
-            .gridGlow;
+        final expectedGlow = AppTheme.buildTheme(
+          Brightness.dark,
+        ).extension<AppSemanticColors>()!.gridGlow;
 
         final glowColor = _findGlowColor(tester);
         expect(

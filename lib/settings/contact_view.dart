@@ -15,6 +15,7 @@ class ContactView extends StatelessWidget {
     final spacing = context.spacing;
 
     return AppGridBackground(
+      mode: AppGridBackgroundMode.adaptive,
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: SafeArea(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
+import 'package:neurostack/core/ui/constants/kit_colors.dart';
 import 'package:neurostack/core/ui/extensions/app_semantic_colors.dart';
 
 import '../../../helpers/contrast_ratio.dart';
@@ -104,16 +105,16 @@ void main() {
       );
 
       testWidgets(
-        'dark: gridLine matches ColorScheme.outlineVariant for visual continuity',
+        'dark: gridLine matches legacyDark line token for visual continuity',
         (_) async {
           final theme = AppTheme.buildTheme(Brightness.dark);
           final colors = theme.extension<AppSemanticColors>()!;
           expect(
             colors.gridLine,
-            equals(theme.colorScheme.outlineVariant),
+            equals(KitColors.white02),
             reason:
-                'dark mode gridLine should match ColorScheme.outlineVariant '
-                'for visual continuity with legacy dark palette',
+                'dark mode gridLine should match legacyDark '
+                '(KitColors.white02) to avoid route visual regressions',
           );
         },
       );
@@ -157,8 +158,9 @@ void main() {
         expect(modified.gridLine, equals(original.gridLine));
       });
 
-      testWidgets('preserves all values when called with no arguments',
-          (_) async {
+      testWidgets('preserves all values when called with no arguments', (
+        _,
+      ) async {
         final theme = AppTheme.buildTheme(Brightness.light);
         final original = theme.extension<AppSemanticColors>()!;
         final copy = original.copyWith();
@@ -176,8 +178,9 @@ void main() {
     });
 
     group('lerp', () {
-      testWidgets('returns this when other is not AppSemanticColors',
-          (_) async {
+      testWidgets('returns this when other is not AppSemanticColors', (
+        _,
+      ) async {
         final theme = AppTheme.buildTheme(Brightness.dark);
         final original = theme.extension<AppSemanticColors>()!;
         final result = original.lerp(null, 0.5);
@@ -185,10 +188,12 @@ void main() {
       });
 
       testWidgets('interpolates between two instances at t=0.5', (_) async {
-        final light =
-            AppTheme.buildTheme(Brightness.light).extension<AppSemanticColors>()!;
-        final dark =
-            AppTheme.buildTheme(Brightness.dark).extension<AppSemanticColors>()!;
+        final light = AppTheme.buildTheme(
+          Brightness.light,
+        ).extension<AppSemanticColors>()!;
+        final dark = AppTheme.buildTheme(
+          Brightness.dark,
+        ).extension<AppSemanticColors>()!;
 
         final mid = light.lerp(dark, 0.5);
 
@@ -197,10 +202,12 @@ void main() {
       });
 
       testWidgets('returns self at t=0', (_) async {
-        final light =
-            AppTheme.buildTheme(Brightness.light).extension<AppSemanticColors>()!;
-        final dark =
-            AppTheme.buildTheme(Brightness.dark).extension<AppSemanticColors>()!;
+        final light = AppTheme.buildTheme(
+          Brightness.light,
+        ).extension<AppSemanticColors>()!;
+        final dark = AppTheme.buildTheme(
+          Brightness.dark,
+        ).extension<AppSemanticColors>()!;
 
         final result = light.lerp(dark, 0.0);
         expect(result.ink, equals(light.ink));
@@ -208,10 +215,12 @@ void main() {
       });
 
       testWidgets('returns other at t=1', (_) async {
-        final light =
-            AppTheme.buildTheme(Brightness.light).extension<AppSemanticColors>()!;
-        final dark =
-            AppTheme.buildTheme(Brightness.dark).extension<AppSemanticColors>()!;
+        final light = AppTheme.buildTheme(
+          Brightness.light,
+        ).extension<AppSemanticColors>()!;
+        final dark = AppTheme.buildTheme(
+          Brightness.dark,
+        ).extension<AppSemanticColors>()!;
 
         final result = light.lerp(dark, 1.0);
         expect(result.ink, equals(dark.ink));
@@ -226,8 +235,7 @@ void main() {
       (_) async {
         for (final brightness in Brightness.values) {
           final theme = AppTheme.buildTheme(brightness);
-          final expected =
-              theme.colorScheme.onSurface.withValues(alpha: .1);
+          final expected = theme.colorScheme.onSurface.withValues(alpha: .1);
           expect(
             theme.highlightColor,
             equals(expected),

@@ -86,6 +86,7 @@ class _ProgressViewState extends State<ProgressView>
     final bottomInset = MediaQuery.of(context).padding.bottom;
 
     return AppGridBackground(
+      mode: AppGridBackgroundMode.adaptive,
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: SafeArea(

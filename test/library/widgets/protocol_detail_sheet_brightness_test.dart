@@ -324,8 +324,7 @@ void main() {
 
     test('library_view.dart contains no kitColors.panel references', () {
       final source = File('lib/library/library_view.dart').readAsStringSync();
-      final panelMatches =
-          RegExp(r'kitColors\.panel').allMatches(source);
+      final panelMatches = RegExp(r'kitColors\.panel').allMatches(source);
       expect(
         panelMatches,
         isEmpty,
@@ -352,20 +351,15 @@ void main() {
     );
 
     test(
-      'library_view.dart AppGridBackground mode is tracked for Task 10',
+      'library_view.dart AppGridBackground mode is adaptive',
       () {
         final source = File('lib/library/library_view.dart').readAsStringSync();
-        // Check that AppGridBackground is not constructed with adaptive mode.
-        // The pattern "mode: AppGridBackgroundMode.adaptive" would indicate
-        // the switch was flipped early. Comments referencing the mode name
-        // are expected and should not trigger this assertion.
         expect(
-          RegExp(r'mode:\s*AppGridBackgroundMode\.adaptive')
-              .hasMatch(source),
-          isFalse,
+          RegExp(r'mode:\s*AppGridBackgroundMode\.adaptive').hasMatch(source),
+          isTrue,
           reason:
-              'AppGridBackground adaptive mode should be enabled in '
-              'Task 10, not Task 6',
+              'library_view.dart should explicitly set '
+              'AppGridBackgroundMode.adaptive',
         );
       },
     );

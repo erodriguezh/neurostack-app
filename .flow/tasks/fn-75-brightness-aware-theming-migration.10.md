@@ -22,11 +22,18 @@ Flip all adaptive routes from `AppGridBackground` `legacyDark` mode to `adaptive
 - `home_bottom_nav.dart` is shared across all 4 tab routes — already migrated in Task 5
 
 ## Acceptance
-- [ ] All 5 adaptive routes use `AppGridBackgroundMode.adaptive`
-- [ ] Light mode: background is light-colored on all adaptive routes
-- [ ] Dark mode: background matches current dark appearance (no regression)
-- [ ] Title text visible in both modes on all adaptive routes
-- [ ] Grid lines visible in both modes on all adaptive routes
-- [ ] Test: each tab route contrast >= 4.5:1 for title text in both modes
-- [ ] `flutter analyze` passes
-- [ ] `flutter test` passes
+- [x] All 5 adaptive routes use `AppGridBackgroundMode.adaptive`
+- [x] Light mode: background is light-colored on all adaptive routes
+- [x] Dark mode: background matches current dark appearance (no regression)
+- [x] Title text visible in both modes on all adaptive routes
+- [x] Grid lines visible in both modes on all adaptive routes
+- [x] Test: each tab route contrast >= 4.5:1 for title text in both modes
+- [x] `flutter analyze` passes
+- [x] `flutter test` passes
+
+## Done summary
+Flipped all adaptive routes to `AppGridBackgroundMode.adaptive` (home, library, progress, settings, contact), aligned adaptive dark grid lines with legacy-dark visual continuity (`KitColors.white02`), and added route-level adaptive audits/contrast coverage including title style source checks for headlineLarge usage.
+## Evidence
+- Commits:
+- Tests: flutter test
+- PRs:

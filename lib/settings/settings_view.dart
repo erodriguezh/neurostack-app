@@ -54,6 +54,7 @@ class _SettingsViewState extends State<SettingsView> {
     final bottomInset = MediaQuery.of(context).padding.bottom;
 
     return AppGridBackground(
+      mode: AppGridBackgroundMode.adaptive,
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: SafeArea(

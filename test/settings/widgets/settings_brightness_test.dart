@@ -62,8 +62,7 @@ void main() {
               );
 
               final theme = AppTheme.buildTheme(brightness);
-              final semanticColors =
-                  theme.extension<AppSemanticColors>()!;
+              final semanticColors = theme.extension<AppSemanticColors>()!;
 
               final labelText = tester.widget<Text>(
                 find.text('Contact Us'),
@@ -91,8 +90,7 @@ void main() {
               );
 
               final theme = AppTheme.buildTheme(brightness);
-              final semanticColors =
-                  theme.extension<AppSemanticColors>()!;
+              final semanticColors = theme.extension<AppSemanticColors>()!;
 
               // Leading icon is the first Icon with size 20
               final icons = tester.widgetList<Icon>(find.byType(Icon));
@@ -117,8 +115,7 @@ void main() {
               );
 
               final theme = AppTheme.buildTheme(brightness);
-              final semanticColors =
-                  theme.extension<AppSemanticColors>()!;
+              final semanticColors = theme.extension<AppSemanticColors>()!;
 
               final icons = tester.widgetList<Icon>(find.byType(Icon));
               final trailingIcon = icons.firstWhere((i) => i.size == 16);
@@ -133,8 +130,7 @@ void main() {
             'label contrast >= 4.5:1 against surfaceElevated',
             (tester) async {
               final theme = AppTheme.buildTheme(brightness);
-              final semanticColors =
-                  theme.extension<AppSemanticColors>()!;
+              final semanticColors = theme.extension<AppSemanticColors>()!;
 
               final ratio = contrastRatio(
                 semanticColors.ink,
@@ -185,8 +181,7 @@ void main() {
               );
 
               final theme = AppTheme.buildTheme(brightness);
-              final semanticColors =
-                  theme.extension<AppSemanticColors>()!;
+              final semanticColors = theme.extension<AppSemanticColors>()!;
 
               final headlineText = tester.widget<Text>(
                 find.text('Unlock All Protocols'),
@@ -209,8 +204,7 @@ void main() {
               );
 
               final theme = AppTheme.buildTheme(brightness);
-              final semanticColors =
-                  theme.extension<AppSemanticColors>()!;
+              final semanticColors = theme.extension<AppSemanticColors>()!;
 
               final subtitleText = tester.widget<Text>(
                 find.text('Unlimited protocols, all future updates'),
@@ -226,8 +220,7 @@ void main() {
             'headline contrast >= 4.5:1 against surfaceElevated',
             (tester) async {
               final theme = AppTheme.buildTheme(brightness);
-              final semanticColors =
-                  theme.extension<AppSemanticColors>()!;
+              final semanticColors = theme.extension<AppSemanticColors>()!;
 
               final ratio = contrastRatio(
                 semanticColors.ink,
@@ -294,8 +287,7 @@ void main() {
               );
 
               final theme = AppTheme.buildTheme(brightness);
-              final semanticColors =
-                  theme.extension<AppSemanticColors>()!;
+              final semanticColors = theme.extension<AppSemanticColors>()!;
 
               final headerText = tester.widget<Text>(
                 find.text('SUPPORT & RESOURCES'),
@@ -330,8 +322,7 @@ void main() {
           expect(
             matches,
             isEmpty,
-            reason:
-                '$path should not reference any kitColors.whiteXX tokens',
+            reason: '$path should not reference any kitColors.whiteXX tokens',
           );
         });
       }
@@ -340,16 +331,17 @@ void main() {
     // --- ContactView source audit ---
     group('ContactView source audit', () {
       test(
-        'contact_view.dart AppGridBackground mode is tracked for Task 10',
+        'contact_view.dart AppGridBackground mode is adaptive',
         () {
-          final source =
-              File('lib/settings/contact_view.dart').readAsStringSync();
+          final source = File(
+            'lib/settings/contact_view.dart',
+          ).readAsStringSync();
           expect(
-            source.contains('AppGridBackgroundMode.adaptive'),
-            isFalse,
+            RegExp(r'mode:\s*AppGridBackgroundMode\.adaptive').hasMatch(source),
+            isTrue,
             reason:
-                'AppGridBackground adaptive mode should be enabled in '
-                'Task 10, not Task 8',
+                'contact_view.dart should explicitly set '
+                'AppGridBackgroundMode.adaptive',
           );
         },
       );

@@ -67,8 +67,7 @@ void main() {
               );
 
               final theme = AppTheme.buildTheme(brightness);
-              final semanticColors =
-                  theme.extension<AppSemanticColors>()!;
+              final semanticColors = theme.extension<AppSemanticColors>()!;
 
               // Find the nav pill container by its distinctive decoration
               // (BoxDecoration with border + boxShadow within HomeBottomNav)
@@ -106,15 +105,13 @@ void main() {
               );
 
               final theme = AppTheme.buildTheme(brightness);
-              final semanticColors =
-                  theme.extension<AppSemanticColors>()!;
+              final semanticColors = theme.extension<AppSemanticColors>()!;
 
               // "Library" is an inactive tab (Stack is active)
               final libraryText = tester.widget<Text>(
                 find.text('Library'),
               );
-              final color =
-                  (libraryText.style as TextStyle).color;
+              final color = (libraryText.style as TextStyle).color;
               expect(color, equals(semanticColors.inkSubtle));
             },
           );
@@ -152,8 +149,7 @@ void main() {
               );
 
               final theme = AppTheme.buildTheme(brightness);
-              final semanticColors =
-                  theme.extension<AppSemanticColors>()!;
+              final semanticColors = theme.extension<AppSemanticColors>()!;
 
               final protocolText = tester.widget<Text>(
                 find.text('Add your first protocol'),
@@ -192,8 +188,7 @@ void main() {
         (tester) async {
           for (final brightness in Brightness.values) {
             final theme = AppTheme.buildTheme(brightness);
-            final semanticColors =
-                theme.extension<AppSemanticColors>()!;
+            final semanticColors = theme.extension<AppSemanticColors>()!;
             // HomeHeader uses textTheme.headlineLarge which resolves to
             // onSurface-equivalent text color
             final headerTextColor = theme.textTheme.headlineLarge!.color!;
@@ -260,8 +255,7 @@ void main() {
               );
 
               final theme = AppTheme.buildTheme(brightness);
-              final semanticColors =
-                  theme.extension<AppSemanticColors>()!;
+              final semanticColors = theme.extension<AppSemanticColors>()!;
 
               final titleText = tester.widget<Text>(
                 find.text('Test Protocol'),
@@ -287,19 +281,19 @@ void main() {
               );
 
               final theme = AppTheme.buildTheme(brightness);
-              final semanticColors =
-                  theme.extension<AppSemanticColors>()!;
+              final semanticColors = theme.extension<AppSemanticColors>()!;
 
               // Read the actual card background color from the
               // AnimatedContainer within HomeProtocolCard
               final cardContainer = tester.widget<AnimatedContainer>(
-                find.descendant(
-                  of: find.byType(HomeProtocolCard),
-                  matching: find.byType(AnimatedContainer),
-                ).first,
+                find
+                    .descendant(
+                      of: find.byType(HomeProtocolCard),
+                      matching: find.byType(AnimatedContainer),
+                    )
+                    .first,
               );
-              final decoration =
-                  cardContainer.decoration as BoxDecoration;
+              final decoration = cardContainer.decoration as BoxDecoration;
               // Card bg may be semi-transparent (e.g. outlineVariant in
               // dark mode is white05). Composite over the page surface
               // to get the effective rendered color.
@@ -388,8 +382,7 @@ void main() {
               );
 
               final theme = AppTheme.buildTheme(brightness);
-              final semanticColors =
-                  theme.extension<AppSemanticColors>()!;
+              final semanticColors = theme.extension<AppSemanticColors>()!;
 
               // Find the circle-shaped Container within HomeStatusDot
               final dotContainer = tester.widget<Container>(
@@ -404,8 +397,7 @@ void main() {
                   ),
                 ),
               );
-              final decoration =
-                  dotContainer.decoration as BoxDecoration;
+              final decoration = dotContainer.decoration as BoxDecoration;
               expect(decoration.color, equals(semanticColors.borderSubtle));
             },
           );
@@ -474,8 +466,7 @@ void main() {
 
       test('home_view.dart contains no kitColors.panel references', () {
         final source = File('lib/home/home_view.dart').readAsStringSync();
-        final matches =
-            RegExp(r'kitColors\.panel').allMatches(source);
+        final matches = RegExp(r'kitColors\.panel').allMatches(source);
         expect(
           matches,
           isEmpty,
@@ -485,21 +476,17 @@ void main() {
         );
       });
 
-      // Note: AppGridBackground mode flip from legacyDark to adaptive is
-      // explicitly deferred to Task 10 (fn-75...10). This audit documents
-      // that the home route still uses legacyDark until Task 10 lands.
+      // Task 10 flips adaptive routes to AppGridBackgroundMode.adaptive.
       test(
-        'home_view.dart AppGridBackground mode is tracked for Task 10',
+        'home_view.dart AppGridBackground mode is adaptive',
         () {
           final source = File('lib/home/home_view.dart').readAsStringSync();
-          // Currently legacyDark (default). Task 10 will flip to adaptive.
-          // If someone flips it early, this test catches it so we know.
           expect(
-            source.contains('AppGridBackgroundMode.adaptive'),
-            isFalse,
+            RegExp(r'mode:\s*AppGridBackgroundMode\.adaptive').hasMatch(source),
+            isTrue,
             reason:
-                'AppGridBackground adaptive mode should be enabled in '
-                'Task 10, not Task 5',
+                'home_view.dart should explicitly set '
+                'AppGridBackgroundMode.adaptive',
           );
         },
       );

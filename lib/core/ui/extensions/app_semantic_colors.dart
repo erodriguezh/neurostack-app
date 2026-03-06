@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:neurostack/core/ui/constants/kit_colors.dart';
 
 /// Brightness-aware semantic color tokens for adaptive routes.
 ///
@@ -52,7 +53,9 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       inkSubtle: colorScheme.onSurfaceVariant,
       border: colorScheme.outline,
       borderSubtle: colorScheme.outlineVariant,
-      gridLine: colorScheme.outlineVariant,
+      // Keep adaptive dark grid lines aligned with legacyDark mode
+      // (KitColors.white02) to avoid visual regressions on existing dark routes.
+      gridLine: KitColors.white02,
       gridBackground: colorScheme.surface,
       gridGlow: colorScheme.primary.withValues(alpha: 0.05),
     );

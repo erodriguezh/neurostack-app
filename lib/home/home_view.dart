@@ -76,6 +76,7 @@ class _HomeViewState extends State<HomeView> {
     final bottomInset = MediaQuery.of(context).padding.bottom;
 
     return AppGridBackground(
+      mode: AppGridBackgroundMode.adaptive,
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: SafeArea(
@@ -287,6 +288,7 @@ class _HomeViewState extends State<HomeView> {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         await _showGraceDialog();
         _showingGraceModal = false;
+        if (!mounted) return;
         _viewModel.acknowledgeGraceModal();
       });
     }
@@ -296,6 +298,7 @@ class _HomeViewState extends State<HomeView> {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         await _showDeactivationDialog();
         _showingDeactivationModal = false;
+        if (!mounted) return;
         _viewModel.acknowledgeDeactivationModal();
       });
     }
@@ -305,6 +308,7 @@ class _HomeViewState extends State<HomeView> {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         await _showLogSessionModal(state, state.logSessionRequest!);
         _showingLogSessionModal = false;
+        if (!mounted) return;
         _viewModel.acknowledgeLogSessionRequest();
       });
     }
@@ -333,6 +337,7 @@ class _HomeViewState extends State<HomeView> {
       userId: userId,
       initialDate: request.initialDate,
       onSessionLogged: (session) {
+        if (!mounted) return;
         _viewModel.refresh();
       },
     );

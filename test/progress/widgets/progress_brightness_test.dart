@@ -67,8 +67,7 @@ void main() {
               );
 
               final theme = AppTheme.buildTheme(brightness);
-              final semanticColors =
-                  theme.extension<AppSemanticColors>()!;
+              final semanticColors = theme.extension<AppSemanticColors>()!;
 
               final container = tester.widget<Container>(
                 find.byKey(const ValueKey('cell-not-done')),
@@ -98,8 +97,7 @@ void main() {
               );
 
               final theme = AppTheme.buildTheme(brightness);
-              final semanticColors =
-                  theme.extension<AppSemanticColors>()!;
+              final semanticColors = theme.extension<AppSemanticColors>()!;
 
               final dashed = tester.widget<DashedRoundedBorder>(
                 find.byKey(const ValueKey('cell-future')),
@@ -176,25 +174,25 @@ void main() {
               );
 
               final theme = AppTheme.buildTheme(brightness);
-              final semanticColors =
-                  theme.extension<AppSemanticColors>()!;
+              final semanticColors = theme.extension<AppSemanticColors>()!;
 
               // Find the outer container of ProgressGrid
               final gridContainer = tester.widget<Container>(
-                find.descendant(
-                  of: find.byType(ProgressGrid),
-                  matching: find.byWidgetPredicate(
-                    (w) =>
-                        w is Container &&
-                        w.decoration is BoxDecoration &&
-                        (w.decoration as BoxDecoration).border != null &&
-                        (w.decoration as BoxDecoration).borderRadius !=
-                            null,
-                  ),
-                ).first,
+                find
+                    .descendant(
+                      of: find.byType(ProgressGrid),
+                      matching: find.byWidgetPredicate(
+                        (w) =>
+                            w is Container &&
+                            w.decoration is BoxDecoration &&
+                            (w.decoration as BoxDecoration).border != null &&
+                            (w.decoration as BoxDecoration).borderRadius !=
+                                null,
+                      ),
+                    )
+                    .first,
               );
-              final decoration =
-                  gridContainer.decoration as BoxDecoration;
+              final decoration = gridContainer.decoration as BoxDecoration;
               expect(
                 decoration.color,
                 equals(semanticColors.surfaceElevated),
@@ -214,8 +212,7 @@ void main() {
               );
 
               final theme = AppTheme.buildTheme(brightness);
-              final semanticColors =
-                  theme.extension<AppSemanticColors>()!;
+              final semanticColors = theme.extension<AppSemanticColors>()!;
 
               // Find the protocol name text
               final protocolText = tester.widget<Text>(
@@ -238,8 +235,7 @@ void main() {
               );
 
               final theme = AppTheme.buildTheme(brightness);
-              final semanticColors =
-                  theme.extension<AppSemanticColors>()!;
+              final semanticColors = theme.extension<AppSemanticColors>()!;
 
               final ratio = contrastRatio(
                 semanticColors.ink,
@@ -283,8 +279,7 @@ void main() {
               );
 
               final theme = AppTheme.buildTheme(brightness);
-              final semanticColors =
-                  theme.extension<AppSemanticColors>()!;
+              final semanticColors = theme.extension<AppSemanticColors>()!;
 
               final emptyText = tester.widget<Text>(
                 find.text('Add protocols to track'),
@@ -347,8 +342,9 @@ void main() {
           final whiteXXPattern = RegExp(
             r'kitColors\.white(90|80|70|60|50|40|30|20|10|05|02)',
           );
-          final source =
-              File('lib/progress/progress_view.dart').readAsStringSync();
+          final source = File(
+            'lib/progress/progress_view.dart',
+          ).readAsStringSync();
           expect(
             whiteXXPattern.allMatches(source),
             isEmpty,
@@ -364,8 +360,7 @@ void main() {
         (_) async {
           for (final brightness in Brightness.values) {
             final theme = AppTheme.buildTheme(brightness);
-            final semanticColors =
-                theme.extension<AppSemanticColors>()!;
+            final semanticColors = theme.extension<AppSemanticColors>()!;
             // Subtitle uses semanticColors.inkSubtle against the
             // grid background surface.
             final ratio = contrastRatio(
@@ -383,22 +378,19 @@ void main() {
         },
       );
 
-      // Note: AppGridBackground mode flip from legacyDark to adaptive is
-      // explicitly deferred to Task 10 (fn-75...10). This audit documents
-      // that the progress route still uses legacyDark until Task 10 lands.
+      // Task 10 flips adaptive routes to AppGridBackgroundMode.adaptive.
       test(
-        'progress_view.dart AppGridBackground mode is tracked for Task 10',
+        'progress_view.dart AppGridBackground mode is adaptive',
         () {
-          final source =
-              File('lib/progress/progress_view.dart').readAsStringSync();
-          // Currently legacyDark (default). Task 10 will flip to adaptive.
-          // If someone flips it early, this test catches it so we know.
+          final source = File(
+            'lib/progress/progress_view.dart',
+          ).readAsStringSync();
           expect(
-            source.contains('AppGridBackgroundMode.adaptive'),
-            isFalse,
+            RegExp(r'mode:\s*AppGridBackgroundMode\.adaptive').hasMatch(source),
+            isTrue,
             reason:
-                'AppGridBackground adaptive mode should be enabled in '
-                'Task 10, not Task 7',
+                'progress_view.dart should explicitly set '
+                'AppGridBackgroundMode.adaptive',
           );
         },
       );
@@ -424,8 +416,7 @@ void main() {
           expect(
             matches,
             isEmpty,
-            reason:
-                '$path should not reference any kitColors.whiteXX tokens',
+            reason: '$path should not reference any kitColors.whiteXX tokens',
           );
         });
       }
