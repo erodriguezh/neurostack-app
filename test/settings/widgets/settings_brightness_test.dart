@@ -102,6 +102,34 @@ void main() {
           );
 
           testWidgets(
+            'trailing icon uses semantic inkSubtle color',
+            (tester) async {
+              await tester.pumpWidget(
+                wrap(
+                  brightness: brightness,
+                  child: SettingsTile(
+                    icon: Icons.mail,
+                    label: 'Contact Us',
+                    trailing: Icons.chevron_right,
+                    onTap: () {},
+                  ),
+                ),
+              );
+
+              final theme = AppTheme.buildTheme(brightness);
+              final semanticColors =
+                  theme.extension<AppSemanticColors>()!;
+
+              final icons = tester.widgetList<Icon>(find.byType(Icon));
+              final trailingIcon = icons.firstWhere((i) => i.size == 16);
+              expect(
+                trailingIcon.color,
+                equals(semanticColors.inkSubtle),
+              );
+            },
+          );
+
+          testWidgets(
             'label contrast >= 4.5:1 against surfaceElevated',
             (tester) async {
               final theme = AppTheme.buildTheme(brightness);

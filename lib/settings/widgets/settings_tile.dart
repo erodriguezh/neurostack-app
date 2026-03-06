@@ -27,7 +27,7 @@ class SettingsTile extends StatefulWidget {
   /// Tile label text (Inter 15 px, w400, semanticColors.ink).
   final String label;
 
-  /// Trailing icon data (16 px, semanticColors.borderSubtle) -- chevron-right or external-link.
+  /// Trailing icon data (16 px, semanticColors.inkSubtle) -- chevron-right or external-link.
   final IconData trailing;
 
   /// Called when the user taps the tile.
@@ -88,7 +88,7 @@ class _SettingsTileState extends State<SettingsTile> {
                 Icon(
                   widget.trailing,
                   size: 16,
-                  color: semanticColors.borderSubtle,
+                  color: semanticColors.inkSubtle,
                 ),
               ],
             ),
