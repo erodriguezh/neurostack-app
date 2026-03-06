@@ -30,7 +30,7 @@ class ContactView extends StatelessWidget {
                 IconButton(
                   icon: Icon(
                     LucideIcons.chevronLeft,
-                    color: semanticColors.ink,
+                    color: semanticColors.inkSubtle,
                   ),
                   onPressed: () => locator<RouterService>().back(),
                 ),

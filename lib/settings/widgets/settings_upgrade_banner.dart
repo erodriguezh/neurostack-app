@@ -45,8 +45,10 @@ class _SettingsUpgradeBannerState extends State<SettingsUpgradeBanner> {
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: widget.onTap,
-          onHighlightChanged: (highlighted) =>
-              setState(() => _pressed = highlighted),
+          onHighlightChanged: (highlighted) {
+            if (!mounted) return;
+            setState(() => _pressed = highlighted);
+          },
           highlightColor: colorScheme.onSurface.withValues(alpha: 0.03),
           splashFactory: NoSplash.splashFactory,
           borderRadius: BorderRadius.circular(24),

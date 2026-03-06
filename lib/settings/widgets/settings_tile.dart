@@ -21,13 +21,13 @@ class SettingsTile extends StatefulWidget {
     required this.onTap,
   });
 
-  /// Leading icon data (20 px, stroke-width 1.5, white40).
+  /// Leading icon data (20 px, stroke-width 1.5, semanticColors.inkSubtle).
   final IconData icon;
 
-  /// Tile label text (Inter 15 px, w400, white80).
+  /// Tile label text (Inter 15 px, w400, semanticColors.ink).
   final String label;
 
-  /// Trailing icon data (16 px, white20) -- chevron-right or external-link.
+  /// Trailing icon data (16 px, semanticColors.borderSubtle) -- chevron-right or external-link.
   final IconData trailing;
 
   /// Called when the user taps the tile.
@@ -49,8 +49,10 @@ class _SettingsTileState extends State<SettingsTile> {
       color: Colors.transparent,
       child: InkWell(
         onTap: widget.onTap,
-        onHighlightChanged: (highlighted) =>
-            setState(() => _pressed = highlighted),
+        onHighlightChanged: (highlighted) {
+          if (!mounted) return;
+          setState(() => _pressed = highlighted);
+        },
         highlightColor: colorScheme.onSurface.withValues(alpha: 0.03),
         splashFactory: NoSplash.splashFactory,
         child: AnimatedScale(
