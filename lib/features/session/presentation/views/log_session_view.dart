@@ -123,6 +123,7 @@ class _LogSessionViewState extends State<LogSessionView> {
   @override
   Widget build(BuildContext context) {
     final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
     final spacing = context.spacing;
     final safeBottom = MediaQuery.of(context).padding.bottom;
     final keyboardInset = MediaQuery.of(context).viewInsets.bottom;
@@ -152,7 +153,7 @@ class _LogSessionViewState extends State<LogSessionView> {
           padding: EdgeInsets.only(bottom: keyboardInset),
           child: Container(
             decoration: BoxDecoration(
-              color: kitColors.background,
+              color: semanticColors.surface,
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(32),
               ),
@@ -174,7 +175,7 @@ class _LogSessionViewState extends State<LogSessionView> {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: kitColors.white20,
+                        color: semanticColors.border,
                         borderRadius: BorderRadius.circular(999),
                       ),
                     ),
@@ -266,7 +267,8 @@ class _HeaderRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -276,7 +278,7 @@ class _HeaderRow extends StatelessWidget {
           style: GoogleFonts.newsreader(
             fontSize: 24,
             fontStyle: FontStyle.italic,
-            color: kitColors.white90,
+            color: semanticColors.ink,
           ),
         ),
         GestureDetector(
@@ -291,13 +293,13 @@ class _HeaderRow extends StatelessWidget {
               height: 44,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: kitColors.white05,
+                color: colorScheme.outlineVariant,
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.close,
                 size: 20,
-                color: kitColors.white40,
+                color: semanticColors.inkSubtle,
               ),
             ),
           ),
@@ -318,7 +320,8 @@ class _DateField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
+    final colorScheme = Theme.of(context).colorScheme;
     final spacing = context.spacing;
 
     return Column(
@@ -336,9 +339,9 @@ class _DateField extends StatelessWidget {
               child: Container(
                 padding: EdgeInsets.all(spacing.md),
                 decoration: BoxDecoration(
-                  color: kitColors.white02,
+                  color: colorScheme.surfaceContainerLowest,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: kitColors.white10),
+                  border: Border.all(color: semanticColors.border),
                 ),
                 child: Row(
                   children: [
@@ -348,14 +351,14 @@ class _DateField extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontSize: 16,
                           fontWeight: FontWeight.w400,
-                          color: kitColors.white80,
+                          color: colorScheme.onSurface,
                         ),
                       ),
                     ),
                     Icon(
                       Icons.calendar_today_outlined,
                       size: 18,
-                      color: kitColors.white30,
+                      color: semanticColors.inkSubtle,
                     ),
                   ],
                 ),
@@ -401,17 +404,6 @@ class _DateField extends StatelessWidget {
       initialDate: currentDate,
       firstDate: oldestAllowed,
       lastDate: today,
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: Theme.of(context).colorScheme.copyWith(
-              surface: context.kitColors.panel,
-              onSurface: context.kitColors.white90,
-            ),
-          ),
-          child: child!,
-        );
-      },
     );
 
     if (picked != null) {
@@ -438,6 +430,8 @@ class _DurationField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
+    final colorScheme = Theme.of(context).colorScheme;
     final spacing = context.spacing;
     final hasError = error != null;
 
@@ -452,7 +446,7 @@ class _DurationField extends StatelessWidget {
               '(optional)',
               style: GoogleFonts.inter(
                 fontSize: 11,
-                color: kitColors.white30,
+                color: semanticColors.inkSubtle,
               ),
             ),
           ],
@@ -464,12 +458,12 @@ class _DurationField extends StatelessWidget {
             vertical: spacing.xs,
           ),
           decoration: BoxDecoration(
-            color: kitColors.white02,
+            color: colorScheme.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: hasError
                   ? kitColors.red500.withValues(alpha: 0.5)
-                  : kitColors.white10,
+                  : semanticColors.border,
             ),
             boxShadow: hasError
                 ? [
@@ -496,14 +490,14 @@ class _DurationField extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
-                    color: kitColors.white80,
+                    color: colorScheme.onSurface,
                   ),
                   decoration: InputDecoration(
                     hintText: '0',
                     hintStyle: GoogleFonts.inter(
                       fontSize: 16,
                       fontWeight: FontWeight.w400,
-                      color: kitColors.white20,
+                      color: semanticColors.border,
                     ),
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.symmetric(vertical: spacing.sm),
@@ -516,7 +510,7 @@ class _DurationField extends StatelessWidget {
                 'min',
                 style: GoogleFonts.inter(
                   fontSize: 14,
-                  color: kitColors.white40,
+                  color: semanticColors.inkSubtle,
                 ),
               ),
             ],
@@ -583,6 +577,8 @@ class _NotesFieldState extends State<_NotesField> {
   @override
   Widget build(BuildContext context) {
     final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
+    final colorScheme = Theme.of(context).colorScheme;
     final spacing = context.spacing;
 
     final showCounter = _charCount >= _showCounterThreshold;
@@ -599,7 +595,7 @@ class _NotesFieldState extends State<_NotesField> {
               '(optional)',
               style: GoogleFonts.inter(
                 fontSize: 11,
-                color: kitColors.white30,
+                color: semanticColors.inkSubtle,
               ),
             ),
           ],
@@ -610,9 +606,9 @@ class _NotesFieldState extends State<_NotesField> {
             Container(
               padding: EdgeInsets.all(spacing.md),
               decoration: BoxDecoration(
-                color: kitColors.white02,
+                color: colorScheme.surfaceContainerLowest,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: kitColors.white10),
+                border: Border.all(color: semanticColors.border),
               ),
               constraints: const BoxConstraints(minHeight: 100),
               child: TextField(
@@ -626,14 +622,14 @@ class _NotesFieldState extends State<_NotesField> {
                 style: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w400,
-                  color: kitColors.white80,
+                  color: colorScheme.onSurface,
                 ),
                 decoration: InputDecoration(
                   hintText: 'How did it go?',
                   hintStyle: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
-                    color: kitColors.white20,
+                    color: semanticColors.border,
                   ),
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.zero,
@@ -651,7 +647,9 @@ class _NotesFieldState extends State<_NotesField> {
                   '$_charCount/$_maxLength',
                   style: GoogleFonts.robotoMono(
                     fontSize: 10,
-                    color: isCounterRed ? kitColors.red400 : kitColors.white30,
+                    color: isCounterRed
+                        ? kitColors.red400
+                        : semanticColors.inkSubtle,
                   ),
                 ),
               ),
@@ -669,7 +667,7 @@ class _FieldLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
 
     return Text(
       label,
@@ -677,7 +675,7 @@ class _FieldLabel extends StatelessWidget {
         fontSize: 11,
         fontWeight: FontWeight.w500,
         letterSpacing: 1.65, // 0.15em
-        color: kitColors.white40,
+        color: semanticColors.inkSubtle,
       ),
     );
   }
@@ -692,7 +690,11 @@ class _InlineErrorBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kitColors = context.kitColors;
+    final colorScheme = Theme.of(context).colorScheme;
     final spacing = context.spacing;
+
+    // Error colors use the colorScheme.error slot for adaptive theming.
+    final errorColor = colorScheme.error;
 
     return Container(
       padding: EdgeInsets.all(spacing.md),
@@ -703,12 +705,12 @@ class _InlineErrorBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.error_outline, color: kitColors.red400, size: 18),
+          Icon(Icons.error_outline, color: errorColor, size: 18),
           SizedBox(width: spacing.sm),
           Expanded(
             child: Text(
               message,
-              style: GoogleFonts.inter(fontSize: 13, color: kitColors.red400),
+              style: GoogleFonts.inter(fontSize: 13, color: errorColor),
             ),
           ),
         ],
@@ -729,12 +731,13 @@ class _IneligibleView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
     final spacing = context.spacing;
     final bottomInset = MediaQuery.of(context).padding.bottom;
 
     return Container(
       decoration: BoxDecoration(
-        color: kitColors.background,
+        color: semanticColors.surface,
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(32),
         ),
@@ -753,7 +756,7 @@ class _IneligibleView extends StatelessWidget {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: kitColors.white20,
+              color: semanticColors.border,
               borderRadius: BorderRadius.circular(999),
             ),
           ),
@@ -768,7 +771,7 @@ class _IneligibleView extends StatelessWidget {
           Icon(
             Icons.lock_outline,
             size: 48,
-            color: kitColors.white30,
+            color: semanticColors.inkSubtle,
           ),
           SizedBox(height: spacing.md),
           Text(
@@ -776,7 +779,7 @@ class _IneligibleView extends StatelessWidget {
             style: GoogleFonts.newsreader(
               fontSize: 20,
               fontStyle: FontStyle.italic,
-              color: kitColors.white90,
+              color: semanticColors.ink,
             ),
           ),
           SizedBox(height: spacing.sm),
@@ -785,7 +788,7 @@ class _IneligibleView extends StatelessWidget {
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
               fontSize: 14,
-              color: kitColors.white60,
+              color: semanticColors.inkSubtle,
               height: 1.5,
             ),
           ),
