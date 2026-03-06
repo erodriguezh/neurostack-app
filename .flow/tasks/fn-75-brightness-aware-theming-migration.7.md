@@ -22,10 +22,17 @@ Migrate progress tab widgets from `kitColors.whiteXX` to semantic tokens, includ
 - `progress_view.dart` subtitle is a critical light-mode break if not migrated
 
 ## Acceptance
-- [ ] No `whiteXX` usage in `progress_view.dart` for legibility tokens
-- [ ] No `whiteXX` usage in `progress_grid.dart` for legibility tokens
-- [ ] No `whiteXX` usage in `progress_day_cell.dart` for legibility tokens
-- [ ] No `whiteXX` usage in `backdate_session_sheet.dart` for legibility tokens
-- [ ] All progress widgets visually unchanged in dark mode
-- [ ] Existing `progress_grid_test.dart` updated to test both brightness modes
-- [ ] New brightness test covers day cell, sheet, and view in light+dark
+- [x] No `whiteXX` usage in `progress_view.dart` for legibility tokens
+- [x] No `whiteXX` usage in `progress_grid.dart` for legibility tokens
+- [x] No `whiteXX` usage in `progress_day_cell.dart` for legibility tokens
+- [x] No `whiteXX` usage in `backdate_session_sheet.dart` for legibility tokens
+- [x] All progress widgets visually unchanged in dark mode
+- [x] Existing `progress_grid_test.dart` updated to test both brightness modes
+- [x] New brightness test covers day cell, sheet, and view in light+dark
+
+## Done summary
+Migrated progress widgets from kitColors.whiteXX/panel to semantic tokens. Added brightness tests with WCAG contrast assertions.
+
+## Evidence
+- Commits: 2e0842f, dff8355, 37d2ee0, 645cbb5, db09d4f
+- Tests: `flutter test test/progress/` (45 pass), `flutter analyze` (0 issues)
