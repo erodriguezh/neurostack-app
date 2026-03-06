@@ -66,7 +66,7 @@ class _BackdateSessionSheetState extends State<_BackdateSessionSheet> {
               width: 48,
               height: 5,
               decoration: BoxDecoration(
-                color: semanticColors.borderSubtle,
+                color: semanticColors.border,
                 borderRadius: BorderRadius.circular(999),
               ),
             ),

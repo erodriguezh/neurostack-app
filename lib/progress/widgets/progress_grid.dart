@@ -91,7 +91,7 @@ class ProgressGrid extends StatelessWidget {
                       Icon(
                         LucideIcons.layers,
                         size: 32,
-                        color: semanticColors.borderSubtle,
+                        color: semanticColors.border,
                       ),
                       SizedBox(height: spacing.sm),
                       Text(

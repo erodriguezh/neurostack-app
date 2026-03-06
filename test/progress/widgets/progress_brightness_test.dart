@@ -194,6 +194,10 @@ void main() {
                 decoration.color,
                 equals(semanticColors.surfaceElevated),
               );
+              expect(
+                (decoration.border as Border).top.color,
+                equals(semanticColors.borderSubtle),
+              );
             },
           );
 
@@ -361,7 +365,7 @@ void main() {
             // grid background surface.
             final ratio = contrastRatio(
               semanticColors.inkSubtle,
-              semanticColors.surface,
+              semanticColors.gridBackground,
             );
             expect(
               ratio,
