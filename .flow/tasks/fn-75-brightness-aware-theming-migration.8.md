@@ -30,3 +30,7 @@ Migrate settings and contact view widgets from `kitColors.whiteXX` to semantic t
 
 ## Done summary
 Migrated settings_tile, settings_support_section, settings_upgrade_banner, and contact_view from kitColors.whiteXX to AppSemanticColors tokens. Added 27 brightness tests with WCAG contrast and whiteXX source audits.
+
+## Evidence
+- Commits: b555d24, 7f7d333, fb09c6e, 93f4b30
+- Tests: flutter test test/settings/widgets/settings_brightness_test.dart (27 passed), flutter analyze (no issues)
