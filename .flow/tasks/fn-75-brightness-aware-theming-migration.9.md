@@ -21,10 +21,17 @@ Migrate session-related views and modal/dialog presentations from `kitColors.whi
 - The date picker override will produce a dark picker inside a light modal if not migrated — visual inconsistency
 
 ## Acceptance
-- [ ] No `whiteXX` usage in `log_session_view.dart` for legibility tokens
-- [ ] `log_session_modal.dart` barrier color derived from theme (not hardcoded)
-- [ ] `trial_expired_modal.dart` stays dark under light system theme (wrapped in DarkThemeScope)
-- [ ] Log session modal readable in both light and dark modes
-- [ ] Date picker uses adaptive colors (no forced-dark surface/onSurface override) — picker appearance matches system brightness
-- [ ] Test: log session view rendered in both Brightness.light and Brightness.dark
-- [ ] Existing `trial_expired_modal_test.dart` still passes
+- [x] No `whiteXX` usage in `log_session_view.dart` for legibility tokens
+- [x] `log_session_modal.dart` barrier color derived from theme (not hardcoded)
+- [x] `trial_expired_modal.dart` stays dark under light system theme (wrapped in DarkThemeScope)
+- [x] Log session modal readable in both light and dark modes
+- [x] Date picker uses adaptive colors (no forced-dark surface/onSurface override) — picker appearance matches system brightness
+- [x] Test: log session view rendered in both Brightness.light and Brightness.dark
+- [x] Existing `trial_expired_modal_test.dart` still passes
+
+## Done summary
+Migrated session and modal widgets to semantic tokens: replaced 26+ kitColors.whiteXX usages in log_session_view.dart with semantic/colorScheme equivalents, derived log_session_modal.dart barrier color from colorScheme.scrim, wrapped trial_expired_modal.dart in DarkThemeScope, removed forced-dark date picker override, and added brightness tests for both light/dark modes.
+
+## Evidence
+- Commits: 008b189, 3280167
+- Tests: flutter test (35 tests pass), flutter analyze (no issues)
