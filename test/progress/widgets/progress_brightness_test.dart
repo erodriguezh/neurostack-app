@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
 import 'package:neurostack/core/ui/constants/kit_colors.dart';
 import 'package:neurostack/core/ui/extensions/app_semantic_colors.dart';
+import 'package:neurostack/core/ui/widgets/dashed_rounded_border.dart';
 import 'package:neurostack/progress/progress_state.dart';
 import 'package:neurostack/progress/widgets/progress_day_cell.dart';
 import 'package:neurostack/progress/widgets/progress_grid.dart';
@@ -82,7 +83,7 @@ void main() {
           );
 
           testWidgets(
-            'renders future cell with semantic borderSubtle',
+            'renders future cell with semantic border',
             (tester) async {
               await tester.pumpWidget(
                 wrap(
@@ -96,10 +97,14 @@ void main() {
                 ),
               );
 
-              expect(
+              final theme = AppTheme.buildTheme(brightness);
+              final semanticColors =
+                  theme.extension<AppSemanticColors>()!;
+
+              final dashed = tester.widget<DashedRoundedBorder>(
                 find.byKey(const ValueKey('cell-future')),
-                findsOneWidget,
               );
+              expect(dashed.color, equals(semanticColors.border));
             },
           );
 
