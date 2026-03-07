@@ -11,29 +11,44 @@ All visual values must reference tokens. Never hardcode colors, spacing, or typo
 ### Token Hierarchy
 
 ```
-Foundation Tokens (raw values)
+Foundation Tokens (raw values: KitColors + Material baselines)
     ↓
-Semantic Tokens (purpose-based)
+Semantic Tokens (purpose-based: ColorScheme + AppSemanticColors)
     ↓
-Component Tokens (widget-specific)
+Component Tokens (widget-specific mappings)
 ```
 
 ### File Structure
 
 ```
 lib/core/ui/
+├── app_theme.dart                       # ThemeData assembly + extension registration
 ├── constants/
-│   ├── app_colors.dart       # ColorScheme + semantic colors
-│   ├── app_spacing.dart      # Spacing scale (8px grid)
-│   ├── app_typography.dart   # TextTheme + custom styles
-│   ├── app_shapes.dart       # Border radii
-│   └── app_durations.dart    # Animation timing
-├── theme/
-│   ├── app_theme.dart        # ThemeData assembly
-│   └── theme_extensions.dart # Custom ThemeExtension classes
+│   ├── kit_colors.dart                  # Brand + legacy dark-first palette
+│   ├── spacing.dart                     # Spacing scale (4px grid)
+│   ├── text_styles.dart                 # Typography tokens
+│   ├── border_radius.dart               # Border radii
+│   ├── shadows.dart                     # Elevation shadows
+│   ├── curves.dart                      # Animation curves
+│   ├── durations.dart                   # Animation timings
+│   └── breakpoints.dart                 # Responsive breakpoints
+├── extensions/
+│   └── app_semantic_colors.dart         # Brightness-aware semantic tokens
 └── widgets/
-    └── ...                   # Reusable design system widgets
+    ├── app_grid_background.dart         # Grid background + mode enum
+    ├── dark_theme_scope.dart            # Route-local dark theme wrapper
+    └── ...                              # Reusable design system widgets
 ```
+
+### Surface Mode Policy
+
+- **Adaptive routes** (`home`, `library`, `progress`, `settings`, `contact`) follow
+  system brightness and must use `ColorScheme`/`AppSemanticColors`.
+- **Dark-first routes** (`auth`, `onboarding`, `offline`, `paywall`, `startup`)
+  are wrapped in `DarkThemeScope` and may use `kitColors.whiteXX`.
+- `AppGridBackgroundMode.adaptive` is required for adaptive routes.
+- `AppGridBackgroundMode.legacyDark` is reserved for intentional dark-first
+  surfaces.
 
 ---
 
@@ -445,7 +460,7 @@ SizedBox(
 
 | Category | Token Class | Example |
 |----------|-------------|---------|
-| Colors | `AppColors` | `AppColors.success` |
+| Colors | `ColorScheme` + `AppSemanticColors` | `context.semanticColors.ink` |
 | Spacing | `AppSpacing` | `AppSpacing.md` (16) |
 | Typography | `Theme.of(context).textTheme` | `.headlineMedium` |
 | Shapes | `AppShapes` | `AppShapes.mediumRadius` |
@@ -456,9 +471,12 @@ SizedBox(
 
 ## Checklist Before PR
 
-- [ ] No hardcoded colors (use ColorScheme or AppColors)
+- [ ] No hardcoded colors (use ColorScheme or AppSemanticColors)
 - [ ] No magic numbers for spacing (use AppSpacing)
 - [ ] No inline TextStyle (use textTheme with copyWith if needed)
 - [ ] Animations use AppDurations and AppCurves
 - [ ] Touch targets are 48x48 minimum
 - [ ] Dark mode tested (ColorScheme handles most cases)
+- [ ] Adaptive widgets avoid `kitColors.whiteXX` (use `AppSemanticColors`)
+- [ ] Dark-first surfaces are scoped with `DarkThemeScope`
+- [ ] Route background mode matches policy (`adaptive` vs `legacyDark`)

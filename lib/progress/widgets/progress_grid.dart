@@ -29,13 +29,13 @@ class ProgressGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(!weekRange.start.isAfter(weekRange.end));
     final spacing = context.spacing;
-    final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
 
     return Container(
       decoration: BoxDecoration(
-        color: kitColors.white02,
+        color: semanticColors.surfaceElevated,
         borderRadius: context.borderRadius.r24,
-        border: Border.all(color: kitColors.white10),
+        border: Border.all(color: semanticColors.border),
       ),
       padding: EdgeInsets.all(spacing.lg),
       child: LayoutBuilder(
@@ -91,13 +91,13 @@ class ProgressGrid extends StatelessWidget {
                       Icon(
                         LucideIcons.layers,
                         size: 32,
-                        color: kitColors.white20,
+                        color: semanticColors.border,
                       ),
                       SizedBox(height: spacing.sm),
                       Text(
                         'Add protocols to track',
                         style: context.theme.textTheme.bodyMedium?.copyWith(
-                          color: kitColors.white40,
+                          color: semanticColors.inkSubtle,
                         ),
                       ),
                     ],
@@ -142,6 +142,7 @@ class ProgressGrid extends StatelessWidget {
     double cellGap,
   ) {
     final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -160,7 +161,7 @@ class ProgressGrid extends StatelessWidget {
                   style: context.theme.textTheme.labelSmall?.copyWith(
                     color: i == todayIndex
                         ? kitColors.brandSky
-                        : kitColors.white40,
+                        : semanticColors.inkSubtle,
                   ),
                 ),
                 SizedBox(height: context.spacing.xs),
@@ -188,7 +189,7 @@ class ProgressGrid extends StatelessWidget {
     double cellSize,
     double cellGap,
   ) {
-    final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -203,7 +204,7 @@ class ProgressGrid extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: context.theme.textTheme.bodyMedium?.copyWith(
                 fontSize: 14,
-                color: kitColors.white70,
+                color: semanticColors.ink,
               ),
             ),
           ),

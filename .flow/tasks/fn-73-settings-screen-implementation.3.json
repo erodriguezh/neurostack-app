@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-02-27T20:03:38.768055Z",
+  "depends_on": [],
+  "epic": "fn-73-settings-screen-implementation",
+  "id": "fn-73-settings-screen-implementation.3",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-73-settings-screen-implementation.3.md",
+  "status": "todo",
+  "title": "Phase 1.3: Add Settings tab to HomeBottomNav widget",
+  "updated_at": "2026-02-27T20:03:38.768632Z"
+}

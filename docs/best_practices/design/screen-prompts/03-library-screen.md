@@ -1,5 +1,9 @@
 Create a mobile-first protocol library screen.
 
+> Semantic token mapping note: This is an adaptive route. Map any `white/XX`
+> prompt values to `ColorScheme`/`AppSemanticColors` equivalents instead of
+> using `kitColors.whiteXX` directly.
+
 Background: #030303 with grid texture.
 
 Layout:

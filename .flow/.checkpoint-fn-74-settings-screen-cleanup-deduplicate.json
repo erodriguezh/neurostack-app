@@ -1,0 +1,87 @@
+{
+  "created_at": "2026-03-04T08:02:29.782752Z",
+  "epic": {
+    "data": {
+      "branch_name": "feature/settings-screen",
+      "completion_review_status": "unknown",
+      "completion_reviewed_at": null,
+      "created_at": "2026-03-04T08:00:14.319108Z",
+      "default_impl": null,
+      "default_review": null,
+      "default_sync": null,
+      "depends_on_epics": [],
+      "id": "fn-74-settings-screen-cleanup-deduplicate",
+      "next_task": 1,
+      "plan_review_status": "unknown",
+      "plan_reviewed_at": null,
+      "spec_path": ".flow/specs/fn-74-settings-screen-cleanup-deduplicate.md",
+      "status": "open",
+      "title": "Settings screen cleanup: deduplicate, remove stubs, extract shared widgets",
+      "updated_at": "2026-03-04T08:00:44.808569Z"
+    },
+    "spec": "# Settings Screen Cleanup: Deduplicate, Remove Stubs, Extract Shared Widgets\n\n## Overview\n\nPost-implementation cleanup of the settings screen branch (`feature/settings-screen`). The branch introduced ~715 lines across 6 new files in `lib/settings/`. During rapid feature implementation, several patterns were copy-pasted from other tab screens rather than extracted to shared code, stub callbacks were wired for features that don't exist yet, and minor inconsistencies crept in. This epic addresses all of these before the branch merges to master.\n\n## Scope\n\n**In scope:**\n- Remove 3 stub tiles (Send Feedback, Rate the App, Feature Request) that are wired to `() {}`\n- Merge duplicate `ValueListenableBuilder<bool>` blocks in `settings_view.dart`\n- Fix GestureDetector \u2192 InkWell inconsistency on SettingsUpgradeBanner\n- Extract home indicator pill (duplicated in 4 tab screens) to shared widget\n- Extract screen header text style (duplicated in 4+ places) to shared constant\n- Fix misleading/stale doc comments\n- Update docs: README dead reference, plan outdated info\n\n**Out of scope:**\n- Retrofitting `PremiumAwareViewModelMixin` onto Home/Library ViewModels (separate epic)\n- Adding widget tests for settings widgets (separate scope)\n- Creating a `ContactViewModel` (acceptable for a single-back-button page per existing precedent in `progress_view.dart`)\n- Changing mixin contracts (EntitlementListenerMixin / PremiumAwareViewModelMixin)\n\n## Open Questions\n\n1. **letterSpacing: -0.5 vs -0.8** \u2014 `CustomTextStyles.h1` at `lib/core/ui/constants/text_styles.dart:55` uses `-0.5`, but Settings/Library/Progress/Contact inline `-0.8`. Check Figma for source of truth. Default: extract with `-0.8` and update the `h1` token to match, since 4 screens already use it.\n\n## Quick commands\n\n```bash\nflutter analyze\nflutter test\nflutter test test/settings/\n```\n\n## Acceptance\n\n- [ ] `flutter analyze` passes with zero issues\n- [ ] `flutter test` passes (all existing tests green)\n- [ ] No `() {}` stub callbacks remain in settings code\n- [ ] Home indicator pill exists as a single shared widget, used by all 4 tab screens\n- [ ] Screen header text style is defined once and reused (no inline `copyWith` duplication)\n- [ ] SettingsUpgradeBanner uses InkWell with press feedback (not GestureDetector)\n- [ ] Only one `ValueListenableBuilder<bool>` for `isPremium` in settings_view.dart\n- [ ] `docs/README.md` has no dead file references\n- [ ] No stale doc comments (ContactView \"placeholder\" comment, banner doc mismatch)\n\n## References\n\n- Settings spec: `docs/specs/20260227120000_spec_settings_screen.md`\n- Settings plan: `plan_settings_screen.md`\n- Prior cleanup patterns: fn-60 (paywall cleanup phase 1), fn-61 (paywall cleanup phase 2)\n- Mixin contracts: `lib/core/abstractions/entitlement_listener_mixin.dart`, `lib/core/abstractions/premium_aware_view_model_mixin.dart`\n- Shared widget precedent: `lib/core/ui/widgets/staggered_fade_in.dart`, `lib/core/ui/widgets/error_state_view.dart` (extracted in fn-60.3)\n"
+  },
+  "epic_id": "fn-74-settings-screen-cleanup-deduplicate",
+  "schema_version": 2,
+  "tasks": [
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-03-04T08:00:49.198260Z",
+        "depends_on": [],
+        "epic": "fn-74-settings-screen-cleanup-deduplicate",
+        "id": "fn-74-settings-screen-cleanup-deduplicate.1",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-74-settings-screen-cleanup-deduplicate.1.md",
+        "status": "todo",
+        "title": "Clean up settings view: remove stubs, merge builders, fix banner interaction",
+        "updated_at": "2026-03-04T08:01:21.597205Z"
+      },
+      "id": "fn-74-settings-screen-cleanup-deduplicate.1",
+      "runtime": null,
+      "spec": "# fn-74-settings-screen-cleanup-deduplicate.1 Clean up settings view: remove stubs, merge builders, fix banner interaction\n\n## Description\nClean up the settings module code: remove no-op stub tiles, consolidate duplicate ValueListenableBuilder usage, and fix the GestureDetector/InkWell inconsistency on the upgrade banner.\n\n**Size:** M\n**Files:**\n- `lib/settings/settings_view.dart`\n- `lib/settings/widgets/settings_upgrade_banner.dart`\n- `lib/settings/widgets/settings_support_section.dart`\n- `lib/settings/contact_view.dart`\n\n## Approach\n\n### 1. Remove 3 stub tiles\n\nThe tiles \"Send Feedback\" (`LucideIcons.messageSquare`), \"Rate the App\" (`LucideIcons.star`), and \"Feature Request\" (`LucideIcons.lightbulb`) at `lib/settings/settings_view.dart:114-116` are wired to `() {}`. Remove them:\n- Remove the 3 `onXxxTap` callback parameters from `SettingsSupportSection` constructor at `lib/settings/widgets/settings_support_section.dart`\n- Remove the corresponding `_TileEntry` items from the tile list at `settings_support_section.dart:~L80-100`\n- Remove the 3 `() {}` callbacks from the `SettingsSupportSection(...)` call in `settings_view.dart`\n- The section will have 2 tiles: \"Contact Us\" (always) + \"Cancel Subscription\" (premium only)\n\n### 2. Merge duplicate ValueListenableBuilder blocks\n\n`settings_view.dart` has two `ValueListenableBuilder<bool>` blocks (lines ~90-101 and ~106-122) both listening to `_viewModel.isPremium`. Merge into a single builder that returns both slivers:\n- Use a builder method pattern: `List<Widget> _buildPremiumAwareSlivers(bool isPremium)` returning a list of `SliverToBoxAdapter` children\n- Keep each section as its own `SliverToBoxAdapter` to preserve scroll behavior\n\n### 3. Switch SettingsUpgradeBanner to InkWell\n\n`settings_upgrade_banner.dart:32` uses `GestureDetector` with no press feedback. Switch to `InkWell` matching the `SettingsTile` pattern at `lib/settings/widgets/settings_tile.dart:49`:\n- Wrap content in `Material(type: MaterialType.transparency)` for ink splash ancestor\n- Use `InkWell` with `borderRadius: BorderRadius.circular(24)` to match the container shape\n- Add highlight color `Colors.white.withOpacity(0.03)` matching tile pattern\n\n### 4. Fix stale doc comments\n\n- `contact_view.dart:8` \u2014 remove \"placeholder until Phase 4\" comment (Phase 4 is done)\n- `settings_upgrade_banner.dart:11` \u2014 fix \"Hidden when isPremium is true\" doc (the widget itself doesn't check isPremium; the parent does via ValueListenableBuilder)\n## Acceptance\n- [ ] No `() {}` stub callbacks in settings code\n- [ ] `SettingsSupportSection` constructor takes only `onContactTap`, `onCancelSubscriptionTap`, `isPremium` (no feedback/rate/feature callbacks)\n- [ ] Only 2 tiles render: Contact Us + Cancel Subscription (Cancel conditional on `isPremium`)\n- [ ] Single `ValueListenableBuilder<bool>` for `isPremium` in `settings_view.dart`\n- [ ] `SettingsUpgradeBanner` uses `InkWell` with visible press feedback\n- [ ] No stale \"placeholder\" or misleading doc comments\n- [ ] `flutter analyze` passes\n- [ ] `flutter test test/settings/` passes\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-03-04T08:00:53.733708Z",
+        "depends_on": [
+          "fn-74-settings-screen-cleanup-deduplicate.1"
+        ],
+        "epic": "fn-74-settings-screen-cleanup-deduplicate",
+        "id": "fn-74-settings-screen-cleanup-deduplicate.2",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-74-settings-screen-cleanup-deduplicate.2.md",
+        "status": "todo",
+        "title": "Extract shared tab-screen widgets: home indicator pill and header text style",
+        "updated_at": "2026-03-04T08:01:40.975564Z"
+      },
+      "id": "fn-74-settings-screen-cleanup-deduplicate.2",
+      "runtime": null,
+      "spec": "# fn-74-settings-screen-cleanup-deduplicate.2 Extract shared tab-screen widgets: home indicator pill and header text style\n\n## Description\nExtract two patterns that are copy-pasted across all 4 tab screens into shared widgets/constants. These were propagated during settings screen implementation.\n\n**Size:** M\n**Files:**\n- `lib/core/ui/widgets/home_indicator_pill.dart` (new)\n- `lib/core/ui/constants/text_styles.dart` (edit \u2014 add shared header style)\n- `lib/settings/settings_view.dart`\n- `lib/settings/contact_view.dart`\n- `lib/home/home_view.dart`\n- `lib/library/library_view.dart`\n- `lib/progress/progress_view.dart`\n\n## Approach\n\n### 1. Extract home indicator pill widget\n\nThe identical ~15-line `Positioned` + `Container` widget appears in all 4 tab screens:\n- `lib/settings/settings_view.dart:144-158`\n- `lib/home/home_view.dart:116-132`\n- `lib/library/library_view.dart:114-130`\n- `lib/progress/progress_view.dart:125-141`\n\nCreate `lib/core/ui/widgets/home_indicator_pill.dart`:\n- Follow extraction pattern from fn-60.3 (`StaggeredFadeIn`, `ErrorStateView`)\n- `StatelessWidget` taking `bottomInset` as parameter (computed from `MediaQuery.of(context).padding.bottom` by caller)\n- Return the `Positioned` + `Center` + `Container` structure with `kitColors.white90.withValues(alpha: 0.3)`, width 134, height 5, borderRadius 999\n- Replace inline code in all 4 tab screens with the new widget\n\n### 2. Extract screen header text style\n\nThe identical `headlineLarge?.copyWith(fontSize: 32, fontStyle: FontStyle.italic, letterSpacing: -0.8, color: kitColors.white90)` appears in:\n- `lib/settings/settings_view.dart:79-83`\n- `lib/settings/contact_view.dart:40-44`\n- `lib/library/library_view.dart:205-209`\n- `lib/progress/progress_view.dart:195-199`\n\nNote: `home_header.dart` uses `textStyles.h1` properties individually with `letterSpacing: -0.5` \u2014 leave it as-is (structurally different, shared row with button).\n\nAdd a `screenTitle` getter to `CustomTextStyles` at `lib/core/ui/constants/text_styles.dart`:\n- Uses `headlineLarge?.copyWith(fontSize: 32, fontStyle: FontStyle.italic, letterSpacing: -0.8, color: kitColors.white90)`\n- Replace all 4 inline usages with `textStyles.screenTitle`\n\n**Open question:** The `CustomTextStyles.h1` token uses `letterSpacing: -0.5` while the 4 inline usages use `-0.8`. Check Figma. If `-0.8` is correct, consider updating `h1` to match. If not, keep them separate (the new `screenTitle` uses `-0.8`, `h1` stays at `-0.5`).\n\n## Key context\n\n- Shared widget precedent: `lib/core/ui/widgets/staggered_fade_in.dart` and `lib/core/ui/widgets/error_state_view.dart` were extracted in fn-60.3 using the same pattern\n- `CustomTextStyles` pattern: `lib/core/ui/constants/text_styles.dart` \u2014 existing TextStyle getters like `h1`, `h2`, `bodyLarge`\n- All 4 pill implementations are byte-identical except for import context\n## Acceptance\n- [ ] `HomeIndicatorPill` widget exists at `lib/core/ui/widgets/home_indicator_pill.dart`\n- [ ] All 4 tab screens (`settings_view.dart`, `home_view.dart`, `library_view.dart`, `progress_view.dart`) use `HomeIndicatorPill` instead of inline code\n- [ ] No inline `Positioned` + `Container` pill code remains in any tab screen\n- [ ] `screenTitle` TextStyle getter exists in `CustomTextStyles`\n- [ ] All 4 header usages (settings, contact, library, progress) use `textStyles.screenTitle`\n- [ ] No inline `headlineLarge?.copyWith(fontSize: 32, fontStyle: FontStyle.italic, ...)` remains\n- [ ] `flutter analyze` passes\n- [ ] `flutter test` passes (all existing tests green)\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-03-04T08:00:57.842607Z",
+        "depends_on": [],
+        "epic": "fn-74-settings-screen-cleanup-deduplicate",
+        "id": "fn-74-settings-screen-cleanup-deduplicate.3",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-74-settings-screen-cleanup-deduplicate.3.md",
+        "status": "todo",
+        "title": "Documentation cleanup: fix dead references, update plan, add mixin to README",
+        "updated_at": "2026-03-04T08:01:53.591376Z"
+      },
+      "id": "fn-74-settings-screen-cleanup-deduplicate.3",
+      "runtime": null,
+      "spec": "# fn-74-settings-screen-cleanup-deduplicate.3 Documentation cleanup: fix dead references, update plan, add mixin to README\n\n## Description\nFix documentation issues introduced or revealed during settings screen implementation.\n\n**Size:** S\n**Files:**\n- `docs/README.md`\n- `plan_settings_screen.md`\n\n## Approach\n\n### 1. Fix dead screen prompt reference\n\n`docs/README.md` line 38 references `./best_practices/design/screen-prompts/11-settings-screen.md` but this file does not exist. Either:\n- Create the file with basic settings screen prompt content (following pattern of `00-splash-screen.md` through `10-auth-check-email.md`)\n- Or remove the line if the screen prompt was never written\n\nCheck `docs/design_screenshots/11-settings.png` \u2014 if the Figma screenshot exists, a minimal screen prompt file should be created. If not, remove the reference.\n\n### 2. Update plan to reflect PremiumAwareViewModelMixin\n\n`plan_settings_screen.md` Phase 2.1 (lines 56-92) instructs wiring `EntitlementListenerMixin` directly and writing `isPremium` boilerplate inline. The actual implementation uses `PremiumAwareViewModelMixin` (extracted in commit `e0bcc9e`). Add a note at the top of Phase 2 indicating the implementation diverged to use the mixin.\n\n### 3. Add PremiumAwareViewModelMixin to README Core Infrastructure\n\n`docs/README.md` \"Core Infrastructure\" section (lines 83-94) lists shared utilities but does not mention the 3 core abstractions:\n- `EntitlementListenerMixin` at `lib/core/abstractions/entitlement_listener_mixin.dart`\n- `PremiumAwareViewModelMixin` at `lib/core/abstractions/premium_aware_view_model_mixin.dart`\n- `ConnectivityListenerMixin` at `lib/core/abstractions/connectivity_listener_mixin.dart`\n\nAdd a bullet for the abstractions directory.\n## Acceptance\n- [ ] `docs/README.md` line 38 \u2014 no dead file reference (file exists or link removed)\n- [ ] `plan_settings_screen.md` Phase 2 has a note about PremiumAwareViewModelMixin\n- [ ] `docs/README.md` Core Infrastructure section mentions core abstractions (mixins)\n- [ ] No broken links in `docs/README.md`\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    }
+  ]
+}

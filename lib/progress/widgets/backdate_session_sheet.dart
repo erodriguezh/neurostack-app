@@ -42,7 +42,7 @@ class _BackdateSessionSheetState extends State<_BackdateSessionSheet> {
   @override
   Widget build(BuildContext context) {
     final spacing = context.spacing;
-    final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
     final bottomInset = MediaQuery.of(context).padding.bottom;
 
     return Padding(
@@ -55,9 +55,9 @@ class _BackdateSessionSheetState extends State<_BackdateSessionSheet> {
           spacing.lg + bottomInset,
         ),
         decoration: BoxDecoration(
-          color: kitColors.panel,
+          color: semanticColors.surfaceElevated,
           borderRadius: context.borderRadius.r32,
-          border: Border.all(color: kitColors.white10),
+          border: Border.all(color: semanticColors.border),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -66,7 +66,7 @@ class _BackdateSessionSheetState extends State<_BackdateSessionSheet> {
               width: 48,
               height: 5,
               decoration: BoxDecoration(
-                color: kitColors.white10,
+                color: semanticColors.border,
                 borderRadius: BorderRadius.circular(999),
               ),
             ),
@@ -75,7 +75,7 @@ class _BackdateSessionSheetState extends State<_BackdateSessionSheet> {
               _buildPrompt(context),
               textAlign: TextAlign.center,
               style: context.theme.textTheme.bodyMedium?.copyWith(
-                color: kitColors.white80,
+                color: semanticColors.ink,
                 height: 1.4,
               ),
             ),
@@ -91,7 +91,7 @@ class _BackdateSessionSheetState extends State<_BackdateSessionSheet> {
               child: Text(
                 'Cancel',
                 style: context.theme.textTheme.labelLarge?.copyWith(
-                  color: kitColors.white60,
+                  color: semanticColors.inkSubtle,
                 ),
               ),
             ),

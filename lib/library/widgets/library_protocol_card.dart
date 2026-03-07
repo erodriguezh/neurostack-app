@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
 import 'package:neurostack/core/ui/constants/kit_colors.dart';
+import 'package:neurostack/core/ui/extensions/app_semantic_colors.dart';
 import 'package:neurostack/core/ui/extensions/category_ui.dart';
 import 'package:neurostack/core/ui/widgets/dashed_rounded_border.dart';
 import 'package:neurostack/core/ui/widgets/spotlight_card.dart';
@@ -37,6 +38,8 @@ class _LibraryProtocolCardState extends State<LibraryProtocolCard> {
   @override
   Widget build(BuildContext context) {
     final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
+    final colorScheme = context.theme.colorScheme;
     final spacing = context.spacing;
     final borderRadius = context.borderRadius.r24;
     final status = widget.model.status;
@@ -46,12 +49,16 @@ class _LibraryProtocolCardState extends State<LibraryProtocolCard> {
 
     final borderColor = isInStack
         ? kitColors.brandSky.withValues(alpha: 0.3)
-        : (_isHovering ? kitColors.white20 : kitColors.white10);
+        : (_isHovering ? semanticColors.border : semanticColors.borderSubtle);
 
+    final baseCardBg = colorScheme.outlineVariant;
     final backgroundColor = switch (status) {
-      LibraryCardStatus.inStack => kitColors.white02,
-      LibraryCardStatus.available => kitColors.white02,
-      LibraryCardStatus.locked => kitColors.white02.withValues(alpha: 0.5),
+      LibraryCardStatus.inStack => baseCardBg,
+      LibraryCardStatus.available => baseCardBg,
+      // Scale existing alpha by 0.5 to dim locked cards without overriding
+      // the dark-mode semi-transparent base.
+      LibraryCardStatus.locked =>
+        baseCardBg.withValues(alpha: baseCardBg.a * 0.5),
     };
 
     final cardContent = Padding(
@@ -75,7 +82,7 @@ class _LibraryProtocolCardState extends State<LibraryProtocolCard> {
             style: context.theme.textTheme.titleLarge?.copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w500,
-              color: isLocked ? kitColors.white50 : kitColors.white90,
+              color: isLocked ? semanticColors.inkSubtle : semanticColors.ink,
             ),
           ),
           SizedBox(height: spacing.xs),
@@ -84,7 +91,7 @@ class _LibraryProtocolCardState extends State<LibraryProtocolCard> {
             style: context.theme.textTheme.bodySmall?.copyWith(
               fontSize: 12,
               color: isLocked
-                  ? kitColors.white30
+                  ? semanticColors.inkSubtle
                   : libraryEvidenceColor(
                       context,
                       widget.model.evidenceLevel,
@@ -104,6 +111,7 @@ class _LibraryProtocolCardState extends State<LibraryProtocolCard> {
     );
 
     final decoratedCard = AnimatedContainer(
+      key: const ValueKey('library-card-surface'),
       duration: context.durations.duration200,
       decoration: BoxDecoration(
         color: backgroundColor,
@@ -116,7 +124,7 @@ class _LibraryProtocolCardState extends State<LibraryProtocolCard> {
     final cardBody = isLocked
         ? DashedRoundedBorder(
             borderRadius: borderRadius,
-            color: kitColors.white10,
+            color: semanticColors.borderSubtle,
             child: decoratedCard,
           )
         : decoratedCard;
@@ -125,7 +133,7 @@ class _LibraryProtocolCardState extends State<LibraryProtocolCard> {
       children: [
         SpotlightCard(
           borderRadius: borderRadius,
-          spotlightColor: kitColors.white05,
+          spotlightColor: semanticColors.borderSubtle,
           enabled: isAvailable,
           onHoverChanged: isAvailable ? _setHovering : null,
           child: GestureDetector(
@@ -162,8 +170,13 @@ class _CategoryPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final kitColors = context.kitColors;
-    final textColor = isMuted ? kitColors.white30 : kitColors.white50;
+    final semanticColors = context.semanticColors;
+    final textColor = isMuted
+        ? semanticColors.inkSubtle.withValues(alpha: 0.7)
+        : semanticColors.inkSubtle;
+    final pillBackground = isMuted
+        ? semanticColors.borderSubtle.withValues(alpha: 0.5)
+        : semanticColors.borderSubtle;
     final textStyle = context.textStyles.mono.copyWith(
       fontSize: 10,
       color: textColor,
@@ -173,9 +186,9 @@ class _CategoryPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: isMuted ? kitColors.white02 : kitColors.white05,
+        color: pillBackground,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: kitColors.white05),
+        border: Border.all(color: semanticColors.borderSubtle),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -207,8 +220,14 @@ class _Badge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kitColors = context.kitColors;
-    final background = _badgeBackground(kitColors);
-    final iconColor = kitColors.white90;
+    final semanticColors = context.semanticColors;
+    final background = _badgeBackground(kitColors, semanticColors);
+    // In-stack badge uses brandSky background — use dark icon for contrast.
+    // Other badges use neutral backgrounds where semantic ink works.
+    final iconColor = switch (status) {
+      LibraryCardStatus.inStack => kitColors.background,
+      _ => semanticColors.ink,
+    };
 
     return GestureDetector(
       onTap: isOfflineDisabled ? null : onTap,
@@ -249,11 +268,14 @@ class _Badge extends StatelessWidget {
     };
   }
 
-  Color _badgeBackground(KitColorsExtension kitColors) {
+  Color _badgeBackground(
+    KitColorsExtension kitColors,
+    AppSemanticColors semanticColors,
+  ) {
     return switch (status) {
       LibraryCardStatus.inStack => kitColors.brandSky,
-      LibraryCardStatus.available => kitColors.white30,
-      LibraryCardStatus.locked => kitColors.white20,
+      LibraryCardStatus.available => semanticColors.border,
+      LibraryCardStatus.locked => semanticColors.borderSubtle,
     };
   }
 

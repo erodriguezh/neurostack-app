@@ -52,7 +52,7 @@ class CustomTextStyles extends ThemeExtension<CustomTextStyles> {
       fontSize: 32.0,
       fontWeight: FontWeight.w400,
       fontStyle: FontStyle.italic,
-      letterSpacing: -0.5,
+      letterSpacing: -0.8,
     ),
     this.mono = const TextStyle(
       fontSize: 11.0,

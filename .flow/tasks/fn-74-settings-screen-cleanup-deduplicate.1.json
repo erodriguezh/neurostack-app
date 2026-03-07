@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-03-04T08:00:49.198260Z",
+  "depends_on": [],
+  "epic": "fn-74-settings-screen-cleanup-deduplicate",
+  "id": "fn-74-settings-screen-cleanup-deduplicate.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-74-settings-screen-cleanup-deduplicate.1.md",
+  "status": "todo",
+  "title": "Clean up settings view: remove stubs, merge builders, fix banner interaction",
+  "updated_at": "2026-03-04T08:10:01.523680Z"
+}

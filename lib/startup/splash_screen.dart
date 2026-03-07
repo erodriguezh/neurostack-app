@@ -6,6 +6,7 @@ import 'package:neurostack/core/ui/app_theme.dart';
 import 'package:neurostack/core/ui/constants/curves.dart';
 import 'package:neurostack/core/ui/constants/durations.dart';
 import 'package:neurostack/core/ui/widgets/app_grid_background.dart';
+import 'package:neurostack/core/ui/widgets/dark_theme_scope.dart';
 
 /// The splash screen displayed during app initialization.
 ///
@@ -108,36 +109,38 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     final kitColors = context.kitColors;
 
-    return Scaffold(
-      backgroundColor: kitColors.background,
-      body: Stack(
-        children: [
-          // Grid background
-          Positioned.fill(
-            child: GridPattern(
-              lineColor: kitColors.white02,
-            ),
-          ),
-
-          // Shader effect layer
-          if (_shader != null)
+    return DarkThemeScope(
+      child: Scaffold(
+        backgroundColor: kitColors.background,
+        body: Stack(
+          children: [
+            // Grid background
             Positioned.fill(
-              child: _ShaderBackground(
-                shader: _shader!,
-                animation: _shaderTimeController,
+              child: GridPattern(
+                lineColor: kitColors.white02,
               ),
             ),
 
-          // Logo
-          Center(
-            child: _AnimatedLogo(
-              entranceAnimation: _logoOpacity,
-              slideAnimation: _logoSlide,
-              breathingAnimation: _breathingController,
-              logoColor: kitColors.brandSky,
+            // Shader effect layer
+            if (_shader != null)
+              Positioned.fill(
+                child: _ShaderBackground(
+                  shader: _shader!,
+                  animation: _shaderTimeController,
+                ),
+              ),
+
+            // Logo
+            Center(
+              child: _AnimatedLogo(
+                entranceAnimation: _logoOpacity,
+                slideAnimation: _logoSlide,
+                breathingAnimation: _breathingController,
+                logoColor: kitColors.brandSky,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

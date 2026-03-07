@@ -17,7 +17,7 @@ class HomeBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
     final shadows = context.shadows;
 
     return ClipRRect(
@@ -27,9 +27,9 @@ class HomeBottomNav extends StatelessWidget {
         child: Container(
           height: 64,
           decoration: BoxDecoration(
-            color: kitColors.background.withValues(alpha: 0.85),
+            color: semanticColors.surface.withValues(alpha: 0.85),
             borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: kitColors.white10),
+            border: Border.all(color: semanticColors.border),
             boxShadow: shadows.lg,
           ),
           child: Row(
@@ -51,6 +51,12 @@ class HomeBottomNav extends StatelessWidget {
                 icon: LucideIcons.chartLine,
                 isActive: activeTab == HomeBottomTab.progress,
                 onTap: () => onSelect(HomeBottomTab.progress),
+              ),
+              _NavItem(
+                label: 'Settings',
+                icon: LucideIcons.settings,
+                isActive: activeTab == HomeBottomTab.settings,
+                onTap: () => onSelect(HomeBottomTab.settings),
               ),
             ],
           ),
@@ -76,8 +82,9 @@ class _NavItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
     final shadows = context.shadows;
-    final color = isActive ? kitColors.brandSky : kitColors.white40;
+    final color = isActive ? kitColors.brandSky : semanticColors.inkSubtle;
 
     return Expanded(
       child: GestureDetector(

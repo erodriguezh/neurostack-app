@@ -16,7 +16,7 @@
 - [DomainFailure](../lib/core/failures/domain_failure.dart) - canonical failure shape and naming convention ({Aggregate}.{Invariant})
 
 ## UI
-- [visual-design.md](./best_practices/design/visual-design.md) - design tokens, ColorScheme, Material 3, typography, TextTheme, spacing grid, AppColors, AppSpacing, theming, dark mode, accessibility
+- [visual-design.md](./best_practices/design/visual-design.md) - design tokens, ColorScheme, AppSemanticColors, Material 3, typography, TextTheme, spacing grid, theming, surface mode policy, accessibility
 - [UI Widget Guidelines](./best_practices/design/ui_widget_guidelines.md) - StatelessWidget extraction, const constructors, widget composition, ValueNotifier state, sealed state classes, ViewModel pattern, ListView.builder, ValueKey/ObjectKey, pure build methods, RepaintBoundary, FadeTransition, widget granularity, lint config
 - [Screen Functional Specs](./best_practices/design/screen-functional-specifications.md) - screen specs, wireframes, navigation routes, subscription states, paywall modal, protocol stack, log session, error mapping
 
@@ -35,6 +35,7 @@
 - [Protocol Selection Modal](./best_practices/design/screen-prompts/08-protocol-selection-modal.md) - protocol selection, deactivation, choose two, downgrade, checkbox, session count
 - [Auth Screen](./best_practices/design/screen-prompts/09-auth-screen.md) - auth, login, sign in, email input, magic link, passwordless
 - [Auth Check Email](./best_practices/design/screen-prompts/10-auth-check-email.md) - check email, inbox, magic link sent, resend link, cooldown timer, verification
+- [Settings Screen](./best_practices/design/screen-prompts/11-settings-screen.md) - settings, support, contact, upgrade banner, cancel subscription
 
 ## Testing
 - [Testing Rules Index](./best_practices/test/domain/index.md) - quick reference, test naming, file structure, boundary testing, factory pattern, hard rules, adoption guide, test checklist
@@ -60,6 +61,7 @@
 - [Spec: Trial Expiration Cronjob](./specs/20260122150000_spec_trial_expiration_cronjob.md) - pg_cron, trial_ends_at, trial_expired_at, expire_trials(), idempotent transition, subscription status free, UTC timezone
 - [Spec: Paywall Modal](./specs/20260123220000_spec_paywall_modal.md) - RevenueCat integration, entitlement mapping, customer identification, webhook architecture, trial reminder
 - [Spec: Protocol Description & Seed](./specs/20260220120000_spec_protocol_description_and_seed.md) - ProtocolDescription VO, description field, protocols.json seed, 57 protocols, idempotent upsert, stale enum fix
+- [Spec: Settings Screen](./specs/20260227120000_spec_settings_screen.md) - SettingsView, 4th bottom tab, upgrade banner, support tiles, contact page, subscription management
 
 ## Investigations
 - [Investigation: Protocol Names Missing](./investigations/20260108223900_investigation_progress_protocol_names.md) - ProgressGrid, layout collapse, nameWidth, narrow screen, responsive, horizontal scroll, widget overflow
@@ -71,6 +73,7 @@
 - [Plan: Trial Expiration Cronjob](../plan_trial_expiration_cron_job.md) - pg_cron, trial_ends_at, expire_trials(), CHECK constraint, TrialPeriodDto endDate, TrialExpirationDecisionStore, SharedPreferences, race condition fix
 - [Plan: Paywall Modal](../plan_paywall_modal.md) - RevenueCat SDK setup, auth integration, subscription sync, paywall presentation, webhook edge function, trial reminder
 - [Plan: Update Protocol Domain & DB](../plan_update_protocol_domain_and_db.md) - ProtocolDescription VO, description field, DB migration, seed 57 protocols, fix stale enums, test factories
+- [Plan: Settings Screen](../plan_settings_screen.md) - Settings tab, upgrade CTA, support tiles, contact page, url_launcher, bottom nav 4th tab
 
 ## Changelogs
 - [Changelog: Home Screen](./changelogs/20260106153900_home_screen_changelog.md) - HomeViewModel, HomeViewState, status banner, protocol card, bottom nav, connectivity, route config
@@ -89,6 +92,7 @@
 - **App Environment** - `lib/core/utils/app_environment.dart` - environment flags and config access
 - **App Lifecycle Service** - `lib/core/utils/app_lifecycle_service.dart` - app lifecycle hooks and foreground/background handling
 - **Service Locator** - `lib/core/utils/locator.dart` - locator access helpers and instance lookup
+- **Core Abstractions** - `lib/core/abstractions/` - `EntitlementListenerMixin` (entitlement change subscription), `PremiumAwareViewModelMixin` (isPremium computation + listener), `ConnectivityListenerMixin` (online/offline listener), `LoggingAbstraction` (structured logging)
 
 ### App Configuration (Implemented)
 - **Route Configuration** - `lib/config/route_config.dart` - route definitions, screen wiring, navigation entry points
@@ -98,6 +102,7 @@
 - **EnumPageView** - `lib/core/ui/widgets/enum_page_view.dart` - generic PageView driven by enum, smooth transitions, onboarding flows
 - **AppPrimaryCta** - `lib/core/ui/widgets/app_primary_cta.dart` - primary CTA button, loading state, disabled state
 - **AppGridBackground** - `lib/core/ui/widgets/app_grid_background.dart` - decorative grid background, brand visual
+- **DarkThemeScope** - `lib/core/ui/widgets/dark_theme_scope.dart` - route-local dark theme wrapper for dark-first surfaces
 
 ### Design Tokens (Implemented)
 - **Spacing** - `lib/core/ui/constants/spacing.dart` - 4px grid, AppSpacing constants
@@ -106,6 +111,7 @@
 - **Curves** - `lib/core/ui/constants/curves.dart` - CustomCurves, emphasizedDecelerate, animation curves
 - **Durations** - `lib/core/ui/constants/durations.dart` - standardized animation timings
 - **Colors** - `lib/core/ui/constants/kit_colors.dart` - core palette and semantic color roles
+- **Semantic Colors Extension** - `lib/core/ui/extensions/app_semantic_colors.dart` - brightness-aware surface/ink/border/grid tokens
 - **Text Styles** - `lib/core/ui/constants/text_styles.dart` - typography scale and text theme helpers
 - **Breakpoints** - `lib/core/ui/constants/breakpoints.dart` - responsive breakpoints, mobile/tablet/desktop
 - **Widget Keys** - `lib/core/ui/constants/widget_keys.dart` - WidgetKeys, test accessibility
@@ -123,6 +129,7 @@
 - **Progress UI Module** - `lib/progress/` - progress view model, grid widgets, week cache store
 - **Startup UI Module** - `lib/startup/` - splash/startup routing and bootstrap logic
 - **Offline UI Module** - `lib/offline/` - offline retry view and view model
+- **Settings UI Module** - `lib/settings/` - settings view model, upgrade banner, support tiles, contact page
 - **Paywall UI Module** - `lib/paywall/` - paywall view and view model
 - **Not Found UI Module** - `lib/not_found/` - fallback routing view and view model
 

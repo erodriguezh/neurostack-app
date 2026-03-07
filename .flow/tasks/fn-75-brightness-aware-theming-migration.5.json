@@ -1,0 +1,16 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-03-05T08:41:22.159334Z",
+  "depends_on": [
+    "fn-75-brightness-aware-theming-migration.3"
+  ],
+  "epic": "fn-75-brightness-aware-theming-migration",
+  "id": "fn-75-brightness-aware-theming-migration.5",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-75-brightness-aware-theming-migration.5.md",
+  "status": "todo",
+  "title": "Home widgets brightness migration",
+  "updated_at": "2026-03-05T09:01:18.844985Z"
+}

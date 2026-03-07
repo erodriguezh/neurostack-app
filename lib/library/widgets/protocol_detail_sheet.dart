@@ -46,7 +46,7 @@ class _ProtocolDetailSheetState extends State<ProtocolDetailSheet> {
   @override
   Widget build(BuildContext context) {
     final spacing = context.spacing;
-    final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
     final bottomInset = MediaQuery.of(context).padding.bottom;
 
     return DraggableScrollableSheet(
@@ -56,12 +56,13 @@ class _ProtocolDetailSheetState extends State<ProtocolDetailSheet> {
       maxChildSize: 0.95,
       builder: (context, controller) {
         return Container(
+          key: const ValueKey('protocol-detail-sheet-surface'),
           decoration: BoxDecoration(
-            color: kitColors.panel,
+            color: semanticColors.surfaceElevated,
             borderRadius: const BorderRadius.vertical(
               top: Radius.circular(32),
             ),
-            border: Border.all(color: kitColors.white10),
+            border: Border.all(color: semanticColors.borderSubtle),
           ),
           child: ListView(
             controller: controller,
@@ -77,7 +78,7 @@ class _ProtocolDetailSheetState extends State<ProtocolDetailSheet> {
                   width: 48,
                   height: 5,
                   decoration: BoxDecoration(
-                    color: kitColors.white10,
+                    color: semanticColors.borderSubtle,
                     borderRadius: BorderRadius.circular(999),
                   ),
                 ),
@@ -89,7 +90,7 @@ class _ProtocolDetailSheetState extends State<ProtocolDetailSheet> {
                 widget.protocol.name.value,
                 style: context.theme.textTheme.headlineMedium?.copyWith(
                   fontSize: 24,
-                  color: kitColors.white90,
+                  color: semanticColors.ink,
                 ),
               ),
               SizedBox(height: spacing.xs),
@@ -108,7 +109,7 @@ class _ProtocolDetailSheetState extends State<ProtocolDetailSheet> {
                 widget.protocol.target.displayText,
                 style: context.theme.textTheme.bodySmall?.copyWith(
                   height: 1.5,
-                  color: kitColors.white60,
+                  color: semanticColors.inkSubtle,
                 ),
               ),
               SizedBox(height: spacing.lg),
@@ -145,7 +146,7 @@ class _CategoryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
     final spacing = context.spacing;
 
     return Row(
@@ -154,21 +155,21 @@ class _CategoryRow extends StatelessWidget {
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: kitColors.white05,
+            color: semanticColors.borderSubtle,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: kitColors.white10),
+            border: Border.all(color: semanticColors.borderSubtle),
           ),
           child: Icon(
             protocol.category.iconData,
             size: 18,
-            color: kitColors.white80,
+            color: semanticColors.ink,
           ),
         ),
         SizedBox(width: spacing.sm),
         Text(
           protocol.category.displayName,
           style: context.theme.textTheme.bodyMedium?.copyWith(
-            color: kitColors.white70,
+            color: semanticColors.ink,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -184,19 +185,19 @@ class _CitationSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
 
     return Theme(
       data: context.theme.copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(
         tilePadding: EdgeInsets.zero,
         childrenPadding: EdgeInsets.zero,
-        iconColor: kitColors.white60,
-        collapsedIconColor: kitColors.white40,
+        iconColor: semanticColors.inkSubtle,
+        collapsedIconColor: semanticColors.inkSubtle,
         title: Text(
           'Research citations',
           style: context.theme.textTheme.bodyMedium?.copyWith(
-            color: kitColors.white80,
+            color: semanticColors.ink,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -207,7 +208,7 @@ class _CitationSection extends StatelessWidget {
                 child: Text(
                   citation.fullCitation,
                   style: context.theme.textTheme.bodySmall?.copyWith(
-                    color: kitColors.white60,
+                    color: semanticColors.inkSubtle,
                     height: 1.4,
                   ),
                 ),
@@ -233,6 +234,7 @@ class _StatsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
     final spacing = context.spacing;
 
     return Column(
@@ -244,7 +246,7 @@ class _StatsSection extends StatelessWidget {
             Text(
               'History',
               style: context.theme.textTheme.bodyMedium?.copyWith(
-                color: kitColors.white80,
+                color: semanticColors.ink,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -277,7 +279,7 @@ class _StatsSection extends StatelessWidget {
                       Text(
                         'Loading stats...',
                         style: context.theme.textTheme.bodySmall?.copyWith(
-                          color: kitColors.white60,
+                          color: semanticColors.inkSubtle,
                         ),
                       ),
                     ],
@@ -291,7 +293,7 @@ class _StatsSection extends StatelessWidget {
                   child: Text(
                     'Unable to load stats.',
                     style: context.theme.textTheme.bodySmall?.copyWith(
-                      color: kitColors.white60,
+                      color: semanticColors.inkSubtle,
                     ),
                   ),
                 );
@@ -358,14 +360,14 @@ class _StatTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: kitColors.white05,
+        color: semanticColors.borderSubtle,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: kitColors.white10),
+        border: Border.all(color: semanticColors.borderSubtle),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -373,7 +375,7 @@ class _StatTile extends StatelessWidget {
           Text(
             label,
             style: context.theme.textTheme.bodySmall?.copyWith(
-              color: kitColors.white50,
+              color: semanticColors.inkSubtle,
               fontSize: 11,
             ),
           ),
@@ -381,7 +383,7 @@ class _StatTile extends StatelessWidget {
           Text(
             value,
             style: context.theme.textTheme.bodyMedium?.copyWith(
-              color: kitColors.white90,
+              color: semanticColors.ink,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -411,7 +413,15 @@ class _ActionSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
+    final isLight = context.theme.brightness == Brightness.light;
     final spacing = context.spacing;
+
+    // Destructive color: kitColors.warning in dark mode for brand
+    // consistency; a dark red in light mode for WCAG AA contrast
+    // against surfaceElevated.
+    final destructiveColor =
+        isLight ? const Color(0xFFB71C1C) : kitColors.warning;
 
     switch (status) {
       case LibraryCardStatus.inStack:
@@ -426,8 +436,13 @@ class _ActionSection extends StatelessWidget {
             SizedBox(height: spacing.sm),
             TextButton(
               onPressed: isOffline ? null : onRemove,
-              style: TextButton.styleFrom(
-                foregroundColor: kitColors.warning,
+              style: TextButton.styleFrom().copyWith(
+                foregroundColor: WidgetStateProperty.resolveWith((states) {
+                  if (states.contains(WidgetState.disabled)) {
+                    return semanticColors.inkSubtle;
+                  }
+                  return destructiveColor;
+                }),
               ),
               child: const Text('Remove from Stack'),
             ),
@@ -452,7 +467,7 @@ class _ActionSection extends StatelessWidget {
             Text(
               'Free tier is limited to 2 active protocols.',
               style: context.theme.textTheme.bodySmall?.copyWith(
-                color: kitColors.white50,
+                color: semanticColors.inkSubtle,
               ),
             ),
           ],

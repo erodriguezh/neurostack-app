@@ -9,6 +9,7 @@ import 'package:neurostack/core/ui/constants/kit_colors.dart';
 import 'package:neurostack/core/ui/constants/shadows.dart';
 import 'package:neurostack/core/ui/constants/spacing.dart';
 import 'package:neurostack/core/ui/constants/text_styles.dart';
+import 'package:neurostack/core/ui/extensions/app_semantic_colors.dart';
 
 /// AppTheme is a class that builds a theme for the app.
 /// By default this will support light and dark mode.
@@ -40,42 +41,49 @@ class AppTheme {
     const shadows = CustomShadows();
     const kitColors = KitColorsExtension();
 
+    final colorScheme = ColorScheme(
+      brightness: brightness,
+      // Surface colors
+      surface: isDark ? kitColors.background : kitColors.neutral100,
+      surfaceContainerLowest: isDark
+          ? kitColors.background
+          : kitColors.neutral50,
+      surfaceContainerLow: isDark
+          ? kitColors.brandDark
+          : kitColors.neutral100,
+      surfaceContainer: isDark ? kitColors.panel : kitColors.neutral200,
+      surfaceContainerHigh: isDark
+          ? kitColors.neutral800
+          : kitColors.neutral300,
+      surfaceTint: isDark ? kitColors.background : kitColors.neutral100,
+      // Primary colors - use brand sky for dark
+      primary: isDark ? kitColors.brandSky : kitColors.neutral950,
+      onPrimary: isDark ? kitColors.background : kitColors.neutral50,
+      // Secondary
+      secondary: isDark ? kitColors.brandSky : kitColors.neutral950,
+      onSecondary: isDark ? kitColors.background : kitColors.neutral50,
+      // Tertiary - success color
+      tertiary: isDark ? kitColors.success : kitColors.green600,
+      onTertiary: isDark ? kitColors.background : kitColors.neutral50,
+      // Error - warning for dark theme
+      error: isDark ? kitColors.warning : Colors.red.shade400,
+      onError: kitColors.neutral50,
+      // Text colors - use white opacity scale for dark
+      onSurface: isDark ? kitColors.white90 : kitColors.neutral950,
+      onSurfaceVariant: isDark ? kitColors.white60 : kitColors.neutral600,
+      // Border colors
+      outline: isDark ? kitColors.white10 : kitColors.neutral300,
+      outlineVariant: isDark ? kitColors.white05 : kitColors.neutral200,
+    );
+
+    final semanticColors = AppSemanticColors.fromBrightness(
+      brightness: brightness,
+      colorScheme: colorScheme,
+    );
+
     return ThemeData(
       brightness: brightness,
-      colorScheme: ColorScheme(
-        brightness: brightness,
-        // Surface colors
-        surface: isDark ? kitColors.background : kitColors.neutral100,
-        surfaceContainerLowest: isDark
-            ? kitColors.background
-            : kitColors.neutral50,
-        surfaceContainerLow: isDark
-            ? kitColors.brandDark
-            : kitColors.neutral100,
-        surfaceContainer: isDark ? kitColors.panel : kitColors.neutral200,
-        surfaceContainerHigh: isDark
-            ? kitColors.neutral800
-            : kitColors.neutral300,
-        surfaceTint: isDark ? kitColors.background : kitColors.neutral100,
-        // Primary colors - use brand sky for dark
-        primary: isDark ? kitColors.brandSky : kitColors.neutral950,
-        onPrimary: isDark ? kitColors.background : kitColors.neutral50,
-        // Secondary
-        secondary: isDark ? kitColors.brandSky : kitColors.neutral950,
-        onSecondary: isDark ? kitColors.background : kitColors.neutral50,
-        // Tertiary - success color
-        tertiary: isDark ? kitColors.success : kitColors.green600,
-        onTertiary: isDark ? kitColors.background : kitColors.neutral50,
-        // Error - warning for dark theme
-        error: isDark ? kitColors.warning : Colors.red.shade400,
-        onError: kitColors.neutral50,
-        // Text colors - use white opacity scale for dark
-        onSurface: isDark ? kitColors.white90 : kitColors.neutral950,
-        onSurfaceVariant: isDark ? kitColors.white60 : kitColors.neutral600,
-        // Border colors
-        outline: isDark ? kitColors.white10 : kitColors.neutral300,
-        outlineVariant: isDark ? kitColors.white05 : kitColors.neutral200,
-      ),
+      colorScheme: colorScheme,
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: <TargetPlatform, PageTransitionsBuilder>{
           TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
@@ -151,10 +159,17 @@ class AppTheme {
       iconTheme: IconThemeData(
         color: isDark ? kitColors.white40 : kitColors.neutral950,
       ),
-      extensions: [textStyles, borderRadius, breakpoints, shadows, kitColors],
+      extensions: [
+        textStyles,
+        borderRadius,
+        breakpoints,
+        shadows,
+        kitColors,
+        semanticColors,
+      ],
       useMaterial3: true,
       splashFactory: NoSplash.splashFactory,
-      highlightColor: Colors.white.withValues(alpha: .1),
+      highlightColor: colorScheme.onSurface.withValues(alpha: .1),
       dropdownMenuTheme: DropdownMenuThemeData(
         textStyle: GoogleFonts.inter(
           textStyle: textStyles.standard,
@@ -236,6 +251,9 @@ extension ThemeDataX on BuildContext {
 
   KitColorsExtension get kitColors =>
       Theme.of(this).extension<KitColorsExtension>()!;
+
+  AppSemanticColors get semanticColors =>
+      Theme.of(this).extension<AppSemanticColors>()!;
 
   CustomBorderRadius get borderRadius =>
       Theme.of(this).extension<CustomBorderRadius>()!;

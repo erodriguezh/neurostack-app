@@ -203,15 +203,15 @@ void main() {
           await tester.enterText(notesField, 'A' * 129);
           await tester.pump();
 
-          // Assert - counter should be visible and use white30 color (not red)
+          // Assert - counter should be visible and use inkSubtle color (not red)
           final counterFinder = find.text('129/140');
           expect(counterFinder, findsOneWidget);
 
           final counterText = tester.widget<Text>(counterFinder);
           final element = tester.element(counterFinder);
-          final kitColors = element.kitColors;
+          final semanticColors = element.semanticColors;
 
-          expect(counterText.style?.color, kitColors.white30);
+          expect(counterText.style?.color, semanticColors.inkSubtle);
 
           viewModel.dispose();
         },
@@ -473,11 +473,12 @@ void main() {
             findsNothing,
           );
 
-          // Border should return to normal (white10)
+          // Border should return to normal (semantic border)
           container = tester.widget<Container>(decoratedContainerFinder);
           decoration = container.decoration! as BoxDecoration;
           border = decoration.border! as Border;
-          expect(border.top.color, kitColors.white10);
+          final semanticColors = element.semanticColors;
+          expect(border.top.color, semanticColors.border);
 
           viewModel.dispose();
         },

@@ -1,5 +1,8 @@
 study docs/README.md
-study task plan_update_protocol_domain_and_db.md and pick the most important thing to do
+work on task fn-75-brightness-aware-theming-migration.11
+
+MCP available
+- dart
 
 IMPORTANT:
 - after implementation, anything you'd refactor, simplify, change, etc... if you implemented again. Do not move on from this step until the user says yes or not to the proposals

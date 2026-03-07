@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
 import 'package:neurostack/core/ui/constants/kit_colors.dart';
+import 'package:neurostack/core/ui/extensions/app_semantic_colors.dart';
 import 'package:neurostack/core/ui/widgets/dismiss_button.dart';
 import 'package:neurostack/home/home_state.dart';
 
@@ -22,9 +23,10 @@ class HomeStatusBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
     final spacing = context.spacing;
-    final background = _backgroundColor(kitColors);
-    final accent = _accentColor(kitColors);
+    final background = _backgroundColor(kitColors, semanticColors);
+    final accent = _accentColor(kitColors, semanticColors);
     final isTappable = banner.isTappable && onTap != null;
 
     return Padding(
@@ -46,7 +48,7 @@ class HomeStatusBanner extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: background,
-                      border: Border.all(color: kitColors.white10),
+                      border: Border.all(color: semanticColors.border),
                     ),
                     child: Row(
                       children: [
@@ -61,11 +63,11 @@ class HomeStatusBanner extends StatelessWidget {
                             ),
                           ),
                         ),
-                        if (banner.isTappable)
+                        if (isTappable)
                           Icon(
                             LucideIcons.chevronRight,
                             size: 16,
-                            color: kitColors.white60,
+                            color: context.theme.colorScheme.onSurfaceVariant,
                           ),
                         if (banner.isDismissible && onDismiss != null) ...[
                           SizedBox(width: spacing.xs),
@@ -116,23 +118,29 @@ class HomeStatusBanner extends StatelessWidget {
     return Icon(iconData, size: 16, color: accent);
   }
 
-  Color _backgroundColor(KitColorsExtension kitColors) {
+  Color _backgroundColor(
+    KitColorsExtension kitColors,
+    AppSemanticColors semanticColors,
+  ) {
     return switch (banner.type) {
       HomeBannerType.trial => kitColors.brandSky.withValues(alpha: 0.1),
-      HomeBannerType.free => kitColors.white05,
+      HomeBannerType.free => semanticColors.borderSubtle,
       HomeBannerType.expired => kitColors.warning.withValues(alpha: 0.1),
       HomeBannerType.grace => kitColors.info.withValues(alpha: 0.1),
-      HomeBannerType.offline => kitColors.white05,
+      HomeBannerType.offline => semanticColors.borderSubtle,
     };
   }
 
-  Color _accentColor(KitColorsExtension kitColors) {
+  Color _accentColor(
+    KitColorsExtension kitColors,
+    AppSemanticColors semanticColors,
+  ) {
     return switch (banner.type) {
       HomeBannerType.trial => kitColors.brandSky,
-      HomeBannerType.free => kitColors.white70,
+      HomeBannerType.free => semanticColors.inkSubtle,
       HomeBannerType.expired => kitColors.warning,
       HomeBannerType.grace => kitColors.info,
-      HomeBannerType.offline => kitColors.white70,
+      HomeBannerType.offline => semanticColors.inkSubtle,
     };
   }
 }

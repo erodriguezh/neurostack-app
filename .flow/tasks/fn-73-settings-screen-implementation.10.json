@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-03-03T20:05:03.204482Z",
+  "depends_on": [],
+  "epic": "fn-73-settings-screen-implementation",
+  "id": "fn-73-settings-screen-implementation.10",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-73-settings-screen-implementation.10.md",
+  "status": "todo",
+  "title": "Phase 3.4-3.7: Support section, tile widget, wire tiles, animations",
+  "updated_at": "2026-03-03T20:05:03.204871Z"
+}

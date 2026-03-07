@@ -26,7 +26,9 @@ class _HomeStatusDotState extends State<HomeStatusDot> {
   @override
   Widget build(BuildContext context) {
     final kitColors = context.kitColors;
-    final dotColor = widget.active ? kitColors.success : kitColors.white20;
+    final semanticColors = context.semanticColors;
+    final dotColor =
+        widget.active ? kitColors.success : semanticColors.borderSubtle;
 
     return SizedBox(
       width: 16,

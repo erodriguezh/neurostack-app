@@ -1,17 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:neurostack/core/models/home_bottom_tab.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
 import 'package:neurostack/core/ui/widgets/app_grid_background.dart';
+import 'package:neurostack/core/ui/widgets/home_indicator_pill.dart';
+import 'package:neurostack/core/ui/widgets/staggered_fade_in.dart';
 import 'package:neurostack/core/utils/locator.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
+import 'package:neurostack/features/auth/data/auth_service.dart';
+import 'package:neurostack/features/auth/data/cached_user_store.dart';
+import 'package:neurostack/home/widgets/home_bottom_nav.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
+import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 import 'package:neurostack/settings/settings_view_model.dart';
+import 'package:neurostack/settings/widgets/settings_support_section.dart';
+import 'package:neurostack/settings/widgets/settings_upgrade_banner.dart';
 
-/// Settings view providing user account actions.
+/// Settings tab screen.
 ///
-/// Currently includes:
-/// - Restore Purchases: Critical for subscription correctness after device
-///   change, app reinstall, or family sharing setup.
+/// Shows the screen header, an upgrade banner (for non-premium users),
+/// a support & resources section with interactive tiles, and bottom
+/// navigation.
 class SettingsView extends StatefulWidget {
   const SettingsView({super.key});
 
@@ -21,8 +29,18 @@ class SettingsView extends StatefulWidget {
 
 class _SettingsViewState extends State<SettingsView> {
   late final SettingsViewModel _viewModel = SettingsViewModel(
+    routerService: locator<RouterService>(),
+    authService: locator<AuthService>(),
+    subscriptionStatusResolver: locator<SubscriptionStatusResolver>(),
     revenueCatService: locator<RevenueCatService>(),
+    cachedUserStore: locator<CachedUserStore>(),
   );
+
+  @override
+  void initState() {
+    super.initState();
+    _viewModel.init();
+  }
 
   @override
   void dispose() {
@@ -33,140 +51,95 @@ class _SettingsViewState extends State<SettingsView> {
   @override
   Widget build(BuildContext context) {
     final spacing = context.spacing;
-    final kitColors = context.kitColors;
+    final bottomInset = MediaQuery.of(context).padding.bottom;
 
     return AppGridBackground(
+      mode: AppGridBackgroundMode.adaptive,
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: SafeArea(
-          child: CustomScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: [
-              // Header with back button
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    spacing.sm,
-                    spacing.sm,
-                    spacing.lg,
-                    0,
-                  ),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: Icon(
-                          LucideIcons.chevronLeft,
-                          color: kitColors.white90,
-                        ),
-                        onPressed: () => locator<RouterService>().back(),
+          bottom: false,
+          child: Stack(
+            children: [
+              // Scrollable content area
+              CustomScrollView(
+                key: const PageStorageKey('settings-scroll'),
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  // Header (no back button -- this is a tab screen)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        spacing.lg,
+                        spacing.lg,
+                        spacing.lg,
+                        0,
                       ),
-                      const SizedBox(width: 8),
-                      Text(
+                      child: Text(
                         'Settings',
-                        style: context.theme.textTheme.headlineLarge?.copyWith(
-                          fontSize: 32,
-                          fontStyle: FontStyle.italic,
-                          letterSpacing: -0.8,
-                          color: kitColors.white90,
-                        ),
+                        style: context.theme.textTheme.headlineLarge,
                       ),
-                    ],
-                  ),
-                ),
-              ),
-              SliverToBoxAdapter(child: SizedBox(height: spacing.lg)),
-
-              // Settings list
-              SliverPadding(
-                padding: EdgeInsets.symmetric(horizontal: spacing.lg),
-                sliver: SliverToBoxAdapter(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: kitColors.panel,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: kitColors.white10),
                     ),
+                  ),
+                  // Upgrade banner + Support & Resources section
+                  SliverToBoxAdapter(
                     child: ValueListenableBuilder<bool>(
-                      valueListenable: _viewModel.isRestoring,
-                      builder: (context, isRestoring, child) {
-                        return _RestorePurchasesTile(
-                          isRestoring: isRestoring,
-                          onTap: () => _handleRestorePurchases(context),
+                      valueListenable: _viewModel.isPremium,
+                      builder: (context, isPremium, _) {
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (!isPremium)
+                              StaggeredFadeIn(
+                                key: const ValueKey('settings-upgrade-banner'),
+                                index: 0,
+                                child: SettingsUpgradeBanner(
+                                  onTap: _viewModel.goToPaywall,
+                                ),
+                              ),
+                            StaggeredFadeIn(
+                              key: const ValueKey('settings-support-section'),
+                              index: isPremium ? 0 : 1,
+                              child: SettingsSupportSection(
+                                isPremium: isPremium,
+                                onContactTap: _viewModel.goToContact,
+                                onFeedbackTap: () {}, // TODO: Wiredash
+                                onRateAppTap: () {}, // TODO: App Store
+                                onFeatureRequestTap: () {}, // TODO: Wiredash
+                                onCancelSubscriptionTap:
+                                    _viewModel.openSubscriptionManagement,
+                              ),
+                            ),
+                          ],
                         );
                       },
                     ),
                   ),
+
+                  // Bottom spacer to prevent content under nav bar
+                  SliverToBoxAdapter(
+                    child: SizedBox(height: 120 + bottomInset),
+                  ),
+                ],
+              ),
+
+              // Bottom navigation
+              Positioned(
+                left: spacing.sm,
+                right: spacing.sm,
+                bottom: spacing.sm + bottomInset,
+                child: HomeBottomNav(
+                  activeTab: HomeBottomTab.settings,
+                  onSelect: _viewModel.onSelectBottomTab,
                 ),
               ),
+
+              // Fake home indicator pill
+              HomeIndicatorPill(bottomInset: bottomInset),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Future<void> _handleRestorePurchases(BuildContext context) async {
-    // Capture messenger before async gap
-    final messenger = ScaffoldMessenger.of(context);
-    final result = await _viewModel.restorePurchases();
-    if (!mounted) return;
-
-    switch (result) {
-      case RestoreResult.success:
-        messenger.showSnackBar(
-          const SnackBar(content: Text('Purchases restored successfully')),
-        );
-      case RestoreResult.failure:
-        messenger.showSnackBar(
-          const SnackBar(
-            content: Text('Unable to restore purchases. Try again later.'),
-          ),
-        );
-      case RestoreResult.alreadyInProgress:
-        // Ignore - first request will complete and show feedback
-        break;
-    }
-  }
-}
-
-class _RestorePurchasesTile extends StatelessWidget {
-  const _RestorePurchasesTile({
-    required this.isRestoring,
-    required this.onTap,
-  });
-
-  final bool isRestoring;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final kitColors = context.kitColors;
-
-    return ListTile(
-      leading: isRestoring
-          ? SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation(kitColors.white60),
-              ),
-            )
-          : Icon(LucideIcons.rotateCcw, color: kitColors.white60),
-      title: Text(
-        'Restore Purchases',
-        style: context.theme.textTheme.bodyLarge?.copyWith(
-          color: kitColors.white90,
-        ),
-      ),
-      subtitle: Text(
-        'Recover purchases from another device',
-        style: context.theme.textTheme.bodySmall?.copyWith(
-          color: kitColors.white40,
-        ),
-      ),
-      enabled: !isRestoring,
-      onTap: isRestoring ? null : onTap,
     );
   }
 }

@@ -1,10 +1,10 @@
 {
   "memory": {
-    "enabled": false
+    "enabled": true
   },
   "planSync": {
     "crossEpic": false,
-    "enabled": false
+    "enabled": true
   },
   "review": {
     "backend": "rp"

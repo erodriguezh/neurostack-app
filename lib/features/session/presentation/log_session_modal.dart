@@ -65,7 +65,7 @@ Future<void> showLogSessionModal(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    barrierColor: const Color(0xCC030303), // #030303 at 80%
+    barrierColor: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.8),
     builder: (modalContext) {
       return BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
+import 'package:neurostack/core/ui/widgets/dark_theme_scope.dart';
 import 'package:neurostack/core/ui/widgets/spotlight_card.dart';
 
 /// The user's choice when the trial expired modal is dismissed.
@@ -36,11 +37,13 @@ Future<TrialExpiredChoice?> showTrialExpiredModal(
     barrierDismissible: false,
     barrierColor: const Color(0xE6030303), // #030303 at 90%
     builder: (dialogContext) {
-      return BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-        child: TrialExpiredModal(
-          activeProtocolCount: activeProtocolCount,
-          isTrialExpiration: isTrialExpiration,
+      return DarkThemeScope(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+          child: TrialExpiredModal(
+            activeProtocolCount: activeProtocolCount,
+            isTrialExpiration: isTrialExpiration,
+          ),
         ),
       );
     },

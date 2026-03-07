@@ -10,6 +10,7 @@ class HomeEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
     final spacing = context.spacing;
 
     return SizedBox(
@@ -21,13 +22,13 @@ class HomeEmptyState extends StatelessWidget {
             height: 80,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: kitColors.white05,
-              border: Border.all(color: kitColors.white10),
+              color: semanticColors.borderSubtle,
+              border: Border.all(color: semanticColors.border),
             ),
             child: Icon(
               LucideIcons.layers,
               size: 32,
-              color: kitColors.white30,
+              color: semanticColors.inkSubtle,
             ),
           ),
           SizedBox(height: spacing.md),
@@ -35,7 +36,7 @@ class HomeEmptyState extends StatelessWidget {
             'Add your first protocol',
             style: context.theme.textTheme.bodyLarge?.copyWith(
               fontSize: 16,
-              color: kitColors.white40,
+              color: semanticColors.inkSubtle,
             ),
           ),
           SizedBox(height: spacing.lg),

@@ -24,6 +24,9 @@ class HomeBottomTabCoordinator {
       case HomeBottomTab.progress:
         _routerService.replaceAll([Path(name: '/week')]);
         break;
+      case HomeBottomTab.settings:
+        _routerService.replaceAll([Path(name: '/settings')]);
+        break;
     }
   }
 }

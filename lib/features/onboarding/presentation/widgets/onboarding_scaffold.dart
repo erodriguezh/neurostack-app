@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
 import 'package:neurostack/core/ui/widgets/app_grid_background.dart';
+import 'package:neurostack/core/ui/widgets/dark_theme_scope.dart';
 import 'package:neurostack/features/onboarding/presentation/widgets/onboarding_progress_dots.dart';
 
 /// Scaffold wrapper for all onboarding screens.
@@ -35,42 +36,44 @@ class OnboardingScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     final spacing = context.spacing;
 
-    return AppGridBackground(
-      showTopGlow: _showTopGlow,
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: SafeArea(
-          child: Column(
-            children: [
-              Expanded(
-                child: CustomScrollView(
-                  slivers: [
-                    SliverToBoxAdapter(child: scrollableContent),
-                    // Flexible spacer that fills remaining space
-                    const SliverFillRemaining(
-                      hasScrollBody: false,
-                      fillOverscroll: false,
-                      child: SizedBox.shrink(),
-                    ),
-                  ],
+    return DarkThemeScope(
+      child: AppGridBackground(
+        showTopGlow: _showTopGlow,
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: SafeArea(
+            child: Column(
+              children: [
+                Expanded(
+                  child: CustomScrollView(
+                    slivers: [
+                      SliverToBoxAdapter(child: scrollableContent),
+                      // Flexible spacer that fills remaining space
+                      const SliverFillRemaining(
+                        hasScrollBody: false,
+                        fillOverscroll: false,
+                        child: SizedBox.shrink(),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              // Fixed bottom region (outside scroll)
-              Padding(
-                padding: EdgeInsets.all(spacing.lg),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    OnboardingProgressDots(
-                      currentStep: currentStep,
-                      totalSteps: totalSteps,
-                    ),
-                    SizedBox(height: spacing.md),
-                    bottomCta,
-                  ],
+                // Fixed bottom region (outside scroll)
+                Padding(
+                  padding: EdgeInsets.all(spacing.lg),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      OnboardingProgressDots(
+                        currentStep: currentStep,
+                        totalSteps: totalSteps,
+                      ),
+                      SizedBox(height: spacing.md),
+                      bottomCta,
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

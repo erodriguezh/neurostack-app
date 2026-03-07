@@ -326,7 +326,8 @@ class RevenueCatService {
   /// - Family sharing setup
   ///
   /// This is the #1 subscription correctness issue after launch.
-  /// Must be exposed in Settings UI as "Restore Purchases" action.
+  /// RevenueCat SDK automatically restores on `configure()`, so manual restore
+  /// is a recovery path for edge cases only (not required in Settings UI).
   ///
   /// Returns `true` if restore completed successfully, `false` otherwise.
   /// Common failure reasons:

@@ -1,58 +1,130 @@
 import 'package:flutter/foundation.dart';
+import 'package:neurostack/core/abstractions/entitlement_listener_mixin.dart';
+import 'package:neurostack/core/abstractions/premium_aware_view_model_mixin.dart';
+import 'package:neurostack/core/models/home_bottom_tab.dart';
+import 'package:neurostack/core/utils/navigation/route_data.dart';
+import 'package:neurostack/core/utils/navigation/router_service.dart';
+import 'package:neurostack/features/auth/data/auth_service.dart';
+import 'package:neurostack/features/auth/data/cached_user_store.dart';
+import 'package:neurostack/home/home_bottom_tab_coordinator.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
-
-/// Result of a restore purchases operation.
-enum RestoreResult {
-  /// Restore completed successfully.
-  success,
-
-  /// Restore failed (SDK error, not configured, not identified, etc.).
-  failure,
-
-  /// Restore is already in progress - request was ignored.
-  alreadyInProgress,
-}
+import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// ViewModel for SettingsView.
 ///
-/// Handles restore purchases functionality by delegating to [RevenueCatService].
-class SettingsViewModel {
-  SettingsViewModel({required RevenueCatService revenueCatService})
-    : _revenueCatService = revenueCatService;
+/// Manages subscription awareness (via [PremiumAwareViewModelMixin]),
+/// tab coordination, and navigation to paywall, contact, and
+/// subscription management screens.
+class SettingsViewModel
+    with EntitlementListenerMixin, PremiumAwareViewModelMixin {
+  SettingsViewModel({
+    required RouterService routerService,
+    required AuthService authService,
+    required SubscriptionStatusResolver subscriptionStatusResolver,
+    required RevenueCatService revenueCatService,
+    CachedUserStore? cachedUserStore,
+    HomeBottomTabCoordinator? tabCoordinator,
+    Future<bool> Function(Uri, {LaunchMode mode})? launch,
+  }) : _routerService = routerService,
+       _authService = authService,
+       _resolver = subscriptionStatusResolver,
+       _revenueCatService = revenueCatService,
+       _cachedUserStore = cachedUserStore,
+       _tabCoordinator =
+           tabCoordinator ??
+           HomeBottomTabCoordinator(routerService: routerService),
+       _launch = launch ?? launchUrl {
+    initPremiumAwareness();
+  }
 
+  final RouterService _routerService;
+  final AuthService _authService;
+  final SubscriptionStatusResolver _resolver;
   final RevenueCatService _revenueCatService;
+  final CachedUserStore? _cachedUserStore;
+  final HomeBottomTabCoordinator _tabCoordinator;
+  final Future<bool> Function(Uri, {LaunchMode mode}) _launch;
 
-  final ValueNotifier<bool> isRestoring = ValueNotifier<bool>(false);
+  bool _isDisposed = false;
 
-  /// Restores purchases from the App Store / Play Store.
+  // --- Mixin wiring ---
+
+  @override
+  RevenueCatService get entitlementListenerService => _revenueCatService;
+
+  @override
+  AuthService get premiumAuthService => _authService;
+
+  @override
+  SubscriptionStatusResolver get premiumResolver => _resolver;
+
+  @override
+  CachedUserStore? get premiumCachedUserStore => _cachedUserStore;
+
+  @override
+  void onEntitlementChanged() {
+    if (_isDisposed) return;
+    super.onEntitlementChanged();
+  }
+
+  // --- Public API ---
+
+  /// Initializes the entitlement listener for live subscription updates.
   ///
-  /// This is critical for subscription correctness after:
-  /// - Device change
-  /// - App reinstall
-  /// - Family sharing setup
-  ///
-  /// Returns [RestoreResult] indicating the outcome:
-  /// - [RestoreResult.success] - restore completed successfully
-  /// - [RestoreResult.failure] - restore failed (show error message)
-  /// - [RestoreResult.alreadyInProgress] - ignore (no feedback needed)
-  Future<RestoreResult> restorePurchases() async {
-    // If already restoring, return "in progress" so caller can ignore
-    // (no SnackBar needed since first request will complete and show feedback)
-    if (isRestoring.value) return RestoreResult.alreadyInProgress;
+  /// Must be called from the view's `initState()`.
+  void init() {
+    initEntitlementListener();
+    // Sync once after wiring the listener to close the window between
+    // construction (which computes isPremium) and listener attachment.
+    onEntitlementChanged();
+  }
 
-    isRestoring.value = true;
+  /// Navigates to a different bottom tab.
+  void onSelectBottomTab(HomeBottomTab tab) {
+    _tabCoordinator.onSelect(tab, currentTab: HomeBottomTab.settings);
+  }
+
+  /// Navigates to the paywall screen.
+  void goToPaywall() {
+    _routerService.goTo(Path(name: '/paywall'));
+  }
+
+  /// Navigates to the contact screen.
+  void goToContact() {
+    _routerService.goTo(Path(name: '/settings/contact'));
+  }
+
+  /// Opens the platform-specific subscription management page.
+  ///
+  /// On iOS/macOS, opens the App Store subscriptions page.
+  /// On Android, opens the Play Store subscriptions page.
+  /// No-ops on unsupported platforms (Windows, Linux, Fuchsia).
+  Future<void> openSubscriptionManagement() async {
+    final uri = switch (defaultTargetPlatform) {
+      TargetPlatform.android =>
+        Uri.parse('https://play.google.com/store/account/subscriptions'),
+      TargetPlatform.iOS || TargetPlatform.macOS =>
+        Uri.parse('https://apps.apple.com/account/subscriptions'),
+      _ => null, // Unsupported platform
+    };
+
+    if (uri == null) return;
+
+    const mode = kIsWeb
+        ? LaunchMode.platformDefault
+        : LaunchMode.externalApplication;
+
     try {
-      final success = await _revenueCatService.restorePurchases();
-      return success ? RestoreResult.success : RestoreResult.failure;
-    } catch (e) {
-      // StateError from _ensureInitStarted() or other unexpected errors
-      return RestoreResult.failure;
-    } finally {
-      isRestoring.value = false;
+      await _launch(uri, mode: mode);
+    } catch (_) {
+      // Best-effort: launchUrl can throw on some platforms/embedders.
     }
   }
 
   void dispose() {
-    isRestoring.dispose();
+    _isDisposed = true;
+    disposeEntitlementListener();
+    disposePremiumAwareness();
   }
 }

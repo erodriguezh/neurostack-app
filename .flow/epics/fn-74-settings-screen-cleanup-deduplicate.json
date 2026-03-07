@@ -1,0 +1,18 @@
+{
+  "branch_name": "feature/settings-screen",
+  "completion_review_status": "ship",
+  "completion_reviewed_at": "2026-03-04T09:12:04.457344Z",
+  "created_at": "2026-03-04T08:00:14.319108Z",
+  "default_impl": null,
+  "default_review": null,
+  "default_sync": null,
+  "depends_on_epics": [],
+  "id": "fn-74-settings-screen-cleanup-deduplicate",
+  "next_task": 1,
+  "plan_review_status": "ship",
+  "plan_reviewed_at": "2026-03-04T08:16:29.498173Z",
+  "spec_path": ".flow/specs/fn-74-settings-screen-cleanup-deduplicate.md",
+  "status": "open",
+  "title": "Settings screen cleanup: deduplicate, remove stubs, extract shared widgets",
+  "updated_at": "2026-03-04T09:12:04.457663Z"
+}

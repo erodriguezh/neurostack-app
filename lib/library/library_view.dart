@@ -3,6 +3,7 @@ import 'package:neurostack/core/ui/app_theme.dart';
 import 'package:neurostack/core/ui/constants/spacing.dart';
 import 'package:neurostack/core/ui/widgets/app_grid_background.dart';
 import 'package:neurostack/core/ui/widgets/error_state_view.dart';
+import 'package:neurostack/core/ui/widgets/home_indicator_pill.dart';
 import 'package:neurostack/core/ui/widgets/staggered_fade_in.dart';
 import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
 import 'package:neurostack/core/utils/internal_notification/notify_service.dart';
@@ -73,6 +74,7 @@ class _LibraryViewState extends State<LibraryView> {
     final bottomInset = MediaQuery.of(context).padding.bottom;
 
     return AppGridBackground(
+      mode: AppGridBackgroundMode.adaptive,
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: SafeArea(
@@ -111,23 +113,7 @@ class _LibraryViewState extends State<LibraryView> {
                       onSelect: _viewModel.onSelectBottomTab,
                     ),
                   ),
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: bottomInset > 0 ? bottomInset / 2 : 4,
-                    child: Center(
-                      child: Container(
-                        width: 134,
-                        height: 5,
-                        decoration: BoxDecoration(
-                          color: context.kitColors.white90.withValues(
-                            alpha: 0.3,
-                          ),
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                      ),
-                    ),
-                  ),
+                  HomeIndicatorPill(bottomInset: bottomInset),
                 ],
               );
             },
@@ -202,12 +188,7 @@ class _LibraryViewState extends State<LibraryView> {
                 index: 1,
                 child: Text(
                   'Protocol Library',
-                  style: context.theme.textTheme.headlineLarge?.copyWith(
-                    fontSize: 32,
-                    fontStyle: FontStyle.italic,
-                    letterSpacing: -0.8,
-                    color: context.kitColors.white90,
-                  ),
+                  style: context.theme.textTheme.headlineLarge,
                 ),
               ),
             ),
@@ -350,12 +331,13 @@ class _LibraryViewState extends State<LibraryView> {
       return;
     }
 
-    final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: kitColors.panel,
+          backgroundColor: semanticColors.surfaceElevated,
+          surfaceTintColor: Colors.transparent,
           title: Text('Remove ${protocol.name.value}?'),
           content: const Text("This won't delete your session history."),
           actions: [
@@ -390,7 +372,7 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
 
     return Padding(
       padding: EdgeInsets.only(top: context.spacing.xxl),
@@ -400,7 +382,7 @@ class _EmptyState extends StatelessWidget {
             'No protocols available right now.',
             textAlign: TextAlign.center,
             style: context.theme.textTheme.bodyMedium?.copyWith(
-              color: kitColors.white60,
+              color: semanticColors.inkSubtle,
             ),
           ),
           SizedBox(height: context.spacing.sm),
@@ -408,7 +390,7 @@ class _EmptyState extends StatelessWidget {
             'Pull to refresh to retry.',
             textAlign: TextAlign.center,
             style: context.theme.textTheme.bodySmall?.copyWith(
-              color: kitColors.white40,
+              color: semanticColors.inkSubtle,
             ),
           ),
         ],

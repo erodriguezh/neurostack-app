@@ -11,13 +11,13 @@ class LibraryCategoryHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final kitColors = context.kitColors;
+    final semanticColors = context.semanticColors;
     return Text(
       label,
       style: context.theme.textTheme.bodySmall?.copyWith(
         fontSize: 12,
         letterSpacing: 1.2,
-        color: kitColors.white50,
+        color: semanticColors.inkSubtle,
       ),
     );
   }

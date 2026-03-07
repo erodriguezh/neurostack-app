@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
 import 'package:neurostack/core/ui/widgets/app_grid_background.dart';
 import 'package:neurostack/core/ui/widgets/app_primary_cta.dart';
+import 'package:neurostack/core/ui/widgets/dark_theme_scope.dart';
 import 'package:neurostack/core/utils/locator.dart';
 import 'package:neurostack/core/utils/navigation/navigation_intent_store.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
@@ -42,53 +43,55 @@ class _OfflineRetryViewState extends State<OfflineRetryView> {
     final kitColors = context.kitColors;
     final spacing = context.spacing;
 
-    return AppGridBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.all(spacing.lg),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Spacer(),
-                // Offline icon
-                Icon(
-                  Icons.wifi_off_rounded,
-                  size: 64,
-                  color: kitColors.white30,
-                ),
-                SizedBox(height: spacing.lg),
-                // Title
-                Text(
-                  "You're offline",
-                  style: context.theme.textTheme.headlineSmall?.copyWith(
-                    color: kitColors.white90,
-                    fontWeight: FontWeight.w500,
+    return DarkThemeScope(
+      child: AppGridBackground(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.all(spacing.lg),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Spacer(),
+                  // Offline icon
+                  Icon(
+                    Icons.wifi_off_rounded,
+                    size: 64,
+                    color: kitColors.white30,
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: spacing.sm),
-                // Description
-                Text(
-                  "Connect to the internet to continue.",
-                  style: context.theme.textTheme.bodyMedium?.copyWith(
-                    color: kitColors.white50,
+                  SizedBox(height: spacing.lg),
+                  // Title
+                  Text(
+                    "You're offline",
+                    style: context.theme.textTheme.headlineSmall?.copyWith(
+                      color: kitColors.white90,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                const Spacer(),
-                // Retry button
-                ValueListenableBuilder<bool>(
-                  valueListenable: _viewModel.isRetrying,
-                  builder: (context, isRetrying, _) => AppPrimaryCta(
-                    label: "Try again",
-                    onPressed: _viewModel.retry,
-                    loading: isRetrying,
+                  SizedBox(height: spacing.sm),
+                  // Description
+                  Text(
+                    "Connect to the internet to continue.",
+                    style: context.theme.textTheme.bodyMedium?.copyWith(
+                      color: kitColors.white50,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                ),
-                SizedBox(height: spacing.xl),
-              ],
+                  const Spacer(),
+                  // Retry button
+                  ValueListenableBuilder<bool>(
+                    valueListenable: _viewModel.isRetrying,
+                    builder: (context, isRetrying, _) => AppPrimaryCta(
+                      label: "Try again",
+                      onPressed: _viewModel.retry,
+                      loading: isRetrying,
+                    ),
+                  ),
+                  SizedBox(height: spacing.xl),
+                ],
+              ),
             ),
           ),
         ),
