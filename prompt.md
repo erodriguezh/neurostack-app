@@ -1,4 +1,5 @@
 study docs/README.md
+work on task fn-75-brightness-aware-theming-migration.11
 
 MCP available
 - dart

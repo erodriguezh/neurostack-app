@@ -15,13 +15,13 @@ Every route falls into one of two categories:
 ### Adaptive routes
 
 Surfaces, text, borders, and icons resolve from the ambient `ColorScheme` and
-`AppSemanticColors` (once available). In light mode, backgrounds are light and
+`AppSemanticColors`. In light mode, backgrounds are light and
 text is dark; in dark mode the inverse.
 
 ### Dark-first routes
 
 Wrapped in `DarkThemeScope` (see `lib/core/ui/widgets/dark_theme_scope.dart`
-once created). They receive a dark `ThemeData` regardless of the system
+). They receive a dark `ThemeData` regardless of the system
 setting, so `whiteXX` tokens remain legible.
 
 ## Token Usage Rules
@@ -48,16 +48,40 @@ On adaptive routes, use `ColorScheme` roles or `AppSemanticColors`:
 | Surface fill | `colorScheme.surface` |
 | Elevated surface | `colorScheme.surfaceContainer` |
 | Subtle border | `colorScheme.outlineVariant` |
-| Grid fill (adaptive) | `AppGridBackgroundMode.adaptive` resolves from `ColorScheme.surface` |
-| Grid lines (adaptive) | `AppGridBackgroundMode.adaptive` resolves from `ColorScheme.outlineVariant` |
-| Glow (adaptive) | `AppGridBackgroundMode.adaptive` resolves from `ColorScheme.primary` at 5% alpha |
+| Grid fill (adaptive) | `AppGridBackgroundMode.adaptive` resolves from `semanticColors.gridBackground` |
+| Grid lines (adaptive) | `AppGridBackgroundMode.adaptive` resolves from `semanticColors.gridLine` |
+| Glow (adaptive) | `AppGridBackgroundMode.adaptive` resolves from `semanticColors.gridGlow` |
 
-### Migration path
+### Migration results (March 6, 2026)
 
-1. New adaptive widgets should never reference `kitColors.whiteXX`.
-2. Existing widgets migrate incrementally (one task per feature area).
-3. `AppSemanticColors` (Task 3) will provide higher-level tokens that
-   encapsulate the `ColorScheme` lookups above.
+1. Adaptive routes now use `AppGridBackgroundMode.adaptive`.
+2. Dark-first routes are scoped by `DarkThemeScope`.
+3. `AppSemanticColors` is implemented and registered in `AppTheme`.
+4. Adaptive surfaces should now be considered `whiteXX`-free by policy.
+
+## CI Guard (adaptive `whiteXX` enforcement)
+
+CI enforces the adaptive policy via:
+
+- Script: `tool/ci/check_adaptive_white_tokens.sh`
+- Workflow step: `.github/workflows/test.yaml` (`Guard adaptive whiteXX usage`)
+
+### Denylist (blocked from `kitColors.whiteXX`)
+
+- `lib/home/`
+- `lib/library/`
+- `lib/progress/`
+- `lib/settings/`
+- `lib/core/ui/widgets/*.dart` (except `dark_theme_scope.dart` and `app_grid_background.dart`)
+
+### Allowlist (dark-first, intentionally excluded)
+
+- `lib/features/auth/`
+- `lib/features/onboarding/`
+- `lib/features/offline/` (legacy location)
+- `lib/offline/` (current location)
+- `lib/paywall/`
+- `lib/startup/`
 
 ## AppGridBackground Modes
 

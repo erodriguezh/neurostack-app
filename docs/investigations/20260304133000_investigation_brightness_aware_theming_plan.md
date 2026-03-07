@@ -138,3 +138,16 @@ The app currently lacks a strict boundary between semantic adaptive colors and d
 - Add a permanent light+dark visual smoke suite for top routes.
 - Add reviewer rule: semantic text/surface/border colors must come from `ColorScheme` or semantic extension on adaptive surfaces.
 - Track residual `whiteXX` usage with periodic grep in CI or PR checklist.
+
+## Resolution
+
+This investigation is resolved by Flow epic
+`fn-75-brightness-aware-theming-migration`, including:
+
+- Route policy split (`adaptive` vs `dark-first`)
+- `DarkThemeScope` containment for dark-first routes
+- `AppSemanticColors` migration for adaptive surfaces
+- CI enforcement against new adaptive `kitColors.whiteXX` usage
+
+Policy reference:
+`docs/best_practices/design/brightness_theming.md`.

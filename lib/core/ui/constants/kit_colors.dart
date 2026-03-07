@@ -71,7 +71,10 @@ class KitColorsExtension extends ThemeExtension<KitColorsExtension> {
   final Color evidenceModerate;
   final Color evidenceWeak;
 
-  // White Opacity Scale
+  // Legacy White Opacity Scale (dark-first only).
+  //
+  // Do not introduce these tokens on adaptive surfaces. Prefer ColorScheme
+  // roles or AppSemanticColors for brightness-aware UI.
   final Color white90;
   final Color white80;
   final Color white70;
@@ -479,7 +482,9 @@ class KitColors {
   static const evidenceModerate = Color(0xFF38BDF8); // Brand Sky
   static const evidenceWeak = Color(0x80FFFFFF); // white/50
 
-  // White Opacity Scale
+  // Legacy White Opacity Scale (dark-first only).
+  //
+  // Keep for intentionally dark routes. Avoid new adaptive usage.
   static const white90 = Color(0xE6FFFFFF); // 0.9 - Headlines
   static const white80 = Color(0xCCFFFFFF); // 0.8 - Body text light
   static const white70 = Color(0xB3FFFFFF); // 0.7 - Subheadings

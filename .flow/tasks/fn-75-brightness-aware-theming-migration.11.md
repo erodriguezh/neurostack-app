@@ -32,16 +32,23 @@ Add CI enforcement against new `whiteXX` usage in adaptive areas, update design 
 - `visual-design.md` File Structure section is materially out of sync with the real repo — this must be fixed alongside adding new entries
 
 ## Acceptance
-- [ ] CI guard blocks new `whiteXX` usage in adaptive paths (`lib/home/`, `lib/library/`, `lib/progress/`, `lib/settings/`, adaptive core widgets)
-- [ ] CI guard allows `whiteXX` in dark-first paths (`lib/features/auth/`, `lib/features/onboarding/`, `lib/features/offline/`, `lib/paywall/`, `lib/startup/`)
-- [ ] Allowlist/denylist documented in guard script and `brightness_theming.md`
-- [ ] `visual-design.md` documents AppSemanticColors in Token Hierarchy and PR checklist
-- [ ] `visual-design.md` has Surface Mode Policy subsection (adaptive vs dark-first)
-- [ ] `visual-design.md` File Structure section matches actual repo layout
-- [ ] `docs/README.md` has DarkThemeScope and AppSemanticColors registry entries
-- [ ] Screen prompt docs (02, 03, 04, 11) have semantic token mapping note
-- [ ] Investigation `20260304133000` has Resolution section
-- [ ] Investigation `20260304120000` has resolution note linking to policy doc
-- [ ] `brightness_theming.md` finalized with migration results and token reference
-- [ ] `flutter analyze` passes
-- [ ] `flutter test` passes
+- [x] CI guard blocks new `whiteXX` usage in adaptive paths (`lib/home/`, `lib/library/`, `lib/progress/`, `lib/settings/`, adaptive core widgets)
+- [x] CI guard allows `whiteXX` in dark-first paths (`lib/features/auth/`, `lib/features/onboarding/`, `lib/features/offline/`, `lib/paywall/`, `lib/startup/`)
+- [x] Allowlist/denylist documented in guard script and `brightness_theming.md`
+- [x] `visual-design.md` documents AppSemanticColors in Token Hierarchy and PR checklist
+- [x] `visual-design.md` has Surface Mode Policy subsection (adaptive vs dark-first)
+- [x] `visual-design.md` File Structure section matches actual repo layout
+- [x] `docs/README.md` has DarkThemeScope and AppSemanticColors registry entries
+- [x] Screen prompt docs (02, 03, 04, 11) have semantic token mapping note
+- [x] Investigation `20260304133000` has Resolution section
+- [x] Investigation `20260304120000` has resolution note linking to policy doc
+- [x] `brightness_theming.md` finalized with migration results and token reference
+- [x] `flutter analyze` passes
+- [x] `flutter test` passes
+
+## Done summary
+Implemented adaptive whiteXX CI enforcement, finalized brightness migration docs, added semantic-token notes to adaptive screen prompts, closed both related investigations, and updated kit_colors whiteXX guidance for dark-first-only usage.
+## Evidence
+- Commits:
+- Tests:
+- PRs:

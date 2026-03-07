@@ -29,6 +29,9 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Guard adaptive whiteXX usage
+        run: ./tool/ci/check_adaptive_white_tokens.sh
+
       - name: Analyze project source
         run: flutter analyze
 

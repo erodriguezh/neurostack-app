@@ -88,3 +88,12 @@ A design inconsistency exists between theme and background:
 - Add a UI test/screenshot test that runs key routes in both light and dark themes and verifies title contrast/visibility.
 - Add lint/review rule: avoid using raw theme text color over fixed custom surfaces unless contrast is explicitly verified.
 - Document theme policy clearly (dark-only vs full light/dark) to prevent mixed assumptions in refactors.
+
+## Resolution
+
+Resolved by epic `fn-75-brightness-aware-theming-migration`.
+Adaptive routes now use brightness-aware semantic tokens and background mode,
+while dark-first routes are contained in `DarkThemeScope`.
+
+Policy reference:
+`docs/best_practices/design/brightness_theming.md`.

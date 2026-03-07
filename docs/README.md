@@ -16,7 +16,7 @@
 - [DomainFailure](../lib/core/failures/domain_failure.dart) - canonical failure shape and naming convention ({Aggregate}.{Invariant})
 
 ## UI
-- [visual-design.md](./best_practices/design/visual-design.md) - design tokens, ColorScheme, Material 3, typography, TextTheme, spacing grid, AppColors, AppSpacing, theming, dark mode, accessibility
+- [visual-design.md](./best_practices/design/visual-design.md) - design tokens, ColorScheme, AppSemanticColors, Material 3, typography, TextTheme, spacing grid, theming, surface mode policy, accessibility
 - [UI Widget Guidelines](./best_practices/design/ui_widget_guidelines.md) - StatelessWidget extraction, const constructors, widget composition, ValueNotifier state, sealed state classes, ViewModel pattern, ListView.builder, ValueKey/ObjectKey, pure build methods, RepaintBoundary, FadeTransition, widget granularity, lint config
 - [Screen Functional Specs](./best_practices/design/screen-functional-specifications.md) - screen specs, wireframes, navigation routes, subscription states, paywall modal, protocol stack, log session, error mapping
 
@@ -102,6 +102,7 @@
 - **EnumPageView** - `lib/core/ui/widgets/enum_page_view.dart` - generic PageView driven by enum, smooth transitions, onboarding flows
 - **AppPrimaryCta** - `lib/core/ui/widgets/app_primary_cta.dart` - primary CTA button, loading state, disabled state
 - **AppGridBackground** - `lib/core/ui/widgets/app_grid_background.dart` - decorative grid background, brand visual
+- **DarkThemeScope** - `lib/core/ui/widgets/dark_theme_scope.dart` - route-local dark theme wrapper for dark-first surfaces
 
 ### Design Tokens (Implemented)
 - **Spacing** - `lib/core/ui/constants/spacing.dart` - 4px grid, AppSpacing constants
@@ -110,6 +111,7 @@
 - **Curves** - `lib/core/ui/constants/curves.dart` - CustomCurves, emphasizedDecelerate, animation curves
 - **Durations** - `lib/core/ui/constants/durations.dart` - standardized animation timings
 - **Colors** - `lib/core/ui/constants/kit_colors.dart` - core palette and semantic color roles
+- **Semantic Colors Extension** - `lib/core/ui/extensions/app_semantic_colors.dart` - brightness-aware surface/ink/border/grid tokens
 - **Text Styles** - `lib/core/ui/constants/text_styles.dart` - typography scale and text theme helpers
 - **Breakpoints** - `lib/core/ui/constants/breakpoints.dart` - responsive breakpoints, mobile/tablet/desktop
 - **Widget Keys** - `lib/core/ui/constants/widget_keys.dart` - WidgetKeys, test accessibility
