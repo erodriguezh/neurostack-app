@@ -1,0 +1,18 @@
+{
+  "branch_name": "fn-76-integrate-userorient-flutter-for",
+  "completion_review_status": "unknown",
+  "completion_reviewed_at": null,
+  "created_at": "2026-03-15T14:03:45.259273Z",
+  "default_impl": null,
+  "default_review": null,
+  "default_sync": null,
+  "depends_on_epics": [],
+  "id": "fn-76-integrate-userorient-flutter-for",
+  "next_task": 1,
+  "plan_review_status": "ship",
+  "plan_reviewed_at": "2026-03-15T14:59:31.484506Z",
+  "spec_path": ".flow/specs/fn-76-integrate-userorient-flutter-for.md",
+  "status": "open",
+  "title": "Integrate userorient_flutter for Feature Request",
+  "updated_at": "2026-03-15T14:59:31.484830Z"
+}

@@ -13,6 +13,7 @@ import '../../../core/utils/data_source/data_source_abstraction.dart';
 import '../../../core/utils/navigation/navigation_intent_store.dart';
 import '../../../core/utils/navigation/route_data.dart';
 import '../../../core/utils/navigation/router_service.dart';
+import '../../../core/utils/userorient/userorient_service.dart';
 import '../../../paywall/data/revenuecat_service.dart';
 import '../../user/domain/entities/user.dart';
 import '../domain/auth_state.dart';
@@ -29,6 +30,7 @@ class AuthService {
     required ConnectivityService connectivityService,
     required AppLifecycleService appLifecycleService,
     required RevenueCatService revenueCatService,
+    required UserOrientService userOrientService,
   }) : _dataSource = dataSource,
        _userBootstrapService = userBootstrapService,
        _navigationIntentStore = navigationIntentStore,
@@ -36,7 +38,8 @@ class AuthService {
        _routerService = routerService,
        _connectivityService = connectivityService,
        _appLifecycleService = appLifecycleService,
-       _revenueCatService = revenueCatService;
+       _revenueCatService = revenueCatService,
+       _userOrientService = userOrientService;
 
   final DataSourceAbstraction _dataSource;
   final UserBootstrapService _userBootstrapService;
@@ -46,6 +49,8 @@ class AuthService {
   final ConnectivityService _connectivityService;
   final AppLifecycleService _appLifecycleService;
   final RevenueCatService _revenueCatService;
+  // ignore: unused_field
+  final UserOrientService _userOrientService;
   final Logger _logger = Logger('Auth');
 
   final ValueNotifier<AuthState> authState = ValueNotifier<AuthState>(

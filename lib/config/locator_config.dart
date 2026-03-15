@@ -45,6 +45,9 @@ import 'package:neurostack/paywall/data/revenuecat_client_factory.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 
+// UserOrient
+import 'package:neurostack/core/utils/userorient/userorient_service.dart';
+
 // Use cases
 import 'package:neurostack/features/session/domain/use_cases/check_eligibility_use_case.dart';
 
@@ -64,6 +67,12 @@ List<Module> buildModules({required SharedPreferences sharedPreferences}) => [
   ),
   Module<RevenueCatService>(
     builder: () => RevenueCatService(locator<RevenueCatClient>()),
+    lazy: true,
+  ),
+
+  // UserOrient (lazy singleton — no disposable resources)
+  Module<UserOrientService>(
+    builder: () => UserOrientService(),
     lazy: true,
   ),
 
@@ -184,6 +193,7 @@ List<Module> buildModules({required SharedPreferences sharedPreferences}) => [
       connectivityService: locator<ConnectivityService>(),
       appLifecycleService: locator<AppLifecycleService>(),
       revenueCatService: locator<RevenueCatService>(),
+      userOrientService: locator<UserOrientService>(),
     ),
     lazy: true,
   ),

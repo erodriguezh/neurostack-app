@@ -13,6 +13,7 @@ import 'package:neurostack/features/auth/data/auth_service.dart';
 import 'package:neurostack/features/auth/domain/auth_state.dart' as auth_state;
 import 'package:neurostack/features/onboarding/data/onboarding_store.dart';
 import 'package:neurostack/features/session/data/services/session_sync_service.dart';
+import 'package:neurostack/core/utils/userorient/userorient_service.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -83,6 +84,13 @@ class StartupViewModel {
         _logger.warning('RevenueCat init failed', e, st);
         // Continue - app works without RC, just can't show paywall
         // identify() calls will gracefully degrade (log and return)
+      }
+
+      // Init UserOrient (synchronous, best-effort — app works without it)
+      try {
+        locator<UserOrientService>().init();
+      } catch (e, st) {
+        _logger.warning('UserOrient init failed', e, st);
       }
 
       final authService = locator<AuthService>();
