@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:neurostack/core/models/home_bottom_tab.dart';
@@ -17,13 +18,17 @@ import '../mocks/mock_services.dart';
 class MockHomeBottomTabCoordinator extends Mock
     implements HomeBottomTabCoordinator {}
 
+class _FakeBuildContext extends Fake implements BuildContext {}
+
 void main() {
   late MockRouterService mockRouterService;
   late MockAuthService mockAuthService;
   late MockRevenueCatService mockRevenueCatService;
+  late MockUserOrientService mockUserOrientService;
   late MockHomeBottomTabCoordinator mockTabCoordinator;
   late SubscriptionStatusResolver resolver;
   late List<(Uri, LaunchMode)> launchCalls;
+  late BuildContext fakeContext;
 
   Future<bool> fakeLaunch(Uri uri, {LaunchMode mode = LaunchMode.platformDefault}) async {
     launchCalls.add((uri, mode));
@@ -33,15 +38,18 @@ void main() {
   setUpAll(() {
     registerFallbackValue(Path(name: '/'));
     registerFallbackValue(HomeBottomTab.stack);
+    registerFallbackValue(_FakeBuildContext());
   });
 
   setUp(() {
     mockRouterService = MockRouterService();
     mockAuthService = MockAuthService();
     mockRevenueCatService = MockRevenueCatService();
+    mockUserOrientService = MockUserOrientService();
     mockTabCoordinator = MockHomeBottomTabCoordinator();
     resolver = const SubscriptionStatusResolver();
     launchCalls = [];
+    fakeContext = _FakeBuildContext();
 
     // Default: null snapshot (RC unavailable, fallback to DB)
     when(
@@ -57,6 +65,7 @@ void main() {
       authService: mockAuthService,
       subscriptionStatusResolver: resolver,
       revenueCatService: mockRevenueCatService,
+      userOrientService: mockUserOrientService,
       tabCoordinator: mockTabCoordinator,
       launch: launch ?? fakeLaunch,
     );
@@ -236,6 +245,119 @@ void main() {
             currentTab: HomeBottomTab.settings,
           ),
         ).called(1);
+      });
+    });
+
+    group('openFeatureRequestBoard', () {
+      test('calls openBoard with correct userId and isPaying for premium user',
+          () {
+        final user = UserFactory.createPremiumMonthly();
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+
+        final vm = createViewModel();
+        addTearDown(vm.dispose);
+
+        vm.openFeatureRequestBoard(fakeContext);
+
+        verify(
+          () => mockUserOrientService.openBoard(
+            any(),
+            userId: user.id,
+            isPaying: true,
+          ),
+        ).called(1);
+      });
+
+      test('calls openBoard with isPaying false for free user', () {
+        final user = UserFactory.create(
+          subscriptionStatus: SubscriptionStatus.free,
+        );
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+
+        final vm = createViewModel();
+        addTearDown(vm.dispose);
+
+        vm.openFeatureRequestBoard(fakeContext);
+
+        verify(
+          () => mockUserOrientService.openBoard(
+            any(),
+            userId: user.id,
+            isPaying: false,
+          ),
+        ).called(1);
+      });
+
+      test('derives isPaying from RC snapshot when available', () {
+        // Free DB status but premium via RC snapshot
+        final user = UserFactory.create(
+          subscriptionStatus: SubscriptionStatus.free,
+        );
+        final snapshot = EntitlementSnapshotFactory.activePaidMonthly(
+          userId: user.id,
+        );
+        when(
+          () => mockRevenueCatService.entitlementSnapshot,
+        ).thenReturn(ValueNotifier<EntitlementSnapshot?>(snapshot));
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+
+        final vm = createViewModel();
+        addTearDown(vm.dispose);
+
+        vm.openFeatureRequestBoard(fakeContext);
+
+        verify(
+          () => mockUserOrientService.openBoard(
+            any(),
+            userId: user.id,
+            isPaying: true,
+          ),
+        ).called(1);
+      });
+
+      test('works with AuthenticatedOffline', () {
+        final user = UserFactory.createPremiumMonthly();
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOffline(user)));
+
+        final vm = createViewModel();
+        addTearDown(vm.dispose);
+
+        vm.openFeatureRequestBoard(fakeContext);
+
+        verify(
+          () => mockUserOrientService.openBoard(
+            any(),
+            userId: user.id,
+            isPaying: true,
+          ),
+        ).called(1);
+      });
+
+      test('is a no-op when user is not authenticated', () {
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(const Unauthenticated()));
+
+        final vm = createViewModel();
+        addTearDown(vm.dispose);
+
+        vm.openFeatureRequestBoard(fakeContext);
+
+        verifyNever(
+          () => mockUserOrientService.openBoard(
+            any(),
+            userId: any(named: 'userId'),
+            isPaying: any(named: 'isPaying'),
+          ),
+        );
       });
     });
 

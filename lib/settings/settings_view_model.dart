@@ -1,11 +1,14 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:neurostack/core/abstractions/entitlement_listener_mixin.dart';
 import 'package:neurostack/core/abstractions/premium_aware_view_model_mixin.dart';
 import 'package:neurostack/core/models/home_bottom_tab.dart';
 import 'package:neurostack/core/utils/navigation/route_data.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
+import 'package:neurostack/core/utils/userorient/userorient_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
 import 'package:neurostack/features/auth/data/cached_user_store.dart';
+import 'package:neurostack/features/auth/domain/auth_state.dart';
 import 'package:neurostack/home/home_bottom_tab_coordinator.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
@@ -23,6 +26,7 @@ class SettingsViewModel
     required AuthService authService,
     required SubscriptionStatusResolver subscriptionStatusResolver,
     required RevenueCatService revenueCatService,
+    required UserOrientService userOrientService,
     CachedUserStore? cachedUserStore,
     HomeBottomTabCoordinator? tabCoordinator,
     Future<bool> Function(Uri, {LaunchMode mode})? launch,
@@ -30,6 +34,7 @@ class SettingsViewModel
        _authService = authService,
        _resolver = subscriptionStatusResolver,
        _revenueCatService = revenueCatService,
+       _userOrientService = userOrientService,
        _cachedUserStore = cachedUserStore,
        _tabCoordinator =
            tabCoordinator ??
@@ -42,6 +47,7 @@ class SettingsViewModel
   final AuthService _authService;
   final SubscriptionStatusResolver _resolver;
   final RevenueCatService _revenueCatService;
+  final UserOrientService _userOrientService;
   final CachedUserStore? _cachedUserStore;
   final HomeBottomTabCoordinator _tabCoordinator;
   final Future<bool> Function(Uri, {LaunchMode mode}) _launch;
@@ -93,6 +99,30 @@ class SettingsViewModel
   /// Navigates to the contact screen.
   void goToContact() {
     _routerService.goTo(Path(name: '/settings/contact'));
+  }
+
+  /// Opens the UserOrient feature-request board.
+  ///
+  /// Extracts the user ID from the current [AuthState] and derives
+  /// `isPaying` from the resolved subscription status. No-ops when the
+  /// user is not authenticated.
+  void openFeatureRequestBoard(BuildContext context) {
+    final state = _authService.authState.value;
+    final user = switch (state) {
+      AuthenticatedOnline(user: final u) => u,
+      AuthenticatedOffline(user: final u) => u,
+      _ => null,
+    };
+    if (user == null) return;
+
+    final isPaying = _resolver
+        .resolveEffectiveStatus(
+          user: user,
+          snapshot: _revenueCatService.entitlementSnapshot.value,
+        )
+        .isPremium;
+
+    _userOrientService.openBoard(context, userId: user.id, isPaying: isPaying);
   }
 
   /// Opens the platform-specific subscription management page.

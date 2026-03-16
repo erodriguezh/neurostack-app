@@ -49,7 +49,6 @@ class AuthService {
   final ConnectivityService _connectivityService;
   final AppLifecycleService _appLifecycleService;
   final RevenueCatService _revenueCatService;
-  // ignore: unused_field
   final UserOrientService _userOrientService;
   final Logger _logger = Logger('Auth');
 
@@ -93,6 +92,13 @@ class AuthService {
       await _revenueCatService.logout().timeout(const Duration(seconds: 2));
     } catch (e, st) {
       _logger.fine('RevenueCat logout skipped: $e', e, st);
+    }
+
+    // Clear UserOrient cache (best-effort, same pattern as RevenueCat above)
+    try {
+      await _userOrientService.clearCache();
+    } catch (e, st) {
+      _logger.fine('UserOrient clearCache skipped: $e', e, st);
     }
 
     await _dataSource.auth.signOut(scope: supabase.SignOutScope.local);
@@ -169,6 +175,12 @@ class AuthService {
               .catchError((e, st) {
                 _logger.fine('RevenueCat logout skipped: $e', e, st);
               }),
+        );
+        // Clear UserOrient cache (best-effort, fire-and-forget with error handler)
+        unawaited(
+          _userOrientService.clearCache().catchError((e, st) {
+            _logger.fine('UserOrient clearCache skipped: $e', e, st);
+          }),
         );
         _currentUser = null;
         await _cachedUserStore.clearUser();
