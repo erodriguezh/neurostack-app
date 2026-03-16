@@ -29,9 +29,8 @@ Update settings screen documentation to list all currently rendered tiles and re
 - [ ] Screen prompt tile table lists all 5 rendered tiles
 
 ## Done summary
-TBD
-
+Updated settings screen spec and screen prompt to list all 5 rendered tiles (Contact Us, Send Feedback placeholder, Rate the App placeholder, Feature Request via UserOrient, Cancel Subscription), added userorient_flutter dependency, and clarified conditional visibility and placeholder status in note/out-of-scope sections.
 ## Evidence
-- Commits:
+- Commits: 9998fe88c97e92253e2331c83b87f6227ee2dfe3
 - Tests:
 - PRs:
