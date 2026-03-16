@@ -84,7 +84,7 @@ This screen has no loading, error, or empty states — all content is static/loc
 | 4 | Feature Request | `LucideIcons.lightbulb` | Chevron | Opens UserOrient board | Always |
 | 5 | Cancel Subscription | `LucideIcons.creditCard` | External-link | Opens platform subscription mgmt | Premium only |
 
-> **Note:** All 5 tiles are rendered. Feature Request is functional via UserOrient. Send Feedback and Rate the App are placeholder tiles with no-op callbacks pending future integrations (Wiredash and App Store rating respectively).
+> **Note:** The settings section defines 5 tiles total. Contact Us, Send Feedback, Rate the App, and Feature Request are always shown; Cancel Subscription is shown only for premium users. Feature Request is functional via UserOrient, while Send Feedback and Rate the App remain placeholder no-ops pending future integrations (Wiredash and App Store rating respectively).
 
 **Cancel Subscription visibility:** Inverse of upgrade banner — only shown when `subscriptionStatus.isPremium`.
 
