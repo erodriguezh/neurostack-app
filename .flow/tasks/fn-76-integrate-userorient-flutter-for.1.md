@@ -45,9 +45,8 @@ Add `userorient_flutter: ^2.1.0` to the project, create a thin `UserOrientServic
 - [ ] `flutter analyze` passes, existing tests pass
 
 ## Done summary
-TBD
-
+Added userorient_flutter v2.1.0 dependency, created UserOrientService wrapper with platform/API-key guards, registered in DI, injected into AuthService, and wired synchronous init in startup sequence.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 9e24457c6d4feb9e4e90df43e7bca5e54744f603
+- Tests: flutter analyze, flutter test
 - PRs:

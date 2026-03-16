@@ -33,25 +33,24 @@ Wire the Settings screen "Feature Request" tile via a ViewModel method with cons
 - Auth `signedOut` event at `auth_service.dart:158` is an independent sign-out path that bypasses `logout()`
 
 ## Acceptance
-- [ ] `UserOrientService` constructor-injected into `SettingsViewModel` (not via locator)
-- [ ] `SettingsViewModel.openFeatureRequestBoard(context)` method exists
-- [ ] Tapping "Feature Request" opens the UserOrient board via ViewModel delegation
-- [ ] Board receives correct user ID (Supabase auth UUID)
-- [ ] Board receives `isPaying: true` for premium users, `false` otherwise
-- [ ] Tap is a no-op when user is not authenticated (no crash)
-- [ ] `clearCache()` called in `AuthService.logout()` via constructor-injected `_userOrientService`
-- [ ] `clearCache()` called in `AuthService._handleAuthChange(signedOut)` via constructor-injected `_userOrientService`
-- [ ] SettingsViewModel test: authenticated tap calls `openBoard` with correct userId and isPaying
-- [ ] SettingsViewModel test: unauthenticated tap is a no-op
-- [ ] SettingsViewModel test: isPaying derived from `SubscriptionStatus.isPremium`
-- [ ] AuthService test: `logout()` triggers `clearCache()` on UserOrientService
-- [ ] AuthService test: `signedOut` auth event triggers `clearCache()` on UserOrientService
-- [ ] `flutter analyze` passes, all tests pass
+- [x] `UserOrientService` constructor-injected into `SettingsViewModel` (not via locator)
+- [x] `SettingsViewModel.openFeatureRequestBoard(context)` method exists
+- [x] Tapping "Feature Request" opens the UserOrient board via ViewModel delegation
+- [x] Board receives correct user ID (Supabase auth UUID)
+- [x] Board receives `isPaying: true` for premium users, `false` otherwise
+- [x] Tap is a no-op when user is not authenticated (no crash)
+- [x] `clearCache()` called in `AuthService.logout()` via constructor-injected `_userOrientService`
+- [x] `clearCache()` called in `AuthService._handleAuthChange(signedOut)` via constructor-injected `_userOrientService`
+- [x] SettingsViewModel test: authenticated tap calls `openBoard` with correct userId and isPaying
+- [x] SettingsViewModel test: unauthenticated tap is a no-op
+- [x] SettingsViewModel test: isPaying derived from `SubscriptionStatus.isPremium`
+- [x] AuthService test: `logout()` triggers `clearCache()` on UserOrientService
+- [x] AuthService test: `signedOut` auth event triggers `clearCache()` on UserOrientService
+- [x] `flutter analyze` passes, all tests pass
 
 ## Done summary
-TBD
-
+Wired the Settings screen Feature Request tile to open the UserOrient board via SettingsViewModel with constructor-injected UserOrientService, added clearCache() to both AuthService logout paths, and added unit tests for all new behavior.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 6626eca86764b55885d6eb773fbb41ac403f5ff3
+- Tests: flutter analyze, flutter test test/settings/settings_view_model_test.dart test/features/auth/data/auth_service_test.dart, flutter test
 - PRs:
