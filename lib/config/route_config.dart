@@ -3,6 +3,7 @@ import 'package:neurostack/library/library_view.dart';
 import 'package:neurostack/paywall/paywall_view.dart';
 import 'package:neurostack/progress/progress_view.dart';
 import 'package:neurostack/settings/contact_view.dart';
+import 'package:neurostack/settings/rate_app_view.dart';
 import 'package:neurostack/settings/settings_view.dart';
 import 'package:neurostack/core/utils/navigation/route_data.dart';
 import 'package:neurostack/not_found/not_found_view.dart';
@@ -42,6 +43,11 @@ final routes = [
     path: '/settings/contact',
     requiresAuth: true,
     builder: (key, routeData) => const ContactView(),
+  ),
+  RouteEntry(
+    path: '/settings/rate-app',
+    requiresAuth: true,
+    builder: (key, routeData) => const RateAppView(),
   ),
   RouteEntry(path: '/auth', builder: (key, routeData) => const AuthView()),
   RouteEntry(

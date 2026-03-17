@@ -80,11 +80,11 @@ This screen has no loading, error, or empty states — all content is static/loc
 |---|-------|------|----------|--------|------------|
 | 1 | Contact Us | `LucideIcons.mail` | Chevron | Navigate to `/settings/contact` | Always |
 | 2 | Send Feedback | `LucideIcons.messageSquare` | Chevron | Placeholder (no-op, pending Wiredash) | Always |
-| 3 | Rate the App | `LucideIcons.star` | External-link | Placeholder (no-op, pending App Store rating) | Always |
+| 3 | Rate the App | `LucideIcons.star` | Chevron | Navigate to `/settings/rate-app` via `RouterService` | Always |
 | 4 | Feature Request | `LucideIcons.lightbulb` | Chevron | Opens UserOrient board | Always |
 | 5 | Cancel Subscription | `LucideIcons.creditCard` | External-link | Opens platform subscription mgmt | Premium only |
 
-> **Note:** The settings section defines 5 tiles total. Contact Us, Send Feedback, Rate the App, and Feature Request are always shown; Cancel Subscription is shown only for premium users. Feature Request is functional via UserOrient, while Send Feedback and Rate the App remain placeholder no-ops pending future integrations (Wiredash and App Store rating respectively).
+> **Note:** The settings section defines 5 tiles total. Contact Us, Send Feedback, Rate the App, and Feature Request are always shown; Cancel Subscription is shown only for premium users. Feature Request is functional via UserOrient. Rate the App navigates to `/settings/rate-app` (in-app review integration). Send Feedback remains a placeholder no-op pending Wiredash integration.
 
 **Cancel Subscription visibility:** Inverse of upgrade banner — only shown when `subscriptionStatus.isPremium`.
 
@@ -128,6 +128,7 @@ This screen has no loading, error, or empty states — all content is static/loc
 - `url_launcher` package — needed for Cancel Subscription (opens `https://apps.apple.com/account/subscriptions` on iOS)
 - `lucide_icons_flutter` — already in `pubspec.yaml`
 - `userorient_flutter: ^2.1.0` — Feature Request board integration
+- `in_app_review` — Rate the App tile navigates to Rate App screen (see [Rate App spec](./202603162012_spec_rate_app_integration.md))
 
 ---
 
@@ -142,6 +143,5 @@ Screenshot (if present): [`docs/design_screenshots/11-settings.png`](../design_s
 
 - Restore Purchases tile (not included)
 - Wiredash integration (Send Feedback tile exists as placeholder; wire up when integration is ready)
-- App Store rating integration (Rate the App tile exists as placeholder; wire up when integration is ready)
 - Sign out / account deletion
 - App version display

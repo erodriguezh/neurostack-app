@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -8,6 +10,7 @@ import 'package:neurostack/core/ui/widgets/app_grid_background.dart';
 import 'package:neurostack/core/ui/widgets/error_state_view.dart';
 import 'package:neurostack/core/ui/widgets/home_indicator_pill.dart';
 import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
+import 'package:neurostack/core/utils/in_app_review/review_trigger_helper.dart';
 import 'package:neurostack/core/utils/internal_notification/notify_service.dart';
 import 'package:neurostack/core/utils/internal_notification/toast/toast_event.dart';
 import 'package:neurostack/core/utils/locator.dart';
@@ -297,12 +300,36 @@ class _ProgressViewState extends State<ProgressView>
       return;
     }
 
+    Future<int>? sessionCountFuture;
+    final resolvedUserId = userId;
+
     await showLogSessionModal(
       context,
       protocol: protocol,
       userId: userId,
       initialDate: day,
-      onSessionLogged: _viewModel.onSessionLogged,
+      onSessionLogged: (session) {
+        sessionCountFuture =
+            locator<ReviewTriggerHelper>().captureSessionCount(resolvedUserId);
+        _viewModel.onSessionLogged(session);
+      },
     );
+
+    // TODO(analytics): track review prompt event
+    // Fire-and-forget: decouple the 2-second delayed review prompt from
+    // the modal lifecycle so the caller returns immediately.
+    if (sessionCountFuture != null) {
+      unawaited(
+        () async {
+          try {
+            final count = await sessionCountFuture!;
+            await locator<ReviewTriggerHelper>()
+                .triggerReviewIfNeeded(count, resolvedUserId);
+          } catch (_) {
+            // Non-critical — review prompt is best-effort
+          }
+        }(),
+      );
+    }
   }
 }

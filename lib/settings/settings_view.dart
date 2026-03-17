@@ -106,7 +106,7 @@ class _SettingsViewState extends State<SettingsView> {
                                 isPremium: isPremium,
                                 onContactTap: _viewModel.goToContact,
                                 onFeedbackTap: () {}, // TODO: Wiredash
-                                onRateAppTap: () {}, // TODO: App Store
+                                onRateAppTap: _viewModel.goToRateApp,
                                 onFeatureRequestTap: () =>
                                     _viewModel.openFeatureRequestBoard(context),
                                 onCancelSubscriptionTap:

@@ -2,7 +2,9 @@
 
 ## Quick Reference
 
-**Budget**: 49 hours | **Screens**: 8 | **Architecture**: MVVM + ValueNotifier + fpdart Either
+**Budget**: 49 hours | **Screens**: 11 (documented) | **Architecture**: MVVM + ValueNotifier + fpdart Either
+
+> **Note:** The time allocation table below budgets only the original MVP screens. The total screen count includes post-MVP additions (e.g., Rate App) that are documented in this file without hour budgets.
 
 ### Time Allocation
 
@@ -598,6 +600,55 @@ Future<void> confirmDeactivation(List<String> keepIds) async {
 ### Invariants
 - **INV-U1**: Result has exactly 2 protocols
 - **INV-U5**: Enforces limit before allowing main app
+
+---
+
+## 11. Rate App Screen
+
+**Route**: `/settings/rate-app` | **Type**: Pushed screen (no bottom nav)
+
+### Wireframe
+
+```
++-------------------------------------+
+|                              [X]    |
+|                                     |
+|          [Neurostack Logo]          |
+|                                     |
+|     "Enjoying Neurostack?"          |
+|                                     |
+|   Your feedback helps improve the   |
+|   app and reach more people who     |
+|   can benefit from evidence-based   |
+|   wellness protocols.               |
+|                                     |
+|      [Rate on App Store]            |
+|        [Quick Rating]               |
+|                                     |
++-------------------------------------+
+```
+
+### States
+
+| State | Condition | UI |
+|-------|-----------|-----|
+| Default (supported) | `isServiceInitialized == true` | Both CTAs visible |
+| Unsupported (fallback) | `isServiceInitialized == false`, `hasFallbackStoreConfig == true` | Primary CTA uses `url_launcher`, Quick Rating hidden |
+| Unsupported (no config) | `isServiceInitialized == false`, `hasFallbackStoreConfig == false` | Primary CTA disabled + explanatory text, Quick Rating hidden |
+
+### Navigation
+
+| Action | Destination | Method |
+|--------|-------------|--------|
+| Close button | Settings screen | `locator<RouterService>().back()` |
+| "Rate on App Store" | App Store / Play Store (external) | `RateAppViewModel.openStoreListing()` |
+| "Quick Rating" | Native review dialog | `RateAppViewModel.requestReviewForScreen()` |
+
+### Invariants
+
+- Close button uses `RouterService.back()` (NOT `Navigator.pop()`)
+- Route is flat `RouteEntry` in `route_config.dart`, mirroring `/settings/contact`
+- `requiresAuth: true`, no bottom nav
 
 ---
 

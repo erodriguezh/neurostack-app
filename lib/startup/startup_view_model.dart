@@ -14,6 +14,7 @@ import 'package:neurostack/features/auth/domain/auth_state.dart' as auth_state;
 import 'package:neurostack/features/onboarding/data/onboarding_store.dart';
 import 'package:neurostack/features/session/data/services/session_sync_service.dart';
 import 'package:neurostack/core/utils/userorient/userorient_service.dart';
+import 'package:neurostack/core/utils/in_app_review/in_app_review_service.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -91,6 +92,13 @@ class StartupViewModel {
         locator<UserOrientService>().init();
       } catch (e, st) {
         _logger.warning('UserOrient init failed', e, st);
+      }
+
+      // Init InAppReview (synchronous, best-effort — app works without it)
+      try {
+        locator<InAppReviewService>().init();
+      } catch (e, st) {
+        _logger.warning('InAppReview init failed', e, st);
       }
 
       final authService = locator<AuthService>();

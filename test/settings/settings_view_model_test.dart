@@ -226,6 +226,23 @@ void main() {
         expect(captured, hasLength(1));
         expect((captured.first as Path).name, '/settings/contact');
       });
+
+      test('goToRateApp calls router with /settings/rate-app', () {
+        final user = UserFactory.create();
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+        final vm = createViewModel();
+        addTearDown(vm.dispose);
+
+        vm.goToRateApp();
+
+        final captured = verify(
+          () => mockRouterService.goTo(captureAny()),
+        ).captured;
+        expect(captured, hasLength(1));
+        expect((captured.first as Path).name, '/settings/rate-app');
+      });
     });
 
     group('onSelectBottomTab', () {

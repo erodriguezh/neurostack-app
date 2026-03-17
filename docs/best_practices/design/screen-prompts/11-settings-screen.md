@@ -41,7 +41,7 @@ Layout:
    |-------|------|----------|------------|--------|
    | Contact Us | mail | chevron-right | Always | Navigate to /settings/contact |
    | Send Feedback | message-square | chevron-right | Always | Placeholder (no-op, pending Wiredash) |
-   | Rate the App | star | external-link | Always | Placeholder (no-op, pending App Store rating) |
+   | Rate the App | star | chevron-right | Always | Navigate to /settings/rate-app via RouterService |
    | Feature Request | lightbulb | chevron-right | Always | Opens UserOrient board |
    | Cancel Subscription | credit-card | external-link | Premium only | Opens platform subscription mgmt |
 

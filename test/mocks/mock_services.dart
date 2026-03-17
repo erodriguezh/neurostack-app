@@ -10,6 +10,9 @@ import 'package:neurostack/features/session/domain/repositories/session_reposito
 import 'package:neurostack/features/session/domain/use_cases/check_eligibility_use_case.dart';
 import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
 import 'package:neurostack/core/utils/userorient/userorient_service.dart';
+import 'package:neurostack/core/utils/in_app_review/in_app_review_adapter.dart';
+import 'package:neurostack/core/utils/in_app_review/in_app_review_service.dart';
+import 'package:neurostack/core/utils/in_app_review/review_trigger_helper.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:neurostack/paywall/data/trial_reminder_service.dart';
 import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
@@ -52,3 +55,9 @@ class MockSubscriptionStatusResolver extends Mock
     implements SubscriptionStatusResolver {}
 
 class MockUserOrientService extends Mock implements UserOrientService {}
+
+class MockInAppReviewAdapter extends Mock implements InAppReviewAdapter {}
+
+class MockInAppReviewService extends Mock implements InAppReviewService {}
+
+class MockReviewTriggerHelper extends Mock implements ReviewTriggerHelper {}

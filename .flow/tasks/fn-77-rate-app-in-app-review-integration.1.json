@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-03-16T20:02:14.251573Z",
+  "depends_on": [],
+  "epic": "fn-77-rate-app-in-app-review-integration",
+  "id": "fn-77-rate-app-in-app-review-integration.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-77-rate-app-in-app-review-integration.1.md",
+  "status": "todo",
+  "title": "Add in_app_review package, InAppReviewService, and env config",
+  "updated_at": "2026-03-17T07:30:29.107969Z"
+}

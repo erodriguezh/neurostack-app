@@ -48,6 +48,11 @@ import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 // UserOrient
 import 'package:neurostack/core/utils/userorient/userorient_service.dart';
 
+// InAppReview
+import 'package:neurostack/core/utils/in_app_review/in_app_review_adapter.dart';
+import 'package:neurostack/core/utils/in_app_review/in_app_review_service.dart';
+import 'package:neurostack/core/utils/in_app_review/review_trigger_helper.dart';
+
 // Use cases
 import 'package:neurostack/features/session/domain/use_cases/check_eligibility_use_case.dart';
 
@@ -73,6 +78,23 @@ List<Module> buildModules({required SharedPreferences sharedPreferences}) => [
   // UserOrient (lazy singleton — no disposable resources)
   Module<UserOrientService>(
     builder: () => UserOrientService(),
+    lazy: true,
+  ),
+
+  // InAppReview (lazy singleton — no disposable resources)
+  Module<InAppReviewService>(
+    builder: () => InAppReviewService(
+      prefs: locator<SharedPreferences>(),
+      notifyService: locator<NotifyService>(),
+      adapter: DefaultInAppReviewAdapter(),
+    ),
+    lazy: true,
+  ),
+  Module<ReviewTriggerHelper>(
+    builder: () => ReviewTriggerHelper(
+      sessionLocalDataSource: locator<SessionLocalDataSource>(),
+      inAppReviewService: locator<InAppReviewService>(),
+    ),
     lazy: true,
   ),
 

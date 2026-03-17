@@ -64,7 +64,7 @@ class SettingsSupportSection extends StatelessWidget {
       _TileEntry(
         icon: LucideIcons.star,
         label: 'Rate the App',
-        trailing: LucideIcons.externalLink,
+        trailing: LucideIcons.chevronRight,
         onTap: onRateAppTap,
         isVisible: true,
       ),

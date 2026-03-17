@@ -101,6 +101,11 @@ class SettingsViewModel
     _routerService.goTo(Path(name: '/settings/contact'));
   }
 
+  /// Navigates to the Rate App screen.
+  void goToRateApp() {
+    _routerService.goTo(Path(name: '/settings/rate-app'));
+  }
+
   /// Opens the UserOrient feature-request board.
   ///
   /// Extracts the user ID from the current [AuthState] and derives

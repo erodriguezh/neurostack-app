@@ -36,6 +36,7 @@
 - [Auth Screen](./best_practices/design/screen-prompts/09-auth-screen.md) - auth, login, sign in, email input, magic link, passwordless
 - [Auth Check Email](./best_practices/design/screen-prompts/10-auth-check-email.md) - check email, inbox, magic link sent, resend link, cooldown timer, verification
 - [Settings Screen](./best_practices/design/screen-prompts/11-settings-screen.md) - settings, support, contact, upgrade banner, cancel subscription
+- [Rate App Screen](./best_practices/design/screen-prompts/12-rate-app-screen.md) - rate app, in-app review, openStoreListing, requestReview, session milestone
 
 ## Testing
 - [Testing Rules Index](./best_practices/test/domain/index.md) - quick reference, test naming, file structure, boundary testing, factory pattern, hard rules, adoption guide, test checklist
@@ -63,6 +64,7 @@
 - [Spec: Protocol Description & Seed](./specs/20260220120000_spec_protocol_description_and_seed.md) - ProtocolDescription VO, description field, protocols.json seed, 57 protocols, idempotent upsert, stale enum fix
 - [Spec: Settings Screen](./specs/20260227120000_spec_settings_screen.md) - SettingsView, 4th bottom tab, upgrade banner, support tiles, contact page, subscription management
 - [Spec: UserOrient Integration](./specs/20260315140000_spec_userorient_integration.md) - userorient_flutter, feature request board, UserOrientService, settings screen wiring
+- [Spec: Rate App / In-App Review](./specs/202603162012_spec_rate_app_integration.md) - InAppReviewService, requestReview, openStoreListing, session milestone trigger, Rate App screen
 
 ## Investigations
 - [Investigation: Protocol Names Missing](./investigations/20260108223900_investigation_progress_protocol_names.md) - ProgressGrid, layout collapse, nameWidth, narrow screen, responsive, horizontal scroll, widget overflow
@@ -76,6 +78,7 @@
 - [Plan: Update Protocol Domain & DB](../plan_update_protocol_domain_and_db.md) - ProtocolDescription VO, description field, DB migration, seed 57 protocols, fix stale enums, test factories
 - [Plan: Settings Screen](../plan_settings_screen.md) - Settings tab, upgrade CTA, support tiles, contact page, url_launcher, bottom nav 4th tab
 - [Plan: UserOrient Integration](../integrate_userorient.md) - userorient_flutter SDK, Feature Request tile, UserOrientService, env key, startup init
+- [Plan: Rate App / In-App Review](../plan_app_rating_workflow.md) - in_app_review, InAppReviewService, Rate App screen, programmatic session trigger, Settings tile wiring
 
 ## Changelogs
 - [Changelog: Home Screen](./changelogs/20260106153900_home_screen_changelog.md) - HomeViewModel, HomeViewState, status banner, protocol card, bottom nav, connectivity, route config
