@@ -13,6 +13,7 @@ import '../../../core/utils/data_source/data_source_abstraction.dart';
 import '../../../core/utils/navigation/navigation_intent_store.dart';
 import '../../../core/utils/navigation/route_data.dart';
 import '../../../core/utils/navigation/router_service.dart';
+import '../../../core/utils/userorient/userorient_service.dart';
 import '../../../paywall/data/revenuecat_service.dart';
 import '../../user/domain/entities/user.dart';
 import '../domain/auth_state.dart';
@@ -29,6 +30,7 @@ class AuthService {
     required ConnectivityService connectivityService,
     required AppLifecycleService appLifecycleService,
     required RevenueCatService revenueCatService,
+    required UserOrientService userOrientService,
   }) : _dataSource = dataSource,
        _userBootstrapService = userBootstrapService,
        _navigationIntentStore = navigationIntentStore,
@@ -36,7 +38,8 @@ class AuthService {
        _routerService = routerService,
        _connectivityService = connectivityService,
        _appLifecycleService = appLifecycleService,
-       _revenueCatService = revenueCatService;
+       _revenueCatService = revenueCatService,
+       _userOrientService = userOrientService;
 
   final DataSourceAbstraction _dataSource;
   final UserBootstrapService _userBootstrapService;
@@ -46,6 +49,7 @@ class AuthService {
   final ConnectivityService _connectivityService;
   final AppLifecycleService _appLifecycleService;
   final RevenueCatService _revenueCatService;
+  final UserOrientService _userOrientService;
   final Logger _logger = Logger('Auth');
 
   final ValueNotifier<AuthState> authState = ValueNotifier<AuthState>(
@@ -88,6 +92,13 @@ class AuthService {
       await _revenueCatService.logout().timeout(const Duration(seconds: 2));
     } catch (e, st) {
       _logger.fine('RevenueCat logout skipped: $e', e, st);
+    }
+
+    // Clear UserOrient cache (best-effort, same pattern as RevenueCat above)
+    try {
+      await _userOrientService.clearCache();
+    } catch (e, st) {
+      _logger.fine('UserOrient clearCache skipped: $e', e, st);
     }
 
     await _dataSource.auth.signOut(scope: supabase.SignOutScope.local);
@@ -164,6 +175,12 @@ class AuthService {
               .catchError((e, st) {
                 _logger.fine('RevenueCat logout skipped: $e', e, st);
               }),
+        );
+        // Clear UserOrient cache (best-effort, fire-and-forget with error handler)
+        unawaited(
+          _userOrientService.clearCache().catchError((e, st) {
+            _logger.fine('UserOrient clearCache skipped: $e', e, st);
+          }),
         );
         _currentUser = null;
         await _cachedUserStore.clearUser();

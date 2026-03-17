@@ -6,6 +6,7 @@ import 'package:neurostack/core/ui/widgets/home_indicator_pill.dart';
 import 'package:neurostack/core/ui/widgets/staggered_fade_in.dart';
 import 'package:neurostack/core/utils/locator.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
+import 'package:neurostack/core/utils/userorient/userorient_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
 import 'package:neurostack/features/auth/data/cached_user_store.dart';
 import 'package:neurostack/home/widgets/home_bottom_nav.dart';
@@ -33,6 +34,7 @@ class _SettingsViewState extends State<SettingsView> {
     authService: locator<AuthService>(),
     subscriptionStatusResolver: locator<SubscriptionStatusResolver>(),
     revenueCatService: locator<RevenueCatService>(),
+    userOrientService: locator<UserOrientService>(),
     cachedUserStore: locator<CachedUserStore>(),
   );
 
@@ -105,7 +107,8 @@ class _SettingsViewState extends State<SettingsView> {
                                 onContactTap: _viewModel.goToContact,
                                 onFeedbackTap: () {}, // TODO: Wiredash
                                 onRateAppTap: () {}, // TODO: App Store
-                                onFeatureRequestTap: () {}, // TODO: Wiredash
+                                onFeatureRequestTap: () =>
+                                    _viewModel.openFeatureRequestBoard(context),
                                 onCancelSubscriptionTap:
                                     _viewModel.openSubscriptionManagement,
                               ),

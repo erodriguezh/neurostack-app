@@ -9,6 +9,7 @@ import 'package:neurostack/features/session/data/services/session_sync_service.d
 import 'package:neurostack/features/session/domain/repositories/session_repository.dart';
 import 'package:neurostack/features/session/domain/use_cases/check_eligibility_use_case.dart';
 import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
+import 'package:neurostack/core/utils/userorient/userorient_service.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:neurostack/paywall/data/trial_reminder_service.dart';
 import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
@@ -49,3 +50,5 @@ class MockTrialReminderService extends Mock implements TrialReminderService {}
 
 class MockSubscriptionStatusResolver extends Mock
     implements SubscriptionStatusResolver {}
+
+class MockUserOrientService extends Mock implements UserOrientService {}

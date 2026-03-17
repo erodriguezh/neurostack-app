@@ -37,10 +37,13 @@ Layout:
    - Divider between tiles: 1px white/5, mx-5
 
    Tile definitions:
-   | Label | Icon | Trailing | Visibility |
-   |-------|------|----------|------------|
-   | Contact Us | mail | chevron-right | Always |
-   | Cancel Subscription | credit-card | external-link | Premium only |
+   | Label | Icon | Trailing | Visibility | Action |
+   |-------|------|----------|------------|--------|
+   | Contact Us | mail | chevron-right | Always | Navigate to /settings/contact |
+   | Send Feedback | message-square | chevron-right | Always | Placeholder (no-op, pending Wiredash) |
+   | Rate the App | star | external-link | Always | Placeholder (no-op, pending App Store rating) |
+   | Feature Request | lightbulb | chevron-right | Always | Opens UserOrient board |
+   | Cancel Subscription | credit-card | external-link | Premium only | Opens platform subscription mgmt |
 
 4. Animations:
    - Content fade-in: 400ms ease-out, translateY(8 to 0)

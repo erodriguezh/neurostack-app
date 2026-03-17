@@ -1,0 +1,89 @@
+{
+  "created_at": "2026-03-15T14:11:43.213072Z",
+  "epic": {
+    "data": {
+      "branch_name": "fn-76-integrate-userorient-flutter-for",
+      "completion_review_status": "unknown",
+      "completion_reviewed_at": null,
+      "created_at": "2026-03-15T14:03:45.259273Z",
+      "default_impl": null,
+      "default_review": null,
+      "default_sync": null,
+      "depends_on_epics": [],
+      "id": "fn-76-integrate-userorient-flutter-for",
+      "next_task": 1,
+      "plan_review_status": "unknown",
+      "plan_reviewed_at": null,
+      "spec_path": ".flow/specs/fn-76-integrate-userorient-flutter-for.md",
+      "status": "open",
+      "title": "Integrate userorient_flutter for Feature Request",
+      "updated_at": "2026-03-15T14:04:21.316604Z"
+    },
+    "spec": "# Integrate userorient_flutter for Feature Request\n\n## Overview\nAdd the `userorient_flutter` v2.1.0 SDK to enable the \"Feature Request\" tile in the Settings screen. When a user taps the tile, the UserOrient board opens \u2014 letting users vote on and submit feature requests. The integration follows the same patterns as RevenueCat: a thin service wrapper, env-based API key, startup initialization, and logout cleanup.\n\n## Scope\n- **In scope**: Add package, env key, thin `UserOrientService` wrapper, init at startup, wire Feature Request tap with user identification (`isPremium` flag), light/dark theming, `clearCache()` on logout, update settings screen spec + screen prompt docs.\n- **Out of scope**: \"Send Feedback\" tile (remains pending Wiredash), web platform support, `setDataCollection()` configuration, reactive locale changes, widget/unit tests for UserOrientService (can be added later if the service grows).\n\n## Approach\n\n### SDK initialization\n- Create a thin `UserOrientService` class with `init()`, `openBoard()`, and `clearCache()` methods.\n- `init()` calls `UserOrient.configure(apiKey:)` + `UserOrient.setLanguage(Language.en)` + `UserOrient.setTheme(light:, dark:)`.\n- API key read via `const String.fromEnvironment('USERORIENT_API_KEY')` \u2014 guard empty key with warning log and skip init (RevenueCat pattern at `revenuecat_service.dart:148`).\n- Register in `locator_config.dart`, call `init()` from `startup_view_model.dart` during app bootstrap.\n\n### Feature Request tap\n- `onFeatureRequestTap` stays `VoidCallback`. The view's builder closure already has `context`, so wire it as: `onFeatureRequestTap: () { ... UserOrient.setUser(...); UserOrient.openBoard(context); }`.\n- `setUser()` called lazily before each `openBoard()` with: `uniqueIdentifier` = auth user ID, `isPaying` = `SubscriptionStatus.isPremium`.\n- Auth user ID extracted via pattern match on `AuthState` (handle only `AuthenticatedOnline`/`AuthenticatedOffline`).\n\n### Theming\n- Call `UserOrient.setTheme()` during init, mapping the app's `KitColorsExtension` to `UserOrientColors` for both light and dark modes.\n- `backgroundColor` \u2192 app surface color, `accentColor` \u2192 app primary/brandSky color.\n\n### Logout cleanup\n- Call `UserOrient.clearCache()` in the service wrapper's `clearCache()` method, invoked from the logout flow in `AuthService`.\n\n### v2.1.0 breaking change\n- `configure()` no longer accepts `languageCode`. Must use `UserOrient.setLanguage(Language.en)` separately.\n\n## Quick commands\n```bash\n# Verify dependency resolves\nflutter pub get\n\n# Run the app and tap Settings > Feature Request\nflutter run -d 1EA9596A-EBDF-4B22-9781-181F20DEB836 --dart-define-from-file=env/env.json\n\n# Run existing tests (no regressions)\nflutter test\n```\n\n## Risks\n- **Low-star package** (23 GitHub stars): limited community validation. Test thoroughly, especially offline behavior when `openBoard()` is called without connectivity.\n- **Dependency conflicts**: `userorient_flutter` pulls in `device_info_plus`, `package_info_plus`, `shared_preferences`, `url_launcher` \u2014 all likely already in the dependency tree, but verify no version conflicts.\n- **Offline tap**: If user taps Feature Request while `AuthenticatedOffline`, `openBoard()` may fail silently or show an error. Guard or let the SDK handle it gracefully.\n\n## Acceptance\n- [ ] `userorient_flutter: ^2.1.0` in pubspec.yaml, `flutter pub get` succeeds\n- [ ] `USERORIENT_API_KEY` in `env/default.env.json` as placeholder\n- [ ] `UserOrientService` with `init()`, `openBoard()`, `clearCache()` methods\n- [ ] Service registered in locator, initialized in startup sequence\n- [ ] Feature Request tap opens UserOrient board with user ID and isPaying flag\n- [ ] Board respects app light/dark theme\n- [ ] `clearCache()` called on logout\n- [ ] Settings screen spec updated (Feature Request tile restored, UserOrient dependency added)\n- [ ] Settings screen prompt updated (Feature Request tile in table)\n- [ ] App builds and existing tests pass\n\n## References\n- [userorient_flutter v2.1.0 on pub.dev](https://pub.dev/packages/userorient_flutter)\n- [v2.1.0 breaking change](https://pub.dev/packages/userorient_flutter/changelog): `configure()` no longer accepts `languageCode`\n- [UserOrient API docs](https://pub.dev/documentation/userorient_flutter/latest/userorient_flutter/UserOrient-class.html)\n- RevenueCat pattern: `lib/paywall/data/revenuecat_service.dart`\n- Startup sequence: `lib/startup/startup_view_model.dart:58-111`\n- Settings view tap site: `lib/settings/settings_view.dart:108`\n- Auth state: `lib/features/auth/domain/auth_state.dart`\n- App theme: `lib/core/ui/app_theme.dart`\n"
+  },
+  "epic_id": "fn-76-integrate-userorient-flutter-for",
+  "schema_version": 2,
+  "tasks": [
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-03-15T14:04:27.749414Z",
+        "depends_on": [],
+        "epic": "fn-76-integrate-userorient-flutter-for",
+        "id": "fn-76-integrate-userorient-flutter-for.1",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-76-integrate-userorient-flutter-for.1.md",
+        "status": "todo",
+        "title": "Add userorient_flutter package, service wrapper, and startup init",
+        "updated_at": "2026-03-15T14:04:51.318409Z"
+      },
+      "id": "fn-76-integrate-userorient-flutter-for.1",
+      "runtime": null,
+      "spec": "# fn-76-integrate-userorient-flutter-for.1 Add userorient_flutter package, service wrapper, and startup init\n\n## Description\nAdd `userorient_flutter: ^2.1.0` to the project, create a thin `UserOrientService` wrapper, register it in the service locator, and call `init()` during app startup.\n\n**Size:** M\n**Files:**\n- `pubspec.yaml` \u2014 add dependency\n- `env/default.env.json` \u2014 add `USERORIENT_API_KEY` placeholder\n- `lib/core/utils/userorient/userorient_service.dart` \u2014 new thin service wrapper\n- `lib/config/locator_config.dart` \u2014 register service\n- `lib/startup/startup_view_model.dart` \u2014 call init in startup sequence\n\n## Approach\n- Follow RevenueCat pattern at `lib/paywall/data/revenuecat_service.dart:148` for API key loading + empty guard\n- `UserOrientService` exposes: `init()`, `openBoard(BuildContext, {required String userId, required bool isPaying})`, `clearCache()`\n- `init()` calls `UserOrient.configure(apiKey:)`, `UserOrient.setLanguage(Language.en)`, `UserOrient.setTheme(light:, dark:)` mapping from `KitColorsExtension`\n- Guard empty API key: log warning, skip init, set `_isInitialized = false` flag so `openBoard()` becomes a no-op\n- Register as lazy singleton in `locator_config.dart` following existing module pattern\n- Call `init()` in `startup_view_model.dart` after RevenueCat init (around line 89), fire-and-forget (non-blocking)\n\n## Key context\n- **v2.1.0 breaking change**: `configure()` no longer accepts `languageCode`. Must use `UserOrient.setLanguage(Language.en)` separately.\n- `UserOrient.setTheme()` accepts `light:` and `dark:` params of type `UserOrientColors(backgroundColor:, accentColor:)`. Map from `KitColorsExtension`: background \u2192 `kitColors.background`/`kitColors.neutral100`, accent \u2192 `kitColors.brandSky`/`kitColors.neutral950`.\n- Package supports Android, iOS, macOS, Windows, Linux, Web \u2014 but focus is mobile only for now.\n## Acceptance\n- [ ] `userorient_flutter: ^2.1.0` in pubspec.yaml\n- [ ] `flutter pub get` succeeds with no version conflicts\n- [ ] `USERORIENT_API_KEY` added to `env/default.env.json` with placeholder value\n- [ ] `UserOrientService` created with `init()`, `openBoard()`, `clearCache()` methods\n- [ ] Empty API key guard: logs warning and skips init (no crash)\n- [ ] `setLanguage(Language.en)` called (not via deprecated `languageCode` param)\n- [ ] `setTheme()` called with light + dark `UserOrientColors` mapped from app palette\n- [ ] Service registered in `locator_config.dart`\n- [ ] `init()` called in `startup_view_model.dart` startup sequence\n- [ ] `flutter analyze` passes\n- [ ] Existing tests still pass (`flutter test`)\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-03-15T14:04:27.875270Z",
+        "depends_on": [
+          "fn-76-integrate-userorient-flutter-for.1"
+        ],
+        "epic": "fn-76-integrate-userorient-flutter-for",
+        "id": "fn-76-integrate-userorient-flutter-for.2",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-76-integrate-userorient-flutter-for.2.md",
+        "status": "todo",
+        "title": "Wire Feature Request tap, theming, and logout cleanup",
+        "updated_at": "2026-03-15T14:05:04.102837Z"
+      },
+      "id": "fn-76-integrate-userorient-flutter-for.2",
+      "runtime": null,
+      "spec": "# fn-76-integrate-userorient-flutter-for.2 Wire Feature Request tap, theming, and logout cleanup\n\n## Description\nWire the Settings screen \"Feature Request\" tile to open the UserOrient board with user identification, and add `clearCache()` to the logout flow.\n\n**Size:** M\n**Files:**\n- `lib/settings/settings_view.dart` \u2014 wire `onFeatureRequestTap` closure\n- `lib/features/auth/data/auth_service.dart` \u2014 add `clearCache()` to logout flow\n\n## Approach\n- In `settings_view.dart:108`, replace the no-op `onFeatureRequestTap: () {}` with a closure that:\n  1. Extracts user ID from `AuthState` via pattern match (`AuthenticatedOnline`/`AuthenticatedOffline`)\n  2. Derives `isPaying` from `SubscriptionStatus.isPremium`\n  3. Calls `locator<UserOrientService>().openBoard(context, userId: ..., isPaying: ...)`\n- `openBoard()` in the service calls `UserOrient.setUser(uniqueIdentifier:, isPaying:)` then `UserOrient.openBoard(context)` \u2014 lazy setUser before each openBoard as decided\n- The `context` is available from the `ValueListenableBuilder` builder at `settings_view.dart:88`\n- For logout: add `UserOrient.clearCache()` call in `AuthService` logout flow, following the fire-and-forget pattern used by RevenueCat logout at `auth_service.dart:158`. Keep it pragmatic \u2014 a single static call, no try-catch ceremony.\n- Guard: if auth state is not authenticated (Authenticating/Unauthenticated/AuthUnknown), do nothing on tap\n\n## Key context\n- `onFeatureRequestTap` is `VoidCallback` \u2014 keep it that way, use `context` from the enclosing builder\n- `AuthState` is a sealed class at `lib/features/auth/domain/auth_state.dart` \u2014 use `switch` or `if case` to extract user\n- `SubscriptionStatus.isPremium` covers `premiumMonthly`, `premiumAnnual`, `grace` \u2014 exactly what we want for `isPaying`\n## Acceptance\n- [ ] Tapping \"Feature Request\" in Settings opens the UserOrient board\n- [ ] Board receives correct user ID (Supabase auth UUID)\n- [ ] Board receives `isPaying: true` for premium users, `false` otherwise\n- [ ] Tap is a no-op when user is not authenticated (no crash)\n- [ ] `UserOrient.clearCache()` called during logout\n- [ ] App builds and existing tests pass\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-03-15T14:04:27.999363Z",
+        "depends_on": [
+          "fn-76-integrate-userorient-flutter-for.2"
+        ],
+        "epic": "fn-76-integrate-userorient-flutter-for",
+        "id": "fn-76-integrate-userorient-flutter-for.3",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-76-integrate-userorient-flutter-for.3.md",
+        "status": "todo",
+        "title": "Update settings screen spec and screen prompt docs",
+        "updated_at": "2026-03-15T14:05:11.898509Z"
+      },
+      "id": "fn-76-integrate-userorient-flutter-for.3",
+      "runtime": null,
+      "spec": "# fn-76-integrate-userorient-flutter-for.3 Update settings screen spec and screen prompt docs\n\n## Description\nUpdate settings screen documentation to reflect the UserOrient integration for the Feature Request tile.\n\n**Size:** S\n**Files:**\n- `docs/specs/20260227120000_spec_settings_screen.md` \u2014 restore Feature Request tile, add userorient_flutter dependency, update Out of Scope\n- `docs/best_practices/design/screen-prompts/11-settings-screen.md` \u2014 add Feature Request tile to Tile Definitions table\n\n## Approach\n- In the settings screen spec:\n  - Restore \"Feature Request\" row in the Tile Definitions table (line 79 area) with action: opens UserOrient board\n  - Add `userorient_flutter: ^2.1.0` to the Dependencies section (line 125 area)\n  - Update \"Out of Scope\" section (line 140 area): remove Feature Request from the \"removed pending Wiredash\" note (keep Send Feedback as still pending)\n- In the screen prompt:\n  - Add Feature Request tile to the Tile Definitions table (line 40 area): lightbulb icon, chevron-right trailing, always visible, action opens UserOrient board\n## Acceptance\n- [ ] Settings screen spec has Feature Request tile in Tile Definitions table\n- [ ] Settings screen spec lists `userorient_flutter` in Dependencies\n- [ ] Out of Scope note updated: only Send Feedback remains pending Wiredash\n- [ ] Screen prompt has Feature Request tile in table\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    }
+  ]
+}
