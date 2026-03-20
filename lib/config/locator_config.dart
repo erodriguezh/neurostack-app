@@ -9,6 +9,7 @@ import 'package:neurostack/core/utils/navigation/navigation_intent_store.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/core/utils/internal_notification/notify_service.dart';
 import 'package:neurostack/core/utils/data_source/data_source_abstraction.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
@@ -56,8 +57,12 @@ import 'package:neurostack/core/utils/in_app_review/review_trigger_helper.dart';
 // Use cases
 import 'package:neurostack/features/session/domain/use_cases/check_eligibility_use_case.dart';
 
-List<Module> buildModules({required SharedPreferences sharedPreferences}) => [
+List<Module> buildModules({
+  required SharedPreferences sharedPreferences,
+  required PackageInfo packageInfo,
+}) => [
   Module<SharedPreferences>(builder: () => sharedPreferences, lazy: false),
+  Module<PackageInfo>(builder: () => packageInfo, lazy: false),
   Module<RouterService>(
     builder: () => RouterService(supportedRoutes: routes),
     lazy: false,

@@ -10,6 +10,7 @@ import 'package:neurostack/home/home_bottom_tab_coordinator.dart';
 import 'package:neurostack/paywall/domain/entitlement_snapshot.dart';
 import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 import 'package:neurostack/settings/settings_view_model.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../factories/factories.dart';
@@ -59,6 +60,7 @@ void main() {
 
   SettingsViewModel createViewModel({
     Future<bool> Function(Uri, {LaunchMode mode})? launch,
+    PackageInfo? packageInfo,
   }) {
     return SettingsViewModel(
       routerService: mockRouterService,
@@ -66,6 +68,13 @@ void main() {
       subscriptionStatusResolver: resolver,
       revenueCatService: mockRevenueCatService,
       userOrientService: mockUserOrientService,
+      packageInfo: packageInfo ??
+          PackageInfo(
+            appName: 'NeuroStack',
+            packageName: 'app.getneurostack',
+            version: '1.0.0',
+            buildNumber: '1',
+          ),
       tabCoordinator: mockTabCoordinator,
       launch: launch ?? fakeLaunch,
     );
