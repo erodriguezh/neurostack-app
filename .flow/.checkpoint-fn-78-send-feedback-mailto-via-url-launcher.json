@@ -1,0 +1,174 @@
+{
+  "created_at": "2026-03-20T19:48:20.415269Z",
+  "epic": {
+    "data": {
+      "branch_name": "feature/send-feedback-mailto",
+      "completion_review_status": "unknown",
+      "completion_reviewed_at": null,
+      "created_at": "2026-03-20T19:45:10.759444Z",
+      "default_impl": null,
+      "default_review": null,
+      "default_sync": null,
+      "depends_on_epics": [],
+      "id": "fn-78-send-feedback-mailto-via-url-launcher",
+      "next_task": 1,
+      "plan_review_status": "unknown",
+      "plan_reviewed_at": null,
+      "spec_path": ".flow/specs/fn-78-send-feedback-mailto-via-url-launcher.md",
+      "status": "open",
+      "title": "Send Feedback mailto via url_launcher",
+      "updated_at": "2026-03-20T19:45:44.412488Z"
+    },
+    "spec": "# Send Feedback mailto via url_launcher\n\n## Overview\n\nReplace the no-op Wiredash placeholder on the Settings \"Send Feedback\" tile with a `mailto:` link that opens the device email client pre-filled with diagnostic context (app version, platform, effective subscription tier).\n\n**Spec:** `docs/specs/20260227120000_spec_settings_screen.md` \u2014 \u00a7Send Feedback (mailto)\n\n## Scope\n\n**In scope:**\n- Add `package_info_plus` as a direct dependency (currently transitive via `userorient_flutter`)\n- Thread `PackageInfo` through the full startup/DI path (same pattern as `SharedPreferences`)\n- Implement `sendFeedback()` on `SettingsViewModel` using existing launch/auth/subscription patterns\n- Build mailto URI with correct encoding (`Uri.encodeComponent` + `query:`, not `queryParameters:`)\n- Wire the callback in `SettingsView`\n- Clean up all stale Wiredash references in code and docs\n- Unit tests including effective-status regression test\n\n**Out of scope:**\n- In-app fallback UI when no email client is configured (fire-and-forget per spec)\n- Web-specific platform detection (uses `defaultTargetPlatform.name` consistently)\n- Debounce on tile tap (consistent with existing tiles)\n\n## Approach\n\n### DI/Bootstrap\nThread `PackageInfo` through `main()` \u2192 `_AppLifecycleObserver` \u2192 `StartupView` \u2192 `StartupViewModel` \u2192 `buildModules()`, mirroring the `SharedPreferences` pattern exactly. Register as non-lazy singleton so it survives `locator.reset()` + `retryInitialization()` cycles.\n\n### mailto URI Construction\nUse `Uri(scheme: 'mailto', path: '...', query: encodeQueryParameters({...}))` with a helper that uses `Uri.encodeComponent()` per value. This avoids the Dart `queryParameters` bug that encodes spaces as `+` (Dart SDK #43838). The helper follows the pattern from the official url_launcher README.\n\n### ViewModel Method\n`sendFeedback()` combines two existing patterns:\n- Auth extraction + effective status resolution from `openFeatureRequestBoard()` (`settings_view_model.dart:114-131`)\n- URI launch with `LaunchMode` from `openSubscriptionManagement()` (`settings_view_model.dart:138-158`)\n\n## Quick commands\n\n```bash\n# Run tests\nflutter test test/settings/settings_view_model_test.dart\n\n# Analyze\nflutter analyze\n\n# Full test suite\nflutter test\n```\n\n## Risks & Mitigations\n\n| Risk | Mitigation |\n|------|-----------|\n| `Uri(queryParameters:)` encodes spaces as `+`, breaking mail clients | Use `query:` with manual `Uri.encodeComponent()` \u2014 documented in url_launcher README |\n| Settings spec says `Uri.encodeFull` but that's incorrect for query params | Update spec to say `Uri.encodeComponent` during doc cleanup |\n| `PackageInfo.fromPlatform()` could theoretically fail in `main()` | Extremely unlikely (battle-tested plugin); consistent with `SharedPreferences` pattern which also runs in `main()` without fallback |\n| `defaultTargetPlatform.name` reports simulated platform on web (e.g., `android`) | Acceptable \u2014 consistent behavior, low priority for support triage |\n\n## Acceptance\n\n- [ ] Tapping \"Send Feedback\" opens device email client with pre-filled `to`, `subject`, and `body`\n- [ ] Email `to` is `feedback@getneurostack.app`\n- [ ] Email `subject` is `NeuroStack Feedback`\n- [ ] Email `body` contains app version+build, platform name, and effective subscription tier\n- [ ] Spaces in mailto URI are encoded as `%20` (not `+`)\n- [ ] No-op when user is unauthenticated\n- [ ] `PackageInfo` survives `retryInitialization()` cycles\n- [ ] All stale Wiredash references removed from code and docs\n- [ ] Unit tests pass including effective-status regression test\n- [ ] `flutter analyze` clean\n\n## References\n\n- Plan: `plan_send_feedback_mailto.md`\n- Spec: `docs/specs/20260227120000_spec_settings_screen.md` lines 89-116\n- Dart SDK #43838: `Uri.toString()` encodes spaces as `+` for mailto\n- url_launcher README: canonical `encodeQueryParameters` helper\n- Existing patterns: `openFeatureRequestBoard()` at `settings_view_model.dart:114-131`, `openSubscriptionManagement()` at `settings_view_model.dart:138-158`\n"
+  },
+  "epic_id": "fn-78-send-feedback-mailto-via-url-launcher",
+  "schema_version": 2,
+  "tasks": [
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-03-20T19:45:55.844835Z",
+        "depends_on": [],
+        "epic": "fn-78-send-feedback-mailto-via-url-launcher",
+        "id": "fn-78-send-feedback-mailto-via-url-launcher.1",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-78-send-feedback-mailto-via-url-launcher.1.md",
+        "status": "todo",
+        "title": "Add package_info_plus, bootstrap DI, implement sendFeedback, wire callback",
+        "updated_at": "2026-03-20T19:47:42.455460Z"
+      },
+      "id": "fn-78-send-feedback-mailto-via-url-launcher.1",
+      "runtime": null,
+      "spec": "# fn-78-send-feedback-mailto-via-url-launcher.1 Add package_info_plus, bootstrap DI, implement sendFeedback, wire callback\n\n## Description\nAdd `package_info_plus` as a direct dependency, thread `PackageInfo` through the full startup/DI bootstrap path, implement `sendFeedback()` on `SettingsViewModel`, and wire the callback in `SettingsView`.\n\n**Size:** M\n**Files:**\n- `pubspec.yaml`\n- `lib/main.dart` (resolve `PackageInfo.fromPlatform()` + thread through `_AppLifecycleObserver`)\n- `lib/startup/startup_view.dart` (accept + forward `PackageInfo`)\n- `lib/startup/startup_view_model.dart` (accept + forward to `buildModules`)\n- `lib/config/locator_config.dart` (extend `buildModules` signature, register non-lazy singleton)\n- `lib/settings/settings_view_model.dart` (add `PackageInfo` param + `sendFeedback()` method)\n- `lib/settings/settings_view.dart` (wire callback, pass `PackageInfo` from locator)\n\n## Approach\n\n### DI Bootstrap\n- Follow the `SharedPreferences` threading pattern exactly: resolve in `main()`, pass through `_AppLifecycleObserver` \u2192 `StartupView` \u2192 `StartupViewModel` \u2192 `buildModules()`\n- `main.dart:12-14` \u2014 resolve alongside `SharedPreferences`\n- `main.dart:22-63` \u2014 `_AppLifecycleObserver` needs new `PackageInfo` field\n- `startup_view.dart:18-30` \u2014 add constructor param, forward to `StartupViewModel`\n- `startup_view_model.dart:46-64` \u2014 accept param, pass to `buildModules()` at L63-64\n- `locator_config.dart:59-60` \u2014 extend signature: `buildModules({required SharedPreferences, required PackageInfo})`; register with `Module<PackageInfo>(builder: () => packageInfo, lazy: false)`\n\n### sendFeedback() Method\n- Combine auth extraction from `openFeatureRequestBoard()` (`settings_view_model.dart:114-131`) with launch pattern from `openSubscriptionManagement()` (`settings_view_model.dart:138-158`)\n- Build mailto URI using `Uri(scheme: 'mailto', path: 'feedback@getneurostack.app', query: ...)` with an `encodeQueryParameters` helper using `Uri.encodeComponent()` per value \u2014 NOT `queryParameters:` (Dart SDK #43838 encodes spaces as `+`)\n- Subject: `NeuroStack Feedback`\n- Body: `App Version: {version}+{buildNumber}\\nPlatform: {defaultTargetPlatform.name}\\nSubscription: {effectiveStatus.name}`\n- Launch with `LaunchMode.externalApplication` (native) / `LaunchMode.platformDefault` (web)\n- Fire-and-forget try-catch, no fallback\n- No-op when user is unauthenticated (same guard as `openFeatureRequestBoard`)\n\n### Wiring\n- Replace `onFeedbackTap: () {}, // TODO: Wiredash` at `settings_view.dart:108` with `_viewModel.sendFeedback`\n- Pass `locator<PackageInfo>()` to `SettingsViewModel` constructor at `settings_view.dart:32-39`\n\n## Key context\n- `Uri(queryParameters:)` encodes spaces as `+` which breaks mailto on many mail clients \u2014 MUST use `query:` param with manual `Uri.encodeComponent()` (url_launcher README canonical helper)\n- `PackageInfo` has a public constructor for testing \u2014 no mock needed\n- The `_launch` function is already injected for testability (`settings_view_model.dart:32/42`)\n## Acceptance\n- [ ] `package_info_plus` added as direct dependency in `pubspec.yaml`\n- [ ] `PackageInfo` resolved in `main()` and threaded through `_AppLifecycleObserver` \u2192 `StartupView` \u2192 `StartupViewModel` \u2192 `buildModules()`\n- [ ] `PackageInfo` registered as non-lazy singleton in locator (survives `retryInitialization()`)\n- [ ] `sendFeedback()` method on `SettingsViewModel` builds correct mailto URI\n- [ ] mailto URI uses `Uri.encodeComponent` (spaces as `%20`, not `+`)\n- [ ] `to` is `feedback@getneurostack.app`, subject is `NeuroStack Feedback`\n- [ ] Body contains app version+build, platform name, effective subscription tier\n- [ ] No-op when user is unauthenticated\n- [ ] Callback wired in `SettingsView` \u2014 tapping \"Send Feedback\" invokes `sendFeedback()`\n- [ ] `flutter analyze` clean\n- [ ] `flutter test` passes (existing tests, no new tests in this task)\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-03-20T19:45:55.965064Z",
+        "depends_on": [
+          "fn-78-send-feedback-mailto-via-url-launcher.1"
+        ],
+        "epic": "fn-78-send-feedback-mailto-via-url-launcher",
+        "id": "fn-78-send-feedback-mailto-via-url-launcher.2",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-78-send-feedback-mailto-via-url-launcher.2.md",
+        "status": "todo",
+        "title": "Unit tests for sendFeedback including effective-status regression",
+        "updated_at": "2026-03-20T19:47:42.871036Z"
+      },
+      "id": "fn-78-send-feedback-mailto-via-url-launcher.2",
+      "runtime": null,
+      "spec": "# fn-78-send-feedback-mailto-via-url-launcher.2 Unit tests for sendFeedback including effective-status regression\n\n## Description\nAdd unit tests for `sendFeedback()` in `settings_view_model_test.dart`, following the existing `openFeatureRequestBoard` test group as a structural template. Include an effective-status regression test.\n\n**Size:** M\n**Files:**\n- `test/settings/settings_view_model_test.dart`\n\n## Approach\n\n- Follow the test structure of `openFeatureRequestBoard` group at `settings_view_model_test.dart:268-379`\n- Use existing `launchCalls` list to capture `(Uri, LaunchMode)` tuples (`settings_view_model_test.dart:30`)\n- Use existing `fakeLaunch` injection via constructor (`settings_view_model_test.dart:33-36`)\n- Extend `createViewModel()` factory at `settings_view_model_test.dart:60-72` to accept `PackageInfo` param\n- Create `PackageInfo` directly via public constructor (no mock needed): `PackageInfo(appName: 'Neurostack', packageName: 'com.example', version: '1.2.3', buildNumber: '42')`\n- Use `UserFactory` and `EntitlementSnapshotFactory` from `test/factories/`\n\n## Key context\n\n- Assert URI structurally: `scheme == 'mailto'`, `path == 'feedback@getneurostack.app'`, decode and verify exact `subject` and `body` values\n- Assert spaces encoded as `%20` not `+` (catch Dart SDK #43838 regression)\n- Effective-status regression test: DB-level `free` user + RC snapshot resolving to `premiumMonthly` \u2192 body must contain `premiumMonthly` not `free`\n## Acceptance\n- [ ] Test: mailto URI has scheme `mailto` and path `feedback@getneurostack.app`\n- [ ] Test: subject is `NeuroStack Feedback`\n- [ ] Test: body contains app version (`1.2.3+42`), platform name, subscription status\n- [ ] Test: spaces in URI encoded as `%20` not `+`\n- [ ] Test: effective-status regression \u2014 DB `free` + RC `premiumMonthly` snapshot \u2192 body contains `premiumMonthly`\n- [ ] Test: `_launch` called with `LaunchMode.externalApplication`\n- [ ] Test: no-op when user is unauthenticated (launch not called)\n- [ ] Test: no-op when user is `null` (unauthenticated state)\n- [ ] All tests pass: `flutter test test/settings/settings_view_model_test.dart`\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-03-20T19:45:56.107921Z",
+        "depends_on": [
+          "fn-78-send-feedback-mailto-via-url-launcher.1"
+        ],
+        "epic": "fn-78-send-feedback-mailto-via-url-launcher",
+        "id": "fn-78-send-feedback-mailto-via-url-launcher.3",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-78-send-feedback-mailto-via-url-launcher.3.md",
+        "status": "todo",
+        "title": "Clean up stale Wiredash references in code and docs",
+        "updated_at": "2026-03-20T19:47:43.009685Z"
+      },
+      "id": "fn-78-send-feedback-mailto-via-url-launcher.3",
+      "runtime": null,
+      "spec": "# fn-78-send-feedback-mailto-via-url-launcher.3 Clean up stale Wiredash references in code and docs\n\n## Description\nRemove all stale Wiredash references from code doc comments and documentation files. Update the settings spec to correct the encoding function reference.\n\n**Size:** S\n**Files:**\n- `lib/settings/widgets/settings_support_section.dart` (remove stale doc comments)\n- `docs/best_practices/design/screen-prompts/11-settings-screen.md` (update Send Feedback from Wiredash placeholder to mailto)\n- `docs/specs/20260315140000_spec_userorient_integration.md` (remove stale out-of-scope Wiredash reference)\n- `docs/specs/202603162012_spec_rate_app_integration.md` (remove stale out-of-scope Wiredash reference)\n- `docs/specs/20260227120000_spec_settings_screen.md` (fix `Uri.encodeFull` \u2192 `Uri.encodeComponent` at line ~107)\n\n## Approach\n\n### Code cleanup (`settings_support_section.dart`)\n- Remove/update all 3 stale doc comments:\n  - L31: `/// Placeholder action for Send Feedback (TODO: Wiredash).` \u2192 update to reflect mailto behavior\n  - L34: `/// Placeholder action for Rate the App (TODO: App Store).` \u2192 update to reflect in-app review behavior (already implemented)\n  - L37: `/// Placeholder action for Feature Request (TODO: Wiredash).` \u2192 update to reflect UserOrient behavior (already implemented)\n\n### Screen prompt (`11-settings-screen.md`)\n- L43: Replace `Placeholder (no-op, pending Wiredash)` with description of mailto behavior in the tile table\n- Follow existing table format: `| Label | Icon | Trailing | Visibility | Action |`\n\n### Out-of-scope sections\n- `20260315140000_spec_userorient_integration.md:147`: Remove bullet about \"Send Feedback pending Wiredash\"\n- `202603162012_spec_rate_app_integration.md:277`: Remove bullet about \"Send Feedback pending Wiredash\"\n\n### Settings spec encoding fix\n- `20260227120000_spec_settings_screen.md:~107`: Change `Uri.encodeFull` \u2192 `Uri.encodeComponent` to match actual implementation\n\n## Key context\n- The screen prompt file (`11-settings-screen.md`) is used as input for AI-assisted UI generation \u2014 stale data causes regressions in future screen regeneration\n- Remove entire \"pending Wiredash\" bullets from out-of-scope sections rather than leaving tombstones\n## Acceptance\n- [ ] No remaining \"Wiredash\" references in `settings_support_section.dart` doc comments\n- [ ] All 3 callback doc comments in `settings_support_section.dart` reflect current behavior\n- [ ] `11-settings-screen.md` tile table shows mailto action for Send Feedback\n- [ ] UserOrient spec out-of-scope no longer mentions \"Send Feedback pending Wiredash\"\n- [ ] Rate App spec out-of-scope no longer mentions \"Send Feedback pending Wiredash\"\n- [ ] Settings spec references `Uri.encodeComponent` (not `Uri.encodeFull`)\n- [ ] `flutter analyze` clean\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-03-20T19:46:00.066696Z",
+        "depends_on": [],
+        "epic": "fn-78-send-feedback-mailto-via-url-launcher",
+        "id": "fn-78-send-feedback-mailto-via-url-launcher.4",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-78-send-feedback-mailto-via-url-launcher.4.md",
+        "status": "todo",
+        "title": "Add package_info_plus, bootstrap DI, implement sendFeedback, wire callback",
+        "updated_at": "2026-03-20T19:46:33.525859Z"
+      },
+      "id": "fn-78-send-feedback-mailto-via-url-launcher.4",
+      "runtime": {
+        "evidence": {
+          "commits": [],
+          "prs": [],
+          "tests": []
+        },
+        "status": "done",
+        "updated_at": "2026-03-20T19:48:09.527884Z"
+      },
+      "spec": "# fn-78-send-feedback-mailto-via-url-launcher.4 Add package_info_plus, bootstrap DI, implement sendFeedback, wire callback\n\n## Description\nAdd `package_info_plus` as a direct dependency, thread `PackageInfo` through the full startup/DI bootstrap path, implement `sendFeedback()` on `SettingsViewModel`, and wire the callback in `SettingsView`.\n\n**Size:** M\n**Files:**\n- `pubspec.yaml`\n- `lib/main.dart` (resolve `PackageInfo.fromPlatform()` + thread through `_AppLifecycleObserver`)\n- `lib/startup/startup_view.dart` (accept + forward `PackageInfo`)\n- `lib/startup/startup_view_model.dart` (accept + forward to `buildModules`)\n- `lib/config/locator_config.dart` (extend `buildModules` signature, register non-lazy singleton)\n- `lib/settings/settings_view_model.dart` (add `PackageInfo` param + `sendFeedback()` method)\n- `lib/settings/settings_view.dart` (wire callback, pass `PackageInfo` from locator)\n\n## Approach\n\n### DI Bootstrap\n- Follow the `SharedPreferences` threading pattern exactly: resolve in `main()`, pass through `_AppLifecycleObserver` \u2192 `StartupView` \u2192 `StartupViewModel` \u2192 `buildModules()`\n- `main.dart:12-14` \u2014 resolve alongside `SharedPreferences`\n- `main.dart:22-63` \u2014 `_AppLifecycleObserver` needs new `PackageInfo` field\n- `startup_view.dart:18-30` \u2014 add constructor param, forward to `StartupViewModel`\n- `startup_view_model.dart:46-64` \u2014 accept param, pass to `buildModules()` at L63-64\n- `locator_config.dart:59-60` \u2014 extend signature: `buildModules({required SharedPreferences, required PackageInfo})`; register with `Module<PackageInfo>(builder: () => packageInfo, lazy: false)`\n\n### sendFeedback() Method\n- Combine auth extraction from `openFeatureRequestBoard()` (`settings_view_model.dart:114-131`) with launch pattern from `openSubscriptionManagement()` (`settings_view_model.dart:138-158`)\n- Build mailto URI using `Uri(scheme: 'mailto', path: 'feedback@getneurostack.app', query: ...)` with an `encodeQueryParameters` helper using `Uri.encodeComponent()` per value \u2014 NOT `queryParameters:` (Dart SDK #43838 encodes spaces as `+`)\n- Subject: `NeuroStack Feedback`\n- Body: `App Version: {version}+{buildNumber}\\nPlatform: {defaultTargetPlatform.name}\\nSubscription: {effectiveStatus.name}`\n- Launch with `LaunchMode.externalApplication` (native) / `LaunchMode.platformDefault` (web)\n- Fire-and-forget try-catch, no fallback\n- No-op when user is unauthenticated (same guard as `openFeatureRequestBoard`)\n\n### Wiring\n- Replace `onFeedbackTap: () {}, // TODO: Wiredash` at `settings_view.dart:108` with `_viewModel.sendFeedback`\n- Pass `locator<PackageInfo>()` to `SettingsViewModel` constructor at `settings_view.dart:32-39`\n\n## Key context\n- `Uri(queryParameters:)` encodes spaces as `+` which breaks mailto on many mail clients \u2014 MUST use `query:` param with manual `Uri.encodeComponent()` (url_launcher README canonical helper)\n- `PackageInfo` has a public constructor for testing \u2014 no mock needed\n- The `_launch` function is already injected for testability (`settings_view_model.dart:32/42`)\n## Acceptance\n- [ ] `package_info_plus` added as direct dependency in `pubspec.yaml`\n- [ ] `PackageInfo` resolved in `main()` and threaded through `_AppLifecycleObserver` \u2192 `StartupView` \u2192 `StartupViewModel` \u2192 `buildModules()`\n- [ ] `PackageInfo` registered as non-lazy singleton in locator (survives `retryInitialization()`)\n- [ ] `sendFeedback()` method on `SettingsViewModel` builds correct mailto URI\n- [ ] mailto URI uses `Uri.encodeComponent` (spaces as `%20`, not `+`)\n- [ ] `to` is `feedback@getneurostack.app`, subject is `NeuroStack Feedback`\n- [ ] Body contains app version+build, platform name, effective subscription tier\n- [ ] No-op when user is unauthenticated\n- [ ] Callback wired in `SettingsView` \u2014 tapping \"Send Feedback\" invokes `sendFeedback()`\n- [ ] `flutter analyze` clean\n- [ ] `flutter test` passes (existing tests, no new tests in this task)\n## Done summary\nDuplicate \u2014 use task .1 instead\n## Evidence\n- Commits:\n- Tests:\n- PRs:"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-03-20T19:46:06.559468Z",
+        "depends_on": [
+          "fn-78-send-feedback-mailto-via-url-launcher.4"
+        ],
+        "epic": "fn-78-send-feedback-mailto-via-url-launcher",
+        "id": "fn-78-send-feedback-mailto-via-url-launcher.5",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-78-send-feedback-mailto-via-url-launcher.5.md",
+        "status": "todo",
+        "title": "Unit tests for sendFeedback including effective-status regression",
+        "updated_at": "2026-03-20T19:46:49.165316Z"
+      },
+      "id": "fn-78-send-feedback-mailto-via-url-launcher.5",
+      "runtime": {
+        "evidence": {
+          "commits": [],
+          "prs": [],
+          "tests": []
+        },
+        "status": "done",
+        "updated_at": "2026-03-20T19:48:09.692000Z"
+      },
+      "spec": "# fn-78-send-feedback-mailto-via-url-launcher.5 Unit tests for sendFeedback including effective-status regression\n\n## Description\nAdd unit tests for `sendFeedback()` in `settings_view_model_test.dart`, following the existing `openFeatureRequestBoard` test group as a structural template. Include an effective-status regression test.\n\n**Size:** M\n**Files:**\n- `test/settings/settings_view_model_test.dart`\n\n## Approach\n\n- Follow the test structure of `openFeatureRequestBoard` group at `settings_view_model_test.dart:268-379`\n- Use existing `launchCalls` list to capture `(Uri, LaunchMode)` tuples (`settings_view_model_test.dart:30`)\n- Use existing `fakeLaunch` injection via constructor (`settings_view_model_test.dart:33-36`)\n- Extend `createViewModel()` factory at `settings_view_model_test.dart:60-72` to accept `PackageInfo` param\n- Create `PackageInfo` directly via public constructor (no mock needed): `PackageInfo(appName: 'Neurostack', packageName: 'com.example', version: '1.2.3', buildNumber: '42')`\n- Use `UserFactory` and `EntitlementSnapshotFactory` from `test/factories/`\n\n## Key context\n\n- Assert URI structurally: `scheme == 'mailto'`, `path == 'feedback@getneurostack.app'`, decode and verify exact `subject` and `body` values\n- Assert spaces encoded as `%20` not `+` (catch Dart SDK #43838 regression)\n- Effective-status regression test: DB-level `free` user + RC snapshot resolving to `premiumMonthly` \u2192 body must contain `premiumMonthly` not `free`\n## Acceptance\n- [ ] Test: mailto URI has scheme `mailto` and path `feedback@getneurostack.app`\n- [ ] Test: subject is `NeuroStack Feedback`\n- [ ] Test: body contains app version (`1.2.3+42`), platform name, subscription status\n- [ ] Test: spaces in URI encoded as `%20` not `+`\n- [ ] Test: effective-status regression \u2014 DB `free` + RC `premiumMonthly` snapshot \u2192 body contains `premiumMonthly`\n- [ ] Test: `_launch` called with `LaunchMode.externalApplication`\n- [ ] Test: no-op when user is unauthenticated (launch not called)\n- [ ] Test: no-op when user is `null` (unauthenticated state)\n- [ ] All tests pass: `flutter test test/settings/settings_view_model_test.dart`\n## Done summary\nDuplicate \u2014 use task .1 instead\n## Evidence\n- Commits:\n- Tests:\n- PRs:"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-03-20T19:46:06.711384Z",
+        "depends_on": [
+          "fn-78-send-feedback-mailto-via-url-launcher.4"
+        ],
+        "epic": "fn-78-send-feedback-mailto-via-url-launcher",
+        "id": "fn-78-send-feedback-mailto-via-url-launcher.6",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-78-send-feedback-mailto-via-url-launcher.6.md",
+        "status": "todo",
+        "title": "Clean up stale Wiredash references in code and docs",
+        "updated_at": "2026-03-20T19:47:08.090673Z"
+      },
+      "id": "fn-78-send-feedback-mailto-via-url-launcher.6",
+      "runtime": {
+        "evidence": {
+          "commits": [],
+          "prs": [],
+          "tests": []
+        },
+        "status": "done",
+        "updated_at": "2026-03-20T19:48:09.859598Z"
+      },
+      "spec": "# fn-78-send-feedback-mailto-via-url-launcher.6 Clean up stale Wiredash references in code and docs\n\n## Description\nRemove all stale Wiredash references from code doc comments and documentation files. Update the settings spec to correct the encoding function reference.\n\n**Size:** S\n**Files:**\n- `lib/settings/widgets/settings_support_section.dart` (remove stale doc comments)\n- `docs/best_practices/design/screen-prompts/11-settings-screen.md` (update Send Feedback from Wiredash placeholder to mailto)\n- `docs/specs/20260315140000_spec_userorient_integration.md` (remove stale out-of-scope Wiredash reference)\n- `docs/specs/202603162012_spec_rate_app_integration.md` (remove stale out-of-scope Wiredash reference)\n- `docs/specs/20260227120000_spec_settings_screen.md` (fix `Uri.encodeFull` \u2192 `Uri.encodeComponent` at line ~107)\n\n## Approach\n\n### Code cleanup (`settings_support_section.dart`)\n- Remove/update all 3 stale doc comments:\n  - L31: `/// Placeholder action for Send Feedback (TODO: Wiredash).` \u2192 update to reflect mailto behavior\n  - L34: `/// Placeholder action for Rate the App (TODO: App Store).` \u2192 update to reflect in-app review behavior (already implemented)\n  - L37: `/// Placeholder action for Feature Request (TODO: Wiredash).` \u2192 update to reflect UserOrient behavior (already implemented)\n\n### Screen prompt (`11-settings-screen.md`)\n- L43: Replace `Placeholder (no-op, pending Wiredash)` with description of mailto behavior in the tile table\n- Follow existing table format: `| Label | Icon | Trailing | Visibility | Action |`\n\n### Out-of-scope sections\n- `20260315140000_spec_userorient_integration.md:147`: Remove bullet about \"Send Feedback pending Wiredash\"\n- `202603162012_spec_rate_app_integration.md:277`: Remove bullet about \"Send Feedback pending Wiredash\"\n\n### Settings spec encoding fix\n- `20260227120000_spec_settings_screen.md:~107`: Change `Uri.encodeFull` \u2192 `Uri.encodeComponent` to match actual implementation\n\n## Key context\n- The screen prompt file (`11-settings-screen.md`) is used as input for AI-assisted UI generation \u2014 stale data causes regressions in future screen regeneration\n- Remove entire \"pending Wiredash\" bullets from out-of-scope sections rather than leaving tombstones\n## Acceptance\n- [ ] No remaining \"Wiredash\" references in `settings_support_section.dart` doc comments\n- [ ] All 3 callback doc comments in `settings_support_section.dart` reflect current behavior\n- [ ] `11-settings-screen.md` tile table shows mailto action for Send Feedback\n- [ ] UserOrient spec out-of-scope no longer mentions \"Send Feedback pending Wiredash\"\n- [ ] Rate App spec out-of-scope no longer mentions \"Send Feedback pending Wiredash\"\n- [ ] Settings spec references `Uri.encodeComponent` (not `Uri.encodeFull`)\n- [ ] `flutter analyze` clean\n## Done summary\nDuplicate \u2014 use task .1 instead\n## Evidence\n- Commits:\n- Tests:\n- PRs:"
+    }
+  ]
+}
