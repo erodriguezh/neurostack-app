@@ -16,6 +16,7 @@ import 'package:neurostack/features/session/data/services/session_sync_service.d
 import 'package:neurostack/core/utils/userorient/userorient_service.dart';
 import 'package:neurostack/core/utils/in_app_review/in_app_review_service.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Represents different states of app initialization
@@ -45,13 +46,16 @@ class AppInitializationError extends AppState {
 class StartupViewModel {
   StartupViewModel({
     required SharedPreferences sharedPreferences,
+    required PackageInfo packageInfo,
     LoggingAbstraction? loggingAbstraction,
   }) : _sharedPreferences = sharedPreferences,
+       _packageInfo = packageInfo,
        _loggingAbstraction = loggingAbstraction ?? LoggingAbstraction();
 
   final appStateNotifier = ValueNotifier<AppState>(const InitializingApp());
 
   final SharedPreferences _sharedPreferences;
+  final PackageInfo _packageInfo;
   final LoggingAbstraction _loggingAbstraction;
   StreamSubscription<LogRecord>? loggingSubscription;
 
@@ -61,7 +65,10 @@ class StartupViewModel {
     appStateNotifier.value = const InitializingApp();
     try {
       locator.registerMany(
-        buildModules(sharedPreferences: _sharedPreferences),
+        buildModules(
+          sharedPreferences: _sharedPreferences,
+          packageInfo: _packageInfo,
+        ),
       );
       loggingSubscription?.cancel();
       loggingSubscription = _loggingAbstraction.initializeLogging();

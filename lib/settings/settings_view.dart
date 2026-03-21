@@ -9,6 +9,7 @@ import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/core/utils/userorient/userorient_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
 import 'package:neurostack/features/auth/data/cached_user_store.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:neurostack/home/widgets/home_bottom_nav.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
@@ -35,6 +36,7 @@ class _SettingsViewState extends State<SettingsView> {
     subscriptionStatusResolver: locator<SubscriptionStatusResolver>(),
     revenueCatService: locator<RevenueCatService>(),
     userOrientService: locator<UserOrientService>(),
+    packageInfo: locator<PackageInfo>(),
     cachedUserStore: locator<CachedUserStore>(),
   );
 
@@ -105,7 +107,7 @@ class _SettingsViewState extends State<SettingsView> {
                               child: SettingsSupportSection(
                                 isPremium: isPremium,
                                 onContactTap: _viewModel.goToContact,
-                                onFeedbackTap: () {}, // TODO: Wiredash
+                                onFeedbackTap: _viewModel.sendFeedback,
                                 onRateAppTap: _viewModel.goToRateApp,
                                 onFeatureRequestTap: () =>
                                     _viewModel.openFeatureRequestBoard(context),

@@ -1,0 +1,18 @@
+{
+  "branch_name": "feature/send-feedback-mailto",
+  "completion_review_status": "unknown",
+  "completion_reviewed_at": null,
+  "created_at": "2026-03-20T19:45:10.759444Z",
+  "default_impl": null,
+  "default_review": null,
+  "default_sync": null,
+  "depends_on_epics": [],
+  "id": "fn-78-send-feedback-mailto-via-url-launcher",
+  "next_task": 1,
+  "plan_review_status": "ship",
+  "plan_reviewed_at": "2026-03-20T20:01:05.141468Z",
+  "spec_path": ".flow/specs/fn-78-send-feedback-mailto-via-url-launcher.md",
+  "status": "open",
+  "title": "Send Feedback mailto via url_launcher",
+  "updated_at": "2026-03-20T20:01:05.141680Z"
+}

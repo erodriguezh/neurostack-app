@@ -1,0 +1,16 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-03-20T19:45:55.965064Z",
+  "depends_on": [
+    "fn-78-send-feedback-mailto-via-url-launcher.1"
+  ],
+  "epic": "fn-78-send-feedback-mailto-via-url-launcher",
+  "id": "fn-78-send-feedback-mailto-via-url-launcher.2",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-78-send-feedback-mailto-via-url-launcher.2.md",
+  "status": "todo",
+  "title": "Unit tests for sendFeedback including effective-status regression",
+  "updated_at": "2026-03-20T19:55:05.584928Z"
+}

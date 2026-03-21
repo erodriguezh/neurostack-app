@@ -13,12 +13,18 @@ import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
 import 'package:neurostack/features/auth/domain/auth_state.dart' as auth_state;
 import 'package:neurostack/startup/startup_view_model.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StartupView extends StatefulWidget {
-  const StartupView({super.key, required this.sharedPreferences});
+  const StartupView({
+    super.key,
+    required this.sharedPreferences,
+    required this.packageInfo,
+  });
 
   final SharedPreferences sharedPreferences;
+  final PackageInfo packageInfo;
 
   @override
   State<StartupView> createState() => _StartupViewState();
@@ -27,6 +33,7 @@ class StartupView extends StatefulWidget {
 class _StartupViewState extends State<StartupView> {
   late final StartupViewModel _viewModel = StartupViewModel(
     sharedPreferences: widget.sharedPreferences,
+    packageInfo: widget.packageInfo,
   );
   late final BestRouterConfig _routerConfig;
 

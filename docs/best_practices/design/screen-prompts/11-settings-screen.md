@@ -40,7 +40,7 @@ Layout:
    | Label | Icon | Trailing | Visibility | Action |
    |-------|------|----------|------------|--------|
    | Contact Us | mail | chevron-right | Always | Navigate to /settings/contact |
-   | Send Feedback | message-square | chevron-right | Always | Placeholder (no-op, pending Wiredash) |
+   | Send Feedback | message-square | chevron-right | Always | Launches pre-filled mailto with diagnostic context |
    | Rate the App | star | chevron-right | Always | Navigate to /settings/rate-app via RouterService |
    | Feature Request | lightbulb | chevron-right | Always | Opens UserOrient board |
    | Cancel Subscription | credit-card | external-link | Premium only | Opens platform subscription mgmt |

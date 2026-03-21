@@ -28,13 +28,13 @@ class SettingsSupportSection extends StatelessWidget {
   /// Navigate to the Contact Us page.
   final VoidCallback onContactTap;
 
-  /// Placeholder action for Send Feedback (TODO: Wiredash).
+  /// Launches a pre-filled feedback email.
   final VoidCallback onFeedbackTap;
 
-  /// Placeholder action for Rate the App (TODO: App Store).
+  /// Navigates to the Rate App screen.
   final VoidCallback onRateAppTap;
 
-  /// Placeholder action for Feature Request (TODO: Wiredash).
+  /// Opens the UserOrient board.
   final VoidCallback onFeatureRequestTap;
 
   /// Opens platform subscription management.

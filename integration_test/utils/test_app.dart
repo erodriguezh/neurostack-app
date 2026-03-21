@@ -12,6 +12,7 @@ import 'package:neurostack/features/auth/data/user_bootstrap_service.dart';
 import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
 import 'package:neurostack/paywall/data/revenuecat_client.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 List<Module> buildTestModules({
@@ -23,7 +24,15 @@ List<Module> buildTestModules({
   RevenueCatService? revenueCatService,
   UserRepository? userRepository,
 }) {
-  final modules = buildModules(sharedPreferences: sharedPreferences);
+  final modules = buildModules(
+    sharedPreferences: sharedPreferences,
+    packageInfo: PackageInfo(
+      appName: 'NeuroStack',
+      packageName: 'app.getneurostack',
+      version: '1.0.0',
+      buildNumber: '1',
+    ),
+  );
   final overrides = <Type, Module>{};
 
   if (dataSource != null) {

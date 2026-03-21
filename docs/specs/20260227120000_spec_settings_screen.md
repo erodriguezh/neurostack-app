@@ -79,12 +79,40 @@ This screen has no loading, error, or empty states — all content is static/loc
 | # | Label | Icon | Trailing | Action | Visibility |
 |---|-------|------|----------|--------|------------|
 | 1 | Contact Us | `LucideIcons.mail` | Chevron | Navigate to `/settings/contact` | Always |
-| 2 | Send Feedback | `LucideIcons.messageSquare` | Chevron | Placeholder (no-op, pending Wiredash) | Always |
+| 2 | Send Feedback | `LucideIcons.messageSquare` | Chevron | Opens mailto link via `url_launcher` (see §Send Feedback below) | Always |
 | 3 | Rate the App | `LucideIcons.star` | Chevron | Navigate to `/settings/rate-app` via `RouterService` | Always |
 | 4 | Feature Request | `LucideIcons.lightbulb` | Chevron | Opens UserOrient board | Always |
 | 5 | Cancel Subscription | `LucideIcons.creditCard` | External-link | Opens platform subscription mgmt | Premium only |
 
-> **Note:** The settings section defines 5 tiles total. Contact Us, Send Feedback, Rate the App, and Feature Request are always shown; Cancel Subscription is shown only for premium users. Feature Request is functional via UserOrient. Rate the App navigates to `/settings/rate-app` (in-app review integration). Send Feedback remains a placeholder no-op pending Wiredash integration.
+> **Note:** The settings section defines 5 tiles total. Contact Us, Send Feedback, Rate the App, and Feature Request are always shown; Cancel Subscription is shown only for premium users. Feature Request is functional via UserOrient. Rate the App navigates to `/settings/rate-app` (in-app review integration). Send Feedback opens a pre-filled mailto link via `url_launcher`.
+
+### Send Feedback (mailto)
+
+Tapping "Send Feedback" opens the device's default email client with a pre-filled message.
+
+| Field | Value |
+|-------|-------|
+| To | `feedback@getneurostack.app` |
+| Subject | `NeuroStack Feedback` |
+| Body | App version (`PackageInfo.version`+`buildNumber`), platform (`defaultTargetPlatform.name`), subscription tier (`SubscriptionStatus.name`) |
+
+**Example body:**
+```
+App Version: 1.0.0+1
+Platform: iOS
+Subscription: premiumAnnual
+```
+
+**Behavior:**
+- Composes a `mailto:` URI with `Uri.encodeComponent` query parameters (`subject`, `body`)
+- Launches via `launchUrl` with `LaunchMode.externalApplication` (native) / `LaunchMode.platformDefault` (web)
+- No in-app fallback if no email client is configured — fire-and-forget, consistent with `openSubscriptionManagement()` pattern
+- App version provided by `package_info_plus` via `PackageInfo.fromPlatform()`
+
+**Data sources:**
+- App version: `PackageInfo` from `package_info_plus` (registered as singleton in locator)
+- Platform: `defaultTargetPlatform` (Flutter foundation)
+- Subscription tier: resolved via `SubscriptionStatusResolver.resolveEffectiveStatus()` — same pattern as `openFeatureRequestBoard()`
 
 **Cancel Subscription visibility:** Inverse of upgrade banner — only shown when `subscriptionStatus.isPremium`.
 
@@ -125,7 +153,8 @@ This screen has no loading, error, or empty states — all content is static/loc
 
 ## Dependencies
 
-- `url_launcher` package — needed for Cancel Subscription (opens `https://apps.apple.com/account/subscriptions` on iOS)
+- `url_launcher` package — Cancel Subscription + Send Feedback mailto (already in `pubspec.yaml`)
+- `package_info_plus` — runtime app version for Send Feedback email body
 - `lucide_icons_flutter` — already in `pubspec.yaml`
 - `userorient_flutter: ^2.1.0` — Feature Request board integration
 - `in_app_review` — Rate the App tile navigates to Rate App screen (see [Rate App spec](./202603162012_spec_rate_app_integration.md))
@@ -142,6 +171,7 @@ Screenshot (if present): [`docs/design_screenshots/11-settings.png`](../design_s
 ## Out of Scope
 
 - Restore Purchases tile (not included)
-- Wiredash integration (Send Feedback tile exists as placeholder; wire up when integration is ready)
+- ~~Wiredash integration~~ — replaced by mailto via `url_launcher` (decision 2026-03-20)
+- In-app fallback for missing email client (fire-and-forget for now)
 - Sign out / account deletion
-- App version display
+- App version display in Settings UI (version is only included in feedback email body)

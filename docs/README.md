@@ -79,6 +79,7 @@
 - [Plan: Settings Screen](../plan_settings_screen.md) - Settings tab, upgrade CTA, support tiles, contact page, url_launcher, bottom nav 4th tab
 - [Plan: UserOrient Integration](../integrate_userorient.md) - userorient_flutter SDK, Feature Request tile, UserOrientService, env key, startup init
 - [Plan: Rate App / In-App Review](../plan_app_rating_workflow.md) - in_app_review, InAppReviewService, Rate App screen, programmatic session trigger, Settings tile wiring
+- [Plan: Send Feedback (mailto)](../plan_send_feedback_mailto.md) - package_info_plus, mailto URI, url_launcher, feedback email, diagnostic context, Settings tile wiring
 
 ## Changelogs
 - [Changelog: Home Screen](./changelogs/20260106153900_home_screen_changelog.md) - HomeViewModel, HomeViewState, status banner, protocol card, bottom nav, connectivity, route config

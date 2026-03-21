@@ -10,6 +10,7 @@ import 'package:neurostack/home/home_bottom_tab_coordinator.dart';
 import 'package:neurostack/paywall/domain/entitlement_snapshot.dart';
 import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 import 'package:neurostack/settings/settings_view_model.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../factories/factories.dart';
@@ -59,6 +60,7 @@ void main() {
 
   SettingsViewModel createViewModel({
     Future<bool> Function(Uri, {LaunchMode mode})? launch,
+    PackageInfo? packageInfo,
   }) {
     return SettingsViewModel(
       routerService: mockRouterService,
@@ -66,6 +68,13 @@ void main() {
       subscriptionStatusResolver: resolver,
       revenueCatService: mockRevenueCatService,
       userOrientService: mockUserOrientService,
+      packageInfo: packageInfo ??
+          PackageInfo(
+            appName: 'NeuroStack',
+            packageName: 'app.getneurostack',
+            version: '1.0.0',
+            buildNumber: '1',
+          ),
       tabCoordinator: mockTabCoordinator,
       launch: launch ?? fakeLaunch,
     );
@@ -375,6 +384,191 @@ void main() {
             isPaying: any(named: 'isPaying'),
           ),
         );
+      });
+    });
+
+    group('sendFeedback', () {
+      test('builds mailto URI with correct scheme, path, subject, and body',
+          () async {
+        final user = UserFactory.createPremiumMonthly();
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+
+        final info = PackageInfo(
+          appName: 'NeuroStack',
+          packageName: 'app.getneurostack',
+          version: '1.2.3',
+          buildNumber: '42',
+        );
+
+        final vm = createViewModel(packageInfo: info);
+        addTearDown(vm.dispose);
+
+        await vm.sendFeedback();
+
+        expect(launchCalls, hasLength(1));
+        final uri = launchCalls.first.$1;
+
+        expect(uri.scheme, 'mailto');
+        expect(uri.path, 'feedback@getneurostack.app');
+
+        // Decode query manually (custom encoder, not standard queryParameters)
+        final params = Uri.splitQueryString(uri.query);
+        expect(params['subject'], 'NeuroStack Feedback');
+
+        final body = params['body']!;
+        expect(body, contains('App Version: 1.2.3+42'));
+        expect(body, contains('Platform:'));
+        expect(body, contains('Subscription: premiumMonthly'));
+      });
+
+      test('encodes spaces as %20 not + (Dart SDK #43838 regression)',
+          () async {
+        final user = UserFactory.createPremiumMonthly();
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+
+        final vm = createViewModel();
+        addTearDown(vm.dispose);
+
+        await vm.sendFeedback();
+
+        expect(launchCalls, hasLength(1));
+        final rawQuery = launchCalls.first.$1.query;
+
+        // subject contains a space: "NeuroStack Feedback"
+        expect(rawQuery, contains('NeuroStack%20Feedback'));
+        expect(rawQuery, isNot(contains('NeuroStack+Feedback')));
+      });
+
+      test(
+          'effective-status regression: DB free + RC premiumMonthly → body contains premiumMonthly',
+          () async {
+        final user = UserFactory.create(
+          subscriptionStatus: SubscriptionStatus.free,
+        );
+        final snapshot = EntitlementSnapshotFactory.activePaidMonthly(
+          userId: user.id,
+        );
+        when(
+          () => mockRevenueCatService.entitlementSnapshot,
+        ).thenReturn(ValueNotifier(snapshot));
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+
+        final vm = createViewModel();
+        addTearDown(vm.dispose);
+
+        await vm.sendFeedback();
+
+        expect(launchCalls, hasLength(1));
+        final params = Uri.splitQueryString(launchCalls.first.$1.query);
+        final body = params['body']!;
+        expect(body, contains('Subscription: premiumMonthly'));
+        expect(body, isNot(contains('Subscription: free')));
+      });
+
+      test('calls launch with LaunchMode.externalApplication', () async {
+        final user = UserFactory.create();
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+
+        final vm = createViewModel();
+        addTearDown(vm.dispose);
+
+        await vm.sendFeedback();
+
+        expect(launchCalls, hasLength(1));
+        expect(launchCalls.first.$2, LaunchMode.externalApplication);
+      });
+
+      test('is a no-op when user is not authenticated', () async {
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(const Unauthenticated()));
+
+        final vm = createViewModel();
+        addTearDown(vm.dispose);
+
+        await vm.sendFeedback();
+
+        expect(launchCalls, isEmpty);
+      });
+
+      test('works with AuthenticatedOffline', () async {
+        final user = UserFactory.createPremiumMonthly();
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOffline(user)));
+
+        final info = PackageInfo(
+          appName: 'NeuroStack',
+          packageName: 'app.getneurostack',
+          version: '2.0.0',
+          buildNumber: '99',
+        );
+
+        final vm = createViewModel(packageInfo: info);
+        addTearDown(vm.dispose);
+
+        await vm.sendFeedback();
+
+        expect(launchCalls, hasLength(1));
+        final uri = launchCalls.first.$1;
+        expect(uri.scheme, 'mailto');
+        expect(uri.path, 'feedback@getneurostack.app');
+
+        final params = Uri.splitQueryString(uri.query);
+        expect(params['body'], contains('App Version: 2.0.0+99'));
+      });
+
+      test('ignores stale snapshot for different user and falls back to DB status',
+          () async {
+        final user = UserFactory.create(
+          subscriptionStatus: SubscriptionStatus.free,
+        );
+        // Snapshot belongs to a different user — resolver must ignore it
+        final staleSnapshot = EntitlementSnapshotFactory.activePaidMonthly(
+          userId: 'different-user-id',
+        );
+        when(
+          () => mockRevenueCatService.entitlementSnapshot,
+        ).thenReturn(ValueNotifier(staleSnapshot));
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+
+        final vm = createViewModel();
+        addTearDown(vm.dispose);
+
+        await vm.sendFeedback();
+
+        expect(launchCalls, hasLength(1));
+        final params = Uri.splitQueryString(launchCalls.first.$1.query);
+        final body = params['body']!;
+        expect(body, contains('Subscription: free'));
+        expect(body, isNot(contains('Subscription: premiumMonthly')));
+      });
+
+      test('completes normally when launch throws', () async {
+        final user = UserFactory.create();
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+
+        final vm = createViewModel(
+          launch: (uri, {mode = LaunchMode.platformDefault}) async {
+            throw Exception('launch failed');
+          },
+        );
+        addTearDown(vm.dispose);
+
+        // Should not propagate the exception
+        await expectLater(vm.sendFeedback(), completes);
       });
     });
 

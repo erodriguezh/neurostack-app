@@ -254,3 +254,46 @@ INV-P6: New users MUST start with 'free' status (not 'trial')
 → Enforcement: Default subscription_status = 'free' in user profile
 → Test: Fresh install → user.subscriptionStatus == 'free'
 ```
+
+## **Settings & Support Terms** (new)
+
+**Settings Screen** (noun)
+
+- Definition: The 4th bottom-navigation tab exposing account management and support actions
+- Properties: Upgrade Banner (conditional), Support Section (5 tiles), subscription-aware layout
+- UI Label: "Settings"
+
+**Support Tile** (noun)
+
+- Definition: A tappable row in the Settings "Support & Resources" section that triggers an action
+- Properties: Icon (Lucide), Label, Trailing icon (chevron or external-link), Tap callback
+- Examples: Contact Us, Send Feedback, Rate the App, Feature Request, Cancel Subscription
+- UI Label: Varies per tile
+
+**Send Feedback** (action)
+
+- Definition: Opens the device's default email client with a pre-filled mailto link addressed to the support inbox
+- Properties: To (`feedback@getneurostack.app`), Subject ("NeuroStack Feedback"), Body (app version, platform, subscription tier)
+- Constraint: No in-app fallback if no email client is configured
+- UI Label: "Send Feedback"
+- Note: Replaces the originally-planned Wiredash integration
+
+**Feedback Email** (noun)
+
+- Definition: The pre-composed email opened via `url_launcher` when the user taps Send Feedback
+- Properties: Recipient address, subject line, body with diagnostic context (app version, platform, subscription status)
+- Example body: "App Version: 1.0.0+1\nPlatform: iOS\nSubscription: premiumAnnual"
+
+## **Settings & Support Invariants** (new)
+
+```sh
+INV-SET1: Send Feedback MUST open a mailto link with diagnostic context
+→ Rationale: Support needs device/subscription context to triage feedback
+→ Enforcement: SettingsViewModel composes URI with app version, platform, subscription status
+→ Test: Tap Send Feedback → mailto URI contains version, platform, and subscription tier
+
+INV-SET2: Send Feedback MUST NOT provide an in-app fallback
+→ Rationale: Scope decision — no fallback for now; revisit if user reports show email-client absence is common
+→ Enforcement: Fire-and-forget launchUrl call
+→ Test: If no email client → system handles error; app does not intervene
+```

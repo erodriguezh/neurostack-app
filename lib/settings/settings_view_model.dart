@@ -12,6 +12,7 @@ import 'package:neurostack/features/auth/domain/auth_state.dart';
 import 'package:neurostack/home/home_bottom_tab_coordinator.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// ViewModel for SettingsView.
@@ -27,6 +28,7 @@ class SettingsViewModel
     required SubscriptionStatusResolver subscriptionStatusResolver,
     required RevenueCatService revenueCatService,
     required UserOrientService userOrientService,
+    required PackageInfo packageInfo,
     CachedUserStore? cachedUserStore,
     HomeBottomTabCoordinator? tabCoordinator,
     Future<bool> Function(Uri, {LaunchMode mode})? launch,
@@ -35,6 +37,7 @@ class SettingsViewModel
        _resolver = subscriptionStatusResolver,
        _revenueCatService = revenueCatService,
        _userOrientService = userOrientService,
+       _packageInfo = packageInfo,
        _cachedUserStore = cachedUserStore,
        _tabCoordinator =
            tabCoordinator ??
@@ -48,6 +51,7 @@ class SettingsViewModel
   final SubscriptionStatusResolver _resolver;
   final RevenueCatService _revenueCatService;
   final UserOrientService _userOrientService;
+  final PackageInfo _packageInfo;
   final CachedUserStore? _cachedUserStore;
   final HomeBottomTabCoordinator _tabCoordinator;
   final Future<bool> Function(Uri, {LaunchMode mode}) _launch;
@@ -130,6 +134,47 @@ class SettingsViewModel
     _userOrientService.openBoard(context, userId: user.id, isPaying: isPaying);
   }
 
+  /// Sends feedback by opening the device email client with a pre-filled
+  /// mailto link containing diagnostic context.
+  ///
+  /// No-ops when the user is not authenticated.
+  Future<void> sendFeedback() async {
+    final state = _authService.authState.value;
+    final user = switch (state) {
+      AuthenticatedOnline(user: final u) => u,
+      AuthenticatedOffline(user: final u) => u,
+      _ => null,
+    };
+    if (user == null) return;
+
+    final effectiveStatus = _resolver.resolveEffectiveStatus(
+      user: user,
+      snapshot: _revenueCatService.entitlementSnapshot.value,
+    );
+
+    final uri = Uri(
+      scheme: 'mailto',
+      path: 'feedback@getneurostack.app',
+      query: _encodeQueryParameters({
+        'subject': 'NeuroStack Feedback',
+        'body':
+            'App Version: ${_packageInfo.version}+${_packageInfo.buildNumber}\n'
+            'Platform: ${defaultTargetPlatform.name}\n'
+            'Subscription: ${effectiveStatus.name}',
+      }),
+    );
+
+    const mode = kIsWeb
+        ? LaunchMode.platformDefault
+        : LaunchMode.externalApplication;
+
+    try {
+      await _launch(uri, mode: mode);
+    } catch (_) {
+      // Best-effort: launchUrl can throw on some platforms/embedders.
+    }
+  }
+
   /// Opens the platform-specific subscription management page.
   ///
   /// On iOS/macOS, opens the App Store subscriptions page.
@@ -161,5 +206,18 @@ class SettingsViewModel
     _isDisposed = true;
     disposeEntitlementListener();
     disposePremiumAwareness();
+  }
+
+  /// Encodes query parameters for a mailto URI using [Uri.encodeComponent]
+  /// per value instead of [Uri.queryParameters] which encodes spaces as `+`.
+  ///
+  /// See: https://github.com/dart-lang/sdk/issues/43838
+  static String _encodeQueryParameters(Map<String, String> params) {
+    return params.entries
+        .map(
+          (e) =>
+              '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}',
+        )
+        .join('&');
   }
 }

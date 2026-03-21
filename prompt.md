@@ -1,5 +1,5 @@
 study docs/README.md
-work on task fn-77-rate-app-in-app-review-integration.4
+work on task fn-78-send-feedback-mailto-via-url-launcher.4
 
 MCP available
 - dart
