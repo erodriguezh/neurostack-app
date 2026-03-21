@@ -1,5 +1,5 @@
 study docs/README.md
-work on task fn-79-fix-empty-white-startup-screen.1
+work on task fn-79-fix-empty-white-startup-screen.2
 
 MCP available
 - dart

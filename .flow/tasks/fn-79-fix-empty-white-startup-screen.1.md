@@ -52,9 +52,8 @@ Make all native launch surfaces dark (#030303) on both Android and iOS to match 
 - [ ] Visual verification: cold start on Android pre-12, Android 12+, and iOS shows no white flash (uninstall + reinstall to clear caches)
 
 ## Done summary
-TBD
-
+Made all native launch surfaces dark (#030303) on both Android and iOS: defined color once in colors.xml, updated all drawable/style resources for day/night/v31, added Android 12+ setOnExitAnimationListener in MainActivity.kt, and updated both iOS storyboard backgrounds from white to dark.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: d5e219d3956401c53f85ba1d76bd107cbba864e2
+- Tests: flutter analyze
 - PRs:

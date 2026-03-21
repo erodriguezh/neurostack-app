@@ -46,16 +46,13 @@ class AppInitializationError extends AppState {
 class StartupViewModel {
   StartupViewModel({
     required SharedPreferences sharedPreferences,
-    required PackageInfo packageInfo,
     LoggingAbstraction? loggingAbstraction,
   }) : _sharedPreferences = sharedPreferences,
-       _packageInfo = packageInfo,
        _loggingAbstraction = loggingAbstraction ?? LoggingAbstraction();
 
   final appStateNotifier = ValueNotifier<AppState>(const InitializingApp());
 
   final SharedPreferences _sharedPreferences;
-  final PackageInfo _packageInfo;
   final LoggingAbstraction _loggingAbstraction;
   StreamSubscription<LogRecord>? loggingSubscription;
 
@@ -64,12 +61,24 @@ class StartupViewModel {
   Future<void> initializeApp() async {
     appStateNotifier.value = const InitializingApp();
     try {
+      // Phase 1: Register core modules synchronously. RouterService and other
+      // startup-critical modules are available immediately after this call.
+      // This is required because StartupView.initState() calls
+      // locator<RouterService>() synchronously right after initializeApp().
       locator.registerMany(
-        buildModules(
-          sharedPreferences: _sharedPreferences,
-          packageInfo: _packageInfo,
-        ),
+        buildModules(sharedPreferences: _sharedPreferences),
       );
+
+      // Phase 2: Fetch PackageInfo asynchronously (safe — RouterService is
+      // already registered above, so the sync locator call in initState works).
+      final packageInfo = await PackageInfo.fromPlatform();
+
+      // Phase 3: Register PackageInfo as a separate module. Calling
+      // registerMany twice with disjoint types is safe per ModuleLocator.
+      locator.registerMany([
+        Module<PackageInfo>(builder: () => packageInfo, lazy: false),
+      ]);
+
       loggingSubscription?.cancel();
       loggingSubscription = _loggingAbstraction.initializeLogging();
       locator<AppLifecycleService>().attachStartupViewModel(this);

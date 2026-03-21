@@ -4,18 +4,15 @@ import 'package:neurostack/core/utils/data_source/data_source_init.dart';
 import 'package:neurostack/core/utils/locator.dart';
 import 'package:neurostack/core/utils/navigation/url_strategy/url_strategy.dart';
 import 'package:neurostack/startup/startup_view.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initDataSource();
   final sharedPreferences = await SharedPreferences.getInstance();
-  final packageInfo = await PackageInfo.fromPlatform();
   configureUrlStrategy();
   runApp(_AppLifecycleObserver(
     sharedPreferences: sharedPreferences,
-    packageInfo: packageInfo,
   ));
 }
 
@@ -27,11 +24,9 @@ void main() async {
 class _AppLifecycleObserver extends StatefulWidget {
   const _AppLifecycleObserver({
     required this.sharedPreferences,
-    required this.packageInfo,
   });
 
   final SharedPreferences sharedPreferences;
-  final PackageInfo packageInfo;
 
   @override
   State<_AppLifecycleObserver> createState() => _AppLifecycleObserverState();
@@ -69,7 +64,6 @@ class _AppLifecycleObserverState extends State<_AppLifecycleObserver>
   Widget build(BuildContext context) {
     return StartupView(
       sharedPreferences: widget.sharedPreferences,
-      packageInfo: widget.packageInfo,
     );
   }
 }
