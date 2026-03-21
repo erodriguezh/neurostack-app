@@ -104,7 +104,7 @@ Subscription: premiumAnnual
 ```
 
 **Behavior:**
-- Composes a `mailto:` URI with `Uri.encodeFull` query parameters (`subject`, `body`)
+- Composes a `mailto:` URI with `Uri.encodeComponent` query parameters (`subject`, `body`)
 - Launches via `launchUrl` with `LaunchMode.externalApplication` (native) / `LaunchMode.platformDefault` (web)
 - No in-app fallback if no email client is configured — fire-and-forget, consistent with `openSubscriptionManagement()` pattern
 - App version provided by `package_info_plus` via `PackageInfo.fromPlatform()`

@@ -274,7 +274,6 @@ See: [`docs/best_practices/design/screen-prompts/12-rate-app-screen.md`](../best
 - Analytics events (deferred to future analytics epic -- leave `// TODO(analytics)` comments)
 - Cooldown timer between prompts (thresholds are sufficient)
 - Server-side review-request tracking (SharedPreferences local-only for now)
-- "Send Feedback" tile (remains pending Wiredash integration)
 - "Quick Rating" counting against the programmatic threshold tracker (independent flows)
 - Web/desktop native review support (service is inert, fallback to `url_launcher`)
 

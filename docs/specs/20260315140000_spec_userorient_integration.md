@@ -144,7 +144,6 @@ No new UI elements. The "Feature Request" tile already exists in `lib/settings/w
 
 ## Out of Scope
 
-- "Send Feedback" tile (remains pending Wiredash integration — exists in code as placeholder with no-op callback at `settings_support_section.dart:57-63`)
 - "Rate the App" tile (remains pending App Store rating integration — exists in code as placeholder with no-op callback at `settings_support_section.dart:64-69`)
 - Web / desktop platform support — `userorient_flutter` supports iOS and Android only. On unsupported targets (`kIsWeb` / non-iOS/Android), `UserOrientService` is an explicit no-op: `init()` returns early, `openBoard()` and `clearCache()` guard on `_isInitialized`. No conditional imports or stub classes needed.
 - `UserOrient.setDataCollection()` configuration
