@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-03-21T19:22:14.133595Z",
+  "depends_on": [],
+  "epic": "fn-79-fix-empty-white-startup-screen",
+  "id": "fn-79-fix-empty-white-startup-screen.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-79-fix-empty-white-startup-screen.1.md",
+  "status": "todo",
+  "title": "Make native launch surfaces dark on Android and iOS",
+  "updated_at": "2026-03-21T19:32:56.443561Z"
+}

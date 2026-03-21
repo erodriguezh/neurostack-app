@@ -12,6 +12,7 @@ import 'package:neurostack/core/utils/l10n/translate.dart';
 import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
 import 'package:neurostack/features/auth/domain/auth_state.dart' as auth_state;
+import 'package:neurostack/startup/splash_screen.dart';
 import 'package:neurostack/startup/startup_view_model.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -66,7 +67,7 @@ class _StartupViewState extends State<StartupView> {
           builder: (context, child) {
             Translate.init(context);
             return switch (state) {
-              InitializingApp() => _SplashView(),
+              InitializingApp() => const SplashScreen(),
               AppInitialized() => InternalNotificationListener(
                 child: _AuthStatusShell(child: child!),
               ),
@@ -126,13 +127,6 @@ class _StartupErrorView extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class _SplashView extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: CircularProgressIndicator()));
   }
 }
 

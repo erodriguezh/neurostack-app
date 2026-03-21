@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-03-21T19:22:14.270168Z",
+  "depends_on": [],
+  "epic": "fn-79-fix-empty-white-startup-screen",
+  "id": "fn-79-fix-empty-white-startup-screen.2",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-79-fix-empty-white-startup-screen.2.md",
+  "status": "todo",
+  "title": "Defer PackageInfo.fromPlatform() after runApp()",
+  "updated_at": "2026-03-21T19:33:10.330242Z"
+}
