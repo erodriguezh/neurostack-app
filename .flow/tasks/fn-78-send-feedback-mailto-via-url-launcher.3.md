@@ -44,9 +44,8 @@ Remove all stale Wiredash references from code doc comments and documentation fi
 - [ ] Historical replacement note in settings spec Out of Scope preserved (struck-through with rationale)
 - [ ] `flutter analyze` clean
 ## Done summary
-TBD
-
+Cleaned up all stale Wiredash references: updated 3 callback doc comments in settings_support_section.dart to describe actual widget contracts, updated 11-settings-screen.md tile table for Send Feedback mailto action, removed "Send Feedback pending Wiredash" bullets from UserOrient and Rate App specs, and fixed Uri.encodeFull to Uri.encodeComponent in the settings spec. Historical struck-through Wiredash note preserved.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 98da0d7e8b716ea7cc8ade93c849afe632671431
+- Tests: flutter analyze, flutter test test/settings/
 - PRs:

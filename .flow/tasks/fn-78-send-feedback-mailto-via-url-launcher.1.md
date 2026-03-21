@@ -60,9 +60,8 @@ Add `package_info_plus` as a direct dependency, thread `PackageInfo` through the
 - [ ] `flutter analyze` clean
 - [ ] `flutter test` passes (all existing tests green)
 ## Done summary
-TBD
-
+Added package_info_plus as a direct dependency, threaded PackageInfo through the full DI bootstrap chain (main -> StartupView -> StartupViewModel -> buildModules), implemented sendFeedback() on SettingsViewModel with correct mailto URI encoding (Uri.encodeComponent for %20), and wired the callback in SettingsView replacing the Wiredash placeholder.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 9586c08f39eee36aa2744e79df1fc083429c007e
+- Tests: flutter analyze, flutter test
 - PRs:

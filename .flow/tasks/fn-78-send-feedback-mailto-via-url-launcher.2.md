@@ -9,11 +9,12 @@ Add unit tests for `sendFeedback()` in `settings_view_model_test.dart`, followin
 
 ## Approach
 
-- Follow the test structure of `openFeatureRequestBoard` group at `settings_view_model_test.dart:268-379`
-- Use existing `launchCalls` list to capture `(Uri, LaunchMode)` tuples (`settings_view_model_test.dart:30`)
-- Use existing `fakeLaunch` injection via constructor (`settings_view_model_test.dart:33-36`)
-- Extend `createViewModel()` factory at `settings_view_model_test.dart:60-72` to accept `PackageInfo` param
-- Create `PackageInfo` directly via public constructor (no mock needed): `PackageInfo(appName: 'Neurostack', packageName: 'com.example', version: '1.2.3', buildNumber: '42')`
+- Follow the test structure of `openFeatureRequestBoard` group at `settings_view_model_test.dart:277-388`
+- Use existing `launchCalls` list to capture `(Uri, LaunchMode)` tuples (`settings_view_model_test.dart:31`)
+- Use existing `fakeLaunch` injection via constructor (`settings_view_model_test.dart:34-37`)
+- `createViewModel()` factory at `settings_view_model_test.dart:61-79` already accepts optional `PackageInfo` param (done in task .1) — no extension needed
+- Create `PackageInfo` directly via public constructor (no mock needed): `PackageInfo(appName: 'NeuroStack', packageName: 'app.getneurostack', version: '1.2.3', buildNumber: '42')`
+<!-- Updated by plan-sync: fn-78-send-feedback-mailto-via-url-launcher.1 already extended createViewModel with PackageInfo; line numbers shifted -->
 - Use `UserFactory` and `EntitlementSnapshotFactory` from `test/factories/`
 
 ## Key context
@@ -31,9 +32,16 @@ Add unit tests for `sendFeedback()` in `settings_view_model_test.dart`, followin
 - [ ] Test: no-op when `AuthState` is `Unauthenticated` (launch not called)
 - [ ] All tests pass: `flutter test test/settings/settings_view_model_test.dart`
 ## Done summary
-TBD
-
+Added 8 unit tests for `sendFeedback()` in `settings_view_model_test.dart`:
+1. mailto URI structure (scheme, path, subject, body with version/platform/subscription)
+2. `%20` encoding regression (Dart SDK #43838)
+3. Effective-status regression (DB `free` + RC `premiumMonthly` → body shows `premiumMonthly`)
+4. `LaunchMode.externalApplication` assertion
+5. Unauthenticated no-op (launch not called)
+6. `AuthenticatedOffline` support
+7. Stale snapshot for different user falls back to DB status
+8. Launcher failure (try/catch) completes normally
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 5840d9d
+- Tests: flutter test test/settings/settings_view_model_test.dart — 28 pass (8 new)
 - PRs:
