@@ -135,8 +135,10 @@ class StartupViewModel {
       }
     } catch (e, st) {
       // Ensure the splash is visible for the minimum duration even on errors.
-      // Future.wait rejects eagerly when _bootstrap() throws, so we must
-      // explicitly await the timer before transitioning to the error state.
+      // Future.wait collects all errors by default (eagerError: false), but
+      // since only _bootstrap() can throw, the catch fires after the timer
+      // completes anyway. We still await splashTimer explicitly as a safety
+      // net in case the timer future hasn't resolved yet.
       await splashTimer;
       appStateNotifier.value = AppInitializationError(e, st);
     }
