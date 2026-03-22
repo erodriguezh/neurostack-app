@@ -60,16 +60,11 @@ void main() {
       });
 
       test(
-        'initializeApp transitions through InitializingApp to AppInitialized on success',
+        'initializeApp transitions to AppInitialized on successful bootstrap',
         () async {
-          // Arrange: set up completers to resolve immediately.
-          final prefs = await SharedPreferences.getInstance();
-
           final vm = StartupViewModel(
             loggingAbstraction: mockLogging,
-            dataSourceInitializer: () async {},
-            sharedPreferencesLoader: () async => prefs,
-            packageInfoLoader: () async => fakePackageInfo,
+            bootstrapOverride: () async => BootstrapResult.initialized,
           );
 
           final states = <AppState>[];
@@ -77,15 +72,31 @@ void main() {
             states.add(vm.appStateNotifier.value);
           });
 
-          // Act: since _bootstrap calls locator.registerMany(buildModules())
-          // which registers real services, and those services need real
-          // Supabase etc., this will fail at the locator level. Instead,
-          // we verify the error path catches and transitions to error.
           await vm.initializeApp();
 
-          // Assert: bootstrap will fail because buildModules depends on
-          // real infrastructure we haven't set up. Verify error transition.
-          expect(states.last, isA<AppInitializationError>());
+          // Should transition: InitializingApp -> AppInitialized.
+          expect(states.last, isA<AppInitialized>());
+
+          vm.dispose();
+        },
+      );
+
+      test(
+        'initializeApp transitions to OfflineNoUserState when auth is offline-no-user',
+        () async {
+          final vm = StartupViewModel(
+            loggingAbstraction: mockLogging,
+            bootstrapOverride: () async => BootstrapResult.offlineNoUser,
+          );
+
+          final states = <AppState>[];
+          vm.appStateNotifier.addListener(() {
+            states.add(vm.appStateNotifier.value);
+          });
+
+          await vm.initializeApp();
+
+          expect(states.last, isA<OfflineNoUserState>());
 
           vm.dispose();
         },
@@ -223,6 +234,60 @@ void main() {
             // (already resolved), so error emits immediately.
             async.elapse(const Duration(milliseconds: 100));
             expect(vm.appStateNotifier.value, isA<AppInitializationError>());
+
+            vm.dispose();
+          });
+        },
+      );
+
+      test(
+        'AppInitialized not emitted before minSplashDuration (success path)',
+        () {
+          fakeAsync((async) {
+            StartupViewModel.minSplashDuration =
+                const Duration(milliseconds: 500);
+
+            final vm = StartupViewModel(
+              loggingAbstraction: mockLogging,
+              bootstrapOverride: () async => BootstrapResult.initialized,
+            );
+
+            vm.initializeApp();
+
+            // At 200ms, state should still be InitializingApp.
+            async.elapse(const Duration(milliseconds: 200));
+            expect(vm.appStateNotifier.value, isA<InitializingApp>());
+
+            // At 500ms, splash timer completes and state becomes AppInitialized.
+            async.elapse(const Duration(milliseconds: 300));
+            expect(vm.appStateNotifier.value, isA<AppInitialized>());
+
+            vm.dispose();
+          });
+        },
+      );
+
+      test(
+        'OfflineNoUserState not emitted before minSplashDuration',
+        () {
+          fakeAsync((async) {
+            StartupViewModel.minSplashDuration =
+                const Duration(milliseconds: 500);
+
+            final vm = StartupViewModel(
+              loggingAbstraction: mockLogging,
+              bootstrapOverride: () async => BootstrapResult.offlineNoUser,
+            );
+
+            vm.initializeApp();
+
+            // At 200ms, still initializing.
+            async.elapse(const Duration(milliseconds: 200));
+            expect(vm.appStateNotifier.value, isA<InitializingApp>());
+
+            // At 500ms, transitions to offline.
+            async.elapse(const Duration(milliseconds: 300));
+            expect(vm.appStateNotifier.value, isA<OfflineNoUserState>());
 
             vm.dispose();
           });

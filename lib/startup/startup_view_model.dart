@@ -45,7 +45,11 @@ class AppInitializationError extends AppState {
 
 /// Typed result of the bootstrap sequence, used to decide routing after
 /// the minimum splash display time elapses.
-enum _BootstrapResult {
+///
+/// Visible for testing so unit tests can inject a fake bootstrap function
+/// that returns a known result without needing the full DI chain.
+@visibleForTesting
+enum BootstrapResult {
   /// All services initialized successfully and user is reachable.
   initialized,
 
@@ -61,11 +65,13 @@ class StartupViewModel {
     @visibleForTesting Future<SharedPreferences> Function()?
         sharedPreferencesLoader,
     @visibleForTesting Future<PackageInfo> Function()? packageInfoLoader,
+    @visibleForTesting Future<BootstrapResult> Function()? bootstrapOverride,
   }) : _loggingAbstraction = loggingAbstraction ?? LoggingAbstraction(),
        _initDataSource = dataSourceInitializer ?? initDataSource,
        _getSharedPreferences =
            sharedPreferencesLoader ?? SharedPreferences.getInstance,
-       _getPackageInfo = packageInfoLoader ?? PackageInfo.fromPlatform;
+       _getPackageInfo = packageInfoLoader ?? PackageInfo.fromPlatform,
+       _bootstrapOverride = bootstrapOverride;
 
   final appStateNotifier = ValueNotifier<AppState>(const InitializingApp());
 
@@ -73,6 +79,7 @@ class StartupViewModel {
   final Future<void> Function() _initDataSource;
   final Future<SharedPreferences> Function() _getSharedPreferences;
   final Future<PackageInfo> Function() _getPackageInfo;
+  final Future<BootstrapResult> Function()? _bootstrapOverride;
 
   StreamSubscription<LogRecord>? loggingSubscription;
 
@@ -107,31 +114,37 @@ class StartupViewModel {
 
     try {
       final results = await Future.wait<Object?>([
-        _bootstrap(),
+        _bootstrapOverride?.call() ?? _bootstrap(),
         splashTimer,
       ]);
 
-      final result = results[0] as _BootstrapResult;
+      final result = results[0] as BootstrapResult;
 
-      if (result == _BootstrapResult.offlineNoUser) {
+      if (result == BootstrapResult.offlineNoUser) {
         appStateNotifier.value = const OfflineNoUserState();
         return;
       }
 
-      // _BootstrapResult.initialized — finish routing.
-      // Initialize session sync service and trigger startup sync
-      final syncService = locator<SessionSyncService>();
-      syncService.init();
-      unawaited(syncService.sync());
+      // BootstrapResult.initialized — finish routing.
+      // When bootstrapOverride is set, skip service calls (tests handle
+      // their own locator state). In production, _bootstrap() has already
+      // registered all modules.
+      if (_bootstrapOverride == null) {
+        final syncService = locator<SessionSyncService>();
+        syncService.init();
+        unawaited(syncService.sync());
+      }
 
       appStateNotifier.value = const AppInitialized();
 
-      final routerService = locator<RouterService>();
-      final authService = locator<AuthService>();
-      if (routerService.shouldShowOnboarding()) {
-        routerService.replaceAll([Path(name: '/onboarding')]);
-      } else if (authService.authState.value is auth_state.Unauthenticated) {
-        routerService.replaceAll([Path(name: '/auth')]);
+      if (_bootstrapOverride == null) {
+        final routerService = locator<RouterService>();
+        final authService = locator<AuthService>();
+        if (routerService.shouldShowOnboarding()) {
+          routerService.replaceAll([Path(name: '/onboarding')]);
+        } else if (authService.authState.value is auth_state.Unauthenticated) {
+          routerService.replaceAll([Path(name: '/auth')]);
+        }
       }
     } catch (e, st) {
       // Ensure the splash is visible for the minimum duration even on errors.
@@ -146,7 +159,7 @@ class StartupViewModel {
 
   /// Core bootstrap sequence: initializes all services and returns a typed
   /// result indicating whether the app is ready or offline without a user.
-  Future<_BootstrapResult> _bootstrap() async {
+  Future<BootstrapResult> _bootstrap() async {
     // Phase 1: Initialize data source (Supabase) — idempotent via completer.
     await _initDataSource();
 
@@ -207,10 +220,10 @@ class StartupViewModel {
     await authService.init(); // This may trigger identify() via rehydration
 
     if (authService.authState.value is auth_state.OfflineNoUser) {
-      return _BootstrapResult.offlineNoUser;
+      return BootstrapResult.offlineNoUser;
     }
 
-    return _BootstrapResult.initialized;
+    return BootstrapResult.initialized;
   }
 
   Future<void> retryInitialization() async {

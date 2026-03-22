@@ -434,81 +434,88 @@ void main() {
 **Create:** `integration_test/utils/test_app.dart`:
 
 ```dart
+// integration_test/utils/test_app.dart (actual implementation)
 import 'package:flutter/material.dart';
-import 'package:neurostack/core/utils/locator.dart';
 import 'package:neurostack/config/locator_config.dart';
-import 'package:neurostack/startup/startup_view.dart';
+import 'package:neurostack/core/ui/app_theme.dart';
+import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
+import 'package:neurostack/core/utils/data_source/data_source_abstraction.dart';
+import 'package:neurostack/core/utils/l10n/app_localizations.dart';
+import 'package:neurostack/core/utils/l10n/translate.dart';
+import 'package:neurostack/core/utils/locator.dart';
+import 'package:neurostack/core/utils/navigation/best_router.dart';
+import 'package:neurostack/core/utils/navigation/router_service.dart';
+import 'package:neurostack/features/auth/data/user_bootstrap_service.dart';
+import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
+import 'package:neurostack/paywall/data/revenuecat_client.dart';
+import 'package:neurostack/paywall/data/revenuecat_service.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../mocks/mock_data_sources.dart';
 
-/// Test module builder that overrides real services with mocks
+/// Builds test modules by starting with production buildModules() and
+/// overlaying type-safe overrides. Also registers a fake PackageInfo
+/// (no longer part of buildModules).
 List<Module> buildTestModules({
-  MockAuthService? authService,
-  MockUserRemoteDataSource? userDataSource,
-  MockProtocolRemoteDataSource? protocolDataSource,
-  MockSessionRemoteDataSource? sessionDataSource,
-  MockConnectivityService? connectivityService,
+  required SharedPreferences sharedPreferences,
+  DataSourceAbstraction? dataSource,
+  UserBootstrapService? userBootstrapService,
+  ConnectivityService? connectivityService,
+  RevenueCatClient? revenueCatClient,
+  RevenueCatService? revenueCatService,
+  UserRepository? userRepository,
 }) {
-  // Start with default modules
-  final modules = buildModules();
-
-  // Create overrides map
+  final modules = buildModules(sharedPreferences: sharedPreferences);
   final overrides = <Type, Module>{};
 
-  if (authService != null) {
-    overrides[AuthService] = Module<AuthService>(() => authService, lazy: false);
-  }
-  if (userDataSource != null) {
-    overrides[UserRemoteDataSource] = Module<UserRemoteDataSource>(
-      () => userDataSource,
-      lazy: true,
+  if (dataSource != null) {
+    overrides[DataSourceAbstraction] = Module<DataSourceAbstraction>(
+      builder: () => dataSource, lazy: false,
     );
   }
-  if (protocolDataSource != null) {
-    overrides[ProtocolRemoteDataSource] = Module<ProtocolRemoteDataSource>(
-      () => protocolDataSource,
-      lazy: true,
-    );
-  }
-  if (sessionDataSource != null) {
-    overrides[SessionRemoteDataSource] = Module<SessionRemoteDataSource>(
-      () => sessionDataSource,
-      lazy: true,
-    );
-  }
-  if (connectivityService != null) {
-    overrides[ConnectivityService] = Module<ConnectivityService>(
-      () => connectivityService,
-      lazy: false,
-    );
-  }
+  // ... other override blocks follow the same pattern ...
 
-  // Replace modules with overrides
-  return modules.map((m) {
-    final override = overrides[m.runtimeType];
-    return override ?? m;
-  }).toList();
+  final result = modules
+      .map((module) => overrides[module.type] ?? module)
+      .toList();
+
+  // PackageInfo is registered separately (no longer in buildModules)
+  result.add(Module<PackageInfo>(
+    builder: () => PackageInfo(
+      appName: 'NeuroStack', packageName: 'app.getneurostack',
+      version: '1.0.0', buildNumber: '1',
+    ),
+    lazy: false,
+  ));
+
+  return result;
 }
 
-/// Creates a test app with mocked dependencies.
+/// Creates a test app that bypasses StartupView entirely.
+/// Integration tests go router-first: register modules, then build
+/// MaterialApp.router directly with BestRouterConfig.
 ///
-/// NOTE: Integration tests bypass StartupView entirely and build
-/// MaterialApp.router directly. StartupView is only tested in unit/widget
-/// tests (see test/startup/startup_view_test.dart).
+/// StartupView is only tested in unit/widget tests
+/// (see test/startup/startup_view_test.dart).
 Future<Widget> createTestApp({
   required SharedPreferences sharedPreferences,
   DataSourceAbstraction? dataSource,
+  UserBootstrapService? userBootstrapService,
   ConnectivityService? connectivityService,
-  // ... other overrides
+  RevenueCatClient? revenueCatClient,
+  RevenueCatService? revenueCatService,
+  UserRepository? userRepository,
 }) async {
   locator.reset();
   locator.registerMany(buildTestModules(
     sharedPreferences: sharedPreferences,
     dataSource: dataSource,
+    userBootstrapService: userBootstrapService,
     connectivityService: connectivityService,
+    revenueCatClient: revenueCatClient,
+    revenueCatService: revenueCatService,
+    userRepository: userRepository,
   ));
 
-  // Router-first: skip StartupView, go directly to MaterialApp.router.
   return MaterialApp.router(
     routerConfig: BestRouterConfig(routerService: locator<RouterService>()),
     localizationsDelegates: AppLocalizations.localizationsDelegates,
