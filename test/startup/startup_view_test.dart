@@ -168,7 +168,8 @@ void main() {
 
         // The MaterialApp now has a routerConfig (MaterialApp.router was used).
         final routerApp = tester.widget<MaterialApp>(find.byType(MaterialApp));
-        expect(routerApp.routerConfig, isNotNull,
+        final firstRouterConfig = routerApp.routerConfig;
+        expect(firstRouterConfig, isNotNull,
             reason: 'Router app should have routerConfig (lazy creation)');
 
         // Phase 3: Retry -- routerConfig is invalidated and re-created.
@@ -191,11 +192,15 @@ void main() {
         await tester.pump(const Duration(milliseconds: 50));
         await tester.pump();
 
-        // Fresh router created with new RouterService instance.
+        // Fresh router created with a NEW RouterService instance.
         final freshRouterApp =
             tester.widget<MaterialApp>(find.byType(MaterialApp));
-        expect(freshRouterApp.routerConfig, isNotNull,
+        final freshRouterConfig = freshRouterApp.routerConfig;
+        expect(freshRouterConfig, isNotNull,
             reason: 'Fresh router app after retry should have routerConfig');
+        // Verify it's a different instance (not the stale cached one).
+        expect(freshRouterConfig, isNot(same(firstRouterConfig)),
+            reason: 'Router config after retry must be a fresh instance');
       },
     );
 
