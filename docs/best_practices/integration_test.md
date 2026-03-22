@@ -376,8 +376,9 @@ class OnboardingRobot {
 
 ```dart
 testWidgets('new user completes onboarding flow', (tester) async {
-  await tester.pumpWidget(createTestApp());
-  await tester.pumpPastSplash();
+  SharedPreferences.setMockInitialValues({});
+  final prefs = await SharedPreferences.getInstance();
+  await tester.pumpWidget(await createTestApp(sharedPreferences: prefs));
 
   final onboarding = OnboardingRobot(tester);
   onboarding.expectOnOnboardingScreen();
@@ -554,9 +555,9 @@ testWidgets('authenticated user sees home screen', (tester) async {
 
   // Create app with the required sharedPreferences param.
   // Auth bootstrap is handled via integration_test/utils/auth_helpers.dart.
+  // createTestApp is router-first (no StartupView, no splash).
   final app = await createTestApp(sharedPreferences: prefs);
   await tester.pumpWidget(app);
-  await tester.pumpPastSplash();
   await tester.pumpUntilFound(find.byType(HomeView));
 
   expect(find.byType(HomeView), findsOneWidget);
@@ -588,8 +589,9 @@ import 'package:neurostack/core/ui/constants/widget_keys.dart';
 
 void main() {
   patrolTest('user can sign in with Google', ($) async {
-    await $.pumpWidgetAndSettle(await createTestApp());
-    await $.pump(const Duration(seconds: 2)); // Past splash
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+    await $.pumpWidgetAndSettle(await createTestApp(sharedPreferences: prefs));
 
     // Tap Google sign-in button
     await $(WidgetKeys.authGoogleButton).tap();
@@ -771,7 +773,9 @@ testWidgets('premium user sees all protocols', (tester) async {
 
 ```dart
 testWidgets('shows loading then content', (tester) async {
-  await tester.pumpWidget(createTestApp());
+  SharedPreferences.setMockInitialValues({});
+  final prefs = await SharedPreferences.getInstance();
+  await tester.pumpWidget(await createTestApp(sharedPreferences: prefs));
 
   // Initial state should be loading
   expect(find.byType(CircularProgressIndicator), findsOneWidget);

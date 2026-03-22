@@ -4,7 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:neurostack/core/abstractions/logging_abstraction.dart';
+import 'package:neurostack/config/route_config.dart';
+import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
+import 'package:neurostack/core/utils/internal_notification/notify_service.dart';
 import 'package:neurostack/core/utils/locator.dart';
+import 'package:neurostack/core/utils/navigation/router_service.dart';
+import 'package:neurostack/features/auth/data/auth_service.dart';
+
+import '../mocks/mock_services.dart';
 import 'package:neurostack/startup/splash_screen.dart';
 import 'package:neurostack/startup/startup_view.dart';
 import 'package:neurostack/startup/startup_view_model.dart';
@@ -111,42 +118,60 @@ void main() {
     );
 
     testWidgets(
-      'AppInitialized state removes splash and error/offline views',
+      'lazy router handoff: splash during InitializingApp, router branch entered on AppInitialized',
       (tester) async {
-        // Use a completer so bootstrap blocks and we can verify splash first.
-        final dataSourceCompleter = Completer<void>();
-        final vm = createVm(
-          dataSourceInitializer: () => dataSourceCompleter.future,
+        // Register RouterService so BestRouterConfig can be created.
+        // The router will navigate to HomeView which needs more locator
+        // services -- those errors are expected and suppressed.
+        // This test verifies the VIEW correctly switches from splash to
+        // the router branch when state transitions to AppInitialized.
+        locator.registerMany([
+          Module<RouterService>(
+            builder: () => RouterService(supportedRoutes: routes),
+            lazy: false,
+          ),
+          Module<NotifyService>(
+            builder: () => NotifyService(),
+            lazy: false,
+          ),
+          Module<ConnectivityService>(
+            builder: () => MockConnectivityService(),
+            lazy: false,
+          ),
+          Module<AuthService>(
+            builder: () => MockAuthService(),
+            lazy: false,
+          ),
+        ]);
+
+        final vm = StartupViewModel(
+          loggingAbstraction: mockLogging,
+          bootstrapOverride: () async => BootstrapResult.initialized,
         );
 
         await tester.pumpWidget(StartupView(viewModel: vm));
+
+        // 1. InitializingApp: splash is rendered, no router.
         expect(find.byType(SplashScreen), findsOneWidget);
 
-        // Directly set AppInitialized. In production, _buildRouterApp()
-        // needs the full locator chain; here we verify the switch statement
-        // leaves the splash/error/offline paths and enters the router branch.
-        // The router branch will throw (no RouterService registered), but
-        // the switch itself proves the view reacts to AppInitialized.
-        vm.appStateNotifier.value = const AppInitialized();
+        // Suppress downstream locator errors from route widgets (HomeView etc.)
+        // that need services not registered in this unit test.
+        final originalOnError = FlutterError.onError;
+        FlutterError.onError = (d) {};
 
-        // Use FlutterError to catch the expected locator error from router
-        // creation, while verifying the view exited the splash/error branches.
-        final errors = <FlutterErrorDetails>[];
-        FlutterError.onError = (d) => errors.add(d);
-
+        // 2. Pump past splash timer -- transitions to AppInitialized.
+        await tester.pump(const Duration(milliseconds: 50));
         await tester.pump();
 
-        // Restore default error handler.
-        FlutterError.onError = FlutterError.dumpErrorToConsole;
+        FlutterError.onError = originalOnError;
 
-        // The view tried to build the router (which failed due to no locator
-        // services), but it did NOT render splash, error, or offline views.
+        // Splash is gone -- the view entered the router branch.
         expect(find.byType(SplashScreen), findsNothing);
+        // No error/offline fallback views.
         expect(find.byIcon(Icons.error_outline), findsNothing);
         expect(find.byIcon(Icons.wifi_off), findsNothing);
-
-        dataSourceCompleter.completeError(Exception('teardown'));
-        await tester.pump(const Duration(milliseconds: 50));
+        // MaterialApp.router is present (the router branch was entered).
+        expect(find.byType(MaterialApp), findsOneWidget);
       },
     );
 
