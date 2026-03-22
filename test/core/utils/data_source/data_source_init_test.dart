@@ -107,8 +107,8 @@ void main() {
 
       completer.completeError(Exception('shared failure'));
 
-      expect(() => future1, throwsA(isA<Exception>()));
-      expect(() => future2, throwsA(isA<Exception>()));
+      await expectLater(future1, throwsA(isA<Exception>()));
+      await expectLater(future2, throwsA(isA<Exception>()));
     });
 
     test('resetDataSourceInitGuard allows fresh init attempt', () async {

@@ -159,6 +159,7 @@ void main() {
 
         // Suppress downstream errors from route widgets needing more services.
         final originalOnError = FlutterError.onError;
+        addTearDown(() => FlutterError.onError = originalOnError);
         FlutterError.onError = (d) {};
 
         // Phase 2: AppInitialized -- router branch with lazy BestRouterConfig.
@@ -195,8 +196,6 @@ void main() {
             tester.widget<MaterialApp>(find.byType(MaterialApp));
         expect(freshRouterApp.routerConfig, isNotNull,
             reason: 'Fresh router app after retry should have routerConfig');
-
-        FlutterError.onError = originalOnError;
       },
     );
 

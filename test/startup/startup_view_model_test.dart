@@ -386,19 +386,28 @@ void main() {
         vm.dispose();
       });
 
-      test('uses injected packageInfoLoader', () async {
-        final prefs = await SharedPreferences.getInstance();
+      test('dataSourceInitializer failure prevents packageInfoLoader call', () async {
+        var packageInfoCalled = false;
         final vm = StartupViewModel(
           loggingAbstraction: mockLogging,
-          dataSourceInitializer: () async {},
-          sharedPreferencesLoader: () async => prefs,
-          packageInfoLoader: () async => fakePackageInfo,
+          dataSourceInitializer: () async {
+            throw Exception('early failure');
+          },
+          sharedPreferencesLoader: () async =>
+              await SharedPreferences.getInstance(),
+          packageInfoLoader: () async {
+            packageInfoCalled = true;
+            return fakePackageInfo;
+          },
         );
 
         await vm.initializeApp();
-        // packageInfoLoader is called after buildModules succeeds.
-        // If buildModules fails (no real infra), packageInfo may not be
-        // reached. That's OK -- the seam exists and is wired.
+
+        // packageInfoLoader is called after dataSource + sharedPreferences.
+        // If dataSource fails, packageInfoLoader should NOT be reached.
+        expect(packageInfoCalled, isFalse);
+        expect(vm.appStateNotifier.value, isA<AppInitializationError>());
+
         vm.dispose();
       });
 
