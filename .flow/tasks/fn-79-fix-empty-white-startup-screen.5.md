@@ -76,9 +76,8 @@ Follow `plan_app_launch_handoff.md` Phase 3 + docs gap findings.
 - [ ] `flutter analyze` passes
 - [ ] `flutter test` passes (all new + existing tests)
 ## Done summary
-TBD
-
+Added startup regression tests (data_source_init guard, StartupViewModel state transitions/timing/reentrancy, StartupView lazy-router handoff/retry/widget lifecycle) and updated docs (README architecture link, integration_test.md aligned with real router-first harness, investigation resolution section).
 ## Evidence
-- Commits:
-- Tests:
+- Commits: d16acb64a4debfe40ebed64a62ad48759d5beffe, 5b866de, 833693e, e21207f, c538cfb, 699981d, 6997460
+- Tests: flutter analyze, flutter test
 - PRs:
