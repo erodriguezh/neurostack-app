@@ -8,53 +8,41 @@ Users see a white/light native launch surface before Flutter's dark splash scree
 
 ## Scope
 
-1. **Native launch surfaces → dark #030303** (Android + iOS)
-2. **Defer `PackageInfo.fromPlatform()` after `runApp()`** to reduce pre-render wait
+1. **Native launch surfaces → dark #030303** (Android + iOS) — DONE (task .1)
+2. **Defer `PackageInfo.fromPlatform()` after `runApp()`** — DONE (task .2)
+3. **Move Supabase + SharedPreferences after `runApp()`** — make `main()` synchronous, defer `BestRouterConfig`, handle retry (task .3)
+4. **Add 500ms minimum splash display time** — frame-anchored via post-frame callback, `_BootstrapResult` typed return (task .4)
+5. **Tests + doc updates** — new regression tests, fix broken doc refs (task .5)
 
-Out of scope: Supabase/SharedPreferences deferral, flutter_native_splash package adoption, animated native splash.
+Out of scope: flutter_native_splash package adoption, animated native splash, parallelizing sequential awaits inside `initializeApp()`.
 
-## Key Decisions
-
-- **Color**: Exactly `#030303` via custom `colors.xml` / explicit storyboard RGB — NOT `@android:color/black` (#000000), which is perceptibly different on OLED
-- **DI strategy — phased bootstrap**: Remove `PackageInfo` from `buildModules()` signature. In `initializeApp()`: (1) call `locator.registerMany(buildModules(sharedPreferences: ...))` synchronously first (registers RouterService and all core modules), (2) then `await PackageInfo.fromPlatform()`, (3) then `locator.registerMany([Module<PackageInfo>(...)])` as a separate registration. This preserves the `StartupView.initState()` contract where `locator<RouterService>()` is called synchronously after the non-awaited `initializeApp()` call.
-- **PackageInfo failure**: Caught by existing `try/catch` in `initializeApp()` → error screen with retry (consistent behavior)
-- **Android 12+**: Create `values-v31` + `values-night-v31` with `windowSplashScreenBackground`. The existing Flutter embedding `NormalTheme` metadata in AndroidManifest handles `postSplashScreenTheme` implicitly — the system transitions from the v31 splash to NormalTheme automatically via `io.flutter.embedding.android.NormalTheme`. Add `setOnExitAnimationListener` in `MainActivity.kt` to prevent fade flicker.
-- **Night mode**: Create `drawable-night/launch_background.xml` for future-proofing
+**Spec**: `docs/specs/20260322120000_spec_app_launch_handoff.md`
+**Plan**: `plan_app_launch_handoff.md`
+**Best practices**: `docs/best_practices/architecture/app_launch_and_handoff_to_flutter.md`
 
 ## Quick commands
 
 ```bash
-# Build and run on iOS simulator (clear cache first)
-flutter clean && flutter pub get && flutter run -d 1EA9596A-EBDF-4B22-9781-181F20DEB836 --dart-define-from-file=env/env.json
-
-# Analyze
 flutter analyze
-
-# Run tests
 flutter test
+flutter run --profile --trace-startup -d <device> --dart-define-from-file=env/env.json
 ```
 
 ## Acceptance
 
-- [ ] No white flash visible on cold start (Android pre-12, Android 12+, iOS)
-- [ ] Native launch surface matches Flutter splash background (#030303)
-- [ ] `PackageInfo.fromPlatform()` no longer blocks `runApp()`
+- [ ] `main()` contains no `await` — reaches `runApp()` synchronously
+- [ ] Supabase + SharedPreferences init inside `StartupViewModel.initializeApp()`
+- [ ] `sharedPreferences` removed from constructor chain
+- [ ] `BestRouterConfig` deferred to `AppInitialized` state, cleared on retry
+- [ ] Splash visible for at least 500ms after first paint (all outcomes)
+- [ ] `retryInitialization()` works correctly with view-driven re-bootstrap
+- [ ] No white/black flash between native splash and first Flutter frame
 - [ ] `flutter analyze` passes
-- [ ] Existing tests pass
-- [ ] Retry initialization path still works (error → retry → success)
-
-## Verification Matrix
-
-Cold-start validation (uninstall + reinstall, or `flutter clean` + rebuild):
-- [ ] Android pre-12 (API 24–30): dark launch surface, no white flash
-- [ ] Android 12+ (API 31+): dark system splash, no crossfade artifact, no white flash
-- [ ] iOS: dark launch screen, no white flash (requires `flutter clean` + app reinstall to clear storyboard cache)
-- [ ] At least one light-mode and one dark-mode system setting tested per platform
+- [ ] All tests pass
 
 ## References
 
 - Flutter Android splash docs: https://docs.flutter.dev/platform-integration/android/splash-screen
 - Flutter iOS splash docs: https://docs.flutter.dev/platform-integration/ios/splash-screen
-- Android 12 SplashScreen API: https://developer.android.com/develop/ui/views/launch/splash-screen
-- Investigation: `docs/investigations/20260321174500_investigation_empty_white_startup_screen.md`
-- Related epics: fn-78 (established PackageInfo injection), fn-75 (dark-first route policy)
+- Supabase 2.10.3: `initialize()` is idempotent (returns early if already init'd)
+- SharedPreferences: `getInstance()` cached via internal Completer with error reset

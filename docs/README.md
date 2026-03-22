@@ -65,6 +65,7 @@
 - [Spec: Settings Screen](./specs/20260227120000_spec_settings_screen.md) - SettingsView, 4th bottom tab, upgrade banner, support tiles, contact page, subscription management
 - [Spec: UserOrient Integration](./specs/20260315140000_spec_userorient_integration.md) - userorient_flutter, feature request board, UserOrientService, settings screen wiring
 - [Spec: Rate App / In-App Review](./specs/202603162012_spec_rate_app_integration.md) - InAppReviewService, requestReview, openStoreListing, session milestone trigger, Rate App screen
+- [Spec: App Launch Handoff](./specs/20260322120000_spec_app_launch_handoff.md) - lean main(), defer Supabase + SharedPreferences after runApp(), BestRouterConfig lazy creation, 500ms minimum splash, entrance animation
 
 ## Investigations
 - [Investigation: Protocol Names Missing](./investigations/20260108223900_investigation_progress_protocol_names.md) - ProgressGrid, layout collapse, nameWidth, narrow screen, responsive, horizontal scroll, widget overflow
@@ -80,6 +81,7 @@
 - [Plan: UserOrient Integration](../integrate_userorient.md) - userorient_flutter SDK, Feature Request tile, UserOrientService, env key, startup init
 - [Plan: Rate App / In-App Review](../plan_app_rating_workflow.md) - in_app_review, InAppReviewService, Rate App screen, programmatic session trigger, Settings tile wiring
 - [Plan: Send Feedback (mailto)](../plan_send_feedback_mailto.md) - package_info_plus, mailto URI, url_launcher, feedback email, diagnostic context, Settings tile wiring
+- [Plan: App Launch Handoff](../plan_app_launch_handoff.md) - move Supabase + SharedPreferences after runApp(), defer BestRouterConfig, 500ms minimum splash, sync main()
 
 ## Changelogs
 - [Changelog: Home Screen](./changelogs/20260106153900_home_screen_changelog.md) - HomeViewModel, HomeViewState, status banner, protocol card, bottom nav, connectivity, route config

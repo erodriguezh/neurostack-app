@@ -42,9 +42,8 @@ This works because `ModuleLocator.registerMany()` at `lib/core/utils/locator.dar
 - [ ] All existing tests pass (update test mocks for changed constructor signatures)
 
 ## Done summary
-TBD
-
+Deferred PackageInfo.fromPlatform() from pre-runApp() into StartupViewModel.initializeApp() using phased DI bootstrap, removing the packageInfo parameter from constructors and buildModules to reduce time on the native launch surface before Flutter renders its first frame.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 25d6fb906fccd583fa6d7b1cf86c4056ad2665be
+- Tests: flutter analyze, flutter test
 - PRs:

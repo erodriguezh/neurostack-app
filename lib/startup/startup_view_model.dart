@@ -6,6 +6,7 @@ import 'package:neurostack/config/locator_config.dart';
 import 'package:neurostack/core/abstractions/logging_abstraction.dart';
 import 'package:neurostack/core/utils/app_lifecycle_service.dart';
 import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
+import 'package:neurostack/core/utils/data_source/data_source_init.dart';
 import 'package:neurostack/core/utils/locator.dart';
 import 'package:neurostack/core/utils/navigation/route_data.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
@@ -45,36 +46,59 @@ class AppInitializationError extends AppState {
 /// ViewModel responsible for handling app startup and initialization
 class StartupViewModel {
   StartupViewModel({
-    required SharedPreferences sharedPreferences,
     LoggingAbstraction? loggingAbstraction,
-  }) : _sharedPreferences = sharedPreferences,
-       _loggingAbstraction = loggingAbstraction ?? LoggingAbstraction();
+    @visibleForTesting Future<void> Function()? dataSourceInitializer,
+    @visibleForTesting Future<SharedPreferences> Function()?
+        sharedPreferencesLoader,
+    @visibleForTesting Future<PackageInfo> Function()? packageInfoLoader,
+  }) : _loggingAbstraction = loggingAbstraction ?? LoggingAbstraction(),
+       _initDataSource = dataSourceInitializer ?? initDataSource,
+       _getSharedPreferences =
+           sharedPreferencesLoader ?? SharedPreferences.getInstance,
+       _getPackageInfo = packageInfoLoader ?? PackageInfo.fromPlatform;
 
   final appStateNotifier = ValueNotifier<AppState>(const InitializingApp());
 
-  final SharedPreferences _sharedPreferences;
   final LoggingAbstraction _loggingAbstraction;
+  final Future<void> Function() _initDataSource;
+  final Future<SharedPreferences> Function() _getSharedPreferences;
+  final Future<PackageInfo> Function() _getPackageInfo;
+
   StreamSubscription<LogRecord>? loggingSubscription;
 
   final Logger _logger = Logger('StartupViewModel');
 
-  Future<void> initializeApp() async {
+  /// Reentrancy guard: if `initializeApp()` is already running, concurrent
+  /// callers share the same future instead of racing through registration.
+  /// Without this, two post-frame callbacks could fire `initializeApp()`
+  /// concurrently and `ModuleLocator.registerMany()` would throw
+  /// `ModuleAlreadyRegisteredException` on duplicate types.
+  Future<void>? _bootstrapFuture;
+
+  Future<void> initializeApp() {
+    _bootstrapFuture ??= _doInitializeApp().whenComplete(() {
+      _bootstrapFuture = null;
+    });
+    return _bootstrapFuture!;
+  }
+
+  Future<void> _doInitializeApp() async {
     appStateNotifier.value = const InitializingApp();
     try {
-      // Phase 1: Register core modules synchronously. RouterService and other
+      // Phase 1: Initialize data source (Supabase) — idempotent via completer.
+      await _initDataSource();
+
+      // Phase 2: Get SharedPreferences instance.
+      final sharedPreferences = await _getSharedPreferences();
+
+      // Phase 3: Register core modules. RouterService and other
       // startup-critical modules are available immediately after this call.
-      // This is required because StartupView.initState() calls
-      // locator<RouterService>() synchronously right after initializeApp().
       locator.registerMany(
-        buildModules(sharedPreferences: _sharedPreferences),
+        buildModules(sharedPreferences: sharedPreferences),
       );
 
-      // Phase 2: Fetch PackageInfo asynchronously (safe — RouterService is
-      // already registered above, so the sync locator call in initState works).
-      final packageInfo = await PackageInfo.fromPlatform();
-
-      // Phase 3: Register PackageInfo as a separate module. Calling
-      // registerMany twice with disjoint types is safe per ModuleLocator.
+      // Phase 4: Fetch PackageInfo asynchronously and register it.
+      final packageInfo = await _getPackageInfo();
       locator.registerMany([
         Module<PackageInfo>(builder: () => packageInfo, lazy: false),
       ]);
@@ -143,12 +167,18 @@ class StartupViewModel {
   }
 
   Future<void> retryInitialization() async {
-    // Set state to initializing BEFORE disposing to prevent widgets from
-    // reading disposed notifiers/services during the transition window
+    // Set state to InitializingApp BEFORE disposing to prevent widgets from
+    // reading disposed notifiers/services during the transition window.
+    // (Preserves the existing safety guard from the current code.)
     appStateNotifier.value = const InitializingApp();
     _disposeServices();
     locator.reset();
-    await initializeApp();
+    // initializeApp() is NOT called here — the view schedules it
+    // from a post-frame callback when it sees InitializingApp state.
+    // This future completes immediately after cleanup. Callers like
+    // AppLifecycleService.restartApp() await this to ensure cleanup
+    // finishes before returning, but bootstrap runs asynchronously
+    // after the next frame.
   }
 
   void dispose() {

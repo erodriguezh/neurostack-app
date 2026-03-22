@@ -1,19 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:neurostack/core/utils/app_lifecycle_service.dart';
-import 'package:neurostack/core/utils/data_source/data_source_init.dart';
 import 'package:neurostack/core/utils/locator.dart';
 import 'package:neurostack/core/utils/navigation/url_strategy/url_strategy.dart';
 import 'package:neurostack/startup/startup_view.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  await initDataSource();
-  final sharedPreferences = await SharedPreferences.getInstance();
   configureUrlStrategy();
-  runApp(_AppLifecycleObserver(
-    sharedPreferences: sharedPreferences,
-  ));
+  runApp(const _AppLifecycleObserver());
 }
 
 /// Observes app lifecycle changes and forwards them to [AppLifecycleService].
@@ -22,11 +16,7 @@ void main() async {
 /// at the top level. Services like [SessionSyncService] can then listen to
 /// [AppLifecycleService.lifecycle] to trigger sync on resume.
 class _AppLifecycleObserver extends StatefulWidget {
-  const _AppLifecycleObserver({
-    required this.sharedPreferences,
-  });
-
-  final SharedPreferences sharedPreferences;
+  const _AppLifecycleObserver();
 
   @override
   State<_AppLifecycleObserver> createState() => _AppLifecycleObserverState();
@@ -62,8 +52,6 @@ class _AppLifecycleObserverState extends State<_AppLifecycleObserver>
 
   @override
   Widget build(BuildContext context) {
-    return StartupView(
-      sharedPreferences: widget.sharedPreferences,
-    );
+    return const StartupView();
   }
 }
