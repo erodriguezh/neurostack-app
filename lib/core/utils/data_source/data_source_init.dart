@@ -5,6 +5,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 Completer<void>? _initCompleter;
 
+/// Override for the underlying initializer, used in tests to avoid
+/// platform-channel calls to Supabase.initialize().
+@visibleForTesting
+Future<void> Function()? testDataSourceInitOverride;
+
 /// Initializes Supabase. Safe to call multiple times:
 /// - First call: runs initialization, returns when done.
 /// - Concurrent calls: return the same future.
@@ -17,16 +22,20 @@ Future<void> initDataSource() async {
   }
   _initCompleter = Completer<void>();
   try {
-    await Supabase.initialize(
-      url: const String.fromEnvironment(
-        'SUPABASE_URL',
-        defaultValue: '',
-      ),
-      anonKey: const String.fromEnvironment(
-        'SUPABASE_PUBLISHABLE_KEY',
-        defaultValue: '',
-      ),
-    );
+    if (testDataSourceInitOverride != null) {
+      await testDataSourceInitOverride!();
+    } else {
+      await Supabase.initialize(
+        url: const String.fromEnvironment(
+          'SUPABASE_URL',
+          defaultValue: '',
+        ),
+        anonKey: const String.fromEnvironment(
+          'SUPABASE_PUBLISHABLE_KEY',
+          defaultValue: '',
+        ),
+      );
+    }
     _initCompleter!.complete();
   } catch (e, st) {
     _initCompleter!.completeError(e, st);

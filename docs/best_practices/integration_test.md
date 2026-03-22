@@ -490,34 +490,35 @@ List<Module> buildTestModules({
   }).toList();
 }
 
-/// Creates a test app with mocked dependencies
+/// Creates a test app with mocked dependencies.
+///
+/// NOTE: Integration tests bypass StartupView entirely and build
+/// MaterialApp.router directly. StartupView is only tested in unit/widget
+/// tests (see test/startup/startup_view_test.dart).
 Future<Widget> createTestApp({
-  MockAuthService? authService,
-  MockUserRemoteDataSource? userDataSource,
-  MockProtocolRemoteDataSource? protocolDataSource,
-  MockSessionRemoteDataSource? sessionDataSource,
-  MockConnectivityService? connectivityService,
+  required SharedPreferences sharedPreferences,
+  DataSourceAbstraction? dataSource,
+  ConnectivityService? connectivityService,
+  // ... other overrides
 }) async {
-  // Reset locator before registering test modules
   locator.reset();
-
-  // Initialize SharedPreferences for tests
-  SharedPreferences.setMockInitialValues({});
-  final prefs = await SharedPreferences.getInstance();
-
-  // Register test modules
   locator.registerMany(buildTestModules(
-    authService: authService,
-    userDataSource: userDataSource,
-    protocolDataSource: protocolDataSource,
-    sessionDataSource: sessionDataSource,
+    sharedPreferences: sharedPreferences,
+    dataSource: dataSource,
     connectivityService: connectivityService,
   ));
 
-  // StartupView no longer accepts sharedPreferences — inject a
-  // StartupViewModel with test seams instead, or use StartupView()
-  // directly (it creates its own ViewModel internally).
-  return StartupView();
+  // Router-first: skip StartupView, go directly to MaterialApp.router.
+  return MaterialApp.router(
+    routerConfig: BestRouterConfig(routerService: locator<RouterService>()),
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    theme: AppTheme.buildTheme(Brightness.light),
+    builder: (context, child) {
+      Translate.init(context);
+      return child ?? const SizedBox();
+    },
+  );
 }
 ```
 
@@ -690,7 +691,7 @@ void main() {
 | **Multiple ValueNotifiers in test setup** | Inconsistent with app architecture | Single ValueNotifier per ViewModel |
 | **Testing with real SharedPreferences** | State persists between tests | `SharedPreferences.setMockInitialValues({})` |
 | **Text-based finders** | Fragile, breaks on i18n | Use WidgetKeys constants |
-| **Skipping StartupViewModel init** | Auth/onboarding guards not set | Let StartupView initialize normally, or inject a `StartupViewModel` with `dataSourceInitializer`/`sharedPreferencesLoader`/`packageInfoLoader` test seams |
+| **Skipping StartupViewModel init** | Auth/onboarding guards not set | Integration tests bypass `StartupView` and use `MaterialApp.router` directly (see `test_app.dart`). Unit/widget tests inject a `StartupViewModel` with `dataSourceInitializer`/`sharedPreferencesLoader`/`packageInfoLoader` test seams |
 
 ---
 

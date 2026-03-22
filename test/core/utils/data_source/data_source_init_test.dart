@@ -1,52 +1,135 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:neurostack/core/utils/data_source/data_source_init.dart';
 
-/// Tests for the initDataSource guard logic.
-///
-/// Note: initDataSource() internally calls Supabase.initialize(), which
-/// requires platform channels unavailable in pure unit tests. The guard
-/// mechanics (idempotency, retry-after-failure, concurrency) are verified
-/// here at the contract level. The injection seam on StartupViewModel
-/// (`dataSourceInitializer`) covers the integration path in
-/// startup_view_model_test.dart.
 void main() {
-  group('initDataSource guard', () {
-    tearDown(() {
-      resetDataSourceInitGuard();
+  setUp(() {
+    resetDataSourceInitGuard();
+    testDataSourceInitOverride = null;
+  });
+
+  tearDown(() {
+    resetDataSourceInitGuard();
+    testDataSourceInitOverride = null;
+  });
+
+  group('initDataSource', () {
+    test('calls the initializer and completes on success', () async {
+      var callCount = 0;
+      testDataSourceInitOverride = () async {
+        callCount++;
+      };
+
+      await initDataSource();
+      expect(callCount, 1);
     });
 
-    test('resetDataSourceInitGuard does not throw', () {
-      // First reset after no initialization.
-      resetDataSourceInitGuard();
-      // Idempotent: calling reset again is safe.
-      resetDataSourceInitGuard();
+    test('second call after success is a no-op (returns same future)', () async {
+      var callCount = 0;
+      testDataSourceInitOverride = () async {
+        callCount++;
+      };
+
+      await initDataSource();
+      expect(callCount, 1);
+
+      // Second call should return the cached completed future.
+      await initDataSource();
+      expect(callCount, 1);
     });
 
-    test('resetDataSourceInitGuard allows fresh init attempt', () {
-      // After reset, the module-level completer is null, meaning the
-      // next initDataSource() call will create a new completer and
-      // run Supabase.initialize() again. This is the test isolation
-      // mechanism used across all startup tests.
-      resetDataSourceInitGuard();
+    test('second call after failure retries (completer resets)', () async {
+      var callCount = 0;
+      testDataSourceInitOverride = () async {
+        callCount++;
+        if (callCount == 1) {
+          throw Exception('first call fails');
+        }
+        // Second call succeeds.
+      };
 
-      // We cannot call initDataSource() without Supabase platform
-      // channels, but we verify the reset seam exists and is callable.
-      // Integration coverage is in startup_view_model_test.dart via
-      // the dataSourceInitializer injection seam.
+      // First call fails. The completer also receives the error;
+      // ignore its unhandled future to prevent zone error.
+      Object? caughtError;
+      await runZonedGuarded(
+        () async {
+          try {
+            await initDataSource();
+          } on Exception catch (e) {
+            caughtError = e;
+          }
+        },
+        (_, __) {
+          // Ignore unhandled errors from the completer's future.
+        },
+      );
+      expect(caughtError, isA<Exception>());
+      expect(callCount, 1);
+
+      // Guard was reset on failure, so second call retries.
+      await initDataSource();
+      expect(callCount, 2);
     });
 
-    test('guard contract: second call after success returns same future', () {
-      // Documented contract (from data_source_init.dart):
-      // - First call: runs initialization, returns when done.
-      // - Concurrent calls: return the same future.
-      // - After failure: resets so the next call retries.
-      // - After success on retry: returns immediately.
-      //
-      // The Completer-based guard ensures all of these properties.
-      // This test documents the contract; functional verification is
-      // in startup_view_model_test.dart where a fake initializer is
-      // injected to simulate success/failure/concurrency.
-      expect(resetDataSourceInitGuard, isA<Function>());
+    test('concurrent calls share the same future', () async {
+      var callCount = 0;
+      final completer = Completer<void>();
+
+      testDataSourceInitOverride = () {
+        callCount++;
+        return completer.future;
+      };
+
+      // Launch two concurrent calls.
+      final future1 = initDataSource();
+      final future2 = initDataSource();
+
+      // Only one initializer call should have been made.
+      expect(callCount, 1);
+
+      // Complete the shared future.
+      completer.complete();
+      await future1;
+      await future2;
+
+      // Still only one call.
+      expect(callCount, 1);
+    });
+
+    test('concurrent calls all fail if initializer fails', () async {
+      final completer = Completer<void>();
+
+      testDataSourceInitOverride = () => completer.future;
+
+      final future1 = initDataSource();
+      final future2 = initDataSource();
+
+      completer.completeError(Exception('shared failure'));
+
+      expect(() => future1, throwsA(isA<Exception>()));
+      expect(() => future2, throwsA(isA<Exception>()));
+    });
+
+    test('resetDataSourceInitGuard allows fresh init attempt', () async {
+      var callCount = 0;
+      testDataSourceInitOverride = () async {
+        callCount++;
+      };
+
+      await initDataSource();
+      expect(callCount, 1);
+
+      // After success, second call is a no-op.
+      await initDataSource();
+      expect(callCount, 1);
+
+      // Reset the guard.
+      resetDataSourceInitGuard();
+
+      // Now a fresh call should run the initializer again.
+      await initDataSource();
+      expect(callCount, 2);
     });
   });
 }

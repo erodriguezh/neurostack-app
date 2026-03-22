@@ -53,7 +53,6 @@ void main() {
     testWidgets(
       'renders SplashScreen in InitializingApp state',
       (tester) async {
-        // Arrange: dataSource never completes so we stay in InitializingApp.
         final dataSourceCompleter = Completer<void>();
         final vm = createVm(
           dataSourceInitializer: () => dataSourceCompleter.future,
@@ -61,15 +60,10 @@ void main() {
 
         await tester.pumpWidget(StartupView(viewModel: vm));
 
-        // The SplashScreen should be rendered immediately (InitializingApp
-        // is the initial state). The post-frame callback also fires during
-        // pumpWidget's warm-up frame.
         expect(find.byType(SplashScreen), findsOneWidget);
 
-        // Clean up: complete to avoid dangling future. Then pump to settle.
         dataSourceCompleter.completeError(Exception('teardown'));
         await tester.pump(const Duration(milliseconds: 50));
-        // Widget tree disposes vm -- do NOT call vm.dispose().
       },
     );
 
@@ -83,17 +77,43 @@ void main() {
         );
 
         await tester.pumpWidget(StartupView(viewModel: vm));
-        // Pump past splash timer so the error state is emitted.
         await tester.pump(const Duration(milliseconds: 50));
-        // Pump to rebuild after state change.
         await tester.pump();
 
-        // Should show error icon.
         expect(find.byIcon(Icons.error_outline), findsOneWidget);
-        // Should show retry button.
         expect(find.byIcon(Icons.refresh), findsOneWidget);
       },
     );
+
+    testWidgets(
+      'renders offline-no-user view in OfflineNoUserState',
+      (tester) async {
+        final dataSourceCompleter = Completer<void>();
+        final vm = createVm(
+          dataSourceInitializer: () => dataSourceCompleter.future,
+        );
+
+        await tester.pumpWidget(StartupView(viewModel: vm));
+        expect(find.byType(SplashScreen), findsOneWidget);
+
+        // Directly set the state to OfflineNoUserState.
+        vm.appStateNotifier.value = const OfflineNoUserState();
+        await tester.pump();
+
+        // Should show wifi_off icon (from _OfflineNoUserView).
+        expect(find.byIcon(Icons.wifi_off), findsOneWidget);
+        // Should have a retry button.
+        expect(find.byIcon(Icons.refresh), findsOneWidget);
+
+        dataSourceCompleter.completeError(Exception('teardown'));
+        await tester.pump(const Duration(milliseconds: 50));
+      },
+    );
+
+    // Note: AppInitialized router creation is not tested here because
+    // BestRouterConfig requires platform-level infrastructure (navigation
+    // stack, route information provider) that cannot be easily mocked in
+    // a widget test. Router lifecycle is covered by navigation/router tests.
 
     testWidgets(
       'schedules initializeApp via post-frame callback (bootstrapScheduled guard)',
@@ -108,18 +128,15 @@ void main() {
           },
         );
 
-        // pumpWidget fires the warm-up frame which includes the post-frame
-        // callback, so initializeApp is called during pumpWidget itself.
         await tester.pumpWidget(StartupView(viewModel: vm));
 
-        // The post-frame callback fires during the warm-up frame in pumpWidget.
+        // Post-frame callback fires during the warm-up frame in pumpWidget.
         expect(initCallCount, 1);
 
         // Another pump should NOT re-schedule (guard prevents it).
         await tester.pump();
         expect(initCallCount, 1);
 
-        // Clean up.
         dataSourceCompleter.completeError(Exception('teardown'));
         await tester.pump(const Duration(milliseconds: 50));
       },
@@ -138,31 +155,48 @@ void main() {
         );
 
         await tester.pumpWidget(StartupView(viewModel: vm));
-        // Let bootstrap fail + splash timer elapse.
         await tester.pump(const Duration(milliseconds: 50));
         await tester.pump();
 
-        // Verify we're in error state.
         expect(find.byIcon(Icons.error_outline), findsOneWidget);
         expect(callCount, 1);
 
-        // Tap retry button.
         await tester.tap(find.byIcon(Icons.refresh));
-        // Pump to process the tap (retryInitialization sets InitializingApp).
         await tester.pump();
 
-        // After retry, we should be back to splash (InitializingApp).
         expect(find.byType(SplashScreen), findsOneWidget);
 
-        // Pump to fire the post-frame callback (re-schedules initializeApp).
         await tester.pump();
-        // Pump past splash timer.
         await tester.pump(const Duration(milliseconds: 50));
         await tester.pump();
 
-        // Should fail again and show error.
         expect(find.byIcon(Icons.error_outline), findsOneWidget);
         expect(callCount, 2);
+      },
+    );
+
+    testWidgets(
+      'retry from offline-no-user view resets to InitializingApp',
+      (tester) async {
+        final dataSourceCompleter = Completer<void>();
+        final vm = createVm(
+          dataSourceInitializer: () => dataSourceCompleter.future,
+        );
+
+        await tester.pumpWidget(StartupView(viewModel: vm));
+
+        vm.appStateNotifier.value = const OfflineNoUserState();
+        await tester.pump();
+
+        expect(find.byIcon(Icons.wifi_off), findsOneWidget);
+
+        await tester.tap(find.byIcon(Icons.refresh));
+        await tester.pump();
+
+        expect(find.byType(SplashScreen), findsOneWidget);
+
+        dataSourceCompleter.completeError(Exception('teardown'));
+        await tester.pump(const Duration(milliseconds: 50));
       },
     );
 
@@ -182,17 +216,13 @@ void main() {
         await tester.pump(const Duration(milliseconds: 50));
         await tester.pump();
 
-        // In error state.
         expect(find.byIcon(Icons.error_outline), findsOneWidget);
 
-        // Retry -- triggers InitializingApp which clears _routerConfig.
         await tester.tap(find.byIcon(Icons.refresh));
         await tester.pump();
 
-        // Should show splash again (routerConfig was cleared).
         expect(find.byType(SplashScreen), findsOneWidget);
 
-        // Let second attempt fail.
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 50));
         await tester.pump();
