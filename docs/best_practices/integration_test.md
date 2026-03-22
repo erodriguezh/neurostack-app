@@ -548,16 +548,13 @@ Widget createTestView<T extends Widget>({
 
 ```dart
 testWidgets('authenticated user sees home screen', (tester) async {
-  // Setup mocks
-  final mockAuth = MockAuthService();
-  final testUser = UserFactory.createActiveTrial();
-  when(() => mockAuth.authState).thenReturn(
-    ValueNotifier(Authenticated(user: testUser)),
-  );
-  when(() => mockAuth.init()).thenAnswer((_) async {});
+  // SharedPreferences must be initialized first.
+  SharedPreferences.setMockInitialValues({});
+  final prefs = await SharedPreferences.getInstance();
 
-  // Create app with mocks
-  final app = await createTestApp(authService: mockAuth);
+  // Create app with the required sharedPreferences param.
+  // Auth bootstrap is handled via integration_test/utils/auth_helpers.dart.
+  final app = await createTestApp(sharedPreferences: prefs);
   await tester.pumpWidget(app);
   await tester.pumpPastSplash();
   await tester.pumpUntilFound(find.byType(HomeView));
@@ -565,6 +562,10 @@ testWidgets('authenticated user sees home screen', (tester) async {
   expect(find.byType(HomeView), findsOneWidget);
 });
 ```
+
+> **Note:** `createTestApp` does not accept `authService` directly.
+> Auth mocking is done via `DataSourceAbstraction` and `UserBootstrapService`
+> overrides — see `integration_test/utils/auth_helpers.dart`.
 
 ---
 

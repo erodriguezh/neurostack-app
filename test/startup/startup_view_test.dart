@@ -110,10 +110,45 @@ void main() {
       },
     );
 
-    // Note: AppInitialized router creation is not tested here because
-    // BestRouterConfig requires platform-level infrastructure (navigation
-    // stack, route information provider) that cannot be easily mocked in
-    // a widget test. Router lifecycle is covered by navigation/router tests.
+    testWidgets(
+      'AppInitialized state removes splash and error/offline views',
+      (tester) async {
+        // Use a completer so bootstrap blocks and we can verify splash first.
+        final dataSourceCompleter = Completer<void>();
+        final vm = createVm(
+          dataSourceInitializer: () => dataSourceCompleter.future,
+        );
+
+        await tester.pumpWidget(StartupView(viewModel: vm));
+        expect(find.byType(SplashScreen), findsOneWidget);
+
+        // Directly set AppInitialized. In production, _buildRouterApp()
+        // needs the full locator chain; here we verify the switch statement
+        // leaves the splash/error/offline paths and enters the router branch.
+        // The router branch will throw (no RouterService registered), but
+        // the switch itself proves the view reacts to AppInitialized.
+        vm.appStateNotifier.value = const AppInitialized();
+
+        // Use FlutterError to catch the expected locator error from router
+        // creation, while verifying the view exited the splash/error branches.
+        final errors = <FlutterErrorDetails>[];
+        FlutterError.onError = (d) => errors.add(d);
+
+        await tester.pump();
+
+        // Restore default error handler.
+        FlutterError.onError = FlutterError.dumpErrorToConsole;
+
+        // The view tried to build the router (which failed due to no locator
+        // services), but it did NOT render splash, error, or offline views.
+        expect(find.byType(SplashScreen), findsNothing);
+        expect(find.byIcon(Icons.error_outline), findsNothing);
+        expect(find.byIcon(Icons.wifi_off), findsNothing);
+
+        dataSourceCompleter.completeError(Exception('teardown'));
+        await tester.pump(const Duration(milliseconds: 50));
+      },
+    );
 
     testWidgets(
       'schedules initializeApp via post-frame callback (bootstrapScheduled guard)',

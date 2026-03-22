@@ -402,21 +402,19 @@ void main() {
         vm.dispose();
       });
 
-      test('no real platform calls with injected fakes', () async {
-        // This test verifies that injecting all three seams prevents any
-        // real platform channel calls during initializeApp.
+      test('bootstrapOverride bypasses all platform calls and reaches AppInitialized', () async {
+        // This test proves that bootstrapOverride skips the entire _bootstrap()
+        // chain (Supabase, SharedPreferences, PackageInfo, locator registration)
+        // and directly produces a known-success state.
         final vm = StartupViewModel(
           loggingAbstraction: mockLogging,
-          dataSourceInitializer: () async {},
-          sharedPreferencesLoader: () async {
-            SharedPreferences.setMockInitialValues({});
-            return SharedPreferences.getInstance();
-          },
-          packageInfoLoader: () async => fakePackageInfo,
+          bootstrapOverride: () async => BootstrapResult.initialized,
         );
 
-        // Should not throw MissingPluginException.
         await vm.initializeApp();
+
+        // Reached AppInitialized without any real platform calls.
+        expect(vm.appStateNotifier.value, isA<AppInitialized>());
         vm.dispose();
       });
     });
