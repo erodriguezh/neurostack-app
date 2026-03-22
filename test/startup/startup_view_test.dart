@@ -118,31 +118,30 @@ void main() {
     );
 
     testWidgets(
-      'lazy router handoff: splash during InitializingApp, router branch entered on AppInitialized',
+      'lazy router handoff: no router during splash, router created on AppInitialized, fresh after retry',
       (tester) async {
-        // Register RouterService so BestRouterConfig can be created.
-        // The router will navigate to HomeView which needs more locator
-        // services -- those errors are expected and suppressed.
-        // This test verifies the VIEW correctly switches from splash to
-        // the router branch when state transitions to AppInitialized.
-        locator.registerMany([
-          Module<RouterService>(
-            builder: () => RouterService(supportedRoutes: routes),
-            lazy: false,
-          ),
-          Module<NotifyService>(
-            builder: () => NotifyService(),
-            lazy: false,
-          ),
-          Module<ConnectivityService>(
-            builder: () => MockConnectivityService(),
-            lazy: false,
-          ),
-          Module<AuthService>(
-            builder: () => MockAuthService(),
-            lazy: false,
-          ),
-        ]);
+        void registerRouterServices() {
+          locator.registerMany([
+            Module<RouterService>(
+              builder: () => RouterService(supportedRoutes: routes),
+              lazy: false,
+            ),
+            Module<NotifyService>(
+              builder: () => NotifyService(),
+              lazy: false,
+            ),
+            Module<ConnectivityService>(
+              builder: () => MockConnectivityService(),
+              lazy: false,
+            ),
+            Module<AuthService>(
+              builder: () => MockAuthService(),
+              lazy: false,
+            ),
+          ]);
+        }
+
+        registerRouterServices();
 
         final vm = StartupViewModel(
           loggingAbstraction: mockLogging,
@@ -151,27 +150,53 @@ void main() {
 
         await tester.pumpWidget(StartupView(viewModel: vm));
 
-        // 1. InitializingApp: splash is rendered, no router.
+        // Phase 1: InitializingApp -- splash rendered, no routerConfig.
         expect(find.byType(SplashScreen), findsOneWidget);
+        // During InitializingApp, the non-router MaterialApp is used.
+        final shellApp = tester.widget<MaterialApp>(find.byType(MaterialApp));
+        expect(shellApp.routerConfig, isNull,
+            reason: 'Shell app should not have routerConfig');
 
-        // Suppress downstream locator errors from route widgets (HomeView etc.)
-        // that need services not registered in this unit test.
+        // Suppress downstream errors from route widgets needing more services.
         final originalOnError = FlutterError.onError;
         FlutterError.onError = (d) {};
 
-        // 2. Pump past splash timer -- transitions to AppInitialized.
+        // Phase 2: AppInitialized -- router branch with lazy BestRouterConfig.
         await tester.pump(const Duration(milliseconds: 50));
         await tester.pump();
 
-        FlutterError.onError = originalOnError;
+        // The MaterialApp now has a routerConfig (MaterialApp.router was used).
+        final routerApp = tester.widget<MaterialApp>(find.byType(MaterialApp));
+        expect(routerApp.routerConfig, isNotNull,
+            reason: 'Router app should have routerConfig (lazy creation)');
 
-        // Splash is gone -- the view entered the router branch.
-        expect(find.byType(SplashScreen), findsNothing);
-        // No error/offline fallback views.
-        expect(find.byIcon(Icons.error_outline), findsNothing);
-        expect(find.byIcon(Icons.wifi_off), findsNothing);
-        // MaterialApp.router is present (the router branch was entered).
-        expect(find.byType(MaterialApp), findsOneWidget);
+        // Phase 3: Retry -- routerConfig is invalidated and re-created.
+        // retryInitialization sets InitializingApp -> view clears _routerConfig.
+        await vm.retryInitialization();
+        await tester.pump();
+
+        // Back to splash -- routerConfig is null again (cleared on retry).
+        expect(find.byType(SplashScreen), findsOneWidget);
+        final retryShellApp =
+            tester.widget<MaterialApp>(find.byType(MaterialApp));
+        expect(retryShellApp.routerConfig, isNull,
+            reason: 'Shell app after retry should not have routerConfig');
+
+        // Re-register services (locator was reset by retryInitialization).
+        registerRouterServices();
+
+        // Post-frame callback re-schedules initializeApp.
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 50));
+        await tester.pump();
+
+        // Fresh router created with new RouterService instance.
+        final freshRouterApp =
+            tester.widget<MaterialApp>(find.byType(MaterialApp));
+        expect(freshRouterApp.routerConfig, isNotNull,
+            reason: 'Fresh router app after retry should have routerConfig');
+
+        FlutterError.onError = originalOnError;
       },
     );
 
