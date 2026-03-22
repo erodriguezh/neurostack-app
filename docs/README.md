@@ -10,6 +10,7 @@
 - [MVVM and DDD Guide](./best_practices/architecture/mvvm_and_ddd_guide.md) - aggregates, invariants, Either flows, repositories, DTOs, domain events, fpdart
 - [MVVM + DDD Supabase Magic Link Authentication](./best_practices/architecture/mvvm_and_ddd_supabase_magic_link_authentication.md) - magic link auth flow, deep linking, PKCE/OTP, auth callbacks
 - [MVVM + DDD Supabase Integration Supplement](./best_practices/architecture/mvvm_and_ddd_supabase_integration_supplement.md) - Supabase data sources, DTO mapping, PostgrestException handling, mocking, PGRST codes
+- [App Launch and Handoff to Flutter](./best_practices/architecture/app_launch_and_handoff_to_flutter.md) - lean main(), deferred Supabase + SharedPreferences, BestRouterConfig lazy creation, 500ms minimum splash, entrance animation, StartupViewModel injection seams
 
 ## Domain
 - [Ubiquitous Language](./ubiquitous-language.md) - domain terms, subscription tiers, invariants, business rules, INV-U1, INV-M2

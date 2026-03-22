@@ -16,11 +16,12 @@ Follow `plan_app_launch_handoff.md` Phase 3 + docs gap findings.
 - Pattern: `setUp`/`tearDown` with `locator.reset()` in tearDown
 - No startup tests exist today — all net-new
 
+<!-- Updated by plan-sync: fn-79-fix-empty-white-startup-screen.4 — StartupViewModel/StartupView never had sharedPreferences params; test_app.dart doesn't use StartupView -->
 ### Constructor/mock updates
-- Grep for `StartupViewModel(` — remove `sharedPreferences:` param
-- Grep for `StartupView(` — remove `sharedPreferences:` param, use `viewModel:` injection
-- Update `integration_test/utils/test_app.dart` — uses `StartupView(sharedPreferences: prefs)` which will be a compile error
-- Use `SharedPreferences.setMockInitialValues({})` or inject fakes via `StartupViewModel` test seams
+- `StartupViewModel` accepts named test seams: `dataSourceInitializer`, `sharedPreferencesLoader`, `packageInfoLoader` (all `@visibleForTesting`)
+- `StartupView` accepts `viewModel:` injection (`@visibleForTesting`)
+- `integration_test/utils/test_app.dart` does NOT use `StartupView` — it builds `MaterialApp.router` directly with `BestRouterConfig`; no compile error to fix there
+- Use `SharedPreferences.setMockInitialValues({})` or inject fakes via `StartupViewModel` constructor seams
 
 ### New regression tests
 
@@ -34,14 +35,16 @@ Follow `plan_app_launch_handoff.md` Phase 3 + docs gap findings.
 - `initializeApp()` transitions to `OfflineNoUserState` when auth is offline-no-user
 - `initializeApp()` transitions to `AppInitializationError` on bootstrap failure
 - Reentrancy guard: second `initializeApp()` call returns same future
-- `retryInitialization()` resets state to `InitializingApp`, disposes, resets locator
-- Minimum splash duration: `AppInitialized` not emitted before 500ms (use `fakeAsync` + `pump`)
-- Same 500ms check for `OfflineNoUserState` and `AppInitializationError`
+- `retryInitialization()` resets state to `InitializingApp`, disposes, resets locator — does NOT call `initializeApp()` itself; the view reschedules it via post-frame callback when it sees `InitializingApp`
+- Minimum splash duration: `AppInitialized` not emitted before 500ms (use `fakeAsync` + `pump`); can also override `StartupViewModel.minSplashDuration` static field (`@visibleForTesting`) to shorten in tests
+- Same 500ms check for `OfflineNoUserState` and `AppInitializationError` — error path uses explicit `await splashTimer` safety net after catch
 - Inject fake `dataSourceInitializer`, `sharedPreferencesLoader`, `packageInfoLoader` — no real platform calls
 
 **`startup_view_test.dart`:**
-- Renders `SplashScreen` in `InitializingApp` without `RouterService` registered
+<!-- Updated by plan-sync: fn-79-fix-empty-white-startup-screen.4 — added _OfflineNoUserView, _bootstrapScheduled guard, post-frame bootstrap -->
+- Renders `SplashScreen` in `InitializingApp` without `RouterService` registered; schedules `initializeApp()` via post-frame callback (guarded by `_bootstrapScheduled` flag)
 - Renders `_StartupErrorView` in `AppInitializationError` without router
+- Renders `_OfflineNoUserView` in `OfflineNoUserState` without router
 - On `AppInitialized`, creates `BestRouterConfig` (verify `locator<RouterService>()` called)
 - Retry clears `_routerConfig` and creates fresh one on next `AppInitialized`
 - Deep link: deferred `BestRouterConfig` preserves non-`/` initial route through auth/onboarding guards
@@ -65,7 +68,8 @@ Follow `plan_app_launch_handoff.md` Phase 3 + docs gap findings.
 - [ ] `test/startup/startup_view_model_test.dart` exists with state transition + reentrancy + timing tests
 - [ ] `test/startup/startup_view_test.dart` exists with router lifecycle + retry + deep-link tests
 - [ ] No test uses real `initDataSource()`, `SharedPreferences.getInstance()`, or `PackageInfo.fromPlatform()`
-- [ ] `integration_test/utils/test_app.dart` compiles with new `StartupView` signature
+<!-- Updated by plan-sync: test_app.dart doesn't use StartupView — no signature change needed -->
+- [ ] `integration_test/utils/test_app.dart` compiles (already uses `MaterialApp.router` directly, not `StartupView`)
 - [ ] `docs/README.md` links to `app_launch_and_handoff_to_flutter.md` under Architecture
 - [ ] `docs/best_practices/integration_test.md` updated for new `StartupView` constructor
 - [ ] `docs/investigations/20260321174500_investigation_empty_white_startup_screen.md` has Resolution section

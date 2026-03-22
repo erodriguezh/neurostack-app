@@ -514,7 +514,10 @@ Future<Widget> createTestApp({
     connectivityService: connectivityService,
   ));
 
-  return StartupView(sharedPreferences: prefs);
+  // StartupView no longer accepts sharedPreferences — inject a
+  // StartupViewModel with test seams instead, or use StartupView()
+  // directly (it creates its own ViewModel internally).
+  return StartupView();
 }
 ```
 
@@ -687,7 +690,7 @@ void main() {
 | **Multiple ValueNotifiers in test setup** | Inconsistent with app architecture | Single ValueNotifier per ViewModel |
 | **Testing with real SharedPreferences** | State persists between tests | `SharedPreferences.setMockInitialValues({})` |
 | **Text-based finders** | Fragile, breaks on i18n | Use WidgetKeys constants |
-| **Skipping StartupViewModel init** | Auth/onboarding guards not set | Let StartupView initialize normally |
+| **Skipping StartupViewModel init** | Auth/onboarding guards not set | Let StartupView initialize normally, or inject a `StartupViewModel` with `dataSourceInitializer`/`sharedPreferencesLoader`/`packageInfoLoader` test seams |
 
 ---
 

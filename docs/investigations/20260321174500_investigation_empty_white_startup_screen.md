@@ -135,6 +135,19 @@ Secondary contributor: `main()` blocks `runApp()` on async startup tasks (`Supab
    - Android 12+ and pre-12 devices/emulators.
    - iOS simulator/device (clear launch screen cache by reinstalling app + `flutter clean` if needed).
 
+## Resolution
+
+Implemented across epic `fn-79-fix-empty-white-startup-screen` (branch `feature/splash-screen`):
+
+1. **Native launch surfaces made dark (#030303)** on Android and iOS (task .1).
+2. **`PackageInfo.fromPlatform()` deferred** after `runApp()` (task .2).
+3. **Atomic startup refactor**: synchronous `main()`, deferred `BestRouterConfig`, idempotent `initDataSource` with Completer guard (task .3).
+4. **500ms minimum splash display time** via `Future.wait([_bootstrap(), splashTimer])`, ensuring the entrance animation completes before any state transition (task .4).
+5. **Regression tests and doc updates** covering `StartupViewModel`, `StartupView`, and `initDataSource` guard (task .5).
+
+**Spec**: `docs/specs/20260322120000_spec_app_launch_handoff.md`
+**Best practices**: `docs/best_practices/architecture/app_launch_and_handoff_to_flutter.md`
+
 ## Preventive Measures
 - Add startup visual parity checklist: native launch bg must match first Flutter route bg.
 - Require explicit justification for any new pre-`runApp()` await.

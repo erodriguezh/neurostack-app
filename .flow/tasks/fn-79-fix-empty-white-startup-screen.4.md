@@ -47,9 +47,8 @@ Follow `plan_app_launch_handoff.md` Phase 2.
 - [ ] `flutter analyze` passes
 - [ ] Existing tests still pass (no test changes in this task)
 ## Done summary
-TBD
-
+Extracted bootstrap sequence into _bootstrap() returning typed _BootstrapResult enum, wrapped with Future.wait and 500ms minimum delay so the splash entrance animation always completes before any state transition. Error path also awaits the splash timer.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: cdb52b1, ba2646fd3a248b5a87549949367c05d1d295c1e4
+- Tests: flutter analyze, flutter test
 - PRs:
