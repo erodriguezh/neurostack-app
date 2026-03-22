@@ -65,9 +65,8 @@ Follow `plan_app_launch_handoff.md` Phase 1 (1a + 1b + 1c). All subparts must la
 - [ ] `@visibleForTesting resetDataSourceInitGuard()` exposed
 - [ ] `flutter analyze` passes
 ## Done summary
-TBD
-
+Atomic startup refactor: made main() synchronous, moved initDataSource() and SharedPreferences loading into StartupViewModel.initializeApp(), deferred BestRouterConfig creation until AppInitialized state, added Completer-based idempotency to initDataSource(), added reentrancy guard on initializeApp(), and implemented post-frame callback scheduling so splash renders before bootstrap work begins.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: bbd3b043f60a93445d0f3f6da6fc3c6c3b4327e0
+- Tests: flutter analyze, flutter test
 - PRs:

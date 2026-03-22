@@ -43,6 +43,16 @@ class AppInitializationError extends AppState {
   const AppInitializationError(this.error, this.stackTrace);
 }
 
+/// Typed result of the bootstrap sequence, used to decide routing after
+/// the minimum splash display time elapses.
+enum _BootstrapResult {
+  /// All services initialized successfully and user is reachable.
+  initialized,
+
+  /// Device is offline and no cached user session exists.
+  offlineNoUser,
+}
+
 /// ViewModel responsible for handling app startup and initialization
 class StartupViewModel {
   StartupViewModel({
@@ -82,73 +92,33 @@ class StartupViewModel {
     return _bootstrapFuture!;
   }
 
+  /// Minimum time the splash screen is displayed, aligned with the entrance
+  /// animation duration (500ms). Exposed as a field for test overrides.
+  @visibleForTesting
+  static Duration minSplashDuration = const Duration(milliseconds: 500);
+
   Future<void> _doInitializeApp() async {
     appStateNotifier.value = const InitializingApp();
+
+    // Start the minimum splash timer immediately — it runs in parallel with
+    // _bootstrap() so the entrance animation (500ms) always completes before
+    // any state transition. Both success and error paths await this timer.
+    final splashTimer = Future<void>.delayed(minSplashDuration);
+
     try {
-      // Phase 1: Initialize data source (Supabase) — idempotent via completer.
-      await _initDataSource();
-
-      // Phase 2: Get SharedPreferences instance.
-      final sharedPreferences = await _getSharedPreferences();
-
-      // Phase 3: Register core modules. RouterService and other
-      // startup-critical modules are available immediately after this call.
-      locator.registerMany(
-        buildModules(sharedPreferences: sharedPreferences),
-      );
-
-      // Phase 4: Fetch PackageInfo asynchronously and register it.
-      final packageInfo = await _getPackageInfo();
-      locator.registerMany([
-        Module<PackageInfo>(builder: () => packageInfo, lazy: false),
+      final results = await Future.wait<Object?>([
+        _bootstrap(),
+        splashTimer,
       ]);
 
-      loggingSubscription?.cancel();
-      loggingSubscription = _loggingAbstraction.initializeLogging();
-      locator<AppLifecycleService>().attachStartupViewModel(this);
+      final result = results[0] as _BootstrapResult;
 
-      // Initialize onboarding store (runs async migration)
-      final onboardingStore = locator<OnboardingStore>();
-      await onboardingStore.init();
-
-      // Set up onboarding guard for post-auth navigation
-      final routerService = locator<RouterService>();
-      routerService.setOnboardingGuard(() => !onboardingStore.isCompleted);
-
-      // CRITICAL: Init RevenueCat FIRST (before auth rehydration triggers identify)
-      // Auth rehydration may call identify() - SDK must be configured first.
-      // If init() fails, identify() will gracefully degrade (log and return).
-      final revenueCatService = locator<RevenueCatService>();
-      try {
-        await revenueCatService.init();
-      } catch (e, st) {
-        _logger.warning('RevenueCat init failed', e, st);
-        // Continue - app works without RC, just can't show paywall
-        // identify() calls will gracefully degrade (log and return)
-      }
-
-      // Init UserOrient (synchronous, best-effort — app works without it)
-      try {
-        locator<UserOrientService>().init();
-      } catch (e, st) {
-        _logger.warning('UserOrient init failed', e, st);
-      }
-
-      // Init InAppReview (synchronous, best-effort — app works without it)
-      try {
-        locator<InAppReviewService>().init();
-      } catch (e, st) {
-        _logger.warning('InAppReview init failed', e, st);
-      }
-
-      final authService = locator<AuthService>();
-      await authService.init(); // This may trigger identify() via rehydration
-
-      if (authService.authState.value is auth_state.OfflineNoUser) {
+      if (result == _BootstrapResult.offlineNoUser) {
         appStateNotifier.value = const OfflineNoUserState();
         return;
       }
 
+      // _BootstrapResult.initialized — finish routing.
       // Initialize session sync service and trigger startup sync
       final syncService = locator<SessionSyncService>();
       syncService.init();
@@ -156,14 +126,89 @@ class StartupViewModel {
 
       appStateNotifier.value = const AppInitialized();
 
+      final routerService = locator<RouterService>();
+      final authService = locator<AuthService>();
       if (routerService.shouldShowOnboarding()) {
         routerService.replaceAll([Path(name: '/onboarding')]);
       } else if (authService.authState.value is auth_state.Unauthenticated) {
         routerService.replaceAll([Path(name: '/auth')]);
       }
     } catch (e, st) {
+      // Ensure the splash is visible for the minimum duration even on errors.
+      // Future.wait rejects eagerly when _bootstrap() throws, so we must
+      // explicitly await the timer before transitioning to the error state.
+      await splashTimer;
       appStateNotifier.value = AppInitializationError(e, st);
     }
+  }
+
+  /// Core bootstrap sequence: initializes all services and returns a typed
+  /// result indicating whether the app is ready or offline without a user.
+  Future<_BootstrapResult> _bootstrap() async {
+    // Phase 1: Initialize data source (Supabase) — idempotent via completer.
+    await _initDataSource();
+
+    // Phase 2: Get SharedPreferences instance.
+    final sharedPreferences = await _getSharedPreferences();
+
+    // Phase 3: Register core modules. RouterService and other
+    // startup-critical modules are available immediately after this call.
+    locator.registerMany(
+      buildModules(sharedPreferences: sharedPreferences),
+    );
+
+    // Phase 4: Fetch PackageInfo asynchronously and register it.
+    final packageInfo = await _getPackageInfo();
+    locator.registerMany([
+      Module<PackageInfo>(builder: () => packageInfo, lazy: false),
+    ]);
+
+    loggingSubscription?.cancel();
+    loggingSubscription = _loggingAbstraction.initializeLogging();
+    locator<AppLifecycleService>().attachStartupViewModel(this);
+
+    // Initialize onboarding store (runs async migration)
+    final onboardingStore = locator<OnboardingStore>();
+    await onboardingStore.init();
+
+    // Set up onboarding guard for post-auth navigation
+    final routerService = locator<RouterService>();
+    routerService.setOnboardingGuard(() => !onboardingStore.isCompleted);
+
+    // CRITICAL: Init RevenueCat FIRST (before auth rehydration triggers identify)
+    // Auth rehydration may call identify() - SDK must be configured first.
+    // If init() fails, identify() will gracefully degrade (log and return).
+    final revenueCatService = locator<RevenueCatService>();
+    try {
+      await revenueCatService.init();
+    } catch (e, st) {
+      _logger.warning('RevenueCat init failed', e, st);
+      // Continue - app works without RC, just can't show paywall
+      // identify() calls will gracefully degrade (log and return)
+    }
+
+    // Init UserOrient (synchronous, best-effort — app works without it)
+    try {
+      locator<UserOrientService>().init();
+    } catch (e, st) {
+      _logger.warning('UserOrient init failed', e, st);
+    }
+
+    // Init InAppReview (synchronous, best-effort — app works without it)
+    try {
+      locator<InAppReviewService>().init();
+    } catch (e, st) {
+      _logger.warning('InAppReview init failed', e, st);
+    }
+
+    final authService = locator<AuthService>();
+    await authService.init(); // This may trigger identify() via rehydration
+
+    if (authService.authState.value is auth_state.OfflineNoUser) {
+      return _BootstrapResult.offlineNoUser;
+    }
+
+    return _BootstrapResult.initialized;
   }
 
   Future<void> retryInitialization() async {
