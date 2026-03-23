@@ -99,17 +99,19 @@ class StartupViewModel {
     return _bootstrapFuture!;
   }
 
-  /// Minimum time the splash screen is displayed, aligned with the entrance
-  /// animation duration (500ms). Exposed as a field for test overrides.
+  /// Minimum time the splash screen is displayed. Ensures the entrance
+  /// animation (500ms) completes and the breathing glow is briefly visible
+  /// before any state transition. Exposed as a field for test overrides.
   @visibleForTesting
-  static Duration minSplashDuration = const Duration(milliseconds: 500);
+  static Duration minSplashDuration = const Duration(milliseconds: 1000);
 
   Future<void> _doInitializeApp() async {
     appStateNotifier.value = const InitializingApp();
 
     // Start the minimum splash timer immediately — it runs in parallel with
-    // _bootstrap() so the entrance animation (500ms) always completes before
-    // any state transition. Both success and error paths await this timer.
+    // _bootstrap() so the entrance animation (500ms) and breathing glow
+    // (remaining ~500ms) always complete before any state transition.
+    // Both success and error paths await this timer.
     final splashTimer = Future<void>.delayed(minSplashDuration);
 
     try {

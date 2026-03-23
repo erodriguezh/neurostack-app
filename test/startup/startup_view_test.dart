@@ -40,7 +40,7 @@ void main() {
 
   tearDown(() {
     locator.reset();
-    StartupViewModel.minSplashDuration = const Duration(milliseconds: 500);
+    StartupViewModel.minSplashDuration = const Duration(milliseconds: 1000);
   });
 
   /// Creates a StartupViewModel with the given dataSourceInitializer.

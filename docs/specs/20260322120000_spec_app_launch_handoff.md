@@ -7,7 +7,7 @@ The Flutter `SplashScreen` is only visible for a few milliseconds because `main(
 The goal is a seamless cold-start experience:
 
 1. Native splash covers engine startup (already dark-themed — commit `d5e219d`).
-2. Flutter `SplashScreen` appears immediately and stays visible long enough for its entrance animation (500ms) to complete.
+2. Flutter `SplashScreen` appears immediately and stays visible for at least 1000ms (entrance animation + breathing glow).
 3. Bootstrap runs concurrently behind the splash.
 4. Transition to the app happens only after both bootstrap and the minimum display time finish.
 
@@ -126,13 +126,13 @@ void initState() {
 **Files affected:**
 - `lib/startup/startup_view.dart` — restructure `initState()` and `build()` so that `BestRouterConfig` is created on first `AppInitialized` render, not on init
 
-### Change 3: Minimum splash display time (500ms)
+### Change 3: Minimum splash display time (1000ms)
 
 **Practice 7** from the handoff doc: *Make the first Flutter route cheap to render* + product intent for a polished first impression.
 
 The entrance animation is 500ms (`lib/startup/splash_screen.dart:46-49`). Bootstrap should not dismiss the splash before the animation completes.
 
-**Approach**: In `StartupViewModel.initializeApp()`, wrap the bootstrap in a `Future.wait` with a `Future.delayed(Duration(milliseconds: 500))`. The splash stays visible for whichever takes longer.
+**Approach**: In `StartupViewModel.initializeApp()`, wrap the bootstrap in a `Future.wait` with a `Future.delayed(Duration(milliseconds: 1000))`. The splash stays visible for whichever takes longer.
 
 **Files affected:**
 - `lib/startup/startup_view_model.dart` — add minimum display time via `Future.wait`
@@ -153,7 +153,7 @@ With `SharedPreferences.getInstance()` moving inside `initializeApp()`, the para
 - **Supabase re-initialization**: Verify that `Supabase.initialize()` can be called after a `locator.reset()` without throwing. If it throws on double-init, add a guard.
 - **`configureUrlStrategy()`** remains synchronous before `runApp()` — no change needed.
 - **Lifecycle events during bootstrap**: `_AppLifecycleObserver.didChangeAppLifecycleState()` already guards against missing DI with a `try/catch` on `ModuleNotFoundException` (`main.dart:57-59`). No change needed.
-- **500ms minimum is not artificial delay**: On fast devices, the 500ms covers the entrance animation. On slow devices, bootstrap takes longer and is the natural bottleneck. The `Future.wait` pattern ensures no unnecessary waiting.
+- **1000ms minimum is not artificial delay**: On fast devices, the 1000ms covers the entrance animation (500ms) plus a brief breathing glow (~500ms). On slow devices, bootstrap takes longer and is the natural bottleneck. The `Future.wait` pattern ensures no unnecessary waiting.
 
 ## Acceptance Criteria
 
@@ -161,8 +161,8 @@ With `SharedPreferences.getInstance()` moving inside `initializeApp()`, the para
 - [ ] `Supabase.initialize()` and `SharedPreferences.getInstance()` both run inside `StartupViewModel.initializeApp()`
 - [ ] `sharedPreferences` parameter removed from `_AppLifecycleObserver`, `StartupView`, and `StartupViewModel` constructors
 - [ ] `BestRouterConfig` is not created until `AppInitialized` state — `locator<RouterService>()` is not called during `initState()`
-- [ ] `SplashScreen` is visible for at least 500ms after first paint (bootstrap starts from post-frame callback, 500ms minimum enforced via `Future.wait`)
-- [ ] 500ms minimum applies to all terminal outcomes (success, offline-no-user, error) — no instant flash for any path
+- [ ] `SplashScreen` is visible for at least 1000ms after first paint (bootstrap starts from post-frame callback, 1000ms minimum enforced via `Future.wait`)
+- [ ] 1000ms minimum applies to all terminal outcomes (success, offline-no-user, error) — no instant flash for any path
 - [ ] `retryInitialization()` path still works correctly (router config cleared, Supabase re-init is idempotent)
 - [ ] No white or black flash between native splash and first Flutter frame
 - [ ] `flutter analyze` passes

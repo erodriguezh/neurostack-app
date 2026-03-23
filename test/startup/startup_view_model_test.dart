@@ -50,7 +50,7 @@ void main() {
   tearDown(() {
     viewModel.dispose();
     locator.reset();
-    StartupViewModel.minSplashDuration = const Duration(milliseconds: 500);
+    StartupViewModel.minSplashDuration = const Duration(milliseconds: 1000);
   });
 
   group('StartupViewModel', () {
@@ -178,7 +178,7 @@ void main() {
         () {
           fakeAsync((async) {
             StartupViewModel.minSplashDuration =
-                const Duration(milliseconds: 500);
+                const Duration(milliseconds: 1000);
 
             final vm = StartupViewModel(
               loggingAbstraction: mockLogging,
@@ -196,8 +196,8 @@ void main() {
             async.elapse(const Duration(milliseconds: 200));
             expect(vm.appStateNotifier.value, isA<InitializingApp>());
 
-            // At 500ms, the splash timer completes and error is emitted.
-            async.elapse(const Duration(milliseconds: 300));
+            // At 1000ms, the splash timer completes and error is emitted.
+            async.elapse(const Duration(milliseconds: 800));
             expect(vm.appStateNotifier.value, isA<AppInitializationError>());
 
             vm.dispose();
@@ -210,13 +210,13 @@ void main() {
         () {
           fakeAsync((async) {
             StartupViewModel.minSplashDuration =
-                const Duration(milliseconds: 500);
+                const Duration(milliseconds: 1000);
 
-            // Slow failure: takes 600ms (longer than splash).
+            // Slow failure: takes 1100ms (longer than splash).
             final vm = StartupViewModel(
               loggingAbstraction: mockLogging,
               dataSourceInitializer: () async {
-                await Future<void>.delayed(const Duration(milliseconds: 600));
+                await Future<void>.delayed(const Duration(milliseconds: 1100));
                 throw Exception('slow failure');
               },
               sharedPreferencesLoader: () async =>
@@ -226,11 +226,11 @@ void main() {
 
             vm.initializeApp();
 
-            // At 500ms, splash timer done but bootstrap still running.
-            async.elapse(const Duration(milliseconds: 500));
+            // At 1000ms, splash timer done but bootstrap still running.
+            async.elapse(const Duration(milliseconds: 1000));
             expect(vm.appStateNotifier.value, isA<InitializingApp>());
 
-            // At 600ms, bootstrap fails. The catch block awaits splashTimer
+            // At 1100ms, bootstrap fails. The catch block awaits splashTimer
             // (already resolved), so error emits immediately.
             async.elapse(const Duration(milliseconds: 100));
             expect(vm.appStateNotifier.value, isA<AppInitializationError>());
@@ -245,7 +245,7 @@ void main() {
         () {
           fakeAsync((async) {
             StartupViewModel.minSplashDuration =
-                const Duration(milliseconds: 500);
+                const Duration(milliseconds: 1000);
 
             final vm = StartupViewModel(
               loggingAbstraction: mockLogging,
@@ -258,8 +258,8 @@ void main() {
             async.elapse(const Duration(milliseconds: 200));
             expect(vm.appStateNotifier.value, isA<InitializingApp>());
 
-            // At 500ms, splash timer completes and state becomes AppInitialized.
-            async.elapse(const Duration(milliseconds: 300));
+            // At 1000ms, splash timer completes and state becomes AppInitialized.
+            async.elapse(const Duration(milliseconds: 800));
             expect(vm.appStateNotifier.value, isA<AppInitialized>());
 
             vm.dispose();
@@ -272,7 +272,7 @@ void main() {
         () {
           fakeAsync((async) {
             StartupViewModel.minSplashDuration =
-                const Duration(milliseconds: 500);
+                const Duration(milliseconds: 1000);
 
             final vm = StartupViewModel(
               loggingAbstraction: mockLogging,
@@ -285,8 +285,8 @@ void main() {
             async.elapse(const Duration(milliseconds: 200));
             expect(vm.appStateNotifier.value, isA<InitializingApp>());
 
-            // At 500ms, transitions to offline.
-            async.elapse(const Duration(milliseconds: 300));
+            // At 1000ms, transitions to offline.
+            async.elapse(const Duration(milliseconds: 800));
             expect(vm.appStateNotifier.value, isA<OfflineNoUserState>());
 
             vm.dispose();

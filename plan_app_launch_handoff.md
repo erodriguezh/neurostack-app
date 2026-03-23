@@ -136,7 +136,7 @@ Move all pre-`runApp()` async work into `StartupViewModel.initializeApp()`, make
       if (state is InitializingApp) {
         // Clear cached router on retry so we get a fresh RouterService instance
         _routerConfig = null;
-        // Schedule bootstrap after this frame paints — ensures the 500ms
+        // Schedule bootstrap after this frame paints — ensures the 1000ms
         // minimum timer starts after the splash is visible. Works for both
         // initial cold start and retry (retryInitialization sets InitializingApp
         // then this callback fires on the next build).
@@ -160,7 +160,7 @@ Move all pre-`runApp()` async work into `StartupViewModel.initializeApp()`, make
       };
     }
     ```
-  - **Why this works for retry:** `retryInitialization()` sets `appStateNotifier.value = InitializingApp()`, disposes services, and resets the locator — but no longer calls `initializeApp()` directly. Instead, the `ValueListenableBuilder` detects the `InitializingApp` state, clears the cached router, and schedules `initializeApp()` from a post-frame callback. This ensures the retry splash frame paints before the 500ms timer starts, matching the cold-start behavior exactly.
+  - **Why this works for retry:** `retryInitialization()` sets `appStateNotifier.value = InitializingApp()`, disposes services, and resets the locator — but no longer calls `initializeApp()` directly. Instead, the `ValueListenableBuilder` detects the `InitializingApp` state, clears the cached router, and schedules `initializeApp()` from a post-frame callback. This ensures the retry splash frame paints before the 1000ms timer starts, matching the cold-start behavior exactly.
   - Update `retryInitialization()` in `StartupViewModel` — preserve the existing "flip state before disposal" ordering to prevent widgets from reading disposed services, and keep `Future<void>` return type for the `AppLifecycleService.restartApp()` → `AuthService.logout()` await chain:
     ```dart
     Future<void> retryInitialization() async {
@@ -224,7 +224,7 @@ Move all pre-`runApp()` async work into `StartupViewModel.initializeApp()`, make
     ```
   - **Why separate `MaterialApp` and `MaterialApp.router`:** The `SplashScreen`, error, and offline views do not use routing. Wrapping them in `MaterialApp.router` forces early `RouterService` resolution. A plain `MaterialApp` avoids that dependency while preserving localization delegates, theme, dark theme, and `Translate.init(context)`.
 
-## Phase 2: Add minimum splash display time (500ms)
+## Phase 2: Add minimum splash display time (1000ms)
 
 Ensure the splash entrance animation completes before transitioning.
 
@@ -315,7 +315,7 @@ Ensure the splash entrance animation completes before transitioning.
       try {
         final results = await Future.wait([
           _bootstrap(),
-          Future<void>.delayed(const Duration(milliseconds: 500)),
+          Future<void>.delayed(const Duration(milliseconds: 1000)),
         ]);
         final result = results[0] as _BootstrapResult;
 
@@ -341,9 +341,9 @@ Ensure the splash entrance animation completes before transitioning.
     ```
   - **Why `_BootstrapResult`:** The original plan's pseudocode (`await Future.wait([...]); appStateNotifier.value = AppInitialized()`) would clobber the `OfflineNoUserState` branch. The typed return ensures all three outcomes (`initialized`, `offlineNoUser`, error via catch) are preserved after the min-delay completes.
 
-- **Timing anchor:** `initializeApp()` is called from a post-frame callback (see Phase 1c), so the 500ms minimum timer starts after the splash frame has painted. The splash entrance animation (`_entranceController.forward()`) starts in `SplashScreen.initState()` which fires during the first frame build. This ensures the full 500ms of visible splash animation completes before any state transition.
+- **Timing anchor:** `initializeApp()` is called from a post-frame callback (see Phase 1c), so the 1000ms minimum timer starts after the splash frame has painted. The splash entrance animation (`_entranceController.forward()`) starts in `SplashScreen.initState()` which fires during the first frame build. This ensures the full entrance animation (500ms) and breathing glow (~500ms) complete before any state transition.
 
-- **Minimum duration applies to all outcomes:** The `Future.wait` pattern means the 500ms minimum applies to `AppInitialized`, `OfflineNoUserState`, and `AppInitializationError` equally. This is intentional — a near-instant error flash is jarring. The splash stays visible for at least 500ms regardless of outcome, giving the user a moment to orient before seeing an error or offline screen.
+- **Minimum duration applies to all outcomes:** The `Future.wait` pattern means the 1000ms minimum applies to `AppInitialized`, `OfflineNoUserState`, and `AppInitializationError` equally. This is intentional — a near-instant error flash is jarring. The splash stays visible for at least 1000ms regardless of outcome, giving the user a moment to orient before seeing an error or offline screen.
 
 ## Phase 3: Update tests
 
@@ -362,7 +362,7 @@ Ensure the splash entrance animation completes before transitioning.
   - Retry/restart recreates router wiring after `locator.reset()` — verifies `_routerConfig` is cleared and a fresh `BestRouterConfig` is created on re-init
   - `initDataSource()` second call after success is a no-op (idempotency guard) — use `resetDataSourceInitGuard()` between test cases
   - `initDataSource()` second call after failure retries (completer reset) — verify `_initCompleter` is nulled on error
-  - Minimum splash duration: use `fakeAsync` to verify `AppInitialized` is not emitted before 500ms even when bootstrap completes instantly; verify the same holds for `OfflineNoUserState` and `AppInitializationError`
+  - Minimum splash duration: use `fakeAsync` to verify `AppInitialized` is not emitted before 1000ms even when bootstrap completes instantly; verify the same holds for `OfflineNoUserState` and `AppInitializationError`
   - Delayed router + deep link: verify that when `BestRouterConfig` is created lazily after `AppInitialized`, a non-`/` platform initial route (e.g., from a deep link) is still correctly received by `PlatformRouteInformationProvider` and funneled through auth/onboarding guards. This covers the web/browser edge case where the initial route is set before the router exists.
 
 ## Phase 4: Verify
@@ -388,7 +388,7 @@ Ensure the splash entrance animation completes before transitioning.
 | File | Change |
 |---|---|
 | `lib/main.dart` | Remove 2 awaits, remove `async`, remove `sharedPreferences` param, remove imports, make constructor `const` |
-| `lib/startup/startup_view_model.dart` | Remove `sharedPreferences` param, add `initDataSource()` + `SharedPreferences.getInstance()` to `_bootstrap()`, add 500ms min display time via `Future.wait`, extract `_bootstrap()` returning `_BootstrapResult` |
+| `lib/startup/startup_view_model.dart` | Remove `sharedPreferences` param, add `initDataSource()` + `SharedPreferences.getInstance()` to `_bootstrap()`, add 1000ms min display time via `Future.wait`, extract `_bootstrap()` returning `_BootstrapResult` |
 | `lib/startup/startup_view.dart` | Remove `sharedPreferences` param, defer `BestRouterConfig` to `AppInitialized`, clear on retry, extract `_buildAppShell()` and `_buildRouterApp()` helpers sharing localization/theme config |
 | `lib/core/utils/data_source/data_source_init.dart` | Add completer-based idempotency guard with failure reset for retry safety |
 | `lib/core/utils/app_lifecycle_service.dart` | No change needed — `restartApp()` still awaits `retryInitialization()`, which now completes after cleanup |

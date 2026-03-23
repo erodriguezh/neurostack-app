@@ -142,7 +142,7 @@ Implemented across epic `fn-79-fix-empty-white-startup-screen` (branch `feature/
 1. **Native launch surfaces made dark (#030303)** on Android and iOS (task .1).
 2. **`PackageInfo.fromPlatform()` deferred** after `runApp()` (task .2).
 3. **Atomic startup refactor**: synchronous `main()`, deferred `BestRouterConfig`, idempotent `initDataSource` with Completer guard (task .3).
-4. **500ms minimum splash display time** via `Future.wait([_bootstrap(), splashTimer])`, ensuring the entrance animation completes before any state transition (task .4).
+4. **Minimum splash display time** via `Future.wait([_bootstrap(), splashTimer])`, ensuring the entrance animation completes before any state transition (task .4). Originally 500ms; later increased to 1000ms in epic `fn-80-increment-splash-screen-min-visible` to allow the breathing glow to be briefly visible after the entrance animation.
 5. **Regression tests and doc updates** covering `StartupViewModel`, `StartupView`, and `initDataSource` guard (task .5).
 
 **Spec**: `docs/specs/20260322120000_spec_app_launch_handoff.md`
