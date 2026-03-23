@@ -50,3 +50,10 @@ Bump the splash screen minimum visible time from 500ms to 1000ms and update all 
 - [ ] All `docs/README.md` App Launch Handoff entries describing splash minimum updated to 1000ms
 - [ ] Investigation doc resolution updated with fn-80 historical note
 - [ ] `flutter analyze` clean
+
+## Done summary
+Bumped minSplashDuration from 500ms to 1000ms to allow both the entrance animation and breathing glow to complete before state transitions. Updated doc comments, all 4 fakeAsync timing tests, tearDown resets, slow-failure delay (1100ms), and all spec/plan/README/investigation doc references.
+## Evidence
+- Commits: 07f8566694f4bcbacc78219833b1585c77350b50
+- Tests: flutter test test/startup/, flutter analyze
+- PRs:
