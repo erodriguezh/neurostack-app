@@ -1,5 +1,5 @@
 study docs/README.md
-work on task fn-78-send-feedback-mailto-via-url-launcher.4
+work on task fn-79-fix-empty-white-startup-screen.5
 
 MCP available
 - dart

@@ -26,12 +26,6 @@ List<Module> buildTestModules({
 }) {
   final modules = buildModules(
     sharedPreferences: sharedPreferences,
-    packageInfo: PackageInfo(
-      appName: 'NeuroStack',
-      packageName: 'app.getneurostack',
-      version: '1.0.0',
-      buildNumber: '1',
-    ),
   );
   final overrides = <Type, Module>{};
 
@@ -72,9 +66,22 @@ List<Module> buildTestModules({
     );
   }
 
-  return modules
+  final result = modules
       .map((module) => overrides[module.type] ?? module)
       .toList();
+
+  // PackageInfo is registered separately (no longer in buildModules)
+  result.add(Module<PackageInfo>(
+    builder: () => PackageInfo(
+      appName: 'NeuroStack',
+      packageName: 'app.getneurostack',
+      version: '1.0.0',
+      buildNumber: '1',
+    ),
+    lazy: false,
+  ));
+
+  return result;
 }
 
 Future<Widget> createTestApp({

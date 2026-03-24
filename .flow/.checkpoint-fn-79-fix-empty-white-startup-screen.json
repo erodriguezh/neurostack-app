@@ -1,0 +1,66 @@
+{
+  "created_at": "2026-03-21T19:23:29.318589Z",
+  "epic": {
+    "data": {
+      "branch_name": "feature/splash-screen",
+      "completion_review_status": "unknown",
+      "completion_reviewed_at": null,
+      "created_at": "2026-03-21T19:21:43.962465Z",
+      "default_impl": null,
+      "default_review": null,
+      "default_sync": null,
+      "depends_on_epics": [],
+      "id": "fn-79-fix-empty-white-startup-screen",
+      "next_task": 1,
+      "plan_review_status": "unknown",
+      "plan_reviewed_at": null,
+      "spec_path": ".flow/specs/fn-79-fix-empty-white-startup-screen.md",
+      "status": "open",
+      "title": "Fix empty white startup screen",
+      "updated_at": "2026-03-21T19:22:08.290490Z"
+    },
+    "spec": "# Fix Empty/White Startup Screen\n\n## Overview\n\nUsers see a white/light native launch surface before Flutter's dark splash screen appears. Root cause: Android and iOS native launch surfaces are configured white/light (#FFFFFF), while the Flutter `SplashScreen` widget uses dark (#030303). Pre-`runApp()` async work (`Supabase`, `SharedPreferences`, `PackageInfo`) extends time on the white native surface.\n\n**Investigation**: `docs/investigations/20260321174500_investigation_empty_white_startup_screen.md`\n\n## Scope\n\n1. **Native launch surfaces \u2192 dark #030303** (Android + iOS)\n2. **Defer `PackageInfo.fromPlatform()` after `runApp()`** to reduce pre-render wait\n\nOut of scope: Supabase/SharedPreferences deferral, flutter_native_splash package adoption, animated native splash.\n\n## Key Decisions\n\n- **Color**: Exactly `#030303` via custom `colors.xml` / explicit storyboard RGB \u2014 NOT `@android:color/black` (#000000), which is perceptibly different on OLED\n- **DI strategy**: Await `PackageInfo.fromPlatform()` at top of `initializeApp()`, pass to `buildModules()` \u2014 preserves existing registration pattern, removes from constructor chain\n- **PackageInfo failure**: Caught by existing `try/catch` in `initializeApp()` \u2192 error screen with retry (consistent behavior)\n- **Android 12+**: Create `values-v31` + `values-night-v31` with `windowSplashScreenBackground`; add `setOnExitAnimationListener` in `MainActivity.kt` to prevent fade flicker\n- **Night mode**: Create `drawable-night/launch_background.xml` for future-proofing\n\n## Quick commands\n\n```bash\n# Build and run on iOS simulator (clear cache first)\nflutter clean && flutter pub get && flutter run -d 1EA9596A-EBDF-4B22-9781-181F20DEB836 --dart-define-from-file=env/env.json\n\n# Analyze\nflutter analyze\n\n# Run tests\nflutter test\n```\n\n## Acceptance\n\n- [ ] No white flash visible on cold start (Android pre-12, Android 12+, iOS)\n- [ ] Native launch surface matches Flutter splash background (#030303)\n- [ ] `PackageInfo.fromPlatform()` no longer blocks `runApp()`\n- [ ] `flutter analyze` passes\n- [ ] Existing tests pass\n- [ ] Retry initialization path still works (error \u2192 retry \u2192 success)\n\n## References\n\n- Flutter Android splash docs: https://docs.flutter.dev/platform-integration/android/splash-screen\n- Flutter iOS splash docs: https://docs.flutter.dev/platform-integration/ios/splash-screen\n- Android 12 SplashScreen API: https://developer.android.com/develop/ui/views/launch/splash-screen\n- Investigation: `docs/investigations/20260321174500_investigation_empty_white_startup_screen.md`\n- Related epics: fn-78 (established PackageInfo injection), fn-75 (dark-first route policy)\n"
+  },
+  "epic_id": "fn-79-fix-empty-white-startup-screen",
+  "schema_version": 2,
+  "tasks": [
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-03-21T19:22:14.133595Z",
+        "depends_on": [],
+        "epic": "fn-79-fix-empty-white-startup-screen",
+        "id": "fn-79-fix-empty-white-startup-screen.1",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-79-fix-empty-white-startup-screen.1.md",
+        "status": "todo",
+        "title": "Make native launch surfaces dark on Android and iOS",
+        "updated_at": "2026-03-21T19:22:37.401038Z"
+      },
+      "id": "fn-79-fix-empty-white-startup-screen.1",
+      "runtime": null,
+      "spec": "# fn-79-fix-empty-white-startup-screen.1 Make native launch surfaces dark on Android and iOS\n\n## Description\nMake all native launch surfaces dark (#030303) on both Android and iOS to match the Flutter `SplashScreen` background, eliminating the white flash on cold start.\n\n**Size:** M\n**Files:**\n- `android/app/src/main/res/values/colors.xml` (create) \u2014 define `launch_background` color `#FF030303`\n- `android/app/src/main/res/drawable/launch_background.xml` \u2014 change `@android:color/white` \u2192 `@color/launch_background`\n- `android/app/src/main/res/drawable-v21/launch_background.xml` \u2014 change `?android:colorBackground` \u2192 `@color/launch_background`\n- `android/app/src/main/res/drawable-night/launch_background.xml` (create) \u2014 same dark color for night mode\n- `android/app/src/main/res/values/styles.xml` \u2014 change LaunchTheme + NormalTheme parent to `Theme.Black.NoTitleBar`\n- `android/app/src/main/res/values-v31/styles.xml` (create) \u2014 `android:windowSplashScreenBackground` = `@color/launch_background`\n- `android/app/src/main/res/values-night-v31/styles.xml` (create) \u2014 same for night mode\n- `android/app/src/main/kotlin/.../MainActivity.kt` \u2014 add `setOnExitAnimationListener` for Android 12+ fade prevention\n- `ios/Runner/Base.lproj/LaunchScreen.storyboard` \u2014 change white RGB \u2192 `red=\"0.012\" green=\"0.012\" blue=\"0.012\"`\n- `ios/Runner/Base.lproj/Main.storyboard` \u2014 change `white=\"1\"` \u2192 matching dark color\n\n## Approach\n\n- Follow existing resource structure in `android/app/src/main/res/`\n- Use `@color/launch_background` reference everywhere (DRY via `colors.xml`)\n- Match Flutter `kitColors.background` at `lib/core/ui/constants/kit_colors.dart:472` \u2014 `Color(0xFF030303)`\n- `values-night/styles.xml:4` already uses `Theme.Black.NoTitleBar` \u2014 just needs the drawable fixed\n- `values-v31` LaunchTheme should inherit from base LaunchTheme and add the `android:windowSplashScreenBackground` attribute\n- For iOS, use `colorSpace=\"custom\" customColorSpace=\"sRGB\"` format for exact color match\n\n## Key context\n\n- `drawable-v21/launch_background.xml:4` uses `?android:colorBackground` which resolves per theme \u2014 replace with explicit color ref\n- Android 12+ ignores `windowBackground`; must use `windowSplashScreenBackground` in `values-v31`\n- `setOnExitAnimationListener { it.remove() }` prevents the default 1s crossfade on Android 12+\n- iOS caches launch screens aggressively \u2014 testing requires `flutter clean` + app reinstall\n- `compileSdkVersion` resolves to 36 via Flutter toolchain; `minSdkVersion` 24 \u2014 `values-v31` resources will take effect on API 31+ devices\n## Acceptance\n- [ ] `values/colors.xml` defines `launch_background` as `#FF030303`\n- [ ] `drawable/launch_background.xml` references `@color/launch_background` (not `@android:color/white`)\n- [ ] `drawable-v21/launch_background.xml` references `@color/launch_background` (not `?android:colorBackground`)\n- [ ] `drawable-night/launch_background.xml` exists with dark color\n- [ ] `values/styles.xml` LaunchTheme and NormalTheme use `Theme.Black.NoTitleBar`\n- [ ] `values-v31/styles.xml` sets `android:windowSplashScreenBackground`\n- [ ] `values-night-v31/styles.xml` sets `android:windowSplashScreenBackground`\n- [ ] `MainActivity.kt` calls `setOnExitAnimationListener` for API 31+\n- [ ] `LaunchScreen.storyboard` background is dark (not white)\n- [ ] `Main.storyboard` background is dark (not white)\n- [ ] `flutter analyze` passes\n- [ ] App builds and runs on both platforms without errors\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-03-21T19:22:14.270168Z",
+        "depends_on": [],
+        "epic": "fn-79-fix-empty-white-startup-screen",
+        "id": "fn-79-fix-empty-white-startup-screen.2",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-79-fix-empty-white-startup-screen.2.md",
+        "status": "todo",
+        "title": "Defer PackageInfo.fromPlatform() after runApp()",
+        "updated_at": "2026-03-21T19:22:53.429740Z"
+      },
+      "id": "fn-79-fix-empty-white-startup-screen.2",
+      "runtime": null,
+      "spec": "# fn-79-fix-empty-white-startup-screen.2 Defer PackageInfo.fromPlatform() after runApp()\n\n## Description\nRemove `PackageInfo.fromPlatform()` from pre-`runApp()` in `main()` and resolve it inside `StartupViewModel.initializeApp()` instead. This reduces the time users spend on the native launch surface before Flutter renders its first frame.\n\n**Size:** M\n**Files:**\n- `lib/main.dart` \u2014 remove `PackageInfo.fromPlatform()` await, remove `packageInfo` from `_AppLifecycleObserver` and `StartupView` constructor calls\n- `lib/startup/startup_view.dart` \u2014 remove `packageInfo` constructor parameter, stop passing it to `StartupViewModel`\n- `lib/startup/startup_view_model.dart` \u2014 remove `packageInfo` constructor parameter, await `PackageInfo.fromPlatform()` at top of `initializeApp()`, pass result to `buildModules()`\n- `lib/config/locator_config.dart` \u2014 no signature change needed (`buildModules` already takes `packageInfo` param)\n\n## Approach\n\n- Await `PackageInfo.fromPlatform()` at the top of `initializeApp()` before calling `buildModules()` \u2014 this preserves the existing DI registration pattern where `buildModules` receives `packageInfo` as a parameter\n- Remove `packageInfo` from the constructor chain: `main()` \u2192 `_AppLifecycleObserver` \u2192 `StartupView` \u2192 `StartupViewModel`\n- The `retryInitialization()` path calls `locator.reset()` then `initializeApp()` again \u2014 `PackageInfo.fromPlatform()` will be called again on retry, which is safe (it's a platform channel call that reads static data)\n- `PackageInfo` is only consumed in `SettingsView` via `locator<PackageInfo>()` \u2014 it's accessed long after startup\n\n## Key context\n\n- fn-78 (commit `e6b041f`) added `PackageInfo.fromPlatform()` before `runApp()` and threaded it through constructors \u2014 this change reverses that placement decision while keeping the DI registration\n- `buildModules()` at `lib/config/locator_config.dart:62` takes `{required PackageInfo packageInfo}` \u2014 this signature stays the same\n- `_AppLifecycleObserver` at `lib/main.dart` wraps `StartupView` \u2014 currently passes `packageInfo` through\n- If `PackageInfo.fromPlatform()` throws inside `initializeApp()`, the existing `try/catch` routes to `AppInitializationError` state with retry \u2014 this is acceptable behavior\n- `locator_config.dart:65` registers PackageInfo as `lazy: false` \u2014 it is eagerly instantiated during `registerMany()`, so it must be available before that call\n## Acceptance\n- [ ] `PackageInfo.fromPlatform()` is NOT awaited before `runApp()` in `main()`\n- [ ] `PackageInfo.fromPlatform()` is awaited inside `StartupViewModel.initializeApp()` before `buildModules()`\n- [ ] `packageInfo` parameter removed from `_AppLifecycleObserver`, `StartupView`, and `StartupViewModel` constructors\n- [ ] `buildModules()` still receives `packageInfo` as a named parameter (no signature change)\n- [ ] `retryInitialization()` path still works (re-fetches PackageInfo on retry)\n- [ ] `flutter analyze` passes\n- [ ] All existing tests pass (update test mocks if constructor signatures changed)\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    }
+  ]
+}

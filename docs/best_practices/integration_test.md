@@ -376,8 +376,9 @@ class OnboardingRobot {
 
 ```dart
 testWidgets('new user completes onboarding flow', (tester) async {
-  await tester.pumpWidget(createTestApp());
-  await tester.pumpPastSplash();
+  SharedPreferences.setMockInitialValues({});
+  final prefs = await SharedPreferences.getInstance();
+  await tester.pumpWidget(await createTestApp(sharedPreferences: prefs));
 
   final onboarding = OnboardingRobot(tester);
   onboarding.expectOnOnboardingScreen();
@@ -434,87 +435,98 @@ void main() {
 **Create:** `integration_test/utils/test_app.dart`:
 
 ```dart
+// integration_test/utils/test_app.dart (actual implementation)
 import 'package:flutter/material.dart';
-import 'package:neurostack/core/utils/locator.dart';
 import 'package:neurostack/config/locator_config.dart';
-import 'package:neurostack/startup/startup_view.dart';
+import 'package:neurostack/core/ui/app_theme.dart';
+import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
+import 'package:neurostack/core/utils/data_source/data_source_abstraction.dart';
+import 'package:neurostack/core/utils/l10n/app_localizations.dart';
+import 'package:neurostack/core/utils/l10n/translate.dart';
+import 'package:neurostack/core/utils/locator.dart';
+import 'package:neurostack/core/utils/navigation/best_router.dart';
+import 'package:neurostack/core/utils/navigation/router_service.dart';
+import 'package:neurostack/features/auth/data/user_bootstrap_service.dart';
+import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
+import 'package:neurostack/paywall/data/revenuecat_client.dart';
+import 'package:neurostack/paywall/data/revenuecat_service.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../mocks/mock_data_sources.dart';
 
-/// Test module builder that overrides real services with mocks
+/// Builds test modules by starting with production buildModules() and
+/// overlaying type-safe overrides. Also registers a fake PackageInfo
+/// (no longer part of buildModules).
 List<Module> buildTestModules({
-  MockAuthService? authService,
-  MockUserRemoteDataSource? userDataSource,
-  MockProtocolRemoteDataSource? protocolDataSource,
-  MockSessionRemoteDataSource? sessionDataSource,
-  MockConnectivityService? connectivityService,
+  required SharedPreferences sharedPreferences,
+  DataSourceAbstraction? dataSource,
+  UserBootstrapService? userBootstrapService,
+  ConnectivityService? connectivityService,
+  RevenueCatClient? revenueCatClient,
+  RevenueCatService? revenueCatService,
+  UserRepository? userRepository,
 }) {
-  // Start with default modules
-  final modules = buildModules();
-
-  // Create overrides map
+  final modules = buildModules(sharedPreferences: sharedPreferences);
   final overrides = <Type, Module>{};
 
-  if (authService != null) {
-    overrides[AuthService] = Module<AuthService>(() => authService, lazy: false);
-  }
-  if (userDataSource != null) {
-    overrides[UserRemoteDataSource] = Module<UserRemoteDataSource>(
-      () => userDataSource,
-      lazy: true,
+  if (dataSource != null) {
+    overrides[DataSourceAbstraction] = Module<DataSourceAbstraction>(
+      builder: () => dataSource, lazy: false,
     );
   }
-  if (protocolDataSource != null) {
-    overrides[ProtocolRemoteDataSource] = Module<ProtocolRemoteDataSource>(
-      () => protocolDataSource,
-      lazy: true,
-    );
-  }
-  if (sessionDataSource != null) {
-    overrides[SessionRemoteDataSource] = Module<SessionRemoteDataSource>(
-      () => sessionDataSource,
-      lazy: true,
-    );
-  }
-  if (connectivityService != null) {
-    overrides[ConnectivityService] = Module<ConnectivityService>(
-      () => connectivityService,
-      lazy: false,
-    );
-  }
+  // ... other override blocks follow the same pattern ...
 
-  // Replace modules with overrides
-  return modules.map((m) {
-    final override = overrides[m.runtimeType];
-    return override ?? m;
-  }).toList();
-}
+  final result = modules
+      .map((module) => overrides[module.type] ?? module)
+      .toList();
 
-/// Creates a test app with mocked dependencies
-Future<Widget> createTestApp({
-  MockAuthService? authService,
-  MockUserRemoteDataSource? userDataSource,
-  MockProtocolRemoteDataSource? protocolDataSource,
-  MockSessionRemoteDataSource? sessionDataSource,
-  MockConnectivityService? connectivityService,
-}) async {
-  // Reset locator before registering test modules
-  locator.reset();
-
-  // Initialize SharedPreferences for tests
-  SharedPreferences.setMockInitialValues({});
-  final prefs = await SharedPreferences.getInstance();
-
-  // Register test modules
-  locator.registerMany(buildTestModules(
-    authService: authService,
-    userDataSource: userDataSource,
-    protocolDataSource: protocolDataSource,
-    sessionDataSource: sessionDataSource,
-    connectivityService: connectivityService,
+  // PackageInfo is registered separately (no longer in buildModules)
+  result.add(Module<PackageInfo>(
+    builder: () => PackageInfo(
+      appName: 'NeuroStack', packageName: 'app.getneurostack',
+      version: '1.0.0', buildNumber: '1',
+    ),
+    lazy: false,
   ));
 
-  return StartupView(sharedPreferences: prefs);
+  return result;
+}
+
+/// Creates a test app that bypasses StartupView entirely.
+/// Integration tests go router-first: register modules, then build
+/// MaterialApp.router directly with BestRouterConfig.
+///
+/// StartupView is only tested in unit/widget tests
+/// (see test/startup/startup_view_test.dart).
+Future<Widget> createTestApp({
+  required SharedPreferences sharedPreferences,
+  DataSourceAbstraction? dataSource,
+  UserBootstrapService? userBootstrapService,
+  ConnectivityService? connectivityService,
+  RevenueCatClient? revenueCatClient,
+  RevenueCatService? revenueCatService,
+  UserRepository? userRepository,
+}) async {
+  locator.reset();
+  locator.registerMany(buildTestModules(
+    sharedPreferences: sharedPreferences,
+    dataSource: dataSource,
+    userBootstrapService: userBootstrapService,
+    connectivityService: connectivityService,
+    revenueCatClient: revenueCatClient,
+    revenueCatService: revenueCatService,
+    userRepository: userRepository,
+  ));
+
+  return MaterialApp.router(
+    routerConfig: BestRouterConfig(routerService: locator<RouterService>()),
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    theme: AppTheme.buildTheme(Brightness.light),
+    builder: (context, child) {
+      Translate.init(context);
+      return child ?? const SizedBox();
+    },
+  );
 }
 ```
 
@@ -537,23 +549,24 @@ Widget createTestView<T extends Widget>({
 
 ```dart
 testWidgets('authenticated user sees home screen', (tester) async {
-  // Setup mocks
-  final mockAuth = MockAuthService();
-  final testUser = UserFactory.createActiveTrial();
-  when(() => mockAuth.authState).thenReturn(
-    ValueNotifier(Authenticated(user: testUser)),
-  );
-  when(() => mockAuth.init()).thenAnswer((_) async {});
+  // SharedPreferences must be initialized first.
+  SharedPreferences.setMockInitialValues({});
+  final prefs = await SharedPreferences.getInstance();
 
-  // Create app with mocks
-  final app = await createTestApp(authService: mockAuth);
+  // Create app with the required sharedPreferences param.
+  // Auth bootstrap is handled via integration_test/utils/auth_helpers.dart.
+  // createTestApp is router-first (no StartupView, no splash).
+  final app = await createTestApp(sharedPreferences: prefs);
   await tester.pumpWidget(app);
-  await tester.pumpPastSplash();
   await tester.pumpUntilFound(find.byType(HomeView));
 
   expect(find.byType(HomeView), findsOneWidget);
 });
 ```
+
+> **Note:** `createTestApp` does not accept `authService` directly.
+> Auth mocking is done via `DataSourceAbstraction` and `UserBootstrapService`
+> overrides — see `integration_test/utils/auth_helpers.dart`.
 
 ---
 
@@ -576,8 +589,9 @@ import 'package:neurostack/core/ui/constants/widget_keys.dart';
 
 void main() {
   patrolTest('user can sign in with Google', ($) async {
-    await $.pumpWidgetAndSettle(await createTestApp());
-    await $.pump(const Duration(seconds: 2)); // Past splash
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+    await $.pumpWidgetAndSettle(await createTestApp(sharedPreferences: prefs));
 
     // Tap Google sign-in button
     await $(WidgetKeys.authGoogleButton).tap();
@@ -687,7 +701,7 @@ void main() {
 | **Multiple ValueNotifiers in test setup** | Inconsistent with app architecture | Single ValueNotifier per ViewModel |
 | **Testing with real SharedPreferences** | State persists between tests | `SharedPreferences.setMockInitialValues({})` |
 | **Text-based finders** | Fragile, breaks on i18n | Use WidgetKeys constants |
-| **Skipping StartupViewModel init** | Auth/onboarding guards not set | Let StartupView initialize normally |
+| **Skipping StartupViewModel init** | Auth/onboarding guards not set | Integration tests bypass `StartupView` and use `MaterialApp.router` directly (see `test_app.dart`). Unit/widget tests inject a `StartupViewModel` with `dataSourceInitializer`/`sharedPreferencesLoader`/`packageInfoLoader` test seams |
 
 ---
 
@@ -759,7 +773,9 @@ testWidgets('premium user sees all protocols', (tester) async {
 
 ```dart
 testWidgets('shows loading then content', (tester) async {
-  await tester.pumpWidget(createTestApp());
+  SharedPreferences.setMockInitialValues({});
+  final prefs = await SharedPreferences.getInstance();
+  await tester.pumpWidget(await createTestApp(sharedPreferences: prefs));
 
   // Initial state should be loading
   expect(find.byType(CircularProgressIndicator), findsOneWidget);

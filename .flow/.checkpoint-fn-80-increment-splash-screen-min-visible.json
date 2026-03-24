@@ -1,0 +1,47 @@
+{
+  "created_at": "2026-03-23T20:42:46.162827Z",
+  "epic": {
+    "data": {
+      "branch_name": "fn-80-increment-splash-screen-min-visible",
+      "completion_review_status": "unknown",
+      "completion_reviewed_at": null,
+      "created_at": "2026-03-23T20:21:57.692082Z",
+      "default_impl": null,
+      "default_review": null,
+      "default_sync": null,
+      "depends_on_epics": [],
+      "id": "fn-80-increment-splash-screen-min-visible",
+      "next_task": 1,
+      "plan_review_status": "unknown",
+      "plan_reviewed_at": null,
+      "spec_path": ".flow/specs/fn-80-increment-splash-screen-min-visible.md",
+      "status": "open",
+      "title": "Increment splash screen min visible time to 1s",
+      "updated_at": "2026-03-23T20:41:48.730800Z"
+    },
+    "spec": "# Increment splash screen min visible time to 1s\n\n## Overview\nRaise the minimum splash screen display time from 500ms to 1000ms so users see the full entrance animation (500ms) plus a brief breathing glow (~500ms) before transitioning.\n\n## Scope\n- Change `minSplashDuration` constant from 500ms to 1000ms\n- Update doc comments: remove \"aligned with entrance animation\" claim, add new rationale (entrance + breathing glow)\n- Fix all test timing: tearDown resets, fakeAsync elapsed times, slow-failure bootstrap delay (must exceed 1000ms)\n- Update spec and plan docs that hardcode \"500ms\" minimum splash references\n\n## Out of scope\n- Entrance animation duration stays at 500ms (`splash_screen.dart:45` comment, `screen-prompts/00-splash-screen.md:17` \u2014 leave untouched)\n- `plan_app_launch_handoff.md:375` \"fade + slide, 500ms\" refers to entrance animation \u2014 leave untouched\n- `testSplashDuration` (10ms override in tests) \u2014 stays at 10ms for fast non-timing tests\n\n## Key decisions\n- **Slow-failure test delay**: Change from 600ms to 1100ms (maintains ~100ms margin above splash)\n- **fakeAsync intermediate checks**: Keep 200ms first checkpoint (still proves no early transition), adjust second elapse to reach 1000ms total\n- **Doc comment rationale**: \"Ensures the entrance animation (500ms) completes and the breathing glow is briefly visible before any state transition\"\n\n## Quick commands\n```bash\nflutter test test/startup/\nflutter analyze\n```\n\n## Acceptance\n- [ ] `StartupViewModel.minSplashDuration` equals `Duration(milliseconds: 1000)`\n- [ ] Doc comments on lines 102-103 and 111 reflect 1000ms with updated rationale\n- [ ] All tests in `test/startup/` pass with updated timing\n- [ ] \"Slow failure\" test uses bootstrap delay > 1000ms (e.g. 1100ms)\n- [ ] Spec doc (`docs/specs/20260322120000_spec_app_launch_handoff.md`) updated: splash-minimum 500ms references changed to 1000ms (entrance animation 500ms refs left alone)\n- [ ] Plan doc (`plan_app_launch_handoff.md`) updated: splash-minimum 500ms references changed to 1000ms (entrance animation 500ms refs left alone)\n- [ ] `flutter analyze` clean\n- [ ] `flutter test test/startup/` passes\n\n## References\n- Constant: `lib/startup/startup_view_model.dart:105`\n- Tests: `test/startup/startup_view_model_test.dart`, `test/startup/startup_view_test.dart`\n- Spec: `docs/specs/20260322120000_spec_app_launch_handoff.md`\n- Plan: `plan_app_launch_handoff.md`\n- Related epic: fn-79 (established the 500ms value)\n"
+  },
+  "epic_id": "fn-80-increment-splash-screen-min-visible",
+  "schema_version": 2,
+  "tasks": [
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-03-23T20:41:54.640757Z",
+        "depends_on": [],
+        "epic": "fn-80-increment-splash-screen-min-visible",
+        "id": "fn-80-increment-splash-screen-min-visible.1",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-80-increment-splash-screen-min-visible.1.md",
+        "status": "todo",
+        "title": "Bump minSplashDuration to 1000ms, fix tests and docs",
+        "updated_at": "2026-03-23T20:42:15.401361Z"
+      },
+      "id": "fn-80-increment-splash-screen-min-visible.1",
+      "runtime": null,
+      "spec": "# fn-80-increment-splash-screen-min-visible.1 Bump minSplashDuration to 1000ms, fix tests and docs\n\n## Description\nBump the splash screen minimum visible time from 500ms to 1000ms and update all references.\n\n**Size:** M\n**Files:**\n- `lib/startup/startup_view_model.dart` \u2014 constant + doc comments\n- `test/startup/startup_view_model_test.dart` \u2014 tearDown reset, 4 fakeAsync test timings, slow-failure delay\n- `test/startup/startup_view_test.dart` \u2014 tearDown reset\n- `docs/specs/20260322120000_spec_app_launch_handoff.md` \u2014 ~7 splash-minimum 500ms refs\n- `plan_app_launch_handoff.md` \u2014 ~9 splash-minimum 500ms refs\n\n## Approach\n\n1. **Production code** (`startup_view_model.dart`):\n   - Line 105: change `Duration(milliseconds: 500)` to `Duration(milliseconds: 1000)`\n   - Lines 102-103: update doc comment \u2014 remove \"aligned with entrance animation duration (500ms)\", replace with \"Ensures the entrance animation (500ms) completes and the breathing glow is briefly visible before any state transition\"\n   - Line 111: update parenthetical to reflect 1000ms\n\n2. **Test files**:\n   - `startup_view_model_test.dart:53` tearDown: change reset value from 500 to 1000\n   - `startup_view_test.dart:43` tearDown: change reset value from 500 to 1000\n   - Four fakeAsync tests (lines 180-289): update `minSplashDuration` override from 500 to 1000, adjust `elapse()` calls to reach 1000ms total (e.g., 200ms first check + 800ms second elapse)\n   - Slow-failure bootstrap delay (`line 219`): change from 600ms to 1100ms\n   - Adjust corresponding elapsed times in slow-failure test to match\n\n3. **Docs** \u2014 find-and-replace splash-minimum \"500ms\" with \"1000ms\":\n   - `docs/specs/20260322120000_spec_app_launch_handoff.md`: lines 10, 129, 133, 135, 156, 164-165\n   - `plan_app_launch_handoff.md`: lines 139, 163, 227, 318, 344, 346, 365, 391\n   - **Leave alone**: entrance animation refs (line 375 of plan, line 17 of screen prompt)\n\n## Key context\n\n- `testSplashDuration` (10ms at line 20) stays unchanged \u2014 only used for fast non-timing tests\n- Entrance animation is 500ms (`splash_screen.dart:45`) \u2014 this does NOT change\n- Pattern at `startup_view_model.dart:116`: `Future.wait([_bootstrap(), Future.delayed(minSplashDuration)])` \u2014 mechanism unchanged, only duration value changes\n## Acceptance\n- [ ] `StartupViewModel.minSplashDuration` equals `Duration(milliseconds: 1000)`\n- [ ] Doc comment at lines 102-103 no longer claims \"aligned with entrance animation\"; states new rationale\n- [ ] Doc comment at line 111 reflects 1000ms\n- [ ] tearDown in `startup_view_model_test.dart` resets to 1000ms\n- [ ] tearDown in `startup_view_test.dart` resets to 1000ms\n- [ ] All 4 fakeAsync timing tests use 1000ms override and adjusted elapse calls\n- [ ] Slow-failure bootstrap delay exceeds 1000ms (e.g. 1100ms)\n- [ ] `flutter test test/startup/` passes\n- [ ] Spec doc splash-minimum refs updated to 1000ms (entrance animation refs untouched)\n- [ ] Plan doc splash-minimum refs updated to 1000ms (entrance animation refs untouched)\n- [ ] `flutter analyze` clean\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    }
+  ]
+}
