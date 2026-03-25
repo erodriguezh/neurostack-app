@@ -55,6 +55,30 @@
 |------|-----------|-----------------|
 | **Dark-first route** | A route policy that always renders with dark theme regardless of system setting | Dark mode route |
 
+## RevenueCat subscription architecture (new)
+
+| Term | Definition | Aliases to avoid |
+|------|-----------|-----------------|
+| **Hosted Paywall** (new) | A paywall UI built and rendered by RevenueCat's SDK via `RevenueCatUI.presentPaywall()`, not custom app code | Custom paywall, local paywall, native paywall |
+| **Paywall Component** (new) | A configurable UI element within a Hosted Paywall (Text, Button, Image, Package, Purchase Button, Footer) | Widget (ambiguous with Flutter), element |
+| **Offering** (new) | A RevenueCat-managed named set of Packages presented to the user; exactly one is marked "current" | Plan set, product group |
+| **Package** (new) | A duration-keyed container within an Offering (`$rc_monthly`, `$rc_annual`) that holds one Product per store | Plan, tier (overloaded) |
+| **Entitlement** (new) | A RevenueCat-managed named set of features unlocked by one or more Products across stores | Permission, access level, feature flag |
+| **RevenueCat Product** (new) | A purchasable subscription item registered in RevenueCat, linked to a store-specific product identifier | Product (unqualified — ambiguous with App Store Connect Product) |
+| **Test Store** (new) | RevenueCat's sandbox app type for development testing without a real store connection | Sandbox (ambiguous with Apple Sandbox), dev store |
+| **App Store app** (new) | The RevenueCat app entry connected to a real App Store bundle ID, requiring ASC API key configuration | Production app (too vague), real app |
+
+## Paywall compliance (new)
+
+| Term | Definition | Aliases to avoid |
+|------|-----------|-----------------|
+| **Restore Purchases** (new) | An Apple-required user action that re-syncs previous store purchases to recover entitlements on a new device or reinstall | Sync purchases (different SDK method), recover |
+| **Manage Subscription** (new) | The Settings tile action that opens the platform's subscription management page | Cancel Subscription (old label — action is broader than cancellation) |
+| **Auto-Renewal Disclosure** (new) | Required legal text informing users about subscription renewal terms, cancellation window, and billing behavior | Fine print, legal text, boilerplate |
+| **Introductory Offer** (new) | Apple's term for a free trial or discounted period on an auto-renewable subscription, configured in App Store Connect | Free trial (when referring to the configuration mechanism), promo |
+| **Delayed Close Button** (new) | A paywall dismiss button with an artificial delay before appearing — Apple rejects these during App Review | Timed close, gated dismiss |
+| **canAccessPremium** (new) | The inclusive boolean property that is `true` for both premium subscribers AND trial users | isPremium (excludes trial users — see flagged ambiguities) |
+
 ## Relationships
 
 - A **Cold start** shows the **Native launch surface**, then the **Flutter splash**, then the app
@@ -65,6 +89,12 @@
 - **Router invalidation** is triggered by **Retry**, which returns the app to **InitializingApp**
 - The **App shell** renders during **InitializingApp**, **OfflineNoUserState**, and **AppInitializationError**; the **Router app** renders only during **AppInitialized**
 - The **Idempotent init guard** makes the **Bootstrap** safe across **Retry** cycles
+- (new) An **Offering** contains one or more **Packages**; each **Package** holds one **RevenueCat Product** per store
+- (new) An **Entitlement** is unlocked by one or more **RevenueCat Products** across **Test Store** and **App Store app**
+- (new) A **Hosted Paywall** is paired to exactly one **Offering** and renders its **Packages** as purchasable options
+- (new) **Restore Purchases** re-syncs store receipts and refreshes **Entitlements** — accessible from both the **Hosted Paywall** and the Settings **Manage Subscription** area
+- (new) An **Introductory Offer** is configured per product in App Store Connect; RevenueCat reads it and the **Hosted Paywall** renders it automatically via template variables
+- (new) **canAccessPremium** is `true` when subscription status is `trial`, `premiumMonthly`, `premiumAnnual`, or `grace`; **isPremium** excludes `trial`
 
 ## Example dialogue
 
@@ -75,9 +105,20 @@
 > **Dev:** "What if `initDataSource()` already succeeded on the first attempt?"
 > **Domain expert:** "The **Idempotent init guard** handles that — second call is a no-op after success. If the first attempt failed, the guard resets so **Retry** genuinely re-attempts Supabase initialization."
 
+> (new) **Dev:** "Should trial users see **Manage Subscription** in Settings?"
+> **Domain expert:** "Yes — **Manage Subscription** is visible when **canAccessPremium** is true, which includes trial users. A trial user might want to cancel before being charged. Don't gate it on **isPremium** — that excludes trials."
+> **Dev:** "And **Restore Purchases** — is that only on the **Hosted Paywall**?"
+> **Domain expert:** "Both. Apple requires it accessible from outside the paywall too. We add a Settings tile visible to ALL users — even free users who might have lost their **Entitlement** after a reinstall. The tile calls `RevenueCatService.restorePurchases()`, not `Purchases.syncPurchases()` — restore is user-initiated only."
+> **Dev:** "What about the 7-day trial? The **Hosted Paywall** says 'free trial' but the **RevenueCat Products** show `trial_duration: null`."
+> **Domain expert:** "That's a configuration gap. For **Test Store**, set trial duration directly in RevenueCat. For the **App Store app**, create an **Introductory Offer** in App Store Connect — RevenueCat reads it from there. The **Hosted Paywall** uses template variables like `{{ product.offer_period_with_unit }}` so it auto-renders the trial terms once configured."
+
 ## Flagged ambiguities
 
 - **"splash screen"** was used throughout the conversation to mean both the **Native launch surface** (OS-rendered) and the **Flutter splash** (Dart widget). These are distinct: the native surface covers engine startup, the Flutter splash covers **Bootstrap**. Always qualify which one.
 - **"restart"** was used interchangeably with **Retry**. In this codebase, `restartApp()` in `AppLifecycleService` delegates to `retryInitialization()` in `StartupViewModel`. Use **Retry** for the user-facing concept and `restartApp()`/`retryInitialization()` for the code path.
 - **"delay"** was used to describe the **Minimum splash duration**, but it is not an artificial delay — it is a floor that only adds wait time when **Bootstrap** is faster than 500ms. Prefer "minimum duration" over "delay."
 - **"pre-runApp work"** (from the previous glossary) is now obsolete — after the refactor, there is no async work before `runApp()`. The term is replaced by **Bootstrap**, which runs after `runApp()` inside `initializeApp()`.
+- (new) **"Cancel Subscription"** was the UI label in Settings, but the action opens subscription management (not just cancellation). Resolved: renamed to **Manage Subscription**. The old label persists in specs and code (`onCancelSubscriptionTap`) until fn-81 is complete — do not use "Cancel Subscription" in new code.
+- (new) **"isPremium"** vs **"canAccessPremium"** — `isPremium` is `false` for trial users; `canAccessPremium` is `true` for trial, premium, and grace. Use **canAccessPremium** when gating features that trial users should access (e.g., **Manage Subscription** tile). Use **isPremium** only when you need to distinguish paid subscribers from trial users.
+- (new) **"Product"** is overloaded: **RevenueCat Product** (a purchasable item in RC), App Store Connect product (an IAP in Apple's system), and "the product" (the Neurostack app). Always qualify with the system name.
+- (new) **"Trial"** has two meanings: **Premium Trial** (the 7-day access period the user experiences) vs **Introductory Offer** (Apple's configuration mechanism in App Store Connect). Use **Premium Trial** for the user-facing concept and **Introductory Offer** for the store configuration.

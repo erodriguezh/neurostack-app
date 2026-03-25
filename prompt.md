@@ -1,5 +1,5 @@
 study docs/README.md
-work on task fn-79-fix-empty-white-startup-screen.5
+work on task fn-81-paywall-apple-compliance.1
 
 MCP available
 - dart
