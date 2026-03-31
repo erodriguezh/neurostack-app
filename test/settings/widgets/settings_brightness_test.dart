@@ -250,12 +250,13 @@ void main() {
                 wrap(
                   brightness: brightness,
                   child: SettingsSupportSection(
-                    isPremium: true,
+                    canAccessPremium: true,
                     onContactTap: () {},
                     onFeedbackTap: () {},
                     onRateAppTap: () {},
                     onFeatureRequestTap: () {},
-                    onCancelSubscriptionTap: () {},
+                    onRestorePurchasesTap: () {},
+                    onManageSubscriptionTap: () {},
                   ),
                 ),
               );
@@ -265,7 +266,7 @@ void main() {
                 findsOneWidget,
               );
               expect(find.text('Contact Us'), findsOneWidget);
-              expect(find.text('Cancel Subscription'), findsOneWidget);
+              expect(find.text('Manage Subscription'), findsOneWidget);
             },
           );
 
@@ -276,12 +277,13 @@ void main() {
                 wrap(
                   brightness: brightness,
                   child: SettingsSupportSection(
-                    isPremium: false,
+                    canAccessPremium: false,
                     onContactTap: () {},
                     onFeedbackTap: () {},
                     onRateAppTap: () {},
                     onFeatureRequestTap: () {},
-                    onCancelSubscriptionTap: () {},
+                    onRestorePurchasesTap: () {},
+                    onManageSubscriptionTap: () {},
                   ),
                 ),
               );

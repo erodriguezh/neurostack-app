@@ -17,7 +17,7 @@ class SettingsTile extends StatefulWidget {
     super.key,
     required this.icon,
     required this.label,
-    required this.trailing,
+    this.trailing,
     required this.onTap,
   });
 
@@ -28,7 +28,8 @@ class SettingsTile extends StatefulWidget {
   final String label;
 
   /// Trailing icon data (16 px, semanticColors.inkSubtle) -- chevron-right or external-link.
-  final IconData trailing;
+  /// When `null`, no trailing icon is rendered.
+  final IconData? trailing;
 
   /// Called when the user taps the tile.
   final VoidCallback onTap;
@@ -82,14 +83,15 @@ class _SettingsTileState extends State<SettingsTile> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
-
                 // Trailing icon
-                Icon(
-                  widget.trailing,
-                  size: 16,
-                  color: semanticColors.inkSubtle,
-                ),
+                if (widget.trailing != null) ...[
+                  const SizedBox(width: 8),
+                  Icon(
+                    widget.trailing,
+                    size: 16,
+                    color: semanticColors.inkSubtle,
+                  ),
+                ],
               ],
             ),
           ),

@@ -4,6 +4,7 @@ import 'package:neurostack/core/ui/app_theme.dart';
 import 'package:neurostack/core/ui/widgets/app_grid_background.dart';
 import 'package:neurostack/core/ui/widgets/home_indicator_pill.dart';
 import 'package:neurostack/core/ui/widgets/staggered_fade_in.dart';
+import 'package:neurostack/core/utils/internal_notification/notify_service.dart';
 import 'package:neurostack/core/utils/locator.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/core/utils/userorient/userorient_service.dart';
@@ -36,6 +37,7 @@ class _SettingsViewState extends State<SettingsView> {
     subscriptionStatusResolver: locator<SubscriptionStatusResolver>(),
     revenueCatService: locator<RevenueCatService>(),
     userOrientService: locator<UserOrientService>(),
+    notifyService: locator<NotifyService>(),
     packageInfo: locator<PackageInfo>(),
     cachedUserStore: locator<CachedUserStore>(),
   );
@@ -87,9 +89,15 @@ class _SettingsViewState extends State<SettingsView> {
                   ),
                   // Upgrade banner + Support & Resources section
                   SliverToBoxAdapter(
-                    child: ValueListenableBuilder<bool>(
-                      valueListenable: _viewModel.isPremium,
-                      builder: (context, isPremium, _) {
+                    child: ListenableBuilder(
+                      listenable: Listenable.merge([
+                        _viewModel.isPremium,
+                        _viewModel.canAccessPremium,
+                      ]),
+                      builder: (context, _) {
+                        final isPremium = _viewModel.isPremium.value;
+                        final canAccessPremium =
+                            _viewModel.canAccessPremium.value;
                         return Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -105,13 +113,15 @@ class _SettingsViewState extends State<SettingsView> {
                               key: const ValueKey('settings-support-section'),
                               index: isPremium ? 0 : 1,
                               child: SettingsSupportSection(
-                                isPremium: isPremium,
+                                canAccessPremium: canAccessPremium,
                                 onContactTap: _viewModel.goToContact,
                                 onFeedbackTap: _viewModel.sendFeedback,
                                 onRateAppTap: _viewModel.goToRateApp,
                                 onFeatureRequestTap: () =>
                                     _viewModel.openFeatureRequestBoard(context),
-                                onCancelSubscriptionTap:
+                                onRestorePurchasesTap:
+                                    _viewModel.restorePurchases,
+                                onManageSubscriptionTap:
                                     _viewModel.openSubscriptionManagement,
                               ),
                             ),
