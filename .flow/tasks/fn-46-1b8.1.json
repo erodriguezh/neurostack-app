@@ -1,14 +1,14 @@
 {
-  "assignee": null,
-  "claim_note": "",
-  "claimed_at": null,
+  "assignee": "erodriguez@greentube.com",
+  "claim_note": "Absorbed by fn-81-paywall-apple-compliance.2",
+  "claimed_at": "2026-02-02T12:03:27.732800Z",
   "created_at": "2026-02-02T12:03:08.840366Z",
   "depends_on": [],
   "epic": "fn-46-1b8",
   "id": "fn-46-1b8.1",
   "priority": null,
   "spec_path": ".flow/tasks/fn-46-1b8.1.md",
-  "status": "todo",
+  "status": "done",
   "title": "Add Restore Purchases to Settings View",
-  "updated_at": "2026-02-02T12:03:08.840839Z"
+  "updated_at": "2026-03-31T15:17:30.753669Z"
 }
