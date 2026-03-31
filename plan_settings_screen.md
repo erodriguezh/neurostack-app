@@ -270,7 +270,7 @@
 - **File:** `docs/README.md`
 - Under `### Screen Prompts`, add:
   ```
-  - [Settings Screen](./best_practices/design/screen-prompts/11-settings-screen.md) - settings, support, contact, upgrade banner, cancel subscription
+  - [Settings Screen](./best_practices/design/screen-prompts/11-settings-screen.md) - settings, support, contact, upgrade banner, manage subscription
   ```
 
 ### 6.3 Add plan link ✅

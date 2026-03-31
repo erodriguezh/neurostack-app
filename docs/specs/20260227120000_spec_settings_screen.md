@@ -10,8 +10,13 @@ Settings screen providing support/contact links, subscription management, and an
 
 | State | Condition | User Experience |
 |-------|-----------|-----------------|
-| Free / Expired | `!canAccessPremium` | Upgrade banner visible, Manage Subscription hidden |
-| Trial / Premium | `canAccessPremium` | Upgrade banner hidden (trial) or hidden (premium), Manage Subscription visible |
+| Free / Trial / Expired | `!isPremium` | Upgrade banner visible, Manage Subscription hidden (free/expired) or visible (trial) |
+| Premium | `isPremium` | Upgrade banner hidden, Manage Subscription visible |
+
+**Visibility rules:**
+- Upgrade banner: hidden when `isPremium` (`premiumMonthly`, `premiumAnnual`, `grace`). Visible for trial, free, and expired users.
+- Manage Subscription tile: shown when `canAccessPremium` (`trial`, `premiumMonthly`, `premiumAnnual`, `grace`).
+- Restore Purchases tile: always visible on native platforms, hidden on web.
 
 This screen has no loading, error, or empty states — all content is static/local.
 
