@@ -178,7 +178,7 @@
 
 ### 3.6 Wire up the tiles ✅
 
-> **Implementation note (fn-74):** Post-implementation cleanup removed Send Feedback, Rate the App, and Feature Request tiles (stub `() {}` callbacks with no backend integration). The current tile set is Contact Us + Cancel Subscription only. See spec for current tile definitions.
+> **Implementation note (fn-74):** Post-implementation cleanup temporarily removed Send Feedback, Rate the App, and Feature Request tiles (stub `() {}` callbacks with no backend integration). Those tiles were restored in subsequent epics. **fn-81** added Restore Purchases and renamed Cancel Subscription to Manage Subscription. The canonical tile set is now 6 tiles as defined in the table below.
 
 | Tile | Leading Icon | `onTap` | Trailing | Visibility |
 |------|-------------|---------|----------|------------|
@@ -186,7 +186,7 @@
 | Send Feedback | `LucideIcons.messageSquare` | `_viewModel.sendFeedback()` | `LucideIcons.chevronRight` | Always |
 | Rate the App | `LucideIcons.star` | `_viewModel.goToRateApp()` | `LucideIcons.chevronRight` | Always |
 | Feature Request | `LucideIcons.lightbulb` | `_viewModel.openFeatureRequestBoard()` | `LucideIcons.chevronRight` | Always |
-| Restore Purchases | `LucideIcons.rotateCcw` | `_viewModel.restorePurchases()` | `LucideIcons.chevronRight` | Always (native only) |
+| Restore Purchases | `LucideIcons.rotateCcw` | `_viewModel.restorePurchases()` | None (in-app action) | Always (native only) |
 | Manage Subscription | `LucideIcons.creditCard` | `_viewModel.openSubscriptionManagement()` | `LucideIcons.externalLink` | `canAccessPremium` only |
 
 ### 3.7 Animations ✅

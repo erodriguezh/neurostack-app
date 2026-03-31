@@ -82,7 +82,7 @@ This screen has no loading, error, or empty states — all content is static/loc
 | 2 | Send Feedback | `LucideIcons.messageSquare` | Chevron | Opens mailto link via `url_launcher` (see §Send Feedback below) | Always |
 | 3 | Rate the App | `LucideIcons.star` | Chevron | Navigate to `/settings/rate-app` via `RouterService` | Always |
 | 4 | Feature Request | `LucideIcons.lightbulb` | Chevron | Opens UserOrient board | Always |
-| 5 | Restore Purchases | `LucideIcons.rotateCcw` | Chevron | Calls `RevenueCatService.restorePurchases()` with toast feedback | Always (native only, hidden on web) |
+| 5 | Restore Purchases | `LucideIcons.rotateCcw` | None (in-app action) | Calls `RevenueCatService.restorePurchases()` with toast feedback | Always (native only, hidden on web) |
 | 6 | Manage Subscription | `LucideIcons.creditCard` | External-link | Opens platform subscription mgmt | `canAccessPremium` only (trial + premium) |
 
 > **Note:** The settings section defines 6 tiles total. Contact Us, Send Feedback, Rate the App, and Feature Request are always shown. Restore Purchases is always visible on native platforms (hidden on web) per Apple App Store requirement. Manage Subscription is shown when `canAccessPremium` (includes trial and premium users). Feature Request is functional via UserOrient. Rate the App navigates to `/settings/rate-app` (in-app review integration). Send Feedback opens a pre-filled mailto link via `url_launcher`.

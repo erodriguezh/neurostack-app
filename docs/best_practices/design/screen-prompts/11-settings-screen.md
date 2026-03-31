@@ -43,7 +43,7 @@ Layout:
    | Send Feedback | message-square | chevron-right | Always | Launches pre-filled mailto with diagnostic context |
    | Rate the App | star | chevron-right | Always | Navigate to /settings/rate-app via RouterService |
    | Feature Request | lightbulb | chevron-right | Always | Opens UserOrient board |
-   | Restore Purchases | rotate-ccw | chevron-right | Always (native only) | Calls RevenueCat restorePurchases with toast feedback |
+   | Restore Purchases | rotate-ccw | none (in-app action) | Always (native only) | Calls RevenueCat restorePurchases with toast feedback |
    | Manage Subscription | credit-card | external-link | canAccessPremium (trial + premium) | Opens platform subscription mgmt |
 
 4. Animations:

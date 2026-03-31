@@ -261,7 +261,7 @@ INV-P6: New users MUST start with 'free' status (not 'trial')
 **Settings Screen** (noun)
 
 - Definition: The 4th bottom-navigation tab exposing account management and support actions
-- Properties: Upgrade Banner (conditional), Support Section (5 tiles), subscription-aware layout
+- Properties: Upgrade Banner (conditional), Support Section (6 tiles), subscription-aware layout
 - UI Label: "Settings"
 
 **Support Tile** (noun)
