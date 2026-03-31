@@ -48,22 +48,22 @@
 .flow/bin/flowctl epic close fn-46-1b8 --reason "Absorbed by fn-81-paywall-apple-compliance.2"
 ```
 ## Acceptance
-- [ ] Settings spec: "Restore Purchases" removed from out-of-scope, added to tile table
-- [ ] Settings spec: all "Cancel Subscription" → "Manage Subscription"
-- [ ] Settings screen prompt: tile table updated (Restore + Manage)
-- [ ] Paywall screen prompt: compliance elements noted
-- [ ] Onboarding screen prompt: "No credit card required" flagged
-- [ ] Ubiquitous language: Settings examples updated, INV-M2 annotated
-- [ ] plan_settings_screen.md: Restore decision record annotated, labels updated
-- [ ] plan_paywall_modal.md: Section 5.3 status corrected
-- [ ] paywall_constants.dart: trial comments match actual config
-- [ ] fn-46-1b8 epic closed in .flow
+- [x] Settings spec: "Restore Purchases" removed from out-of-scope, added to tile table
+- [x] Settings spec: all "Cancel Subscription" → "Manage Subscription"
+- [x] Settings screen prompt: tile table updated (Restore + Manage)
+- [x] Paywall screen prompt: compliance elements noted
+- [x] Onboarding screen prompt: "No credit card required" flagged
+- [x] Ubiquitous language: Settings examples updated, INV-M2 annotated
+- [x] plan_settings_screen.md: Restore decision record annotated, labels updated
+- [x] plan_paywall_modal.md: Section 5.3 status corrected
+- [x] paywall_constants.dart: trial comments match actual config
+- [x] fn-46-1b8 epic closed in .flow
 ## Done summary
 Updated 8 docs + 1 code comment file + closed zombie epic fn-46-1b8.
 
 Changes:
-- Settings spec: Restore removed from out-of-scope, added to tile table, Cancel→Manage, merged screen states table with visibility rules
-- Settings screen prompt: tile table updated, trailing icon defined as optional
+- Settings spec: Restore removed from out-of-scope, added to tile table, Cancel→Manage, collapsed Free/Expired into one row, Restore Purchases as platform-specific note
+- Settings spec + screen prompt: trailing icon standardized as optional (omitted for in-app actions)
 - Paywall screen prompt: compliance elements noted
 - Onboarding screen prompt: "No credit card required" flagged as inaccurate
 - Ubiquitous language: Settings examples updated, INV-M2 annotated
@@ -71,10 +71,9 @@ Changes:
 - plan_paywall_modal.md: Section 5.3 status corrected
 - paywall_constants.dart: trial comments updated to reference P7D config
 - fn-46-1b8 zombie epic closed
-- `224ea61`: merged Settings screen-state/visibility rules into one table and standardized trailing-icon wording as optional in both the spec and screen prompt
 
-Commits: 6b08e1b, b59d6f4, a706f47, bd50490, 224ea61
+Commits: 6b08e1b, b59d6f4, a706f47, bd50490, 224ea61, 764ff6d
 ## Evidence
-- Commits: 6b08e1b, b59d6f4, a706f47, bd50490, 224ea61
+- Commits: 6b08e1b, b59d6f4, a706f47, bd50490, 224ea61, 764ff6d
 - Tests: 958 passed, 1 pre-existing failure (unrelated)
 - PRs:

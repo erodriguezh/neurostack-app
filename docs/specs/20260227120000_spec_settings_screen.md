@@ -74,7 +74,7 @@ This screen has no loading, error, or empty states — all content is static/loc
 - Hover/press: `bg-white/[0.03]`, transition 200ms
 - Icon (left): 20px, stroke-width 1.5, `white40`
 - Label: Inter, 15px, w400, `white80`, flex-1
-- Trailing (optional): chevron-right 16px `white20` for navigation, external-link for external actions. Omitted for in-app actions
+- Trailing (optional): chevron-right 16px `white20` for navigation or app-launched actions (e.g. mailto), external-link for browser-opened URLs (e.g. subscription management). Omitted for in-app actions (e.g. Restore Purchases)
 - Divider between tiles: 1px `white5`, mx-5
 
 ### 4. Tile Definitions
