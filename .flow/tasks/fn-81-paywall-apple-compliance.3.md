@@ -72,8 +72,8 @@ Changes:
 - paywall_constants.dart: trial comments updated to reference P7D config
 - fn-46-1b8 zombie epic closed
 
-Commits: 6b08e1b, b59d6f4, a706f47, bd50490, 224ea61, 764ff6d
+Commits: 6b08e1b, b59d6f4, a706f47, bd50490, 224ea61, 764ff6d, 54fa6f1
 ## Evidence
-- Commits: 6b08e1b, b59d6f4, a706f47, bd50490, 224ea61, 764ff6d
+- Commits: 6b08e1b, b59d6f4, a706f47, bd50490, 224ea61, 764ff6d, 54fa6f1
 - Tests: 958 passed, 1 pre-existing failure (unrelated)
 - PRs:
