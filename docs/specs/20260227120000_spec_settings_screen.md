@@ -8,13 +8,13 @@ Settings screen providing support/contact links, subscription management, and an
 
 ## Screen States
 
-| State | Condition | Upgrade Banner | Manage Subscription | Restore Purchases |
-|-------|-----------|----------------|---------------------|-------------------|
-| Free | `!canAccessPremium` | Visible | Hidden | Visible (native) |
-| Trial | `canAccessPremium && !isPremium` | Visible | Visible | Visible (native) |
-| Premium / Grace | `isPremium` | Hidden | Visible | Visible (native) |
-| Expired | `!canAccessPremium` | Visible | Hidden | Visible (native) |
-| Web (any) | `kIsWeb` | Per status above | Per status above | Hidden |
+| State | Condition | Upgrade Banner | Manage Subscription |
+|-------|-----------|----------------|---------------------|
+| Free / Expired | `!canAccessPremium` | Visible | Hidden |
+| Trial | `canAccessPremium && !isPremium` | Visible | Visible |
+| Premium / Grace | `isPremium` | Hidden | Visible |
+
+Restore Purchases is always visible on native platforms and hidden on web (`kIsWeb`).
 
 This screen has no loading, error, or empty states — all content is static/local.
 
