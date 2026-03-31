@@ -31,7 +31,7 @@ Layout:
 
    Tiles (each):
    - Padding: px-5, py-4
-   - Row: icon (20px, white/40, stroke-width 1.5) + label (Inter, 15px, w400, white/80, flex-1) + trailing icon when present (16px, white/20; omitted for in-app actions like Restore Purchases)
+   - Row: icon (20px, white/40, stroke-width 1.5) + label (Inter, 15px, w400, white/80, flex-1) + trailing icon (optional, 16px, white/20; omitted for in-app actions)
    - Min height: 56px, full width tap target
    - Press: bg-white/[0.03], scale(0.99), 150ms
    - Divider between tiles: 1px white/5, mx-5

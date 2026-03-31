@@ -8,15 +8,13 @@ Settings screen providing support/contact links, subscription management, and an
 
 ## Screen States
 
-| State | Condition | User Experience |
-|-------|-----------|-----------------|
-| Free / Trial / Expired | `!isPremium` | Upgrade banner visible, Manage Subscription hidden (free/expired) or visible (trial) |
-| Premium | `isPremium` | Upgrade banner hidden, Manage Subscription visible |
-
-**Visibility rules:**
-- Upgrade banner: hidden when `isPremium` (`premiumMonthly`, `premiumAnnual`, `grace`). Visible for trial, free, and expired users.
-- Manage Subscription tile: shown when `canAccessPremium` (`trial`, `premiumMonthly`, `premiumAnnual`, `grace`).
-- Restore Purchases tile: always visible on native platforms, hidden on web.
+| State | Condition | Upgrade Banner | Manage Subscription | Restore Purchases |
+|-------|-----------|----------------|---------------------|-------------------|
+| Free | `!canAccessPremium` | Visible | Hidden | Visible (native) |
+| Trial | `canAccessPremium && !isPremium` | Visible | Visible | Visible (native) |
+| Premium / Grace | `isPremium` | Hidden | Visible | Visible (native) |
+| Expired | `!canAccessPremium` | Visible | Hidden | Visible (native) |
+| Web (any) | `kIsWeb` | Per status above | Per status above | Hidden |
 
 This screen has no loading, error, or empty states — all content is static/local.
 
@@ -76,7 +74,7 @@ This screen has no loading, error, or empty states — all content is static/loc
 - Hover/press: `bg-white/[0.03]`, transition 200ms
 - Icon (left): 20px, stroke-width 1.5, `white40`
 - Label: Inter, 15px, w400, `white80`, flex-1
-- Trailing (when present): chevron-right 16px `white20` for navigation, external-link for external actions, or none for in-app actions (e.g., Restore Purchases)
+- Trailing (optional): chevron-right 16px `white20` for navigation, external-link for external actions. Omitted for in-app actions
 - Divider between tiles: 1px `white5`, mx-5
 
 ### 4. Tile Definitions
