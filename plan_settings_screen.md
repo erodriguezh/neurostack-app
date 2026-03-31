@@ -110,10 +110,10 @@
 
 ### 2.2 Product decision: Restore Purchases ✅
 
-- **Decision:** Restore Purchases is removed from Settings per spec.
-- **Rationale:** RevenueCat SDK automatically restores on app launch via `configure()`. Manual restore is only needed as a recovery path for edge cases (device change, reinstall). The spec explicitly lists it as out of scope.
-- **Future:** If re-added later, it can be a 6th tile in the Support section or moved to a debug/account screen.
-- **Cleanup:** Update `RevenueCatService.restorePurchases()` docstring to remove "Must be exposed in Settings UI" (no longer accurate per spec).
+- **Decision:** ~~Restore Purchases is removed from Settings per spec.~~ **Reversed by fn-81-paywall-apple-compliance.2** -- Restore Purchases is now a tile in Settings, always visible on native platforms (hidden on web). Apple App Store guideline 3.1.1 requires a user-facing restore mechanism.
+- **Rationale (original):** RevenueCat SDK automatically restores on app launch via `configure()`. Manual restore is only needed as a recovery path for edge cases (device change, reinstall). The spec explicitly lists it as out of scope.
+- **Rationale (fn-81 reversal):** Apple requires a visible "Restore Purchases" button for App Store compliance. The tile calls `RevenueCatService.restorePurchases()` and shows toast feedback (success/no purchases/failure).
+- **Cleanup:** `RevenueCatService.restorePurchases()` docstring updated -- it IS now exposed in Settings UI.
 
 ### Source references for patterns
 - EntitlementListenerMixin: `lib/core/abstractions/entitlement_listener_mixin.dart`
@@ -183,7 +183,11 @@
 | Tile | Leading Icon | `onTap` | Trailing | Visibility |
 |------|-------------|---------|----------|------------|
 | Contact Us | `LucideIcons.mail` | `_viewModel.goToContact()` | `LucideIcons.chevronRight` | Always |
-| Cancel Subscription | `LucideIcons.creditCard` | `_viewModel.openSubscriptionManagement()` | `LucideIcons.externalLink` | `isPremium` only |
+| Send Feedback | `LucideIcons.messageSquare` | `_viewModel.sendFeedback()` | `LucideIcons.chevronRight` | Always |
+| Rate the App | `LucideIcons.star` | `_viewModel.goToRateApp()` | `LucideIcons.chevronRight` | Always |
+| Feature Request | `LucideIcons.lightbulb` | `_viewModel.openFeatureRequestBoard()` | `LucideIcons.chevronRight` | Always |
+| Restore Purchases | `LucideIcons.rotateCcw` | `_viewModel.restorePurchases()` | `LucideIcons.chevronRight` | Always (native only) |
+| Manage Subscription | `LucideIcons.creditCard` | `_viewModel.openSubscriptionManagement()` | `LucideIcons.externalLink` | `canAccessPremium` only |
 
 ### 3.7 Animations ✅
 
@@ -307,6 +311,6 @@
   - Verify `goToPaywall` calls router with `/paywall`
   - Verify `openSubscriptionManagement` calls injected `launch` function with correct platform-specific URI and `LaunchMode.externalApplication`
   - **Live subscription update:** start as free user (isPremium = false), flip entitlement notifier to premium snapshot, assert `isPremium.value` updates to `true` without recreating the VM (mirrors `LibraryViewModel` test pattern in `test/library/library_view_model_test.dart`)
-- **Widget test `SettingsView`:** verify upgrade banner shown/hidden based on subscription, Contact Us tile always renders, Cancel Subscription tile only renders for premium users
+- **Widget test `SettingsView`:** verify upgrade banner shown/hidden based on subscription, Contact Us tile always renders, Restore Purchases tile always renders on native, Manage Subscription tile only renders when `canAccessPremium`
 - **Widget test `HomeBottomNav`:** verify 4 tabs render, Settings tab active state
 - **Enum exhaustiveness:** `flutter analyze` must pass after Phase 1.1 changes before proceeding

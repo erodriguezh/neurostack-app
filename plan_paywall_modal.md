@@ -808,14 +808,15 @@ Single source of truth for UI gating decisions. Prevents duplicate logic across 
   - Add `presentPaywall()` method that delegates to service
   - Remove `navigateToHome()` - view handles navigation
 
-### 5.3 Add Restore Purchases Entry Point (CRITICAL for Launch) [DONE]
-- **File:** Settings view (e.g., `lib/settings/settings_view.dart`)
-- **Rationale:** #1 subscription correctness issue after launch - users reinstall/change devices
+### 5.3 Add Restore Purchases Entry Point (CRITICAL for Launch) [DONE -- reopened by fn-81, re-done in fn-81-paywall-apple-compliance.2]
+- **File:** Settings view (`lib/settings/settings_view.dart`, `lib/settings/widgets/settings_support_section.dart`)
+- **Rationale:** #1 subscription correctness issue after launch - users reinstall/change devices. Apple App Store guideline 3.1.1 requires a user-facing restore mechanism.
+- **History:** Originally marked [DONE] via fn-46-1b8 but never actually implemented. Zombie epic fn-46-1b8 closed. Re-implemented in fn-81-paywall-apple-compliance.2 with proper toast feedback (success/no purchases/failure).
 - **Changes:**
-  - Add "Restore Purchases" button/list tile in settings
+  - Add "Restore Purchases" tile in settings (always visible on native, hidden on web)
   - On tap: call `_revenueCatService.restorePurchases()`
   - Show loading indicator during restore
-  - Show success/failure feedback
+  - Show success/failure/no-purchases toast feedback
   ```dart
   ListTile(cla
     leading: const Icon(Icons.restore),

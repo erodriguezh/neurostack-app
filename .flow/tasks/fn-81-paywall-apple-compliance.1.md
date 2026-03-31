@@ -93,8 +93,27 @@ Open the RevenueCat dashboard → Project "Neurostack" → Paywalls → "Untitle
 - [ ] `neurostack_yearly` has `trial_duration: P7D`
 - [ ] API verification confirms trial_duration on both products
 ## Done summary
-TBD
+## Done
 
+### Part A — Paywall Content (all complete)
+- Paywall renamed from "Untitled Paywall" to "Neurostack Pro"
+- Restore Purchases button added with restore_purchases action
+- Privacy Policy button added → https://getneurostack.app
+- Terms of Use button added → https://getneurostack.app
+- Auto-renewal disclosure text added (Apple-required language)
+- No delayed close button configured
+- Pricing uses dynamic RevenueCat variables (not hardcoded)
+- Paywall published and live to SDK
+
+### Part B — Trial Configuration (blocked on Phase 2)
+- `trial_duration` is a **read-only** field on RevenueCat Test Store products
+- Cannot be set via API (returns "parameter_error") or dashboard UI
+- Free trials require real App Store products with Introductory Offers in App Store Connect
+- **Blocked on tasks .5 and .6** (Phase 2 — App Store product creation)
+
+### Note
+- Monthly product was recreated during investigation (new ID: `prod35fffd4e53`, old: `prod173ebea3fe`)
+- All wiring (package, entitlement) verified intact after recreation
 ## Evidence
 - Commits:
 - Tests:

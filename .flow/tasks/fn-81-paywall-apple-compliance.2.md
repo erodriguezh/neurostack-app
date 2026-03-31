@@ -87,9 +87,8 @@
 - [ ] New tests for restore (success/no-purchases/failure/double-tap/disposal)
 - [ ] `flutter analyze` clean
 ## Done summary
-TBD
-
+Implemented all acceptance criteria for fn-81-paywall-apple-compliance.2. Renamed Cancel→Manage Subscription, added Restore Purchases tile, injected NotifyService, added restorePurchases() with _isRestoring guard and user-scoped snapshot check. 96 tests pass, flutter analyze clean.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 6ce72f5
+- Tests: 96 pass (settings_view_model_test.dart, settings_brightness_test.dart)
 - PRs:

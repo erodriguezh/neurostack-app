@@ -1,5 +1,5 @@
 study docs/README.md
-work on task fn-81-paywall-apple-compliance.1
+work on task fn-81-paywall-apple-compliance.3
 
 MCP available
 - dart
