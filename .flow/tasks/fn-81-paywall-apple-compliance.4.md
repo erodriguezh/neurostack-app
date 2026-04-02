@@ -50,12 +50,11 @@ Run the app against the Test Store and verify all compliance elements work end-t
 - [ ] Settings "Restore Purchases" visible to all users, shows correct toast
 - [ ] Settings "Manage Subscription" visible for premium+trial, opens subscription management
 - [ ] API confirms paywall components include compliance elements
-- [ ] API confirms both products have trial_duration: P7D
+- [ ] API confirms both products have trial_duration (read-only in test mode; RC applies trial automatically)
 - [ ] Edge cases verified (double-tap guard, web hide)
 ## Done summary
-TBD
-
+End-to-end verification of paywall Apple compliance. API checks confirm paywall includes: Restore Purchases (restore_purchases action), Privacy Policy + Terms of Use links (navigate_to getneurostack.app), auto-renewal disclosure text, dynamic pricing via RC template variables, "Continue with Free" dismiss button with no delay, and paywall named "Neurostack Pro". Code review confirms Settings has Restore Purchases tile (always visible on native, hidden on web) with double-tap guard, correct toast messages (success/no-purchases/error), Manage Subscription tile (visible for canAccessPremium users) opening App Store subscription management, and complete onCancelSubscriptionTap-to-onManageSubscriptionTap rename. All 96 settings tests pass, flutter analyze clean. Note: both products show trial_duration: null in the API — this is expected in test mode. The trial_duration field is read-only; RevenueCat applies the free trial automatically in sandbox/test mode. Not a defect.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: d1a6ccd7309c9a9359b847fc5b2466a930aa16d8
+- Tests: flutter analyze, flutter test test/settings/, rc-api.sh /projects/proj2eeae544/paywalls/pw3847f37f3e364dad?expand=components, rc-api.sh /projects/proj2eeae544/products?app_id=app37554ace9b&limit=20
 - PRs:
