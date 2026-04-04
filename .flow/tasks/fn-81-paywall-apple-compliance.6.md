@@ -110,8 +110,16 @@ This task walks you through: (A) generating an App Store Connect API key for Rev
 - [ ] API verification confirms App Store products in packages and entitlement
 - [ ] Paywall republished
 ## Done summary
-TBD
+Configured App Store Connect API key in RevenueCat and wired real App Store products:
 
+- Generated ASC API key (App Manager role) and uploaded .p8 + credentials to RevenueCat
+- Verified `app_store_connect_api_key_configured: true` via API
+- Imported `neurostack_monthly` and `neurostack_yearly` App Store products into RevenueCat
+- Attached App Store products to `$rc_monthly` and `$rc_annual` packages (alongside existing Test Store products)
+- Attached both App Store products to "Neurostack Pro" entitlement
+- Republished paywall
+
+Note: App Store products show MISSING_METADATA state — metadata completion in ASC is required before app submission but does not block RevenueCat wiring.
 ## Evidence
 - Commits:
 - Tests:
