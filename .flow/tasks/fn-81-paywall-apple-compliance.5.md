@@ -94,8 +94,13 @@ This task walks you through creating real subscription products in App Store Con
 - [ ] Products submitted for review (or ready to submit)
 - [ ] Product IDs verified to match RevenueCat identifiers exactly
 ## Done summary
-TBD
-
+Portal-only task completed. In App Store Connect:
+- Created subscription group "Neurostack Pro"
+- Created neurostack_monthly (1 Month, 7-day free trial, localized)
+- Created neurostack_yearly (1 Year, 7-day free trial, localized)
+- Group ranking set (Yearly first)
+- Review screenshots uploaded
+- Products in "Missing Metadata" status — will resolve at release time
 ## Evidence
 - Commits:
 - Tests:
