@@ -36,6 +36,9 @@ Layout (px-6):
    
    - "7 days free" - Inter, 20px, font-weight: 500, text-brand-sky
    - "No credit card required" - Inter, 13px, font-weight: 400, text-white/50, mt-1
+     > **fn-81 note:** "No credit card required" is inaccurate for App Store distribution.
+     > Apple requires a payment method to start a free trial via StoreKit/RevenueCat.
+     > The onboarding code was updated in fn-46 Phase 0.3 to remove this copy.
 
 5. Bottom section (fixed, pb-8, px-6):
    - Progress: dots 3 of 4

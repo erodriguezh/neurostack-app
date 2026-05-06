@@ -1,5 +1,5 @@
 study docs/README.md
-work on task fn-79-fix-empty-white-startup-screen.5
+work on task fn-81-paywall-apple-compliance.6
 
 MCP available
 - dart
@@ -11,3 +11,4 @@ IMPORTANT:
 - when the tests pass, review using RepoPrompt
 - when the review returns status SHIP, then commit
 - update the implementation plan and mark the task as done when the task is completed
+

@@ -31,7 +31,7 @@ Layout:
 
    Tiles (each):
    - Padding: px-5, py-4
-   - Row: icon (20px, white/40, stroke-width 1.5) + label (Inter, 15px, w400, white/80, flex-1) + trailing icon (16px, white/20)
+   - Row: icon (20px, white/40, stroke-width 1.5) + label (Inter, 15px, w400, white/80, flex-1) + trailing icon (optional, 16px, white/20): chevron for navigation/app-launched actions, external-link for browser URLs, omitted for in-app actions
    - Min height: 56px, full width tap target
    - Press: bg-white/[0.03], scale(0.99), 150ms
    - Divider between tiles: 1px white/5, mx-5
@@ -43,7 +43,8 @@ Layout:
    | Send Feedback | message-square | chevron-right | Always | Launches pre-filled mailto with diagnostic context |
    | Rate the App | star | chevron-right | Always | Navigate to /settings/rate-app via RouterService |
    | Feature Request | lightbulb | chevron-right | Always | Opens UserOrient board |
-   | Cancel Subscription | credit-card | external-link | Premium only | Opens platform subscription mgmt |
+   | Restore Purchases | rotate-ccw | none (in-app action) | Always (native only) | Calls RevenueCat restorePurchases with toast feedback |
+   | Manage Subscription | credit-card | external-link | canAccessPremium (trial + premium) | Opens platform subscription mgmt |
 
 4. Animations:
    - Content fade-in: 400ms ease-out, translateY(8 to 0)

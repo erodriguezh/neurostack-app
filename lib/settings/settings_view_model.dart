@@ -3,6 +3,8 @@ import 'package:flutter/widgets.dart';
 import 'package:neurostack/core/abstractions/entitlement_listener_mixin.dart';
 import 'package:neurostack/core/abstractions/premium_aware_view_model_mixin.dart';
 import 'package:neurostack/core/models/home_bottom_tab.dart';
+import 'package:neurostack/core/utils/internal_notification/notify_service.dart';
+import 'package:neurostack/core/utils/internal_notification/toast/toast_event.dart';
 import 'package:neurostack/core/utils/navigation/route_data.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/core/utils/userorient/userorient_service.dart';
@@ -28,6 +30,7 @@ class SettingsViewModel
     required SubscriptionStatusResolver subscriptionStatusResolver,
     required RevenueCatService revenueCatService,
     required UserOrientService userOrientService,
+    required NotifyService notifyService,
     required PackageInfo packageInfo,
     CachedUserStore? cachedUserStore,
     HomeBottomTabCoordinator? tabCoordinator,
@@ -37,6 +40,7 @@ class SettingsViewModel
        _resolver = subscriptionStatusResolver,
        _revenueCatService = revenueCatService,
        _userOrientService = userOrientService,
+       _notifyService = notifyService,
        _packageInfo = packageInfo,
        _cachedUserStore = cachedUserStore,
        _tabCoordinator =
@@ -44,6 +48,7 @@ class SettingsViewModel
            HomeBottomTabCoordinator(routerService: routerService),
        _launch = launch ?? launchUrl {
     initPremiumAwareness();
+    canAccessPremium = ValueNotifier<bool>(_computeCanAccessPremium());
   }
 
   final RouterService _routerService;
@@ -51,12 +56,17 @@ class SettingsViewModel
   final SubscriptionStatusResolver _resolver;
   final RevenueCatService _revenueCatService;
   final UserOrientService _userOrientService;
+  final NotifyService _notifyService;
   final PackageInfo _packageInfo;
   final CachedUserStore? _cachedUserStore;
   final HomeBottomTabCoordinator _tabCoordinator;
   final Future<bool> Function(Uri, {LaunchMode mode}) _launch;
 
   bool _isDisposed = false;
+  bool _isRestoring = false;
+
+  /// Whether the user can access premium features (premium + trial).
+  late final ValueNotifier<bool> canAccessPremium;
 
   // --- Mixin wiring ---
 
@@ -76,6 +86,7 @@ class SettingsViewModel
   void onEntitlementChanged() {
     if (_isDisposed) return;
     super.onEntitlementChanged();
+    _refreshCanAccessPremium();
   }
 
   // --- Public API ---
@@ -202,10 +213,101 @@ class SettingsViewModel
     }
   }
 
+  /// Restores purchases via RevenueCat.
+  ///
+  /// Shows a toast based on the outcome:
+  /// - Success + entitlement active → success toast
+  /// - Success + no entitlement → info toast (no purchases found)
+  /// - Failure → error toast
+  ///
+  /// Guarded by [_isRestoring] to prevent concurrent restore calls.
+  Future<void> restorePurchases() async {
+    if (_isRestoring) return;
+    _isRestoring = true;
+
+    try {
+      final success = await _revenueCatService.restorePurchases();
+      if (_isDisposed) return;
+
+      if (success) {
+        final snapshot = _revenueCatService.entitlementSnapshot.value;
+        final user = resolveAuthUser();
+        final isEntitled = snapshot != null &&
+            user != null &&
+            snapshot.isForUser(user.id) &&
+            snapshot.hasProEntitlement;
+        if (isEntitled) {
+          _notifyService.setToastEvent(
+            ToastEventSuccess(message: 'Purchases restored successfully'),
+          );
+        } else {
+          _notifyService.setToastEvent(
+            ToastEventInfo(message: 'No previous purchases found'),
+          );
+        }
+      } else {
+        _notifyService.setToastEvent(
+          ToastEventError(
+            message: 'Unable to restore purchases. Please try again.',
+          ),
+        );
+      }
+    } catch (_) {
+      if (_isDisposed) return;
+      _notifyService.setToastEvent(
+        ToastEventError(
+          message: 'Unable to restore purchases. Please try again.',
+        ),
+      );
+    } finally {
+      _isRestoring = false;
+    }
+  }
+
   void dispose() {
     _isDisposed = true;
+    canAccessPremium.dispose();
     disposeEntitlementListener();
     disposePremiumAwareness();
+  }
+
+  // --- Private helpers ---
+
+  bool _computeCanAccessPremium() {
+    final user = resolveAuthUser();
+    if (user == null) return false;
+    final snapshot = entitlementListenerService.entitlementSnapshot.value;
+    final status = premiumResolver.resolveEffectiveStatus(
+      user: user,
+      snapshot: snapshot,
+    );
+    return status.canAccessPremium;
+  }
+
+  void _refreshCanAccessPremium() {
+    final user = resolveAuthUser();
+    if (user != null) {
+      final snapshot = entitlementListenerService.entitlementSnapshot.value;
+      final status = premiumResolver.resolveEffectiveStatus(
+        user: user,
+        snapshot: snapshot,
+      );
+      canAccessPremium.value = status.canAccessPremium;
+    } else {
+      premiumCachedUserStore
+          ?.loadUser()
+          .then((cached) {
+            if (cached == null || _isDisposed) return;
+            final snapshot =
+                entitlementListenerService.entitlementSnapshot.value;
+            final status = premiumResolver.resolveEffectiveStatus(
+              user: cached,
+              snapshot: snapshot,
+            );
+            canAccessPremium.value = status.canAccessPremium;
+          })
+          .catchError((_) {});
+    }
   }
 
   /// Encodes query parameters for a mailto URI using [Uri.encodeComponent]

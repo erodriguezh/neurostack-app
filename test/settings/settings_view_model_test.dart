@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:neurostack/core/models/home_bottom_tab.dart';
+import 'package:neurostack/core/utils/internal_notification/toast/toast_event.dart';
 import 'package:neurostack/core/utils/navigation/route_data.dart';
 import 'package:neurostack/features/auth/domain/auth_state.dart';
 import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
@@ -26,6 +27,7 @@ void main() {
   late MockAuthService mockAuthService;
   late MockRevenueCatService mockRevenueCatService;
   late MockUserOrientService mockUserOrientService;
+  late MockNotifyService mockNotifyService;
   late MockHomeBottomTabCoordinator mockTabCoordinator;
   late SubscriptionStatusResolver resolver;
   late List<(Uri, LaunchMode)> launchCalls;
@@ -40,6 +42,7 @@ void main() {
     registerFallbackValue(Path(name: '/'));
     registerFallbackValue(HomeBottomTab.stack);
     registerFallbackValue(_FakeBuildContext());
+    registerFallbackValue(ToastEventInfo(message: ''));
   });
 
   setUp(() {
@@ -47,6 +50,7 @@ void main() {
     mockAuthService = MockAuthService();
     mockRevenueCatService = MockRevenueCatService();
     mockUserOrientService = MockUserOrientService();
+    mockNotifyService = MockNotifyService();
     mockTabCoordinator = MockHomeBottomTabCoordinator();
     resolver = const SubscriptionStatusResolver();
     launchCalls = [];
@@ -68,6 +72,7 @@ void main() {
       subscriptionStatusResolver: resolver,
       revenueCatService: mockRevenueCatService,
       userOrientService: mockUserOrientService,
+      notifyService: mockNotifyService,
       packageInfo: packageInfo ??
           PackageInfo(
             appName: 'NeuroStack',
@@ -621,6 +626,360 @@ void main() {
           'https://play.google.com/store/account/subscriptions',
         );
         expect(launchCalls.first.$2, LaunchMode.externalApplication);
+      });
+    });
+
+    group('canAccessPremium initialization', () {
+      test('is true when user is trial', () {
+        final user = UserFactory.create(
+          subscriptionStatus: SubscriptionStatus.trial,
+        );
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+
+        final vm = createViewModel();
+        addTearDown(vm.dispose);
+
+        expect(vm.canAccessPremium.value, isTrue);
+      });
+
+      test('is false when user is free', () {
+        final user = UserFactory.create(
+          subscriptionStatus: SubscriptionStatus.free,
+        );
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+
+        final vm = createViewModel();
+        addTearDown(vm.dispose);
+
+        expect(vm.canAccessPremium.value, isFalse);
+      });
+
+      test('is true when user is premiumMonthly', () {
+        final user = UserFactory.createPremiumMonthly();
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+
+        final vm = createViewModel();
+        addTearDown(vm.dispose);
+
+        expect(vm.canAccessPremium.value, isTrue);
+      });
+
+      test('is false when authState is Unauthenticated', () {
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(const Unauthenticated()));
+
+        final vm = createViewModel();
+        addTearDown(vm.dispose);
+
+        expect(vm.canAccessPremium.value, isFalse);
+      });
+
+      test('updates when entitlement changes', () {
+        final freeUser = UserFactory.create(
+          subscriptionStatus: SubscriptionStatus.free,
+        );
+        final snapshotNotifier = ValueNotifier<EntitlementSnapshot?>(null);
+        when(
+          () => mockRevenueCatService.entitlementSnapshot,
+        ).thenReturn(snapshotNotifier);
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(freeUser)));
+
+        final vm = createViewModel();
+        addTearDown(vm.dispose);
+        vm.init();
+
+        expect(vm.canAccessPremium.value, isFalse);
+
+        // Simulate trial activation via RC snapshot
+        final trialSnapshot = EntitlementSnapshotFactory.activeTrial(
+          userId: freeUser.id,
+        );
+        snapshotNotifier.value = trialSnapshot;
+
+        expect(vm.canAccessPremium.value, isTrue);
+      });
+    });
+
+    group('restorePurchases', () {
+      test('calls revenueCatService.restorePurchases', () async {
+        final user = UserFactory.create();
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+        when(
+          () => mockRevenueCatService.restorePurchases(),
+        ).thenAnswer((_) async => true);
+
+        // After restore, snapshot has entitlement
+        final snapshot = EntitlementSnapshotFactory.activePaidMonthly(
+          userId: user.id,
+        );
+        when(
+          () => mockRevenueCatService.entitlementSnapshot,
+        ).thenReturn(ValueNotifier<EntitlementSnapshot?>(snapshot));
+
+        final vm = createViewModel();
+        addTearDown(vm.dispose);
+
+        await vm.restorePurchases();
+
+        verify(() => mockRevenueCatService.restorePurchases()).called(1);
+      });
+
+      test('shows success toast when restore succeeds with entitlement',
+          () async {
+        final user = UserFactory.create();
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+        when(
+          () => mockRevenueCatService.restorePurchases(),
+        ).thenAnswer((_) async => true);
+
+        final snapshot = EntitlementSnapshotFactory.activePaidMonthly(
+          userId: user.id,
+        );
+        when(
+          () => mockRevenueCatService.entitlementSnapshot,
+        ).thenReturn(ValueNotifier<EntitlementSnapshot?>(snapshot));
+
+        final vm = createViewModel();
+        addTearDown(vm.dispose);
+
+        await vm.restorePurchases();
+
+        final captured = verify(
+          () => mockNotifyService.setToastEvent(captureAny()),
+        ).captured;
+        expect(captured, hasLength(1));
+        expect(captured.first, isA<ToastEventSuccess>());
+        expect(
+          (captured.first as ToastEventSuccess).message,
+          'Purchases restored successfully',
+        );
+      });
+
+      test('shows info toast when restore succeeds without entitlement',
+          () async {
+        final user = UserFactory.create();
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+        when(
+          () => mockRevenueCatService.restorePurchases(),
+        ).thenAnswer((_) async => true);
+
+        // No entitlement after restore
+        when(
+          () => mockRevenueCatService.entitlementSnapshot,
+        ).thenReturn(ValueNotifier<EntitlementSnapshot?>(null));
+
+        final vm = createViewModel();
+        addTearDown(vm.dispose);
+
+        await vm.restorePurchases();
+
+        final captured = verify(
+          () => mockNotifyService.setToastEvent(captureAny()),
+        ).captured;
+        expect(captured, hasLength(1));
+        expect(captured.first, isA<ToastEventInfo>());
+        expect(
+          (captured.first as ToastEventInfo).message,
+          'No previous purchases found',
+        );
+      });
+
+      test('shows error toast when restore fails', () async {
+        final user = UserFactory.create();
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+        when(
+          () => mockRevenueCatService.restorePurchases(),
+        ).thenAnswer((_) async => false);
+
+        final vm = createViewModel();
+        addTearDown(vm.dispose);
+
+        await vm.restorePurchases();
+
+        final captured = verify(
+          () => mockNotifyService.setToastEvent(captureAny()),
+        ).captured;
+        expect(captured, hasLength(1));
+        expect(captured.first, isA<ToastEventError>());
+        expect(
+          (captured.first as ToastEventError).message,
+          'Unable to restore purchases. Please try again.',
+        );
+      });
+
+      test('double-tap guard: second call while restoring is ignored',
+          () async {
+        final user = UserFactory.create();
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+
+        final snapshot = EntitlementSnapshotFactory.activePaidMonthly(
+          userId: user.id,
+        );
+        when(
+          () => mockRevenueCatService.entitlementSnapshot,
+        ).thenReturn(ValueNotifier<EntitlementSnapshot?>(snapshot));
+
+        // Use a completer to control when the restore completes
+        var callCount = 0;
+        when(
+          () => mockRevenueCatService.restorePurchases(),
+        ).thenAnswer((_) async {
+          callCount++;
+          // Simulate a slow restore
+          await Future<void>.delayed(Duration.zero);
+          return true;
+        });
+
+        final vm = createViewModel();
+        addTearDown(vm.dispose);
+
+        // Fire two restores concurrently
+        final f1 = vm.restorePurchases();
+        final f2 = vm.restorePurchases();
+        await Future.wait([f1, f2]);
+
+        // Only one call should have gone through
+        expect(callCount, 1);
+      });
+
+      test('shows error toast when restore throws', () async {
+        final user = UserFactory.create();
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+        when(
+          () => mockRevenueCatService.restorePurchases(),
+        ).thenThrow(StateError('init not called'));
+
+        final vm = createViewModel();
+        addTearDown(vm.dispose);
+
+        await vm.restorePurchases();
+
+        final captured = verify(
+          () => mockNotifyService.setToastEvent(captureAny()),
+        ).captured;
+        expect(captured, hasLength(1));
+        expect(captured.first, isA<ToastEventError>());
+      });
+
+      test('does not show toast after disposal', () async {
+        final user = UserFactory.create();
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+
+        when(
+          () => mockRevenueCatService.restorePurchases(),
+        ).thenAnswer((_) async {
+          // Simulate: VM gets disposed during the async gap
+          return true;
+        });
+
+        final snapshot = EntitlementSnapshotFactory.activePaidMonthly(
+          userId: user.id,
+        );
+        when(
+          () => mockRevenueCatService.entitlementSnapshot,
+        ).thenReturn(ValueNotifier<EntitlementSnapshot?>(snapshot));
+
+        final vm = createViewModel();
+
+        // Start restore, then dispose before it completes
+        final future = vm.restorePurchases();
+        vm.dispose();
+        await future;
+
+        verifyNever(() => mockNotifyService.setToastEvent(any()));
+      });
+
+      test(
+          'shows info toast when snapshot belongs to different user (stale)',
+          () async {
+        final user = UserFactory.create();
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+        when(
+          () => mockRevenueCatService.restorePurchases(),
+        ).thenAnswer((_) async => true);
+
+        // Snapshot for a different user — should not count as entitled
+        final staleSnapshot = EntitlementSnapshotFactory.activePaidMonthly(
+          userId: 'different-user-id',
+        );
+        when(
+          () => mockRevenueCatService.entitlementSnapshot,
+        ).thenReturn(ValueNotifier<EntitlementSnapshot?>(staleSnapshot));
+
+        final vm = createViewModel();
+        addTearDown(vm.dispose);
+
+        await vm.restorePurchases();
+
+        final captured = verify(
+          () => mockNotifyService.setToastEvent(captureAny()),
+        ).captured;
+        expect(captured, hasLength(1));
+        expect(captured.first, isA<ToastEventInfo>());
+        expect(
+          (captured.first as ToastEventInfo).message,
+          'No previous purchases found',
+        );
+      });
+
+      test(
+          'shows info toast when restore succeeds but snapshot has no entitlement',
+          () async {
+        final user = UserFactory.create();
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+        when(
+          () => mockRevenueCatService.restorePurchases(),
+        ).thenAnswer((_) async => true);
+
+        // Snapshot present but no entitlement
+        final snapshot = EntitlementSnapshotFactory.expiredTrial(
+          userId: user.id,
+        );
+        when(
+          () => mockRevenueCatService.entitlementSnapshot,
+        ).thenReturn(ValueNotifier<EntitlementSnapshot?>(snapshot));
+
+        final vm = createViewModel();
+        addTearDown(vm.dispose);
+
+        await vm.restorePurchases();
+
+        final captured = verify(
+          () => mockNotifyService.setToastEvent(captureAny()),
+        ).captured;
+        expect(captured, hasLength(1));
+        expect(captured.first, isA<ToastEventInfo>());
+        expect(
+          (captured.first as ToastEventInfo).message,
+          'No previous purchases found',
+        );
       });
     });
 

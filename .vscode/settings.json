@@ -11,7 +11,7 @@
     "editor.wordBasedSuggestions": "off"
   },
   "cmake.ignoreCMakeListsMissing": true,
-  "dart.flutterAdditionalArgs": [
+  "dart.flutterRunAdditionalArgs": [
     "--dart-define-from-file=env/env.json"
   ],
   "dart.previewFlutterUiGuides": true,

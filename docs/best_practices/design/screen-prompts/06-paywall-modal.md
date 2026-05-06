@@ -71,3 +71,12 @@ Layout (px-6):
 
 Error: Toast from bottom with red accent.
 Success: "Welcome to Premium!" toast with Brand Sky accent, sparkle icon.
+
+6. Compliance elements (RevenueCat hosted paywall, fn-81):
+   - The hosted paywall (designed in RevenueCat dashboard) now includes:
+     - Restore Purchases button (Apple requirement 3.1.1)
+     - Privacy Policy link (Apple requirement 5.1.1)
+     - Terms of Use link (Apple requirement 3.1.2)
+     - Auto-renewal disclosure text with cancellation instructions
+   - These elements are configured in the RevenueCat paywall builder, not in Flutter code.
+   - Temporary URL for Privacy Policy and Terms of Use: `https://getneurostack.app`

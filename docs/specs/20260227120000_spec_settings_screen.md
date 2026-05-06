@@ -8,10 +8,13 @@ Settings screen providing support/contact links, subscription management, and an
 
 ## Screen States
 
-| State | Condition | User Experience |
-|-------|-----------|-----------------|
-| Free / Trial / Expired | `!subscriptionStatus.isPremium` | Upgrade banner visible, Cancel Subscription hidden |
-| Premium | `subscriptionStatus.isPremium` | Upgrade banner hidden, Cancel Subscription visible |
+| State | Condition | Upgrade Banner | Manage Subscription |
+|-------|-----------|----------------|---------------------|
+| Free / Expired | `!canAccessPremium` | Visible | Hidden |
+| Trial | `canAccessPremium && !isPremium` | Visible | Visible |
+| Premium / Grace | `isPremium` | Hidden | Visible |
+
+Restore Purchases is always visible on native platforms and hidden on web (`kIsWeb`).
 
 This screen has no loading, error, or empty states — all content is static/local.
 
@@ -71,7 +74,7 @@ This screen has no loading, error, or empty states — all content is static/loc
 - Hover/press: `bg-white/[0.03]`, transition 200ms
 - Icon (left): 20px, stroke-width 1.5, `white40`
 - Label: Inter, 15px, w400, `white80`, flex-1
-- Trailing: chevron-right 16px `white20` (or external-link for external actions)
+- Trailing (optional): chevron-right 16px `white20` for navigation or app-launched actions (e.g. mailto), external-link for browser-opened URLs (e.g. subscription management). Omitted for in-app actions (e.g. Restore Purchases)
 - Divider between tiles: 1px `white5`, mx-5
 
 ### 4. Tile Definitions
@@ -82,9 +85,10 @@ This screen has no loading, error, or empty states — all content is static/loc
 | 2 | Send Feedback | `LucideIcons.messageSquare` | Chevron | Opens mailto link via `url_launcher` (see §Send Feedback below) | Always |
 | 3 | Rate the App | `LucideIcons.star` | Chevron | Navigate to `/settings/rate-app` via `RouterService` | Always |
 | 4 | Feature Request | `LucideIcons.lightbulb` | Chevron | Opens UserOrient board | Always |
-| 5 | Cancel Subscription | `LucideIcons.creditCard` | External-link | Opens platform subscription mgmt | Premium only |
+| 5 | Restore Purchases | `LucideIcons.rotateCcw` | None (in-app action) | Calls `RevenueCatService.restorePurchases()` with toast feedback | Always (native only, hidden on web) |
+| 6 | Manage Subscription | `LucideIcons.creditCard` | External-link | Opens platform subscription mgmt | `canAccessPremium` only (trial + premium) |
 
-> **Note:** The settings section defines 5 tiles total. Contact Us, Send Feedback, Rate the App, and Feature Request are always shown; Cancel Subscription is shown only for premium users. Feature Request is functional via UserOrient. Rate the App navigates to `/settings/rate-app` (in-app review integration). Send Feedback opens a pre-filled mailto link via `url_launcher`.
+> **Note:** The settings section defines 6 tiles total. Contact Us, Send Feedback, Rate the App, and Feature Request are always shown. Restore Purchases is always visible on native platforms (hidden on web) per Apple App Store requirement. Manage Subscription is shown when `canAccessPremium` (includes trial and premium users). Feature Request is functional via UserOrient. Rate the App navigates to `/settings/rate-app` (in-app review integration). Send Feedback opens a pre-filled mailto link via `url_launcher`.
 
 ### Send Feedback (mailto)
 
@@ -114,7 +118,9 @@ Subscription: premiumAnnual
 - Platform: `defaultTargetPlatform` (Flutter foundation)
 - Subscription tier: resolved via `SubscriptionStatusResolver.resolveEffectiveStatus()` — same pattern as `openFeatureRequestBoard()`
 
-**Cancel Subscription visibility:** Inverse of upgrade banner — only shown when `subscriptionStatus.isPremium`.
+**Manage Subscription visibility:** Shown when `canAccessPremium` (includes `trial`, `premiumMonthly`, `premiumAnnual`, `grace`).
+
+**Restore Purchases:** Always visible on native platforms (iOS/Android/macOS), hidden on web. Shows toast feedback: success ("Purchases restored successfully"), no purchases found ("No previous purchases found"), or failure ("Unable to restore purchases. Please try again.").
 
 ### 5. Contact Us Page (Placeholder)
 
@@ -139,7 +145,7 @@ Subscription: premiumAnnual
 
 - `SubscriptionStatus` from `SubscriptionStatusResolver.resolveEffectiveStatus()` to determine:
   - Upgrade banner visibility
-  - Cancel Subscription tile visibility
+  - Manage Subscription tile visibility (`canAccessPremium`)
 - `RevenueCatService.entitlementSnapshot` for current entitlement state
 - `CachedUserStore` or `User` aggregate for user data
 
@@ -153,7 +159,7 @@ Subscription: premiumAnnual
 
 ## Dependencies
 
-- `url_launcher` package — Cancel Subscription + Send Feedback mailto (already in `pubspec.yaml`)
+- `url_launcher` package — Manage Subscription + Send Feedback mailto (already in `pubspec.yaml`)
 - `package_info_plus` — runtime app version for Send Feedback email body
 - `lucide_icons_flutter` — already in `pubspec.yaml`
 - `userorient_flutter: ^2.1.0` — Feature Request board integration
@@ -170,8 +176,8 @@ Screenshot (if present): [`docs/design_screenshots/11-settings.png`](../design_s
 
 ## Out of Scope
 
-- Restore Purchases tile (not included)
-- ~~Wiredash integration~~ — replaced by mailto via `url_launcher` (decision 2026-03-20)
+- ~~Restore Purchases tile (not included)~~ -- Added in fn-81-paywall-apple-compliance
+- ~~Wiredash integration~~ -- replaced by mailto via `url_launcher` (decision 2026-03-20)
 - In-app fallback for missing email client (fire-and-forget for now)
 - Sign out / account deletion
 - App version display in Settings UI (version is only included in feedback email body)

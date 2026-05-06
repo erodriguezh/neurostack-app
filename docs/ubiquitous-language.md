@@ -122,6 +122,7 @@ INV-M2: Premium Trial MUST last exactly 7 days from subscription start
 → Rationale: Standard trial period, conversion optimization (RevenueCat-managed)
 → Enforcement: RevenueCat SDK manages trial duration from subscription creation
 → Test: Trial expires at exactly 168 hours after subscription start
+→ Note (fn-81): trial_duration was null on Test Store products until fn-81-paywall-apple-compliance.1 configured P7D
 
 INV-M3: [DEPRECATED] Premium Trial MUST NOT require credit card
 → DEPRECATED: RevenueCat manages trials via App Store/Play Store which require payment method
@@ -260,14 +261,14 @@ INV-P6: New users MUST start with 'free' status (not 'trial')
 **Settings Screen** (noun)
 
 - Definition: The 4th bottom-navigation tab exposing account management and support actions
-- Properties: Upgrade Banner (conditional), Support Section (5 tiles), subscription-aware layout
+- Properties: Upgrade Banner (conditional), Support Section (6 tiles), subscription-aware layout
 - UI Label: "Settings"
 
 **Support Tile** (noun)
 
 - Definition: A tappable row in the Settings "Support & Resources" section that triggers an action
 - Properties: Icon (Lucide), Label, Trailing icon (chevron or external-link), Tap callback
-- Examples: Contact Us, Send Feedback, Rate the App, Feature Request, Cancel Subscription
+- Examples: Contact Us, Send Feedback, Rate the App, Feature Request, Restore Purchases, Manage Subscription
 - UI Label: Varies per tile
 
 **Send Feedback** (action)

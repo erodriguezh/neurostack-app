@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -7,23 +8,27 @@ import 'package:neurostack/settings/widgets/settings_tile.dart';
 /// The "SUPPORT & RESOURCES" section of the Settings screen.
 ///
 /// Contains an uppercase section header and a rounded tile container
-/// holding five settings tiles (Contact Us, Send Feedback, Rate the App,
-/// Feature Request, Cancel Subscription). The Cancel Subscription tile is
-/// only visible for premium users. Tiles are separated by 1 px dividers.
+/// holding settings tiles (Contact Us, Send Feedback, Rate the App,
+/// Feature Request, Restore Purchases, Manage Subscription).
+///
+/// The Manage Subscription tile is visible when [canAccessPremium] is true
+/// (premium + trial users). The Restore Purchases tile is always visible
+/// on native platforms but hidden on web.
 class SettingsSupportSection extends StatelessWidget {
   const SettingsSupportSection({
     super.key,
-    required this.isPremium,
+    required this.canAccessPremium,
     required this.onContactTap,
     required this.onFeedbackTap,
     required this.onRateAppTap,
     required this.onFeatureRequestTap,
-    required this.onCancelSubscriptionTap,
+    required this.onRestorePurchasesTap,
+    required this.onManageSubscriptionTap,
   });
 
-  /// Whether the user has premium status. Drives Cancel Subscription
-  /// tile visibility.
-  final bool isPremium;
+  /// Whether the user can access premium features (premium + trial).
+  /// Drives Manage Subscription tile visibility.
+  final bool canAccessPremium;
 
   /// Navigate to the Contact Us page.
   final VoidCallback onContactTap;
@@ -37,8 +42,11 @@ class SettingsSupportSection extends StatelessWidget {
   /// Opens the UserOrient board.
   final VoidCallback onFeatureRequestTap;
 
+  /// Triggers restore purchases flow.
+  final VoidCallback onRestorePurchasesTap;
+
   /// Opens platform subscription management.
-  final VoidCallback onCancelSubscriptionTap;
+  final VoidCallback onManageSubscriptionTap;
 
   @override
   Widget build(BuildContext context) {
@@ -76,11 +84,17 @@ class SettingsSupportSection extends StatelessWidget {
         isVisible: true,
       ),
       _TileEntry(
+        icon: LucideIcons.rotateCcw,
+        label: 'Restore Purchases',
+        onTap: onRestorePurchasesTap,
+        isVisible: !kIsWeb,
+      ),
+      _TileEntry(
         icon: LucideIcons.creditCard,
-        label: 'Cancel Subscription',
+        label: 'Manage Subscription',
         trailing: LucideIcons.externalLink,
-        onTap: onCancelSubscriptionTap,
-        isVisible: isPremium,
+        onTap: onManageSubscriptionTap,
+        isVisible: canAccessPremium,
       ),
     ];
 
@@ -151,14 +165,14 @@ class _TileEntry {
   const _TileEntry({
     required this.icon,
     required this.label,
-    required this.trailing,
+    this.trailing,
     required this.onTap,
     required this.isVisible,
   });
 
   final IconData icon;
   final String label;
-  final IconData trailing;
+  final IconData? trailing;
   final VoidCallback onTap;
   final bool isVisible;
 }
