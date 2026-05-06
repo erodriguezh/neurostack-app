@@ -4,6 +4,9 @@
 - [CLAUDE.md](../CLAUDE.md) - build commands, architecture overview, layer structure, key patterns, testing, environment setup
 - [AGENTS.md](../AGENTS.md) - repository guidelines, coding style, commit conventions, PR guidelines
 
+## Legal
+- [Legal Research Overview](./legal/research-findings.md) - community research findings, legal best practices
+
 ## Architecture
 - [conventions.md](./best_practices/conventions.md) - naming conventions, file structure, feature folders, lower_snake_case, UpperCamelCase
 - [general_structure_and_guidelines.md](./best_practices/general_structure_and_guidelines.md) - MVVM wiring, ValueNotifier state, DI/service locator, routing and navigation
