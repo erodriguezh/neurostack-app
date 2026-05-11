@@ -5,6 +5,8 @@
 
 ---
 
+> **Update (2026-05-06 / fn-82):** This plan documents the original 57-protocol migration work that shipped in February 2026. Section 3.2's heading reflects the post-fn-82 catalog (60 entries / 85 citations in `protocols.json`; 59/83 distinct after `lower(name)` upsert), but the historical implementation prose below (e.g., "For each of 57 protocols" in the section body) is preserved unchanged as a snapshot of what shipped at the time. See `.flow/specs/fn-82-add-3-community-validated-protocols-to.md` for the delta.
+
 ## Phase 1 — Domain Layer
 
 ### 1.1 Add failure constant ✅
@@ -75,7 +77,7 @@
   - Cite: existing comments at `supabase/migrations/20251204192228_initial_schema.sql` lines 33-37
   - **Done:** commit `ba54cea`
 
-### 3.2 Seed migration — upsert 57 protocols + 76 citations ✅
+### 3.2 Seed migration — upsert 60 protocols + 85 citations (in protocols.json; 59/83 distinct after upsert) ✅
 - **New** `supabase/migrations/YYYYMMDDHHMMSS_seed_protocols.sql`
   - Add case-insensitive unique index: `CREATE UNIQUE INDEX IF NOT EXISTS protocols_name_unique ON public.protocols (lower(name))`
   - For each of 57 protocols: `INSERT INTO public.protocols (name, description, target, category, evidence_level) VALUES (...) ON CONFLICT ((lower(name))) DO UPDATE SET description=EXCLUDED.description, target=EXCLUDED.target, category=EXCLUDED.category, evidence_level=EXCLUDED.evidence_level`
@@ -88,7 +90,7 @@
 
 ### 3.3 Fix `supabase/seed.sql` (test data) ✅
 - **Edit** `supabase/seed.sql`
-  - **Remove explicit IDs** from protocol INSERTs — stop using `OVERRIDING SYSTEM VALUE` with fixed IDs 1..13. Instead let the DB assign identity values, matching the approach used by the seed migration in 3.2. This avoids PK collisions when `supabase db reset` runs migrations (which insert 57 protocols) before seed.sql (which inserts 13 test protocols).
+  - **Remove explicit IDs** from protocol INSERTs — stop using `OVERRIDING SYSTEM VALUE` with fixed IDs 1..13. Instead let the DB assign identity values, matching the approach used by the seed migration in 3.2. This avoids PK collisions when `supabase db reset` runs migrations (which insert 59 distinct protocols) before seed.sql (which inserts 13 test protocols).
   - **Resolve citation FKs by name:** replace `protocol_id = <literal int>` with `protocol_id = (SELECT id FROM public.protocols WHERE name = '...')` in research_citations INSERTs.
   - Add `description` column to INSERT statement — use placeholder descriptions for 13 test protocols
   - Fix stale category values (`coldTherapy` → `coldExposure`, `supplementation` → `supplements`, `mindfulness` → `mind`)

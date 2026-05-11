@@ -1,0 +1,20 @@
+{
+  "branch_name": "fn-82-add-3-protocols",
+  "completion_review_status": "unknown",
+  "completion_reviewed_at": null,
+  "created_at": "2026-05-06T14:58:05.288363Z",
+  "default_impl": null,
+  "default_review": null,
+  "default_sync": null,
+  "depends_on_epics": [
+    "fn-67-phase-32-seed-migration-upsert-57"
+  ],
+  "id": "fn-82-add-3-community-validated-protocols-to",
+  "next_task": 1,
+  "plan_review_status": "ship",
+  "plan_reviewed_at": "2026-05-06T17:38:57.416386Z",
+  "spec_path": ".flow/specs/fn-82-add-3-community-validated-protocols-to.md",
+  "status": "open",
+  "title": "Add 3 community-validated protocols to catalog",
+  "updated_at": "2026-05-06T17:38:57.416578Z"
+}

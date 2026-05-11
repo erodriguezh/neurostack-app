@@ -65,7 +65,7 @@
 - [Spec: Log Session Modal](./specs/20260113180000_spec_log_session_modal.md) - LogSessionModal, offline-first, SessionSyncService, eligibility check, backdate 7 days, haptic feedback, accessibility announcements
 - [Spec: Trial Expiration Cronjob](./specs/20260122150000_spec_trial_expiration_cronjob.md) - pg_cron, trial_ends_at, trial_expired_at, expire_trials(), idempotent transition, subscription status free, UTC timezone
 - [Spec: Paywall Modal](./specs/20260123220000_spec_paywall_modal.md) - RevenueCat integration, entitlement mapping, customer identification, webhook architecture, trial reminder
-- [Spec: Protocol Description & Seed](./specs/20260220120000_spec_protocol_description_and_seed.md) - ProtocolDescription VO, description field, protocols.json seed, 57 protocols, idempotent upsert, stale enum fix
+- [Spec: Protocol Description & Seed](./specs/20260220120000_spec_protocol_description_and_seed.md) - ProtocolDescription VO, description field, protocols.json seed, 59 protocols, idempotent upsert, stale enum fix
 - [Spec: Settings Screen](./specs/20260227120000_spec_settings_screen.md) - SettingsView, 4th bottom tab, upgrade banner, support tiles, contact page, subscription management
 - [Spec: UserOrient Integration](./specs/20260315140000_spec_userorient_integration.md) - userorient_flutter, feature request board, UserOrientService, settings screen wiring
 - [Spec: Rate App / In-App Review](./specs/202603162012_spec_rate_app_integration.md) - InAppReviewService, requestReview, openStoreListing, session milestone trigger, Rate App screen
@@ -80,7 +80,7 @@
 - [Plan: Trial Expiration Modal](../plan_trial_expiration_modal.md) - trial expired modal, TrialExpiredChoice, blocking dialog, upgrade card, downgrade card, CachedUserStore, free tier transition
 - [Plan: Trial Expiration Cronjob](../plan_trial_expiration_cron_job.md) - pg_cron, trial_ends_at, expire_trials(), CHECK constraint, TrialPeriodDto endDate, TrialExpirationDecisionStore, SharedPreferences, race condition fix
 - [Plan: Paywall Modal](../plan_paywall_modal.md) - RevenueCat SDK setup, auth integration, subscription sync, paywall presentation, webhook edge function, trial reminder
-- [Plan: Update Protocol Domain & DB](../plan_update_protocol_domain_and_db.md) - ProtocolDescription VO, description field, DB migration, seed 57 protocols, fix stale enums, test factories
+- [Plan: Update Protocol Domain & DB](../plan_update_protocol_domain_and_db.md) - ProtocolDescription VO, description field, DB migration, seed 60 protocols (59 distinct after lower(name) upsert), fix stale enums, test factories
 - [Plan: Settings Screen](../plan_settings_screen.md) - Settings tab, upgrade CTA, support tiles, contact page, url_launcher, bottom nav 4th tab
 - [Plan: UserOrient Integration](../integrate_userorient.md) - userorient_flutter SDK, Feature Request tile, UserOrientService, env key, startup init
 - [Plan: Rate App / In-App Review](../plan_app_rating_workflow.md) - in_app_review, InAppReviewService, Rate App screen, programmatic session trigger, Settings tile wiring

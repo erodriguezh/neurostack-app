@@ -6,6 +6,8 @@
 
 ---
 
+> **Update (2026-05-06 / fn-82):** The original spec below (2026-02-20) describes the seed catalog at the time of the initial 57-protocol migration. As of fn-82 the catalog is **60 entries in `protocols.json`** (59 distinct after `lower(name)` upsert in the DB) and **85 citation entries** (83 distinct citations in the DB after the duplicate `lower(name)` upsert overwrites the first occurrence's citations). The historical narrative below is preserved unchanged as a snapshot of the 2026-02-20 state. See `.flow/specs/fn-82-add-3-community-validated-protocols-to.md` for the delta.
+
 ## Problem
 
 - The `protocols.json` seed file contains 57 science-backed protocols with a `description` field (mechanism + expected outcomes), but the Protocol aggregate, ProtocolDto, and DB `protocols` table lack this field.
@@ -35,7 +37,7 @@
 | Property | Value |
 |----------|-------|
 | Type | `String` (non-empty, after trim) |
-| Present in JSON | 57/57 protocols |
+| Present in JSON | 60/60 protocols |
 | Domain representation | `ProtocolDescription` value object |
 | DB column | `text NOT NULL` (CHECK: non-empty after trim) |
 | Invariant | Non-empty (validated at domain and DB level) |
@@ -53,20 +55,22 @@
 
 ### Categories in JSON (7 values)
 
-`coldExposure` (7), `exercise` (9), `heatTherapy` (7), `mind` (8), `nutrition` (8), `sleep` (9), `supplements` (9)
+`coldExposure` (7), `exercise` (10), `heatTherapy` (7), `mind` (9), `nutrition` (8), `sleep` (9), `supplements` (10)
 
 ### Evidence levels in JSON (4 values)
 
-`multipleRcts` (25), `singleRct` (24), `observational` (7), `expertConsensus` (1)
+`multipleRcts` (25), `singleRct` (25), `observational` (7), `expertConsensus` (3)
 
 ### Optionality observations
 
 | Field | JSON | Domain | DB |
 |-------|------|--------|----|
-| `target.durationSeconds` | always present (57/57) | `Duration?` (optional) | jsonb (untyped) |
-| `target.intensity` | always present (57/57) | `String?` (optional) | jsonb (untyped) |
-| citation `url` | present 76/76 | `String?` (optional) | `text` (nullable) |
-| citation `doi` | missing 2/76 | `String?` (optional) | `text` (nullable) |
+| `target.durationSeconds` | always present (60/60) | `Duration?` (optional) | jsonb (untyped) |
+| `target.intensity` | always present (60/60) | `String?` (optional) | jsonb (untyped) |
+| citation `url` | present 85/85 | `String?` (optional) | `text` (nullable) |
+| citation `doi` | missing 2/85 | `String?` (optional) | `text` (nullable) |
+
+> **Footnote on counts:** the `JSON` column counts literal entries in `protocols.json`. After `lower(name)` upsert in the DB, the duplicate `Structured Gratitude Journaling for Well-Being` collapses to one row, so DB-distinct counts are **59 protocols / 83 citations** (the later occurrence's 1 citation wins over the earlier occurrence's 2). The fn-82 addendum at the top of this file is the canonical two-track summary.
 
 **Decision:** Keep `Target.duration` and `Target.intensity` optional in domain model — seed data happens to always have them, but the model should allow protocols without them.
 

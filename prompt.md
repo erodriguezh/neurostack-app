@@ -1,5 +1,5 @@
 study docs/README.md
-work on task fn-81-paywall-apple-compliance.6
+work on task fn-82-add-3-community-validated-protocols-to.1
 
 MCP available
 - dart

@@ -1881,5 +1881,152 @@
       "model_a",
       "model_c"
     ]
+  },
+  {
+    "name": "Daily Sub-Maximal Calisthenics for Functional Preservation",
+    "description": "Brief daily sub-maximal calisthenics (push-ups, squats, planks, lunges, rows) sustain musculoskeletal output and movement quality through repeated sub-failure work, with weekly volume distributed across sessions and scaled to current capacity. Resistance-training frequency meta-analyses support distributing modest weekly volume across multiple sessions for hypertrophy and strength preservation. Push-up capacity at baseline is correlated with future cardiovascular events in observational cohorts as a functional marker; this is mechanism/marker context, not a controlled test of daily-calisthenics protocols against functional preservation as the claimed outcome. Recommendation is mechanism-supported expert consensus for sustained functional capacity, not an RCT-proven cardiovascular-prevention regimen.",
+    "target": {
+      "frequency": {
+        "min_per_week": 7,
+        "max_per_week": 7
+      },
+      "durationSeconds": 600,
+      "intensity": "80-90% of max output, sub-failure, scale volume to capacity"
+    },
+    "category": "exercise",
+    "evidence_level": "expertConsensus",
+    "research_citations": [
+      {
+        "authors": "Yang, Christophi, Farioli, Baur, Moffatt, Zollinger, Kales",
+        "year": 2019,
+        "title": "Association Between Push-up Exercise Capacity and Future Cardiovascular Events Among Active Adult Men",
+        "journal": "JAMA Network Open",
+        "doi": "10.1001/jamanetworkopen.2018.8341",
+        "url": "https://doi.org/10.1001/jamanetworkopen.2018.8341",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via JAMA Network Open; DOI matches the prospective cohort linking push-up capacity to CVD events. Cited as functional-marker context, not protocol-level evidence."
+      },
+      {
+        "authors": "Schoenfeld, Grgic, Krieger",
+        "year": 2019,
+        "title": "How many times per week should a muscle be trained to maximize muscle hypertrophy? A systematic review and meta-analysis of studies examining the effects of resistance training frequency",
+        "journal": "Journal of Sports Sciences",
+        "doi": "10.1080/02640414.2018.1555906",
+        "url": "https://doi.org/10.1080/02640414.2018.1555906",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via J Sports Sciences (Taylor & Francis); DOI matches resistance-training frequency meta-analysis (mechanism support)."
+      },
+      {
+        "authors": "Schoenfeld, Ogborn, Krieger",
+        "year": 2016,
+        "title": "Effects of Resistance Training Frequency on Measures of Muscle Hypertrophy: A Systematic Review and Meta-Analysis",
+        "journal": "Sports Medicine",
+        "doi": "10.1007/s40279-016-0543-8",
+        "url": "https://doi.org/10.1007/s40279-016-0543-8",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Springer Sports Medicine, Vol 46 Issue 11 (Nov 2016); DOI matches hypertrophy frequency meta-analysis (mechanism support)."
+      }
+    ],
+    "source_models": [
+      "protocols2.md community research"
+    ]
+  },
+  {
+    "name": "Delayed Morning Caffeine for Sustained Daytime Alertness",
+    "description": "Delaying first caffeine intake by 90-120 minutes after waking allows the cortisol awakening response to peak naturally and gives overnight adenosine time to clear, with the goal of sustained daytime alertness and a milder afternoon energy dip. Mechanism RCTs document caffeine-cortisol interactions and adenosine-receptor occupancy patterns; no protocol-level RCT directly tests delayed-morning caffeine against alertness as a primary outcome. Recommendation is mechanism-supported expert consensus, not RCT-proven afternoon alertness.",
+    "target": {
+      "frequency": {
+        "min_per_week": 7,
+        "max_per_week": 7
+      },
+      "durationSeconds": 5400,
+      "intensity": "first caffeine 90-120 min after waking; water + electrolytes during delay"
+    },
+    "category": "mind",
+    "evidence_level": "expertConsensus",
+    "research_citations": [
+      {
+        "authors": "Lovallo, Whitsett, al'Absi, Sung, Vincent, Wilson",
+        "year": 2005,
+        "title": "Caffeine Stimulation of Cortisol Secretion Across the Waking Hours in Relation to Caffeine Intake Levels",
+        "journal": "Psychosomatic Medicine",
+        "doi": "10.1097/01.psy.0000181270.20036.06",
+        "url": "https://doi.org/10.1097/01.psy.0000181270.20036.06",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Psychosomatic Medicine; DOI matches caffeine-cortisol RCT (mechanism support)."
+      },
+      {
+        "authors": "Lovallo, Farag, Vincent, Thomas, Wilson",
+        "year": 2006,
+        "title": "Cortisol responses to mental stress, exercise, and meals following caffeine intake in men and women",
+        "journal": "Pharmacology Biochemistry and Behavior",
+        "doi": "10.1016/j.pbb.2006.03.005",
+        "url": "https://doi.org/10.1016/j.pbb.2006.03.005",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Pharmacol Biochem Behav (Elsevier); DOI matches caffeine-cortisol RCT (mechanism support)."
+      },
+      {
+        "authors": "Urry, Landolt",
+        "year": 2015,
+        "title": "Adenosine, Caffeine, and Performance: From Cognitive Neuroscience of Sleep to Sleep Pharmacogenetics",
+        "journal": "Current Topics in Behavioral Neurosciences",
+        "doi": "10.1007/7854_2014_274",
+        "url": "https://doi.org/10.1007/7854_2014_274",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Springer Curr Top Behav Neurosci (print volume 2015); DOI prefix `2014_` reflects online-first/series volume; print year is 2015 (mechanism review)."
+      }
+    ],
+    "source_models": [
+      "protocols2.md community research"
+    ]
+  },
+  {
+    "name": "Vitamin D3 with K2 (MK-7) for Bone Density Maintenance",
+    "description": "Daily vitamin D3 (5,000 IU) with vitamin K2 (MK-7, 100-200 mcg) supports bone mineral density (BMD) maintenance, particularly in adults at risk of age-related BMD loss. A 3-year RCT in postmenopausal women showed reduced age-related BMD decline with 180 mcg/day MK-7 (within this range); pooled D3 fracture-prevention analyses support adequate vitamin D status as a related but not identical clinical endpoint. No combined-stack D3+K2 RCT exists; scope is bone density only, not cardiovascular or respiratory-infection outcomes.",
+    "target": {
+      "frequency": {
+        "min_per_week": 7,
+        "max_per_week": 7
+      },
+      "durationSeconds": 60,
+      "intensity": "5,000 IU D3 + 100-200 mcg K2 (MK-7) once daily (Knapen 2013 RCT used 180 mcg/day MK-7, within this range)"
+    },
+    "category": "supplements",
+    "evidence_level": "singleRct",
+    "research_citations": [
+      {
+        "authors": "Knapen, Drummen, Smit, Vermeer, Theuwissen",
+        "year": 2013,
+        "title": "Three-year low-dose menaquinone-7 supplementation helps decrease bone loss in healthy postmenopausal women",
+        "journal": "Osteoporosis International",
+        "doi": "10.1007/s00198-013-2325-6",
+        "url": "https://doi.org/10.1007/s00198-013-2325-6",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via Osteoporosis International (Springer); DOI matches the 3-year MK-7 RCT in postmenopausal women; BMD anchor for this protocol."
+      },
+      {
+        "authors": "Bischoff-Ferrari, Willett, Orav, Lips, Meunier, Lyons, Flicker, Wark, Jackson, Cauley, Meyer, Pfeifer, Sanders, Stähelin, Theiler, Dawson-Hughes",
+        "year": 2012,
+        "title": "A pooled analysis of vitamin D dose requirements for fracture prevention",
+        "journal": "New England Journal of Medicine",
+        "doi": "10.1056/NEJMoa1109617",
+        "url": "https://doi.org/10.1056/NEJMoa1109617",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via NEJM; DOI matches pooled D3 fracture-prevention analysis. Cited as related-but-not-exact-endpoint context (fracture prevention, not BMD itself)."
+      },
+      {
+        "authors": "Geleijnse, Vermeer, Grobbee, Schurgers, Knapen, van der Meer, Hofman, Witteman",
+        "year": 2004,
+        "title": "Dietary intake of menaquinone is associated with a reduced risk of coronary heart disease: the Rotterdam Study",
+        "journal": "Journal of Nutrition",
+        "doi": "10.1093/jn/134.11.3100",
+        "url": "https://doi.org/10.1093/jn/134.11.3100",
+        "verification_status": "verified",
+        "verification_note": "Confirmed via J Nutrition (Oxford Academic); DOI matches the Rotterdam Study K2 cohort. Cited as breadth context only, off-scope for this protocol's bone-density outcome."
+      }
+    ],
+    "source_models": [
+      "protocols2.md community research"
+    ]
   }
 ]

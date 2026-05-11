@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-05-06T14:59:43.976382Z",
+  "depends_on": [],
+  "epic": "fn-82-add-3-community-validated-protocols-to",
+  "id": "fn-82-add-3-community-validated-protocols-to.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-82-add-3-community-validated-protocols-to.1.md",
+  "status": "todo",
+  "title": "Append 3 protocols + regenerate seed migration",
+  "updated_at": "2026-05-06T17:30:38.128612Z"
+}
