@@ -4,7 +4,7 @@
   "scripts": {
     "sandcastle:init": "sandcastle init",
     "sandcastle:image": "sandcastle docker build-image",
-    "ralph": "tsx .sandcastle/main.mts"
+    "ralph": "tsx --env-file-if-exists=.sandcastle/.env .sandcastle/main.mts"
   },
   "engines": {
     "node": "22.x"

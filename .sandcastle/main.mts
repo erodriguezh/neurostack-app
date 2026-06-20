@@ -23,6 +23,8 @@
 
 import * as sandcastle from "@ai-hero/sandcastle";
 import { docker } from "@ai-hero/sandcastle/sandboxes/docker";
+import os from "node:os";
+import path from "node:path";
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -32,11 +34,34 @@ import { docker } from "@ai-hero/sandcastle/sandboxes/docker";
 // Each cycle works on one issue. Raise this to process more issues per run.
 const MAX_ITERATIONS = 10;
 
+// ---------------------------------------------------------------------------
+// Codex subscription authentication
+// ---------------------------------------------------------------------------
+// Authenticate Codex with the host's local Codex/ChatGPT *subscription*
+// credentials instead of a billed OpenAI API key. The host ~/.codex directory
+// is bind-mounted read-only into the sandbox, and the auth files are copied
+// into CODEX_HOME by the onSandboxReady hook below. Sandcastle expects Codex
+// sessions to live at /home/agent/.codex.
+const hostCodexHome = path.join(os.homedir(), ".codex");
+const sandboxCodexMount = "/mnt/host-codex";
+const sandboxCodexHome = "/home/agent/.codex";
+
 // Hooks run inside the sandbox before the agent starts each iteration.
 // npm install ensures the sandbox always has fresh dependencies.
 const hooks = {
   sandbox: {
     onSandboxReady: [
+      {
+        // Copy the mounted host Codex credentials into CODEX_HOME so Codex
+        // authenticates via the subscription rather than an API key. Fails
+        // fast if auth.json is missing from the mount.
+        command: [
+          `mkdir -p "${sandboxCodexHome}"`,
+          `test -f "${sandboxCodexMount}/auth.json"`,
+          `cp "${sandboxCodexMount}/auth.json" "${sandboxCodexHome}/auth.json"`,
+          `if [ -f "${sandboxCodexMount}/config.toml" ]; then cp "${sandboxCodexMount}/config.toml" "${sandboxCodexHome}/config.toml"; fi`,
+        ].join(" && "),
+      },
       {
         command: "flutter --version && flutter pub get && ./tool/verify.sh",
         timeoutMs: 600_000,
@@ -65,6 +90,12 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
   const sandbox = await sandcastle.createSandbox({
     branch,
     sandbox: docker({
+      // Authenticate Codex via the host subscription (CODEX_HOME points at the
+      // copied credentials) and expose the GitHub token for issue management.
+      env: {
+        CODEX_HOME: sandboxCodexHome,
+        GH_TOKEN: process.env.GH_TOKEN ?? "",
+      },
       // Optional dependency-download cache.
       // Sandcastle aligns the container UID/GID with the host when building
       // the image, which helps avoid permission problems.
@@ -72,6 +103,13 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
         {
           hostPath: "~/.pub-cache",
           sandboxPath: "/home/agent/.pub-cache",
+        },
+        {
+          // Host Codex subscription credentials, mounted read-only and copied
+          // into CODEX_HOME by the onSandboxReady hook above.
+          hostPath: hostCodexHome,
+          sandboxPath: sandboxCodexMount,
+          readonly: true,
         },
       ],
     }),
