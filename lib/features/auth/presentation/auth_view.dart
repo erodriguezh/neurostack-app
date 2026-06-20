@@ -14,7 +14,7 @@ import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/features/auth/presentation/auth_view_model.dart';
 import 'package:neurostack/features/auth/presentation/widgets/auth_background.dart';
 import 'package:neurostack/core/ui/widgets/app_primary_cta.dart';
-import 'package:supabase_auth_ui/supabase_auth_ui.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthView extends StatefulWidget {
   const AuthView({super.key});
@@ -131,7 +131,7 @@ class _AuthViewState extends State<AuthView>
                         _MagicLinkAuth(
                           key: const ValueKey('auth_magic_link'),
                           redirectUrl: _redirectUrl(),
-                          localization: const SupaMagicAuthLocalization(),
+                          localization: const _MagicAuthLocalization(),
                           onMagicLinkSent: _viewModel.handleMagicLinkSent,
                           onError: _viewModel.handleAuthError,
                         ),
@@ -156,22 +156,31 @@ class _AuthViewState extends State<AuthView>
   }
 }
 
-class _MagicLinkAuth extends SupaMagicAuth {
+class _MagicAuthLocalization {
+  const _MagicAuthLocalization();
+
+  String get enterEmail => 'Enter your email';
+  String get validEmailError => 'Please enter a valid email address';
+  String get continueWithMagicLink => 'Continue with magic Link';
+}
+
+class _MagicLinkAuth extends StatefulWidget {
   const _MagicLinkAuth({
     super.key,
     required this.onMagicLinkSent,
-    super.onError,
-    super.redirectUrl,
-    super.localization = const SupaMagicAuthLocalization(),
-  }) : super(onSuccess: _noopAuthSuccess);
+    this.onError,
+    this.redirectUrl,
+    this.localization = const _MagicAuthLocalization(),
+  });
 
   final void Function(String email) onMagicLinkSent;
+  final void Function(Object error)? onError;
+  final String? redirectUrl;
+  final _MagicAuthLocalization localization;
 
   @override
   State<_MagicLinkAuth> createState() => _MagicLinkAuthState();
 }
-
-void _noopAuthSuccess(Object? _) {}
 
 class _MagicLinkAuthState extends State<_MagicLinkAuth> {
   final _formKey = GlobalKey<FormState>();

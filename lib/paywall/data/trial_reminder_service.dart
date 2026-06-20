@@ -1,12 +1,12 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../domain/entitlement_snapshot.dart';
-import '../domain/subscription_status_resolver.dart';
+import '../domain/trial_expiry_policy.dart';
 
 /// Throttles trial reminder display to once per 24 hours per user (INV-P4).
 ///
-/// Wraps [SubscriptionStatusResolver.shouldShowTrialReminder] with
-/// user-scoped SharedPreferences persistence. The resolver checks whether
+/// Wraps [TrialExpiryPolicy.shouldShowReminder] with user-scoped
+/// SharedPreferences persistence. The policy checks whether
 /// the user is within the 24h-before-expiration window; this service adds
 /// the "don't show again for 24h" throttle on top.
 ///
@@ -30,12 +30,12 @@ import '../domain/subscription_status_resolver.dart';
 class TrialReminderService {
   TrialReminderService({
     required SharedPreferences sharedPreferences,
-    required SubscriptionStatusResolver resolver,
+    required TrialExpiryPolicy trialExpiryPolicy,
   }) : _prefs = sharedPreferences,
-       _resolver = resolver;
+       _trialExpiryPolicy = trialExpiryPolicy;
 
   final SharedPreferences _prefs;
-  final SubscriptionStatusResolver _resolver;
+  final TrialExpiryPolicy _trialExpiryPolicy;
 
   static const _keyPrefix = 'trialReminder:lastShownAt';
 
@@ -57,8 +57,7 @@ class TrialReminderService {
     // Guard: snapshot must belong to current user (Design Principle #10)
     if (snapshot == null || !snapshot.isForUser(userId)) return false;
 
-    // Delegate to resolver for the expiration-window check
-    final inExpirationWindow = _resolver.shouldShowTrialReminder(
+    final inExpirationWindow = _trialExpiryPolicy.shouldShowReminder(
       snapshot: snapshot,
       now: now,
     );

@@ -44,6 +44,7 @@ import 'package:neurostack/paywall/data/revenuecat_client.dart';
 import 'package:neurostack/paywall/data/revenuecat_client_factory.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
+import 'package:neurostack/paywall/domain/trial_expiry_policy.dart';
 
 // UserOrient
 import 'package:neurostack/core/utils/userorient/userorient_service.dart';
@@ -156,11 +157,18 @@ List<Module> buildModules({
     lazy: true,
   ),
 
+  Module<TrialExpiryPolicy>(
+    builder: () => TrialExpiryPolicy(
+      resolver: locator<SubscriptionStatusResolver>(),
+    ),
+    lazy: true,
+  ),
+
   // Trial reminder throttle (once per 24h per user)
   Module<TrialReminderService>(
     builder: () => TrialReminderService(
       sharedPreferences: locator<SharedPreferences>(),
-      resolver: locator<SubscriptionStatusResolver>(),
+      trialExpiryPolicy: locator<TrialExpiryPolicy>(),
     ),
     lazy: true,
   ),

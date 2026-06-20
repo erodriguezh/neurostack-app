@@ -32,6 +32,7 @@ import 'package:neurostack/paywall/domain/entitlement_snapshot.dart';
 import 'package:neurostack/paywall/data/trial_expiration_decision_store.dart';
 import 'package:neurostack/paywall/data/trial_reminder_service.dart';
 import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
+import 'package:neurostack/paywall/domain/trial_expiry_policy.dart';
 
 class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
   final Logger _logger = Logger('Home');
@@ -46,6 +47,7 @@ class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
     required SessionLocalDataSource sessionLocalDataSource,
     required ConnectivityService connectivityService,
     required SubscriptionStatusResolver subscriptionStatusResolver,
+    required TrialExpiryPolicy trialExpiryPolicy,
     required RevenueCatService revenueCatService,
     required TrialReminderService trialReminderService,
     HomeBottomTabCoordinator? tabCoordinator,
@@ -59,6 +61,7 @@ class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
        _sessionLocalDataSource = sessionLocalDataSource,
        _connectivityService = connectivityService,
        _resolver = subscriptionStatusResolver,
+       _trialExpiryPolicy = trialExpiryPolicy,
        _revenueCatService = revenueCatService,
        _trialReminderService = trialReminderService,
        _trialExpirationDecisionStore = trialExpirationDecisionStore,
@@ -77,6 +80,7 @@ class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
   final SessionLocalDataSource _sessionLocalDataSource;
   final ConnectivityService _connectivityService;
   final SubscriptionStatusResolver _resolver;
+  final TrialExpiryPolicy _trialExpiryPolicy;
   final RevenueCatService _revenueCatService;
   final TrialReminderService _trialReminderService;
   final TrialExpirationDecisionStore? _trialExpirationDecisionStore;
@@ -566,10 +570,9 @@ class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
       snapshot: snapshot,
     );
 
-    // 3. Decide if modal should show using resolver
-    final shouldShowModal = _resolver.shouldShowTrialExpiredModal(
-      currentEffectiveStatus: currentEffectiveStatus,
-      lastSeenStatus: lastSeenStatus,
+    final shouldShowModal = _trialExpiryPolicy.shouldShowExpiredModal(
+      effectiveStatus: currentEffectiveStatus,
+      lastSeen: lastSeenStatus,
       snapshot: snapshot,
     );
 
@@ -612,7 +615,7 @@ class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
     }
 
     // Determine if this is a trial expiration or paid subscription lapse
-    // Trial expiration: detected via resolver's shouldShowTrialExpiredModal
+    // Trial expiration: detected via TrialExpiryPolicy.shouldShowExpiredModal
     // Paid expiration: detected via isPremiumExpired (status == expired)
     final isTrialExpiration = shouldShowModal && !isPremiumExpired;
 

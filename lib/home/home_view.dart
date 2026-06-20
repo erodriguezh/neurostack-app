@@ -23,6 +23,7 @@ import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:neurostack/paywall/data/trial_expiration_decision_store.dart';
 import 'package:neurostack/paywall/data/trial_reminder_service.dart';
 import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
+import 'package:neurostack/paywall/domain/trial_expiry_policy.dart';
 import 'package:neurostack/paywall/widgets/trial_expired_modal.dart';
 import 'package:neurostack/paywall/widgets/trial_reminder_alert.dart';
 import 'package:neurostack/home/home_state.dart';
@@ -51,6 +52,7 @@ class _HomeViewState extends State<HomeView> {
     sessionLocalDataSource: locator<SessionLocalDataSource>(),
     connectivityService: locator<ConnectivityService>(),
     subscriptionStatusResolver: locator<SubscriptionStatusResolver>(),
+    trialExpiryPolicy: locator<TrialExpiryPolicy>(),
     revenueCatService: locator<RevenueCatService>(),
     trialExpirationDecisionStore: locator<TrialExpirationDecisionStore>(),
     trialReminderService: locator<TrialReminderService>(),
@@ -342,8 +344,9 @@ class _HomeViewState extends State<HomeView> {
       userId: userId,
       initialDate: request.initialDate,
       onSessionLogged: (session) {
-        sessionCountFuture =
-            locator<ReviewTriggerHelper>().captureSessionCount(userId);
+        sessionCountFuture = locator<ReviewTriggerHelper>().captureSessionCount(
+          userId,
+        );
         if (!mounted) return;
         _viewModel.refresh();
       },
@@ -357,8 +360,10 @@ class _HomeViewState extends State<HomeView> {
         () async {
           try {
             final count = await sessionCountFuture!;
-            await locator<ReviewTriggerHelper>()
-                .triggerReviewIfNeeded(count, userId);
+            await locator<ReviewTriggerHelper>().triggerReviewIfNeeded(
+              count,
+              userId,
+            );
           } catch (_) {
             // Non-critical — review prompt is best-effort
           }
