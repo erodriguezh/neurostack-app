@@ -38,6 +38,7 @@ class TrialReminderService {
   final TrialExpiryPolicy _trialExpiryPolicy;
 
   static const _keyPrefix = 'trialReminder:lastShownAt';
+  static const _throttleWindow = Duration(hours: 24);
 
   /// Returns the SharedPreferences key for a given user.
   String _key(String userId) => '$_keyPrefix:$userId';
@@ -45,7 +46,7 @@ class TrialReminderService {
   /// Whether the trial reminder should be displayed.
   ///
   /// Returns `true` only when **both** conditions hold:
-  /// 1. The resolver says the user is in the 24h-before-expiration window.
+  /// 1. The policy says the user is in the 24h-before-expiration window.
   /// 2. The reminder has **not** been shown within the last 24 hours.
   ///
   /// Callers must pass [now] for testability (Design Principle #8).
@@ -63,19 +64,19 @@ class TrialReminderService {
     );
     if (!inExpirationWindow) return false;
 
-    // Apply once-per-day throttle
     final lastShownIso = _prefs.getString(_key(userId));
     if (lastShownIso != null) {
       final lastShown = DateTime.tryParse(lastShownIso);
-      if (lastShown != null) {
-        final elapsed = now.difference(lastShown);
-        if (elapsed < const Duration(hours: 24)) {
-          return false; // Shown within last 24h, suppress
-        }
+      if (lastShown != null && _wasShownRecently(lastShown, now)) {
+        return false;
       }
     }
 
     return true;
+  }
+
+  bool _wasShownRecently(DateTime lastShown, DateTime now) {
+    return now.difference(lastShown) < _throttleWindow;
   }
 
   /// Persists that the reminder was shown at [now] for [userId].

@@ -372,27 +372,9 @@ class _MagicLinkAuthState extends State<_MagicLinkAuth> {
         widget.onMagicLinkSent(email);
       }
     } on AuthException catch (error) {
-      if (widget.onError == null) {
-        if (!mounted) {
-          return;
-        }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error.message)),
-        );
-      } else {
-        widget.onError?.call(error);
-      }
+      _handleSignInError(error, error.message);
     } catch (error) {
-      if (widget.onError == null) {
-        if (!mounted) {
-          return;
-        }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Unexpected error: $error')),
-        );
-      } else {
-        widget.onError?.call(error);
-      }
+      _handleSignInError(error, 'Unexpected error: $error');
     } finally {
       if (mounted) {
         setState(() {
@@ -400,5 +382,19 @@ class _MagicLinkAuthState extends State<_MagicLinkAuth> {
         });
       }
     }
+  }
+
+  void _handleSignInError(Object error, String fallbackMessage) {
+    final onError = widget.onError;
+    if (onError != null) {
+      onError(error);
+      return;
+    }
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(fallbackMessage)),
+    );
   }
 }
