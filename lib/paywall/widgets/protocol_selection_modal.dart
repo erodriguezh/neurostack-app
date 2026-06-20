@@ -5,29 +5,28 @@ import 'package:neurostack/core/ui/app_theme.dart';
 import 'package:neurostack/core/ui/widgets/dark_theme_scope.dart';
 import 'package:neurostack/home/home_state.dart';
 
+const _selectionLimit = 2;
+const _modalBackgroundColor = Color(0xFF030303);
+
 class ProtocolSelectionViewModel {
   ProtocolSelectionViewModel({
     required List<ProtocolSelectionItem> items,
     List<String>? initialSelection,
-  }) : _items = items {
-    final activeIds = items.map((item) => item.protocolId).toSet();
-    final seeded = initialSelection?.where(activeIds.contains).take(2).toSet();
+  }) : _items = items,
+       _activeProtocolIds = items.map((item) => item.protocolId).toSet() {
     selectedProtocolIds = ValueNotifier<Set<String>>(
-      seeded != null && seeded.isNotEmpty
-          ? Set<String>.unmodifiable(seeded)
-          : Set<String>.unmodifiable(
-              items.take(2).map((item) => item.protocolId),
-            ),
+      _initialProtocolIds(initialSelection),
     );
   }
 
   final List<ProtocolSelectionItem> _items;
+  final Set<String> _activeProtocolIds;
   late final ValueNotifier<Set<String>> selectedProtocolIds;
 
-  bool get canConfirm => selectedProtocolIds.value.length == 2;
+  bool get canConfirm => selectedProtocolIds.value.length == _selectionLimit;
 
   void toggle(String protocolId) {
-    if (!_items.any((item) => item.protocolId == protocolId)) {
+    if (!_activeProtocolIds.contains(protocolId)) {
       return;
     }
 
@@ -35,7 +34,7 @@ class ProtocolSelectionViewModel {
     if (next.contains(protocolId)) {
       next.remove(protocolId);
     } else {
-      if (next.length >= 2) {
+      if (next.length >= _selectionLimit) {
         return;
       }
       next.add(protocolId);
@@ -48,6 +47,20 @@ class ProtocolSelectionViewModel {
       return null;
     }
     return selectedProtocolIds.value.toList(growable: false);
+  }
+
+  Set<String> _initialProtocolIds(List<String>? initialSelection) {
+    final seeded = initialSelection
+        ?.where(_activeProtocolIds.contains)
+        .take(_selectionLimit)
+        .toSet();
+    if (seeded != null && seeded.isNotEmpty) {
+      return Set<String>.unmodifiable(seeded);
+    }
+
+    return Set<String>.unmodifiable(
+      _items.take(_selectionLimit).map((item) => item.protocolId),
+    );
   }
 
   void dispose() {
@@ -64,7 +77,7 @@ Future<List<String>?> showProtocolSelectionModal(
     context: context,
     barrierDismissible: false,
     useSafeArea: false,
-    barrierColor: const Color(0xFF030303),
+    barrierColor: _modalBackgroundColor,
     builder: (context) => ProtocolSelectionModal(
       items: items,
       initialSelection: initialSelection,
@@ -108,14 +121,14 @@ class _ProtocolSelectionModalState extends State<ProtocolSelectionModal> {
       child: PopScope(
         canPop: false,
         child: Scaffold(
-          backgroundColor: const Color(0xFF030303),
+          backgroundColor: _modalBackgroundColor,
           body: SafeArea(
             bottom: false,
             child: ValueListenableBuilder<Set<String>>(
               valueListenable: _viewModel.selectedProtocolIds,
               builder: (context, selectedIds, child) {
                 final selectedCount = selectedIds.length;
-                final complete = selectedCount == 2;
+                final complete = selectedCount == _selectionLimit;
 
                 return Column(
                   children: [
@@ -151,7 +164,7 @@ class _ProtocolSelectionModalState extends State<ProtocolSelectionModal> {
                               ),
                             ),
                             child: Text(
-                              '$selectedCount/2 SELECTED',
+                              '$selectedCount/$_selectionLimit SELECTED',
                               style: GoogleFonts.jetBrainsMono(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
@@ -284,7 +297,7 @@ class _ProtocolSelectionRow extends StatelessWidget {
                   child: selected
                       ? const Icon(
                           LucideIcons.check,
-                          color: Color(0xFF030303),
+                          color: _modalBackgroundColor,
                           size: 16,
                         )
                       : null,
@@ -387,7 +400,7 @@ class _ConfirmButton extends StatelessWidget {
         onPressed: enabled ? onPressed : null,
         style: TextButton.styleFrom(
           foregroundColor: enabled
-              ? const Color(0xFF030303)
+              ? _modalBackgroundColor
               : Colors.white.withValues(alpha: 0.3),
           disabledForegroundColor: Colors.white.withValues(alpha: 0.3),
           shape: const StadiumBorder(),

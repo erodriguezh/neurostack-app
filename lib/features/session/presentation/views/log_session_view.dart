@@ -87,49 +87,39 @@ class _LogSessionViewState extends State<LogSessionView> {
 
   void _handleStateChange() {
     final state = widget.viewModel.state.value;
-    final direction = Directionality.of(context);
 
     if (state is LogSessionSubmitting) {
-      // Clear any previous duration error when starting submission
       if (_durationError != null) {
         setState(() => _durationError = null);
       }
-      // Announce saving for accessibility
-      SemanticsService.sendAnnouncement(
-        View.of(context),
-        'Saving session',
-        direction,
-      );
+      _announce('Saving session');
       return;
     }
 
     if (state is LogSessionSuccess) {
-      // Announce success for accessibility before popping
-      SemanticsService.sendAnnouncement(
-        View.of(context),
-        'Session logged',
-        direction,
-      );
+      _announce('Session logged');
       widget.onSessionLogged(state.session);
       Navigator.of(context).pop();
       return;
     }
 
     if (state is LogSessionError) {
-      // Announce error for accessibility
-      SemanticsService.sendAnnouncement(
-        View.of(context),
-        state.failure.message,
-        direction,
-      );
+      _announce(state.failure.message);
 
-      // Check if it's a duration error for inline display
       if (state.failure.code == 'Session.DurationMustBePositive') {
         setState(() {
           _durationError = state.failure.message;
         });
       }
     }
+  }
+
+  void _announce(String message) {
+    SemanticsService.sendAnnouncement(
+      View.of(context),
+      message,
+      Directionality.of(context),
+    );
   }
 
   @override

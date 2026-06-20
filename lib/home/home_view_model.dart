@@ -272,29 +272,25 @@ class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
     }
 
     final result = user.applyProtocolLimitSelection(keepIds);
-    if (result.isLeft()) {
-      final failure = result.getLeft().getOrElse(
-        () => const DomainFailure(
-          code: 'User.UnexpectedError',
-          message: 'Unable to update protocol selection',
-        ),
-      );
+    final updatedUser = result.fold<User?>((failure) {
       _notifyService.setToastEvent(ToastEventError(message: failure.message));
+      return null;
+    }, (updatedUser) => updatedUser);
+    if (updatedUser == null) {
       return false;
     }
 
-    final updatedUser = result.getOrElse((_) => user);
     state.value = _applyBanner(state.value.copyWith(user: updatedUser));
 
     final saveResult = await _saveUserWithRetry(updatedUser);
-    if (saveResult.isLeft()) {
-      final failure = saveResult.getLeft().getOrElse(
-        () => const DomainFailure(
-          code: 'Home.UnexpectedError',
-          message: 'Unable to save protocol changes',
-        ),
+    final saveFailure = saveResult.fold<DomainFailure?>(
+      (failure) => failure,
+      (_) => null,
+    );
+    if (saveFailure != null) {
+      _notifyService.setToastEvent(
+        ToastEventError(message: saveFailure.message),
       );
-      _notifyService.setToastEvent(ToastEventError(message: failure.message));
       await refresh();
       return false;
     }

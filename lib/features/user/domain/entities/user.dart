@@ -174,33 +174,33 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
   /// The user's subscription status is intentionally unchanged; subscription
   /// state is written by the webhook, not client-side downgrade flows.
   Either<DomainFailure, User> applyProtocolLimitSelection(
-    List<String> keepProtocolIds,
+    List<String> keepIds,
   ) {
-    if (keepProtocolIds.length != 2) {
+    if (keepIds.length != 2) {
       return left(UserFailures.invalidProtocolLimitSelection);
     }
 
-    if (keepProtocolIds.toSet().length != keepProtocolIds.length) {
+    if (keepIds.toSet().length != keepIds.length) {
       return left(UserFailures.duplicateProtocolSelection);
     }
 
-    for (final protocolId in keepProtocolIds) {
+    for (final protocolId in keepIds) {
       if (!_stack.contains(protocolId)) {
         return left(UserFailures.protocolNotActive);
       }
     }
 
-    final kept = keepProtocolIds.toSet();
-    final removed = _stack.protocolIds
-        .where((protocolId) => !kept.contains(protocolId))
+    final keptIds = keepIds.toSet();
+    final removedIds = _stack.protocolIds
+        .where((protocolId) => !keptIds.contains(protocolId))
         .toList(growable: false);
 
-    if (removed.isEmpty) {
+    if (removedIds.isEmpty) {
       return right(this);
     }
 
     var nextStack = _stack;
-    for (final protocolId in removed) {
+    for (final protocolId in removedIds) {
       nextStack = nextStack.remove(protocolId);
     }
 
@@ -212,7 +212,7 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
       createdAt: createdAt,
     );
 
-    for (final protocolId in removed) {
+    for (final protocolId in removedIds) {
       updated.raiseDomainEvent(
         ProtocolDeactivatedEvent(
           userId: id,

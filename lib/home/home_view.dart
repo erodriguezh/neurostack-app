@@ -302,7 +302,7 @@ class _HomeViewState extends State<HomeView> {
     if (state.showDeactivationModal && !_showingDeactivationModal) {
       _showingDeactivationModal = true;
       WidgetsBinding.instance.addPostFrameCallback((_) async {
-        await _showDeactivationDialog();
+        await _showProtocolSelectionFromState();
         _showingDeactivationModal = false;
         if (!mounted) return;
         _viewModel.acknowledgeDeactivationModal();
@@ -406,7 +406,7 @@ class _HomeViewState extends State<HomeView> {
           final user = _viewModel.state.value.user;
           final freeLimit = SubscriptionStatus.free.protocolLimit ?? 2;
           final success = user != null && user.activeProtocolCount > freeLimit
-              ? await _runDeactivationFlow(user)
+              ? await _runStackTrimFlow(user)
               : await _viewModel.handleUseFreeTier();
           if (success) {
             await _viewModel.markTrialExpiredDecisionResolved();
@@ -445,13 +445,13 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  Future<bool> _runDeactivationFlow(User user) async {
+  Future<bool> _runStackTrimFlow(User user) async {
     var attempts = 0;
     User? currentUser = user;
     List<String>? initialSelection;
 
     while (attempts < 2 && currentUser != null) {
-      final keepIds = await _showDeactivationDialog(
+      final keepIds = await _selectProtocolsToKeep(
         user: currentUser,
         initialSelection: initialSelection,
       );
@@ -472,7 +472,16 @@ class _HomeViewState extends State<HomeView> {
     return false;
   }
 
-  Future<List<String>?> _showDeactivationDialog({
+  Future<void> _showProtocolSelectionFromState() async {
+    final keepIds = await _selectProtocolsToKeep();
+    if (keepIds == null) {
+      return;
+    }
+
+    await _viewModel.confirmProtocolDeactivation(keepIds);
+  }
+
+  Future<List<String>?> _selectProtocolsToKeep({
     User? user,
     List<String>? initialSelection,
   }) async {
@@ -492,15 +501,6 @@ class _HomeViewState extends State<HomeView> {
       items: items,
       initialSelection: initialSelection,
     );
-    if (keepIds == null) {
-      return null;
-    }
-
-    if (user != null) {
-      return keepIds;
-    }
-
-    final success = await _viewModel.confirmProtocolDeactivation(keepIds);
-    return success ? keepIds : null;
+    return keepIds;
   }
 }
