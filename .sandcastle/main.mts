@@ -35,7 +35,14 @@ const MAX_ITERATIONS = 10;
 // Hooks run inside the sandbox before the agent starts each iteration.
 // npm install ensures the sandbox always has fresh dependencies.
 const hooks = {
-  sandbox: { onSandboxReady: [{ command: "npm install" }] },
+  sandbox: {
+    onSandboxReady: [
+      {
+        command: "flutter --version && flutter pub get && ./tool/verify.sh",
+        timeoutMs: 600_000,
+      },
+    ],
+  },
 };
 
 // Copy node_modules from the host into the worktree before each sandbox
@@ -57,7 +64,17 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
   // This gives both agents a real, named branch that persists across phases.
   const sandbox = await sandcastle.createSandbox({
     branch,
-    sandbox: docker(),
+    sandbox: docker({
+      // Optional dependency-download cache.
+      // Sandcastle aligns the container UID/GID with the host when building
+      // the image, which helps avoid permission problems.
+      mounts: [
+        {
+          hostPath: "~/.pub-cache",
+          sandboxPath: "/home/agent/.pub-cache",
+        },
+      ],
+    }),
     hooks,
     copyToWorktree,
   });

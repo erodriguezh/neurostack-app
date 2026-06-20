@@ -50,3 +50,6 @@ app.*.map.json
 
 # Claude local settings
 .claude/settings.local.json
+
+# Sandcastle
+.sandcastle/.env
