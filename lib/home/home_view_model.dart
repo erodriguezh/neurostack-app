@@ -243,12 +243,62 @@ class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
       return false;
     }
 
-    if (user.activeProtocolCount > 2) {
+    final freeLimit = SubscriptionStatus.free.protocolLimit ?? 2;
+    if (user.activeProtocolCount > freeLimit) {
       state.value = state.value.copyWith(showDeactivationModal: true);
       return false;
     }
 
     // ≤2 protocols: accept free tier locally and refresh
+    await refresh();
+    return true;
+  }
+
+  Future<List<ProtocolSelectionItem>> activeProtocolSelectionItems(
+    User user,
+  ) {
+    return Future.wait(
+      user.activeProtocolIds.map(_buildProtocolSelectionItem),
+    );
+  }
+
+  Future<bool> confirmProtocolDeactivation(List<String> keepIds) async {
+    final user = state.value.user;
+    if (user == null) {
+      _notifyService.setToastEvent(
+        ToastEventError(message: 'Unable to identify user'),
+      );
+      return false;
+    }
+
+    final result = user.applyProtocolLimitSelection(keepIds);
+    if (result.isLeft()) {
+      final failure = result.getLeft().getOrElse(
+        () => const DomainFailure(
+          code: 'User.UnexpectedError',
+          message: 'Unable to update protocol selection',
+        ),
+      );
+      _notifyService.setToastEvent(ToastEventError(message: failure.message));
+      return false;
+    }
+
+    final updatedUser = result.getOrElse((_) => user);
+    state.value = _applyBanner(state.value.copyWith(user: updatedUser));
+
+    final saveResult = await _saveUserWithRetry(updatedUser);
+    if (saveResult.isLeft()) {
+      final failure = saveResult.getLeft().getOrElse(
+        () => const DomainFailure(
+          code: 'Home.UnexpectedError',
+          message: 'Unable to save protocol changes',
+        ),
+      );
+      _notifyService.setToastEvent(ToastEventError(message: failure.message));
+      await refresh();
+      return false;
+    }
+
     await refresh();
     return true;
   }
@@ -503,6 +553,34 @@ class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
     return cards;
   }
 
+  Future<ProtocolSelectionItem> _buildProtocolSelectionItem(
+    String protocolId,
+  ) async {
+    final protocolResult = await _protocolRepository.getById(protocolId);
+    final sessionsResult = await _sessionRepository.list(
+      protocolId: protocolId,
+    );
+
+    final sessionCount = sessionsResult.fold((_) => 0, (sessions) {
+      return sessions.length;
+    });
+
+    return protocolResult.fold(
+      (_) => ProtocolSelectionItem(
+        protocolId: protocolId,
+        name: 'Protocol unavailable',
+        categoryLabel: 'UNAVAILABLE',
+        sessionCount: sessionCount,
+      ),
+      (protocol) => ProtocolSelectionItem(
+        protocolId: protocol.id,
+        name: protocol.name.value,
+        categoryLabel: protocol.category.displayName.toUpperCase(),
+        sessionCount: sessionCount,
+      ),
+    );
+  }
+
   HomeProtocolCardModel _buildCard(Protocol protocol, bool loggedToday) {
     return HomeProtocolCardModel(
       protocolId: protocol.id,
@@ -721,6 +799,14 @@ class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
       case SubscriptionStatus.premiumAnnual:
         return null;
     }
+  }
+
+  Future<Either<DomainFailure, Unit>> _saveUserWithRetry(User user) async {
+    final result = await _userRepository.save(user);
+    if (result.isRight()) {
+      return result;
+    }
+    return _userRepository.save(user);
   }
 
   void _setError(String message) {

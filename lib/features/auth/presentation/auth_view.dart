@@ -14,7 +14,15 @@ import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/features/auth/presentation/auth_view_model.dart';
 import 'package:neurostack/features/auth/presentation/widgets/auth_background.dart';
 import 'package:neurostack/core/ui/widgets/app_primary_cta.dart';
-import 'package:supabase_auth_ui/supabase_auth_ui.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+class SupaMagicAuthLocalization {
+  const SupaMagicAuthLocalization();
+
+  String get enterEmail => 'Email';
+  String get continueWithMagicLink => 'Continue with Magic Link';
+  String get validEmailError => 'Please enter a valid email address';
+}
 
 class AuthView extends StatefulWidget {
   const AuthView({super.key});
@@ -156,22 +164,23 @@ class _AuthViewState extends State<AuthView>
   }
 }
 
-class _MagicLinkAuth extends SupaMagicAuth {
+class _MagicLinkAuth extends StatefulWidget {
   const _MagicLinkAuth({
     super.key,
     required this.onMagicLinkSent,
-    super.onError,
-    super.redirectUrl,
-    super.localization = const SupaMagicAuthLocalization(),
-  }) : super(onSuccess: _noopAuthSuccess);
+    this.onError,
+    this.redirectUrl,
+    this.localization = const SupaMagicAuthLocalization(),
+  });
 
   final void Function(String email) onMagicLinkSent;
+  final void Function(Object error)? onError;
+  final String? redirectUrl;
+  final SupaMagicAuthLocalization localization;
 
   @override
   State<_MagicLinkAuth> createState() => _MagicLinkAuthState();
 }
-
-void _noopAuthSuccess(Object? _) {}
 
 class _MagicLinkAuthState extends State<_MagicLinkAuth> {
   final _formKey = GlobalKey<FormState>();

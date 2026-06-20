@@ -168,6 +168,62 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
     return right(updated);
   }
 
+  /// Applies the free-tier protocol limit by keeping exactly two active
+  /// protocols and deactivating every other active protocol.
+  ///
+  /// The user's subscription status is intentionally unchanged; subscription
+  /// state is written by the webhook, not client-side downgrade flows.
+  Either<DomainFailure, User> applyProtocolLimitSelection(
+    List<String> keepProtocolIds,
+  ) {
+    if (keepProtocolIds.length != 2) {
+      return left(UserFailures.invalidProtocolLimitSelection);
+    }
+
+    if (keepProtocolIds.toSet().length != keepProtocolIds.length) {
+      return left(UserFailures.duplicateProtocolSelection);
+    }
+
+    for (final protocolId in keepProtocolIds) {
+      if (!_stack.contains(protocolId)) {
+        return left(UserFailures.protocolNotActive);
+      }
+    }
+
+    final kept = keepProtocolIds.toSet();
+    final removed = _stack.protocolIds
+        .where((protocolId) => !kept.contains(protocolId))
+        .toList(growable: false);
+
+    if (removed.isEmpty) {
+      return right(this);
+    }
+
+    var nextStack = _stack;
+    for (final protocolId in removed) {
+      nextStack = nextStack.remove(protocolId);
+    }
+
+    final updated = User._(
+      id: id,
+      subscriptionStatus: subscriptionStatus,
+      stack: nextStack,
+      onboardingCompleted: onboardingCompleted,
+      createdAt: createdAt,
+    );
+
+    for (final protocolId in removed) {
+      updated.raiseDomainEvent(
+        ProtocolDeactivatedEvent(
+          userId: id,
+          protocolId: protocolId,
+        ),
+      );
+    }
+
+    return right(updated);
+  }
+
   /// Checks if the user can log a session for a protocol.
   ///
   /// Enforces:

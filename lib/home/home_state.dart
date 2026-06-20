@@ -40,6 +40,20 @@ class HomeProtocolCardModel {
   final bool isUnavailable;
 }
 
+class ProtocolSelectionItem {
+  const ProtocolSelectionItem({
+    required this.protocolId,
+    required this.name,
+    required this.categoryLabel,
+    required this.sessionCount,
+  });
+
+  final String protocolId;
+  final String name;
+  final String categoryLabel;
+  final int sessionCount;
+}
+
 /// Request to open the log session modal with pre-populated values.
 ///
 /// Set in [HomeViewState.logSessionRequest] to trigger the modal from

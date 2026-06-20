@@ -95,13 +95,21 @@ class _LogSessionViewState extends State<LogSessionView> {
         setState(() => _durationError = null);
       }
       // Announce saving for accessibility
-      SemanticsService.announce('Saving session', direction);
+      SemanticsService.sendAnnouncement(
+        View.of(context),
+        'Saving session',
+        direction,
+      );
       return;
     }
 
     if (state is LogSessionSuccess) {
       // Announce success for accessibility before popping
-      SemanticsService.announce('Session logged', direction);
+      SemanticsService.sendAnnouncement(
+        View.of(context),
+        'Session logged',
+        direction,
+      );
       widget.onSessionLogged(state.session);
       Navigator.of(context).pop();
       return;
@@ -109,7 +117,11 @@ class _LogSessionViewState extends State<LogSessionView> {
 
     if (state is LogSessionError) {
       // Announce error for accessibility
-      SemanticsService.announce(state.failure.message, direction);
+      SemanticsService.sendAnnouncement(
+        View.of(context),
+        state.failure.message,
+        direction,
+      );
 
       // Check if it's a duration error for inline display
       if (state.failure.code == 'Session.DurationMustBePositive') {
