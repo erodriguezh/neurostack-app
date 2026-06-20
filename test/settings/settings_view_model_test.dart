@@ -9,7 +9,6 @@ import 'package:neurostack/features/auth/domain/auth_state.dart';
 import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
 import 'package:neurostack/home/home_bottom_tab_coordinator.dart';
 import 'package:neurostack/paywall/domain/entitlement_snapshot.dart';
-import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 import 'package:neurostack/settings/settings_view_model.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -29,7 +28,6 @@ void main() {
   late MockUserOrientService mockUserOrientService;
   late MockNotifyService mockNotifyService;
   late MockHomeBottomTabCoordinator mockTabCoordinator;
-  late SubscriptionStatusResolver resolver;
   late List<(Uri, LaunchMode)> launchCalls;
   late BuildContext fakeContext;
 
@@ -55,7 +53,6 @@ void main() {
     mockUserOrientService = MockUserOrientService();
     mockNotifyService = MockNotifyService();
     mockTabCoordinator = MockHomeBottomTabCoordinator();
-    resolver = const SubscriptionStatusResolver();
     launchCalls = [];
     fakeContext = _FakeBuildContext();
 
@@ -72,7 +69,6 @@ void main() {
     return SettingsViewModel(
       routerService: mockRouterService,
       authService: mockAuthService,
-      subscriptionStatusResolver: resolver,
       revenueCatService: mockRevenueCatService,
       userOrientService: mockUserOrientService,
       notifyService: mockNotifyService,
@@ -548,7 +544,7 @@ void main() {
           final user = UserFactory.create(
             subscriptionStatus: SubscriptionStatus.free,
           );
-          // Snapshot belongs to a different user — resolver must ignore it
+          // Snapshot belongs to a different user, so resolution must ignore it.
           final staleSnapshot = EntitlementSnapshotFactory.activePaidMonthly(
             userId: 'different-user-id',
           );

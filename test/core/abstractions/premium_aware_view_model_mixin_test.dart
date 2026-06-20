@@ -11,7 +11,6 @@ import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:neurostack/paywall/domain/entitlement.dart';
 import 'package:neurostack/paywall/domain/entitlement_snapshot.dart';
-import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 
 import '../../factories/factories.dart';
 import '../../mocks/mock_services.dart';
@@ -22,18 +21,15 @@ import '../../mocks/mock_services.dart';
 class _TestViewModel with EntitlementListenerMixin, PremiumAwareViewModelMixin {
   _TestViewModel({
     required AuthService authService,
-    required SubscriptionStatusResolver resolver,
     required RevenueCatService revenueCatService,
     CachedUserStore? cachedUserStore,
   }) : _authService = authService,
-       _resolver = resolver,
        _revenueCatService = revenueCatService,
        _cachedUserStore = cachedUserStore {
     initPremiumAwareness();
   }
 
   final AuthService _authService;
-  final SubscriptionStatusResolver _resolver;
   final RevenueCatService _revenueCatService;
   final CachedUserStore? _cachedUserStore;
 
@@ -42,9 +38,6 @@ class _TestViewModel with EntitlementListenerMixin, PremiumAwareViewModelMixin {
 
   @override
   AuthService get premiumAuthService => _authService;
-
-  @override
-  SubscriptionStatusResolver get premiumResolver => _resolver;
 
   @override
   CachedUserStore? get premiumCachedUserStore => _cachedUserStore;
@@ -69,12 +62,10 @@ class MockCachedUserStore extends Mock implements CachedUserStore {}
 void main() {
   late MockAuthService mockAuthService;
   late MockRevenueCatService mockRevenueCatService;
-  late SubscriptionStatusResolver resolver;
 
   setUp(() {
     mockAuthService = MockAuthService();
     mockRevenueCatService = MockRevenueCatService();
-    resolver = const SubscriptionStatusResolver();
 
     // Default: null snapshot (RC unavailable, fallback to DB)
     when(
@@ -85,7 +76,6 @@ void main() {
   _TestViewModel createViewModel({CachedUserStore? cachedUserStore}) {
     return _TestViewModel(
       authService: mockAuthService,
-      resolver: resolver,
       revenueCatService: mockRevenueCatService,
       cachedUserStore: cachedUserStore,
     );

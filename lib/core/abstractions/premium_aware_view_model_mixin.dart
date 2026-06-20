@@ -5,7 +5,6 @@ import '../../features/auth/data/cached_user_store.dart';
 import '../../features/auth/domain/auth_state.dart';
 import '../../features/user/domain/entities/user.dart';
 import '../../paywall/domain/entitlement.dart';
-import '../../paywall/domain/subscription_status_resolver.dart';
 import 'entitlement_listener_mixin.dart';
 
 /// Mixin that provides a reactive [entitlement] notifier backed by
@@ -25,19 +24,15 @@ import 'entitlement_listener_mixin.dart';
 /// class MyViewModel with EntitlementListenerMixin, PremiumAwareViewModelMixin {
 ///   MyViewModel({
 ///     required AuthService authService,
-///     required SubscriptionStatusResolver subscriptionStatusResolver,
 ///     required RevenueCatService revenueCatService,
 ///     CachedUserStore? cachedUserStore,
 ///   }) : _authService = authService,
-///        _resolver = subscriptionStatusResolver,
 ///        _revenueCatService = revenueCatService,
 ///        _cachedUserStore = cachedUserStore;
 ///
 ///   // Wire the abstract getters to your private fields:
 ///   @override
 ///   AuthService get premiumAuthService => _authService;
-///   @override
-///   SubscriptionStatusResolver get premiumResolver => _resolver;
 ///   @override
 ///   RevenueCatService get entitlementListenerService => _revenueCatService;
 ///   @override
@@ -55,10 +50,6 @@ mixin PremiumAwareViewModelMixin on EntitlementListenerMixin {
 
   /// The auth service used to resolve the current user synchronously.
   AuthService get premiumAuthService;
-
-  /// The resolver that combines DB subscription status with the RevenueCat
-  /// entitlement snapshot to determine effective status.
-  SubscriptionStatusResolver get premiumResolver;
 
   /// Optional cached-user store for defensive fallback when auth state is
   /// unexpectedly non-authenticated on an auth-required route.
