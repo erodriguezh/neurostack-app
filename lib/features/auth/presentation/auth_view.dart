@@ -1,3 +1,5 @@
+// ignore_for_file: implementation_imports
+
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -14,7 +16,9 @@ import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/features/auth/presentation/auth_view_model.dart';
 import 'package:neurostack/features/auth/presentation/widgets/auth_background.dart';
 import 'package:neurostack/core/ui/widgets/app_primary_cta.dart';
-import 'package:supabase_auth_ui/supabase_auth_ui.dart';
+import 'package:supabase_auth_ui/src/components/supa_magic_auth.dart';
+import 'package:supabase_auth_ui/src/localizations/supa_magic_auth_localization.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthView extends StatefulWidget {
   const AuthView({super.key});

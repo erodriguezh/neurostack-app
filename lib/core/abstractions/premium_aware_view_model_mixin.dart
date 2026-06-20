@@ -4,14 +4,15 @@ import '../../features/auth/data/auth_service.dart';
 import '../../features/auth/data/cached_user_store.dart';
 import '../../features/auth/domain/auth_state.dart';
 import '../../features/user/domain/entities/user.dart';
+import '../../paywall/domain/entitlement.dart';
 import '../../paywall/domain/subscription_status_resolver.dart';
 import 'entitlement_listener_mixin.dart';
 
-/// Mixin that provides a reactive [isPremium] notifier backed by
+/// Mixin that provides a reactive [entitlement] notifier backed by
 /// [EntitlementListenerMixin].
 ///
 /// Eliminates the ~40 lines of boilerplate that every ViewModel needs when it
-/// must track whether the current user has a premium subscription:
+/// must track what the current user can do:
 ///
 /// - Synchronous initial computation (no flicker on screen load)
 /// - Live updates via [EntitlementListenerMixin]
@@ -67,11 +68,14 @@ mixin PremiumAwareViewModelMixin on EntitlementListenerMixin {
   // State
   // ---------------------------------------------------------------------------
 
-  /// Whether the current user has a premium subscription.
+  /// Resolved entitlement for the current user.
   ///
   /// Computed synchronously on [initPremiumAwareness] to avoid flicker, then
   /// kept up-to-date via [EntitlementListenerMixin].
-  late final ValueNotifier<bool> isPremium;
+  late final ValueNotifier<Entitlement> entitlement;
+
+  /// Whether the current user has a premium subscription.
+  bool get isPremium => entitlement.value.isPremium;
 
   bool _premiumDisposed = false;
 
@@ -79,19 +83,19 @@ mixin PremiumAwareViewModelMixin on EntitlementListenerMixin {
   // Lifecycle
   // ---------------------------------------------------------------------------
 
-  /// Initializes the [isPremium] notifier with a synchronous computation.
+  /// Initializes the [entitlement] notifier with a synchronous computation.
   ///
-  /// Must be called **before** the first frame that reads [isPremium].
+  /// Must be called **before** the first frame that reads [entitlement].
   /// Typically called during construction or in an `init()` method.
   void initPremiumAwareness() {
-    isPremium = ValueNotifier<bool>(_computeIsPremium());
+    entitlement = ValueNotifier<Entitlement>(_computeEntitlement());
   }
 
-  /// Disposes the [isPremium] notifier. Safe to call multiple times.
+  /// Disposes the [entitlement] notifier. Safe to call multiple times.
   void disposePremiumAwareness() {
     if (_premiumDisposed) return;
     _premiumDisposed = true;
-    isPremium.dispose();
+    entitlement.dispose();
   }
 
   // ---------------------------------------------------------------------------
@@ -99,7 +103,7 @@ mixin PremiumAwareViewModelMixin on EntitlementListenerMixin {
   // ---------------------------------------------------------------------------
 
   /// Default implementation of [onEntitlementChanged] that re-computes
-  /// [isPremium] from the current auth state and entitlement snapshot.
+  /// [entitlement] from the current auth state and entitlement snapshot.
   ///
   /// If the auth state is unexpectedly non-authenticated, falls back to
   /// [premiumCachedUserStore] (async, best-effort).
@@ -112,7 +116,7 @@ mixin PremiumAwareViewModelMixin on EntitlementListenerMixin {
 
     final user = resolveAuthUser();
     if (user != null) {
-      _updateIsPremium(user);
+      _updateEntitlement(user);
       return;
     }
 
@@ -121,7 +125,7 @@ mixin PremiumAwareViewModelMixin on EntitlementListenerMixin {
     premiumCachedUserStore
         ?.loadUser()
         .then((cached) {
-          if (cached != null && !_premiumDisposed) _updateIsPremium(cached);
+          if (cached != null && !_premiumDisposed) _updateEntitlement(cached);
         })
         .catchError((_) {});
   }
@@ -148,25 +152,17 @@ mixin PremiumAwareViewModelMixin on EntitlementListenerMixin {
   // Private
   // ---------------------------------------------------------------------------
 
-  bool _computeIsPremium() {
+  Entitlement _computeEntitlement() {
     final user = resolveAuthUser();
-    if (user == null) return false;
+    if (user == null) return Entitlement.fallback;
 
     final snapshot = entitlementListenerService.entitlementSnapshot.value;
-    final status = premiumResolver.resolveEffectiveStatus(
-      user: user,
-      snapshot: snapshot,
-    );
-    return status.isPremium;
+    return Entitlement.of(user, snapshot);
   }
 
-  void _updateIsPremium(User user) {
+  void _updateEntitlement(User user) {
     if (_premiumDisposed) return;
     final snapshot = entitlementListenerService.entitlementSnapshot.value;
-    final status = premiumResolver.resolveEffectiveStatus(
-      user: user,
-      snapshot: snapshot,
-    );
-    isPremium.value = status.isPremium;
+    entitlement.value = Entitlement.of(user, snapshot);
   }
 }

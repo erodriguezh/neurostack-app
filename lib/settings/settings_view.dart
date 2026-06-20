@@ -91,11 +91,11 @@ class _SettingsViewState extends State<SettingsView> {
                   SliverToBoxAdapter(
                     child: ListenableBuilder(
                       listenable: Listenable.merge([
-                        _viewModel.isPremium,
+                        _viewModel.entitlement,
                         _viewModel.canAccessPremium,
                       ]),
                       builder: (context, _) {
-                        final isPremium = _viewModel.isPremium.value;
+                        final isPremium = _viewModel.isPremium;
                         final canAccessPremium =
                             _viewModel.canAccessPremium.value;
                         return Column(
