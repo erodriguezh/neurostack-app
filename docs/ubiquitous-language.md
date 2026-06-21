@@ -80,6 +80,23 @@ This is the canonical glossary for the Neurostack app (a single bounded context)
 - Values: "Multiple RCTs", "Single RCT", "Observational", "Expert Consensus"
 - UI Label: "Evidence"
 
+### Authentication
+
+**Sign-In** (noun/verb)
+
+- Definition: The act by which a **User** proves ownership of their email to become Authenticated. Passwordless — no password is ever set.
+- Example: "Enter your email, then the code we send you, to sign in."
+- UI Label: "Sign in"
+- Aliases to avoid: log in, login, authenticate
+
+**One-Time Code** (noun)
+
+- Definition: The short, single-use numeric code emailed to a **User**; entering it completes one **Sign-In** and, on first use, confirms the account.
+- Example: "Enter the 6-digit code we emailed you."
+- UI Label: "code"
+- Aliases to avoid: magic link, magic code, OTP, PIN
+- Note: The authenticated state is **never** called a "Session" — that term is reserved for a single logged instance of completing a protocol (see **Session**). Auth state uses the Authenticated / Unauthenticated language on the **User**.
+
 ### Protocol Stack & Limits
 
 | Term | Definition | Aliases to avoid |
