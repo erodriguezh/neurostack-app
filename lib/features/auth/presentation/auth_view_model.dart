@@ -25,7 +25,7 @@ class AuthViewModel {
 
   Future<void> handleMagicLinkSent(String email) async {
     await _navigationIntentStore.saveAuthEmail(email);
-    _logger.info('Magic link sent (env=${AppEnvironment.tag})');
+    _logger.info('One-Time Code sent (env=${AppEnvironment.tag})');
     _routerService.replace(Path(name: '/auth/check-email'));
   }
 

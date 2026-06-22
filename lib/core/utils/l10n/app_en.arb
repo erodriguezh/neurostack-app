@@ -38,27 +38,47 @@
   },
   "authTitle": "Sign in",
   "@authTitle": {
-    "description": "Title for the magic link auth screen"
+    "description": "Title for the auth screen"
   },
-  "authSubtitle": "We'll send you a magic link to continue.",
+  "authSubtitle": "We'll email you a code to continue.",
   "@authSubtitle": {
-    "description": "Subtitle for the magic link auth screen"
+    "description": "Subtitle for the auth screen"
+  },
+  "authSendCode": "Email me a code",
+  "@authSendCode": {
+    "description": "Button label to request a one-time code"
   },
   "checkEmailTitle": "Check your email",
   "@checkEmailTitle": {
     "description": "Title for the check email screen"
   },
-  "checkEmailInstruction": "Check your inbox and tap the link to continue.",
+  "checkEmailInstruction": "Enter the 6-digit code we emailed you.",
   "@checkEmailInstruction": {
-    "description": "Instruction text for magic link check email screen"
+    "description": "Instruction text for the code verification screen"
   },
-  "checkEmailSpamHint": "Hint: Check your spam folder if you don't see it.",
+  "checkEmailSpamHint": "Use the latest code if you request a new one.",
   "@checkEmailSpamHint": {
     "description": "Spam folder hint on check email screen"
   },
-  "authResendLink": "Resend link",
-  "@authResendLink": {
-    "description": "Button label to resend magic link"
+  "authCodeFieldLabel": "Enter the 6-digit code",
+  "@authCodeFieldLabel": {
+    "description": "Label for the one-time code input"
+  },
+  "authVerifyCode": "Verify code",
+  "@authVerifyCode": {
+    "description": "Button label to verify the one-time code"
+  },
+  "authCodeValidationError": "Enter the 6-digit code.",
+  "@authCodeValidationError": {
+    "description": "Validation message when the one-time code is too short"
+  },
+  "authCompletingSignIn": "Completing Sign-In...",
+  "@authCompletingSignIn": {
+    "description": "Message shown after the one-time code verifies while auth navigation completes"
+  },
+  "authResendCode": "Resend code",
+  "@authResendCode": {
+    "description": "Button label to resend one-time code"
   },
   "authResendAvailableIn": "Resend available in",
   "@authResendAvailableIn": {

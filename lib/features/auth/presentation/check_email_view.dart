@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
 import 'package:neurostack/core/ui/constants/curves.dart';
+import 'package:neurostack/core/ui/constants/widget_keys.dart';
+import 'package:neurostack/core/ui/widgets/app_primary_cta.dart';
 import 'package:neurostack/core/utils/data_source/data_source_abstraction.dart';
 import 'package:neurostack/core/utils/internal_notification/notify_service.dart';
 import 'package:neurostack/core/utils/locator.dart';
@@ -25,6 +28,7 @@ class _CheckEmailViewState extends State<CheckEmailView>
   late final Animation<Offset> _slideAnimation;
   late final AnimationController _floatController;
   late final Animation<double> _floatAnimation;
+  final TextEditingController _codeController = TextEditingController();
 
   @override
   void initState() {
@@ -70,6 +74,7 @@ class _CheckEmailViewState extends State<CheckEmailView>
   void dispose() {
     _entranceController.dispose();
     _floatController.dispose();
+    _codeController.dispose();
     _viewModel.dispose();
     super.dispose();
   }
@@ -186,25 +191,33 @@ class _CheckEmailViewState extends State<CheckEmailView>
                               textAlign: TextAlign.center,
                             ),
                             SizedBox(height: context.spacing.xl),
+                            _VerificationSection(
+                              viewModel: _viewModel,
+                              controller: _codeController,
+                            ),
+                            SizedBox(height: context.spacing.xl),
                             ValueListenableBuilder<int>(
                               valueListenable: _viewModel.cooldownSeconds,
                               builder: (context, seconds, _) {
                                 final isEnabled = _viewModel.canResend;
-                                final label = isEnabled
-                                    ? context.translate.authResendLink
-                                    : '${context.translate.authResendAvailableIn} ${_formatSeconds(seconds)}';
-                                final icon = isEnabled
-                                    ? Icons.refresh
-                                    : Icons.schedule;
                                 return Column(
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     OutlinedButton.icon(
                                       onPressed: isEnabled
-                                          ? _viewModel.resendMagicLink
+                                          ? _viewModel.resendCode
                                           : null,
-                                      icon: Icon(icon, size: 16),
-                                      label: Text(label),
+                                      icon: Icon(
+                                        _resendIcon(isEnabled),
+                                        size: 16,
+                                      ),
+                                      label: Text(
+                                        _resendLabel(
+                                          context: context,
+                                          isEnabled: isEnabled,
+                                          seconds: seconds,
+                                        ),
+                                      ),
                                       style: _resendButtonStyle(context),
                                     ),
                                     SizedBox(height: context.spacing.md),
@@ -273,5 +286,204 @@ class _CheckEmailViewState extends State<CheckEmailView>
     final minutes = (seconds ~/ 60).toString().padLeft(2, '0');
     final remainder = (seconds % 60).toString().padLeft(2, '0');
     return '$minutes:$remainder';
+  }
+
+  IconData _resendIcon(bool isEnabled) {
+    if (isEnabled) {
+      return Icons.refresh;
+    }
+    return Icons.schedule;
+  }
+
+  String _resendLabel({
+    required BuildContext context,
+    required bool isEnabled,
+    required int seconds,
+  }) {
+    if (isEnabled) {
+      return context.translate.authResendCode;
+    }
+
+    return '${context.translate.authResendAvailableIn} ${_formatSeconds(seconds)}';
+  }
+}
+
+class _VerificationSection extends StatelessWidget {
+  const _VerificationSection({
+    required this.viewModel,
+    required this.controller,
+  });
+
+  final CheckEmailViewModel viewModel;
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: viewModel.verificationCompleted,
+      builder: (context, completed, _) {
+        if (completed) {
+          return const _CompletionState();
+        }
+
+        return ValueListenableBuilder<bool>(
+          valueListenable: viewModel.isVerifying,
+          builder: (context, isVerifying, _) {
+            return ValueListenableBuilder<String?>(
+              valueListenable: viewModel.codeError,
+              builder: (context, error, _) {
+                return _CodeVerificationForm(
+                  controller: controller,
+                  isVerifying: isVerifying,
+                  error: error,
+                  onVerify: () => viewModel.verifyCode(controller.text),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _CodeVerificationForm extends StatelessWidget {
+  const _CodeVerificationForm({
+    required this.controller,
+    required this.isVerifying,
+    required this.error,
+    required this.onVerify,
+  });
+
+  final TextEditingController controller;
+  final bool isVerifying;
+  final String? error;
+  final VoidCallback onVerify;
+
+  @override
+  Widget build(BuildContext context) {
+    final kitColors = context.kitColors;
+    final textTheme = context.theme.textTheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          context.translate.authCodeFieldLabel.toUpperCase(),
+          style: textTheme.labelSmall?.copyWith(
+            color: kitColors.white40,
+            letterSpacing: 2,
+          ),
+        ),
+        SizedBox(height: context.spacing.sm),
+        TextField(
+          key: WidgetKeys.authCodeField,
+          controller: controller,
+          enabled: !isVerifying,
+          keyboardType: TextInputType.number,
+          textInputAction: TextInputAction.done,
+          maxLength: 6,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            LengthLimitingTextInputFormatter(6),
+          ],
+          onSubmitted: (_) => onVerify(),
+          style: textTheme.headlineSmall?.copyWith(
+            color: kitColors.white90,
+            letterSpacing: 0,
+          ),
+          cursorColor: kitColors.brandSky,
+          decoration: InputDecoration(
+            hintText: '000000',
+            counterText: '',
+            errorText: error,
+            hintStyle: textTheme.headlineSmall?.copyWith(
+              color: kitColors.white20,
+              letterSpacing: 0,
+            ),
+            prefixIcon: Icon(
+              Icons.pin_outlined,
+              color: kitColors.white30,
+              size: 18,
+            ),
+            filled: true,
+            fillColor: kitColors.white02,
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: context.spacing.md,
+              vertical: context.spacing.md,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: context.borderRadius.xxl,
+              borderSide: BorderSide(color: kitColors.white10),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: context.borderRadius.xxl,
+              borderSide: BorderSide(color: kitColors.white10),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: context.borderRadius.xxl,
+              borderSide: BorderSide(
+                color: kitColors.brandSky.withValues(alpha: 0.5),
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: context.borderRadius.xxl,
+              borderSide: BorderSide(
+                color: kitColors.red400.withValues(alpha: 0.6),
+              ),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: context.borderRadius.xxl,
+              borderSide: BorderSide(
+                color: kitColors.red400.withValues(alpha: 0.8),
+              ),
+            ),
+            errorStyle: textTheme.bodySmall?.copyWith(
+              color: kitColors.red300,
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ),
+        SizedBox(height: context.spacing.lg),
+        AppPrimaryCta(
+          key: WidgetKeys.authVerifyButton,
+          label: context.translate.authVerifyCode,
+          onPressed: onVerify,
+          enabled: !isVerifying,
+          loading: isVerifying,
+        ),
+      ],
+    );
+  }
+}
+
+class _CompletionState extends StatelessWidget {
+  const _CompletionState();
+
+  @override
+  Widget build(BuildContext context) {
+    final kitColors = context.kitColors;
+
+    return Column(
+      children: [
+        SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(
+            color: kitColors.brandSky,
+            strokeWidth: 2,
+          ),
+        ),
+        SizedBox(height: context.spacing.md),
+        Text(
+          context.translate.authCompletingSignIn,
+          style: context.theme.textTheme.bodyMedium?.copyWith(
+            color: kitColors.white60,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
   }
 }

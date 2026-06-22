@@ -131,7 +131,10 @@ class _AuthViewState extends State<AuthView>
                         _MagicLinkAuth(
                           key: const ValueKey('auth_magic_link'),
                           redirectUrl: _redirectUrl(),
-                          localization: const SupaMagicAuthLocalization(),
+                          localization: SupaMagicAuthLocalization(
+                            continueWithMagicLink:
+                                context.translate.authSendCode,
+                          ),
                           onMagicLinkSent: _viewModel.handleMagicLinkSent,
                           onError: _viewModel.handleAuthError,
                         ),

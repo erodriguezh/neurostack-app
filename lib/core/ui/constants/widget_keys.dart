@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 abstract final class WidgetKeys {
   static const authEmailField = Key('auth_email_field');
   static const authSubmitButton = Key('auth_submit_button');
+  static const authCodeField = Key('auth_code_field');
+  static const authVerifyButton = Key('auth_verify_button');
 
   // Rate App screen
   static const rateAppScreen = Key('rate_app_screen');
