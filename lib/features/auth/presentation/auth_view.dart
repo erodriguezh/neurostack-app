@@ -5,7 +5,6 @@ import 'package:neurostack/core/ui/app_theme.dart';
 import 'package:neurostack/core/ui/constants/curves.dart';
 import 'package:neurostack/core/ui/constants/durations.dart';
 import 'package:neurostack/core/ui/constants/widget_keys.dart';
-import 'package:neurostack/core/utils/app_environment.dart';
 import 'package:neurostack/core/utils/internal_notification/notify_service.dart';
 import 'package:neurostack/core/utils/locator.dart';
 import 'package:neurostack/core/utils/l10n/translate_extension.dart';
@@ -130,7 +129,6 @@ class _AuthViewState extends State<AuthView>
                         SizedBox(height: context.spacing.xxl),
                         _MagicLinkAuth(
                           key: const ValueKey('auth_magic_link'),
-                          redirectUrl: _redirectUrl(),
                           localization: SupaMagicAuthLocalization(
                             continueWithMagicLink:
                                 context.translate.authSendCode,
@@ -150,13 +148,6 @@ class _AuthViewState extends State<AuthView>
       ),
     );
   }
-
-  String _redirectUrl() {
-    if (AppEnvironment.isDev) {
-      return 'https://getneurostack.app/auth/callback?env=dev';
-    }
-    return 'https://getneurostack.app/auth/callback';
-  }
 }
 
 class _MagicLinkAuth extends SupaMagicAuth {
@@ -164,7 +155,6 @@ class _MagicLinkAuth extends SupaMagicAuth {
     super.key,
     required this.onMagicLinkSent,
     super.onError,
-    super.redirectUrl,
     super.localization = const SupaMagicAuthLocalization(),
   }) : super(onSuccess: _noopAuthSuccess);
 
@@ -360,7 +350,6 @@ class _MagicLinkAuthState extends State<_MagicLinkAuth> {
       final email = _email.text.trim();
       await Supabase.instance.client.auth.signInWithOtp(
         email: email,
-        emailRedirectTo: widget.redirectUrl,
       );
       if (mounted) {
         widget.onMagicLinkSent(email);
