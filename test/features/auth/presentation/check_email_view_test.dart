@@ -53,6 +53,10 @@ void main() {
               path: '/auth/check-email',
               builder: (key, routeData) => const SizedBox(),
             ),
+            RouteEntry(
+              path: '/404',
+              builder: (key, routeData) => const SizedBox(),
+            ),
           ],
         ),
         lazy: false,
