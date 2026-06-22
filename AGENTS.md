@@ -6,7 +6,7 @@ Issues and PRDs live as GitHub issues in `erodriguezh/neurostack-app`, managed v
 
 ### Triage labels
 
-Canonical defaults, except `ready-for-agent` is spelled `Sandcastle` in this repo. See `docs/agents/triage-labels.md`.
+See `docs/agents/triage-labels.md`.
 
 ### Domain docs
 
