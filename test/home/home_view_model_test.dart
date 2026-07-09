@@ -10,6 +10,7 @@ import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
 import 'package:neurostack/home/home_view_model.dart';
 import 'package:neurostack/paywall/domain/entitlement_snapshot.dart';
 import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
+import 'package:neurostack/paywall/domain/trial_expiry_policy.dart';
 
 import '../factories/factories.dart';
 import '../mocks/mock_services.dart';
@@ -26,6 +27,7 @@ void main() {
   late MockRevenueCatService mockRevenueCatService;
   late MockTrialReminderService mockTrialReminderService;
   late SubscriptionStatusResolver subscriptionStatusResolver;
+  late TrialExpiryPolicy trialExpiryPolicy;
 
   setUpAll(() {
     registerFallbackValue(ToastEventError(message: 'fallback'));
@@ -45,6 +47,9 @@ void main() {
     mockTrialReminderService = MockTrialReminderService();
     // Use real resolver since it's pure functions
     subscriptionStatusResolver = const SubscriptionStatusResolver();
+    trialExpiryPolicy = TrialExpiryPolicy(
+      resolver: subscriptionStatusResolver,
+    );
 
     // Default connectivity setup
     when(
@@ -83,6 +88,7 @@ void main() {
       sessionLocalDataSource: mockSessionLocalDataSource,
       connectivityService: mockConnectivityService,
       subscriptionStatusResolver: subscriptionStatusResolver,
+      trialExpiryPolicy: trialExpiryPolicy,
       revenueCatService: mockRevenueCatService,
       trialReminderService: mockTrialReminderService,
     );

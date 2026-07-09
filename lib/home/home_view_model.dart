@@ -32,6 +32,7 @@ import 'package:neurostack/paywall/domain/entitlement_snapshot.dart';
 import 'package:neurostack/paywall/data/trial_expiration_decision_store.dart';
 import 'package:neurostack/paywall/data/trial_reminder_service.dart';
 import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
+import 'package:neurostack/paywall/domain/trial_expiry_policy.dart';
 
 class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
   final Logger _logger = Logger('Home');
@@ -46,6 +47,7 @@ class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
     required SessionLocalDataSource sessionLocalDataSource,
     required ConnectivityService connectivityService,
     required SubscriptionStatusResolver subscriptionStatusResolver,
+    required TrialExpiryPolicy trialExpiryPolicy,
     required RevenueCatService revenueCatService,
     required TrialReminderService trialReminderService,
     HomeBottomTabCoordinator? tabCoordinator,
@@ -59,6 +61,7 @@ class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
        _sessionLocalDataSource = sessionLocalDataSource,
        _connectivityService = connectivityService,
        _resolver = subscriptionStatusResolver,
+       _trialExpiryPolicy = trialExpiryPolicy,
        _revenueCatService = revenueCatService,
        _trialReminderService = trialReminderService,
        _trialExpirationDecisionStore = trialExpirationDecisionStore,
@@ -77,6 +80,7 @@ class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
   final SessionLocalDataSource _sessionLocalDataSource;
   final ConnectivityService _connectivityService;
   final SubscriptionStatusResolver _resolver;
+  final TrialExpiryPolicy _trialExpiryPolicy;
   final RevenueCatService _revenueCatService;
   final TrialReminderService _trialReminderService;
   final TrialExpirationDecisionStore? _trialExpirationDecisionStore;
@@ -556,53 +560,38 @@ class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
     final now = DateTime.now();
     final snapshot = _revenueCatService.entitlementSnapshot.value;
 
-    // 1. Load lastSeenStatus from decision store
     final lastSeenStatus = await _trialExpirationDecisionStore
         ?.getLastSeenStatus(user.id);
 
-    // 2. Compute currentEffectiveStatus via resolver
-    final currentEffectiveStatus = _resolver.resolveEffectiveStatus(
+    final effectiveStatus = _resolver.resolveEffectiveStatus(
       user: user,
       snapshot: snapshot,
     );
 
-    // 3. Decide if modal should show using resolver
-    final shouldShowModal = _resolver.shouldShowTrialExpiredModal(
-      currentEffectiveStatus: currentEffectiveStatus,
-      lastSeenStatus: lastSeenStatus,
+    final shouldShowExpiredTrialModal = _trialExpiryPolicy
+        .shouldShowExpiredModal(
+          effectiveStatus: effectiveStatus,
+          lastSeen: lastSeenStatus,
+          snapshot: snapshot,
+        );
+
+    final hasExpiredPaidSubscription =
+        effectiveStatus == SubscriptionStatus.expired;
+
+    final shouldShowExpiredModal =
+        shouldShowExpiredTrialModal || hasExpiredPaidSubscription;
+
+    final showTrialReminder = await _resolveTrialReminderVisibility(
+      isCurrentlyVisible: state.showTrialReminder,
+      userId: user.id,
       snapshot: snapshot,
+      now: now,
     );
 
-    // Also check premium expired status directly
-    final isPremiumExpired =
-        currentEffectiveStatus == SubscriptionStatus.expired;
-
-    // Check trial reminder (within 24h of expiration + once-per-day throttle).
-    // If reminder is already visible (sticky), keep it until user dismisses.
-    final bool showTrialReminder;
-    if (state.showTrialReminder) {
-      showTrialReminder = true; // Sticky: keep showing until dismissed
-    } else {
-      showTrialReminder = await _shouldShowTrialReminder(
-        userId: user.id,
-        snapshot: snapshot,
-        now: now,
-      );
-      // Mark reminder shown on first display so the 24h throttle takes effect
-      if (showTrialReminder) {
-        await _trialReminderService.markReminderShown(
-          userId: user.id,
-          now: now,
-        );
-      }
-    }
-
-    // If no modal needed, persist status and exit
-    if (!shouldShowModal && !isPremiumExpired) {
-      // Persist the current status to prevent re-triggering on next launch
+    if (!shouldShowExpiredModal) {
       await _trialExpirationDecisionStore?.saveLastSeenStatus(
         userId: user.id,
-        status: currentEffectiveStatus,
+        status: effectiveStatus,
       );
 
       return state.copyWith(
@@ -611,17 +600,39 @@ class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
       );
     }
 
-    // Determine if this is a trial expiration or paid subscription lapse
-    // Trial expiration: detected via resolver's shouldShowTrialExpiredModal
-    // Paid expiration: detected via isPremiumExpired (status == expired)
-    final isTrialExpiration = shouldShowModal && !isPremiumExpired;
-
     _hasShownExpiredModal = true;
     return state.copyWith(
       showTrialExpiredModal: true,
-      isTrialExpiration: isTrialExpiration,
-      showTrialReminder: false, // Don't show reminder when showing modal
+      isTrialExpiration:
+          shouldShowExpiredTrialModal && !hasExpiredPaidSubscription,
+      showTrialReminder: false,
     );
+  }
+
+  Future<bool> _resolveTrialReminderVisibility({
+    required bool isCurrentlyVisible,
+    required String userId,
+    required EntitlementSnapshot? snapshot,
+    required DateTime now,
+  }) async {
+    if (isCurrentlyVisible) {
+      return true;
+    }
+
+    final shouldShowTrialReminder = await _shouldShowTrialReminder(
+      userId: userId,
+      snapshot: snapshot,
+      now: now,
+    );
+
+    if (shouldShowTrialReminder) {
+      await _trialReminderService.markReminderShown(
+        userId: userId,
+        now: now,
+      );
+    }
+
+    return shouldShowTrialReminder;
   }
 
   Future<bool> _shouldShowTrialReminder({

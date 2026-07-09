@@ -1,12 +1,12 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../domain/entitlement_snapshot.dart';
-import '../domain/subscription_status_resolver.dart';
+import '../domain/trial_expiry_policy.dart';
 
 /// Throttles trial reminder display to once per 24 hours per user (INV-P4).
 ///
-/// Wraps [SubscriptionStatusResolver.shouldShowTrialReminder] with
-/// user-scoped SharedPreferences persistence. The resolver checks whether
+/// Wraps [TrialExpiryPolicy.shouldShowReminder] with user-scoped
+/// SharedPreferences persistence. The policy checks whether
 /// the user is within the 24h-before-expiration window; this service adds
 /// the "don't show again for 24h" throttle on top.
 ///
@@ -30,14 +30,15 @@ import '../domain/subscription_status_resolver.dart';
 class TrialReminderService {
   TrialReminderService({
     required SharedPreferences sharedPreferences,
-    required SubscriptionStatusResolver resolver,
+    required TrialExpiryPolicy trialExpiryPolicy,
   }) : _prefs = sharedPreferences,
-       _resolver = resolver;
+       _trialExpiryPolicy = trialExpiryPolicy;
 
   final SharedPreferences _prefs;
-  final SubscriptionStatusResolver _resolver;
+  final TrialExpiryPolicy _trialExpiryPolicy;
 
   static const _keyPrefix = 'trialReminder:lastShownAt';
+  static const _throttleWindow = Duration(hours: 24);
 
   /// Returns the SharedPreferences key for a given user.
   String _key(String userId) => '$_keyPrefix:$userId';
@@ -45,7 +46,7 @@ class TrialReminderService {
   /// Whether the trial reminder should be displayed.
   ///
   /// Returns `true` only when **both** conditions hold:
-  /// 1. The resolver says the user is in the 24h-before-expiration window.
+  /// 1. The policy says the user is in the 24h-before-expiration window.
   /// 2. The reminder has **not** been shown within the last 24 hours.
   ///
   /// Callers must pass [now] for testability (Design Principle #8).
@@ -57,26 +58,25 @@ class TrialReminderService {
     // Guard: snapshot must belong to current user (Design Principle #10)
     if (snapshot == null || !snapshot.isForUser(userId)) return false;
 
-    // Delegate to resolver for the expiration-window check
-    final inExpirationWindow = _resolver.shouldShowTrialReminder(
+    final inExpirationWindow = _trialExpiryPolicy.shouldShowReminder(
       snapshot: snapshot,
       now: now,
     );
     if (!inExpirationWindow) return false;
 
-    // Apply once-per-day throttle
     final lastShownIso = _prefs.getString(_key(userId));
     if (lastShownIso != null) {
       final lastShown = DateTime.tryParse(lastShownIso);
-      if (lastShown != null) {
-        final elapsed = now.difference(lastShown);
-        if (elapsed < const Duration(hours: 24)) {
-          return false; // Shown within last 24h, suppress
-        }
+      if (lastShown != null && _wasShownRecently(lastShown, now)) {
+        return false;
       }
     }
 
     return true;
+  }
+
+  bool _wasShownRecently(DateTime lastShown, DateTime now) {
+    return now.difference(lastShown) < _throttleWindow;
   }
 
   /// Persists that the reminder was shown at [now] for [userId].
