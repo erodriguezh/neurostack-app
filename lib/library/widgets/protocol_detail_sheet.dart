@@ -64,74 +64,77 @@ class _ProtocolDetailSheetState extends State<ProtocolDetailSheet> {
             ),
             border: Border.all(color: semanticColors.borderSubtle),
           ),
-          child: ListView(
-            controller: controller,
-            padding: EdgeInsets.fromLTRB(
-              spacing.lg,
-              spacing.sm,
-              spacing.lg,
-              spacing.lg + bottomInset,
-            ),
-            children: [
-              Center(
-                child: Container(
-                  width: 48,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: semanticColors.borderSubtle,
-                    borderRadius: BorderRadius.circular(999),
+          child: Material(
+            type: MaterialType.transparency,
+            child: ListView(
+              controller: controller,
+              padding: EdgeInsets.fromLTRB(
+                spacing.lg,
+                spacing.sm,
+                spacing.lg,
+                spacing.lg + bottomInset,
+              ),
+              children: [
+                Center(
+                  child: Container(
+                    width: 48,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: semanticColors.borderSubtle,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: spacing.lg),
-              _CategoryRow(protocol: widget.protocol),
-              SizedBox(height: spacing.sm),
-              Text(
-                widget.protocol.name.value,
-                style: context.theme.textTheme.headlineMedium?.copyWith(
-                  fontSize: 24,
-                  color: semanticColors.ink,
-                ),
-              ),
-              SizedBox(height: spacing.xs),
-              Text(
-                widget.protocol.evidenceLevel.label,
-                style: context.theme.textTheme.bodySmall?.copyWith(
-                  fontSize: 12,
-                  color: libraryEvidenceColor(
-                    context,
-                    widget.protocol.evidenceLevel,
-                  ),
-                ),
-              ),
-              SizedBox(height: spacing.sm),
-              Text(
-                widget.protocol.target.displayText,
-                style: context.theme.textTheme.bodySmall?.copyWith(
-                  height: 1.5,
-                  color: semanticColors.inkSubtle,
-                ),
-              ),
-              SizedBox(height: spacing.lg),
-              _CitationSection(protocol: widget.protocol),
-              if (widget.status == LibraryCardStatus.inStack) ...[
                 SizedBox(height: spacing.lg),
-                _StatsSection(
-                  showStats: _showStats,
-                  onToggle: _toggleStats,
-                  statsFuture: _statsFuture,
+                _CategoryRow(protocol: widget.protocol),
+                SizedBox(height: spacing.sm),
+                Text(
+                  widget.protocol.name.value,
+                  style: context.theme.textTheme.headlineMedium?.copyWith(
+                    fontSize: 24,
+                    color: semanticColors.ink,
+                  ),
+                ),
+                SizedBox(height: spacing.xs),
+                Text(
+                  widget.protocol.evidenceLevel.label,
+                  style: context.theme.textTheme.bodySmall?.copyWith(
+                    fontSize: 12,
+                    color: libraryEvidenceColor(
+                      context,
+                      widget.protocol.evidenceLevel,
+                    ),
+                  ),
+                ),
+                SizedBox(height: spacing.sm),
+                Text(
+                  widget.protocol.target.displayText,
+                  style: context.theme.textTheme.bodySmall?.copyWith(
+                    height: 1.5,
+                    color: semanticColors.inkSubtle,
+                  ),
+                ),
+                SizedBox(height: spacing.lg),
+                _CitationSection(protocol: widget.protocol),
+                if (widget.status == LibraryCardStatus.inStack) ...[
+                  SizedBox(height: spacing.lg),
+                  _StatsSection(
+                    showStats: _showStats,
+                    onToggle: _toggleStats,
+                    statsFuture: _statsFuture,
+                  ),
+                ],
+                SizedBox(height: spacing.lg),
+                _ActionSection(
+                  status: widget.status,
+                  isOffline: widget.isOffline,
+                  onAdd: widget.onAdd,
+                  onRemove: widget.onRemove,
+                  onUpgrade: widget.onUpgrade,
+                  onLogSession: widget.onLogSession,
                 ),
               ],
-              SizedBox(height: spacing.lg),
-              _ActionSection(
-                status: widget.status,
-                isOffline: widget.isOffline,
-                onAdd: widget.onAdd,
-                onRemove: widget.onRemove,
-                onUpgrade: widget.onUpgrade,
-                onLogSession: widget.onLogSession,
-              ),
-            ],
+            ),
           ),
         );
       },
@@ -189,32 +192,35 @@ class _CitationSection extends StatelessWidget {
 
     return Theme(
       data: context.theme.copyWith(dividerColor: Colors.transparent),
-      child: ExpansionTile(
-        tilePadding: EdgeInsets.zero,
-        childrenPadding: EdgeInsets.zero,
-        iconColor: semanticColors.inkSubtle,
-        collapsedIconColor: semanticColors.inkSubtle,
-        title: Text(
-          'Research citations',
-          style: context.theme.textTheme.bodyMedium?.copyWith(
-            color: semanticColors.ink,
-            fontWeight: FontWeight.w600,
+      child: Material(
+        type: MaterialType.transparency,
+        child: ExpansionTile(
+          tilePadding: EdgeInsets.zero,
+          childrenPadding: EdgeInsets.zero,
+          iconColor: semanticColors.inkSubtle,
+          collapsedIconColor: semanticColors.inkSubtle,
+          title: Text(
+            'Research citations',
+            style: context.theme.textTheme.bodyMedium?.copyWith(
+              color: semanticColors.ink,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-        ),
-        children: protocol.citations
-            .map(
-              (citation) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Text(
-                  citation.fullCitation,
-                  style: context.theme.textTheme.bodySmall?.copyWith(
-                    color: semanticColors.inkSubtle,
-                    height: 1.4,
+          children: protocol.citations
+              .map(
+                (citation) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Text(
+                    citation.fullCitation,
+                    style: context.theme.textTheme.bodySmall?.copyWith(
+                      color: semanticColors.inkSubtle,
+                      height: 1.4,
+                    ),
                   ),
                 ),
-              ),
-            )
-            .toList(),
+              )
+              .toList(),
+        ),
       ),
     );
   }
@@ -420,8 +426,9 @@ class _ActionSection extends StatelessWidget {
     // Destructive color: kitColors.warning in dark mode for brand
     // consistency; a dark red in light mode for WCAG AA contrast
     // against surfaceElevated.
-    final destructiveColor =
-        isLight ? const Color(0xFFB71C1C) : kitColors.warning;
+    final destructiveColor = isLight
+        ? const Color(0xFFB71C1C)
+        : kitColors.warning;
 
     switch (status) {
       case LibraryCardStatus.inStack:

@@ -39,21 +39,36 @@ class AppLocalizationsSv extends AppLocalizations {
   String get authTitle => 'Logga in';
 
   @override
-  String get authSubtitle => 'Vi skickar en magisk länk för att fortsätta.';
+  String get authSubtitle => 'Vi skickar en kod via e-post för att fortsätta.';
+
+  @override
+  String get authSendCode => 'Skicka kod till mig';
 
   @override
   String get checkEmailTitle => 'Kolla din e-post';
 
   @override
   String get checkEmailInstruction =>
-      'Öppna din inkorg och tryck på länken för att fortsätta.';
+      'Ange den 6-siffriga koden vi skickade till dig.';
 
   @override
   String get checkEmailSpamHint =>
-      'Tips: Kolla skräpposten om du inte ser den.';
+      'Använd den senaste koden om du begär en ny.';
 
   @override
-  String get authResendLink => 'Skicka länk igen';
+  String get authCodeFieldLabel => 'Ange den 6-siffriga koden';
+
+  @override
+  String get authVerifyCode => 'Verifiera kod';
+
+  @override
+  String get authCodeValidationError => 'Ange den 6-siffriga koden.';
+
+  @override
+  String get authCompletingSignIn => 'Slutför Sign-In...';
+
+  @override
+  String get authResendCode => 'Skicka kod igen';
 
   @override
   String get authResendAvailableIn => 'Skicka igen om';

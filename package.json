@@ -1,0 +1,16 @@
+{
+  "name": "my-flutter-app-repo-tools",
+  "private": true,
+  "scripts": {
+    "sandcastle:init": "sandcastle init",
+    "sandcastle:image": "sandcastle docker build-image",
+    "ralph": "tsx --env-file-if-exists=.sandcastle/.env .sandcastle/main.mts"
+  },
+  "engines": {
+    "node": "22.x"
+  },
+  "devDependencies": {
+    "@ai-hero/sandcastle": "0.10.0",
+    "tsx": "4.21.0"
+  }
+}

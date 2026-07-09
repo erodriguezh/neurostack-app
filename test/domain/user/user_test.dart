@@ -186,6 +186,123 @@ void main() {
       });
     });
 
+    group('applyProtocolLimitSelection', () {
+      test('whenValidSelection_keepsSelectedProtocolsAndRaisesEvents', () {
+        final user = UserFactory.create(
+          subscriptionStatus: SubscriptionStatus.trial,
+          stack: StackFactory.fromIds([
+            'protocol-1',
+            'protocol-2',
+            'protocol-3',
+            'protocol-4',
+          ]),
+          onboardingCompleted: true,
+        );
+
+        final result = user.applyProtocolLimitSelection([
+          'protocol-2',
+          'protocol-4',
+        ]);
+
+        expect(result, isRight<User>());
+        final updated = result.getOrElse(
+          (failure) => throw Exception('Failed to apply selection: $failure'),
+        );
+        expect(updated.activeProtocolIds, ['protocol-2', 'protocol-4']);
+        expect(updated.subscriptionStatus, SubscriptionStatus.trial);
+        expect(user.activeProtocolIds, [
+          'protocol-1',
+          'protocol-2',
+          'protocol-3',
+          'protocol-4',
+        ]);
+
+        final events = updated.domainEvents
+            .whereType<ProtocolDeactivatedEvent>()
+            .toList();
+        expect(events.map((event) => event.protocolId), [
+          'protocol-1',
+          'protocol-3',
+        ]);
+        expect(events.every((event) => event.userId == user.id), isTrue);
+      });
+
+      for (final count in [0, 1, 3, 4]) {
+        test('whenSelectionCountIs${count}_returnsInvalidSelection', () {
+          final user = UserFactory.create(
+            stack: StackFactory.fromIds([
+              'protocol-1',
+              'protocol-2',
+              'protocol-3',
+              'protocol-4',
+            ]),
+            onboardingCompleted: true,
+          );
+          final keepIds = List.generate(count, (index) => 'protocol-$index');
+
+          final result = user.applyProtocolLimitSelection(keepIds);
+
+          expect(
+            result,
+            isLeftWith(UserFailures.invalidProtocolLimitSelection),
+          );
+        });
+      }
+
+      test('whenSelectionHasInactiveProtocol_returnsProtocolNotActive', () {
+        final user = UserFactory.create(
+          stack: StackFactory.fromIds(['protocol-1', 'protocol-2']),
+          onboardingCompleted: true,
+        );
+
+        final result = user.applyProtocolLimitSelection([
+          'protocol-1',
+          'protocol-3',
+        ]);
+
+        expect(result, isLeftWith(UserFailures.protocolNotActive));
+      });
+
+      test('whenSelectionHasDuplicateProtocol_returnsDuplicateSelection', () {
+        final user = UserFactory.create(
+          stack: StackFactory.fromIds(['protocol-1', 'protocol-2']),
+          onboardingCompleted: true,
+        );
+
+        final result = user.applyProtocolLimitSelection([
+          'protocol-1',
+          'protocol-1',
+        ]);
+
+        expect(result, isLeftWith(UserFailures.duplicateProtocolSelection));
+      });
+
+      test('whenSelectionAlreadyMatchesStack_returnsNoOpWithoutEvents', () {
+        final user = UserFactory.create(
+          subscriptionStatus: SubscriptionStatus.expired,
+          stack: StackFactory.fromIds(['protocol-1', 'protocol-2']),
+          onboardingCompleted: true,
+        );
+
+        final result = user.applyProtocolLimitSelection([
+          'protocol-1',
+          'protocol-2',
+        ]);
+
+        expect(result, isRight<User>());
+        final updated = result.getOrElse(
+          (failure) => throw Exception('Failed to apply selection: $failure'),
+        );
+        expect(identical(updated, user), isTrue);
+        expect(updated.activeProtocolIds, ['protocol-1', 'protocol-2']);
+        expect(updated.subscriptionStatus, SubscriptionStatus.expired);
+        expect(
+          updated.domainEvents.whereType<ProtocolDeactivatedEvent>(),
+          isEmpty,
+        );
+      });
+    });
+
     group('canLogSession', () {
       // INV-U4: Onboarding required
       test(

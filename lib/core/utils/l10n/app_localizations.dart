@@ -152,17 +152,23 @@ abstract class AppLocalizations {
   /// **'Success'**
   String get success;
 
-  /// Title for the magic link auth screen
+  /// Title for the auth screen
   ///
   /// In en, this message translates to:
   /// **'Sign in'**
   String get authTitle;
 
-  /// Subtitle for the magic link auth screen
+  /// Subtitle for the auth screen
   ///
   /// In en, this message translates to:
-  /// **'We\'ll send you a magic link to continue.'**
+  /// **'We\'ll email you a code to continue.'**
   String get authSubtitle;
+
+  /// Button label to request a one-time code
+  ///
+  /// In en, this message translates to:
+  /// **'Email me a code'**
+  String get authSendCode;
 
   /// Title for the check email screen
   ///
@@ -170,23 +176,47 @@ abstract class AppLocalizations {
   /// **'Check your email'**
   String get checkEmailTitle;
 
-  /// Instruction text for magic link check email screen
+  /// Instruction text for the code verification screen
   ///
   /// In en, this message translates to:
-  /// **'Check your inbox and tap the link to continue.'**
+  /// **'Enter the 6-digit code we emailed you.'**
   String get checkEmailInstruction;
 
   /// Spam folder hint on check email screen
   ///
   /// In en, this message translates to:
-  /// **'Hint: Check your spam folder if you don\'t see it.'**
+  /// **'Use the latest code if you request a new one.'**
   String get checkEmailSpamHint;
 
-  /// Button label to resend magic link
+  /// Label for the one-time code input
   ///
   /// In en, this message translates to:
-  /// **'Resend link'**
-  String get authResendLink;
+  /// **'Enter the 6-digit code'**
+  String get authCodeFieldLabel;
+
+  /// Button label to verify the one-time code
+  ///
+  /// In en, this message translates to:
+  /// **'Verify code'**
+  String get authVerifyCode;
+
+  /// Validation message when the one-time code is too short
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit code.'**
+  String get authCodeValidationError;
+
+  /// Message shown after the one-time code verifies while auth navigation completes
+  ///
+  /// In en, this message translates to:
+  /// **'Completing Sign-In...'**
+  String get authCompletingSignIn;
+
+  /// Button label to resend one-time code
+  ///
+  /// In en, this message translates to:
+  /// **'Resend code'**
+  String get authResendCode;
 
   /// Prefix label for resend cooldown
   ///

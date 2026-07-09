@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:neurostack/paywall/data/trial_reminder_service.dart';
 import 'package:neurostack/paywall/domain/entitlement_snapshot.dart';
 import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
+import 'package:neurostack/paywall/domain/trial_expiry_policy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../factories/entitlement_snapshot_factory.dart';
@@ -9,15 +10,17 @@ import '../../factories/entitlement_snapshot_factory.dart';
 void main() {
   late SharedPreferences prefs;
   late SubscriptionStatusResolver resolver;
+  late TrialExpiryPolicy trialExpiryPolicy;
   late TrialReminderService service;
 
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     prefs = await SharedPreferences.getInstance();
     resolver = const SubscriptionStatusResolver();
+    trialExpiryPolicy = TrialExpiryPolicy(resolver: resolver);
     service = TrialReminderService(
       sharedPreferences: prefs,
-      resolver: resolver,
+      trialExpiryPolicy: trialExpiryPolicy,
     );
   });
 

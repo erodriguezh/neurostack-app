@@ -40,21 +40,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authTitle => 'Sign in';
 
   @override
-  String get authSubtitle => 'We\'ll send you a magic link to continue.';
+  String get authSubtitle => 'We\'ll email you a code to continue.';
+
+  @override
+  String get authSendCode => 'Email me a code';
 
   @override
   String get checkEmailTitle => 'Check your email';
 
   @override
-  String get checkEmailInstruction =>
-      'Check your inbox and tap the link to continue.';
+  String get checkEmailInstruction => 'Enter the 6-digit code we emailed you.';
 
   @override
   String get checkEmailSpamHint =>
-      'Hint: Check your spam folder if you don\'t see it.';
+      'Use the latest code if you request a new one.';
 
   @override
-  String get authResendLink => 'Resend link';
+  String get authCodeFieldLabel => 'Enter the 6-digit code';
+
+  @override
+  String get authVerifyCode => 'Verify code';
+
+  @override
+  String get authCodeValidationError => 'Enter the 6-digit code.';
+
+  @override
+  String get authCompletingSignIn => 'Completing Sign-In...';
+
+  @override
+  String get authResendCode => 'Resend code';
 
   @override
   String get authResendAvailableIn => 'Resend available in';

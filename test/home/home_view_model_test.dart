@@ -2,14 +2,18 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:neurostack/core/failures/domain_failure.dart';
 import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
 import 'package:neurostack/core/utils/internal_notification/toast/toast_event.dart';
 import 'package:neurostack/features/auth/domain/auth_state.dart';
 import 'package:neurostack/features/session/domain/entities/session.dart';
+import 'package:neurostack/features/user/domain/entities/user.dart';
 import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
+import 'package:neurostack/features/user/domain/failures/user_failures.dart';
 import 'package:neurostack/home/home_view_model.dart';
 import 'package:neurostack/paywall/domain/entitlement_snapshot.dart';
 import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
+import 'package:neurostack/paywall/domain/trial_expiry_policy.dart';
 
 import '../factories/factories.dart';
 import '../mocks/mock_services.dart';
@@ -25,11 +29,14 @@ void main() {
   late MockConnectivityService mockConnectivityService;
   late MockRevenueCatService mockRevenueCatService;
   late MockTrialReminderService mockTrialReminderService;
+  late MockTrialExpirationDecisionStore mockTrialExpirationDecisionStore;
   late SubscriptionStatusResolver subscriptionStatusResolver;
+  late TrialExpiryPolicy trialExpiryPolicy;
 
   setUpAll(() {
     registerFallbackValue(ToastEventError(message: 'fallback'));
     registerFallbackValue(UserFactory.create());
+    registerFallbackValue(SubscriptionStatus.free);
   });
 
   setUp(() {
@@ -43,8 +50,12 @@ void main() {
     mockConnectivityService = MockConnectivityService();
     mockRevenueCatService = MockRevenueCatService();
     mockTrialReminderService = MockTrialReminderService();
+    mockTrialExpirationDecisionStore = MockTrialExpirationDecisionStore();
     // Use real resolver since it's pure functions
     subscriptionStatusResolver = const SubscriptionStatusResolver();
+    trialExpiryPolicy = TrialExpiryPolicy(
+      resolver: subscriptionStatusResolver,
+    );
 
     // Default connectivity setup
     when(
@@ -70,9 +81,18 @@ void main() {
         now: any(named: 'now'),
       ),
     ).thenAnswer((_) async {});
+    when(
+      () => mockTrialExpirationDecisionStore.getLastSeenStatus(any()),
+    ).thenAnswer((_) async => null);
+    when(
+      () => mockTrialExpirationDecisionStore.saveLastSeenStatus(
+        userId: any(named: 'userId'),
+        status: any(named: 'status'),
+      ),
+    ).thenAnswer((_) async {});
   });
 
-  HomeViewModel createViewModel() {
+  HomeViewModel createViewModel({bool includeDecisionStore = false}) {
     return HomeViewModel(
       notifyService: mockNotifyService,
       routerService: mockRouterService,
@@ -83,8 +103,12 @@ void main() {
       sessionLocalDataSource: mockSessionLocalDataSource,
       connectivityService: mockConnectivityService,
       subscriptionStatusResolver: subscriptionStatusResolver,
+      trialExpiryPolicy: trialExpiryPolicy,
       revenueCatService: mockRevenueCatService,
       trialReminderService: mockTrialReminderService,
+      trialExpirationDecisionStore: includeDecisionStore
+          ? mockTrialExpirationDecisionStore
+          : null,
     );
   }
 
@@ -167,6 +191,222 @@ void main() {
         expect(viewModel.state.value.showDeactivationModal, isTrue);
         verifyNever(() => mockUserRepository.save(any()));
       });
+    });
+
+    group('protocol selection flow', () {
+      void stubRefresh(User user) {
+        when(
+          () => mockAuthService.authState,
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+        when(
+          () => mockUserRepository.getById(any()),
+        ).thenAnswer((_) async => right(user));
+        when(
+          () => mockSessionRepository.list(
+            from: any(named: 'from'),
+            to: any(named: 'to'),
+          ),
+        ).thenAnswer((_) async => right(<Session>[]));
+        when(
+          () => mockSessionLocalDataSource.listSessions(
+            any(),
+            from: any(named: 'from'),
+            to: any(named: 'to'),
+          ),
+        ).thenAnswer((_) async => <Session>[]);
+        when(
+          () => mockSessionLocalDataSource.upsertSyncedSessions(any(), any()),
+        ).thenAnswer((_) async {});
+        when(
+          () => mockProtocolRepository.getById(any()),
+        ).thenAnswer((invocation) async {
+          final id = invocation.positionalArguments.first as String;
+          return right(ProtocolFactory.reconstitute(id: id));
+        });
+      }
+
+      test(
+        'activeProtocolSelectionItems_loadsRowsAndDegradesSessionFailure',
+        () async {
+          final user = UserFactory.create(
+            stack: StackFactory.fromIds(['protocol-1', 'protocol-2']),
+            onboardingCompleted: true,
+          );
+          when(
+            () => mockProtocolRepository.getById(any()),
+          ).thenAnswer((invocation) async {
+            final id = invocation.positionalArguments.first as String;
+            return right(ProtocolFactory.reconstitute(id: id));
+          });
+          when(
+            () => mockSessionRepository.list(protocolId: 'protocol-1'),
+          ).thenAnswer(
+            (_) async => right([
+              SessionFactory.reconstitute(id: 's1', protocolId: 'protocol-1'),
+              SessionFactory.reconstitute(id: 's2', protocolId: 'protocol-1'),
+            ]),
+          );
+          when(
+            () => mockSessionRepository.list(protocolId: 'protocol-2'),
+          ).thenAnswer(
+            (_) async => left(
+              const DomainFailure(
+                code: 'Session.ReadFailed',
+                message: 'Unable to load sessions',
+              ),
+            ),
+          );
+
+          final viewModel = createViewModel();
+          addTearDown(viewModel.dispose);
+
+          final items = await viewModel.activeProtocolSelectionItems(user);
+
+          expect(items.map((item) => item.protocolId), [
+            'protocol-1',
+            'protocol-2',
+          ]);
+          expect(items.first.sessionCount, 2);
+          expect(items.last.sessionCount, 0);
+        },
+      );
+
+      test('confirmProtocolDeactivation_savesTrimmedUser', () async {
+        final user = UserFactory.create(
+          subscriptionStatus: SubscriptionStatus.trial,
+          stack: StackFactory.fromIds([
+            'protocol-1',
+            'protocol-2',
+            'protocol-3',
+          ]),
+          onboardingCompleted: true,
+        );
+        stubRefresh(user);
+        when(() => mockUserRepository.save(any())).thenAnswer(
+          (_) async => right(unit),
+        );
+        final viewModel = createViewModel();
+        addTearDown(viewModel.dispose);
+        viewModel.state.value = viewModel.state.value.copyWith(user: user);
+
+        final success = await viewModel.confirmProtocolDeactivation([
+          'protocol-1',
+          'protocol-3',
+        ]);
+
+        expect(success, isTrue);
+        final captured =
+            verify(
+                  () => mockUserRepository.save(captureAny()),
+                ).captured.single
+                as User;
+        expect(captured.activeProtocolIds, ['protocol-1', 'protocol-3']);
+        expect(captured.subscriptionStatus, SubscriptionStatus.trial);
+      });
+
+      test('confirmProtocolDeactivation_retriesOnceOnSaveFailure', () async {
+        final user = UserFactory.create(
+          stack: StackFactory.fromIds([
+            'protocol-1',
+            'protocol-2',
+            'protocol-3',
+          ]),
+          onboardingCompleted: true,
+        );
+        stubRefresh(user);
+        var attempts = 0;
+        when(() => mockUserRepository.save(any())).thenAnswer((_) async {
+          attempts += 1;
+          if (attempts == 1) {
+            return left(
+              const DomainFailure(
+                code: 'User.SaveFailed',
+                message: 'Save failed',
+              ),
+            );
+          }
+          return right(unit);
+        });
+        final viewModel = createViewModel();
+        addTearDown(viewModel.dispose);
+        viewModel.state.value = viewModel.state.value.copyWith(user: user);
+
+        final success = await viewModel.confirmProtocolDeactivation([
+          'protocol-1',
+          'protocol-2',
+        ]);
+
+        expect(success, isTrue);
+        verify(() => mockUserRepository.save(any())).called(2);
+      });
+
+      test(
+        'confirmProtocolDeactivation_whenBothSavesFail_toastsAndReloads',
+        () async {
+          final user = UserFactory.create(
+            stack: StackFactory.fromIds([
+              'protocol-1',
+              'protocol-2',
+              'protocol-3',
+            ]),
+            onboardingCompleted: true,
+          );
+          stubRefresh(user);
+          when(() => mockUserRepository.save(any())).thenAnswer(
+            (_) async => left(
+              const DomainFailure(
+                code: 'User.SaveFailed',
+                message: 'Save failed',
+              ),
+            ),
+          );
+          final viewModel = createViewModel();
+          addTearDown(viewModel.dispose);
+          viewModel.state.value = viewModel.state.value.copyWith(user: user);
+
+          final success = await viewModel.confirmProtocolDeactivation([
+            'protocol-1',
+            'protocol-2',
+          ]);
+
+          expect(success, isFalse);
+          verify(() => mockUserRepository.save(any())).called(2);
+          verify(() => mockUserRepository.getById(any())).called(1);
+          final toast =
+              verify(
+                    () => mockNotifyService.setToastEvent(captureAny()),
+                  ).captured.single
+                  as ToastEventError;
+          expect(toast.message, 'Save failed');
+        },
+      );
+
+      test(
+        'confirmProtocolDeactivation_whenDomainFailure_doesNotSave',
+        () async {
+          final user = UserFactory.create(
+            stack: StackFactory.fromIds(['protocol-1', 'protocol-2']),
+            onboardingCompleted: true,
+          );
+          final viewModel = createViewModel();
+          addTearDown(viewModel.dispose);
+          viewModel.state.value = viewModel.state.value.copyWith(user: user);
+
+          final success = await viewModel.confirmProtocolDeactivation([
+            'protocol-1',
+            'protocol-3',
+          ]);
+
+          expect(success, isFalse);
+          verifyNever(() => mockUserRepository.save(any()));
+          final toast =
+              verify(
+                    () => mockNotifyService.setToastEvent(captureAny()),
+                  ).captured.single
+                  as ToastEventError;
+          expect(toast.message, UserFailures.protocolNotActive.message);
+        },
+      );
     });
 
     group('_maybeTriggerExpiredModal (via init)', () {

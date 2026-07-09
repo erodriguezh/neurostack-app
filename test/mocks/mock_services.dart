@@ -14,6 +14,7 @@ import 'package:neurostack/core/utils/in_app_review/in_app_review_adapter.dart';
 import 'package:neurostack/core/utils/in_app_review/in_app_review_service.dart';
 import 'package:neurostack/core/utils/in_app_review/review_trigger_helper.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
+import 'package:neurostack/paywall/data/trial_expiration_decision_store.dart';
 import 'package:neurostack/paywall/data/trial_reminder_service.dart';
 import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 import 'package:uuid/uuid.dart';
@@ -50,6 +51,9 @@ class MockSessionSyncService extends Mock implements SessionSyncService {}
 class MockUuid extends Mock implements Uuid {}
 
 class MockTrialReminderService extends Mock implements TrialReminderService {}
+
+class MockTrialExpirationDecisionStore extends Mock
+    implements TrialExpirationDecisionStore {}
 
 class MockSubscriptionStatusResolver extends Mock
     implements SubscriptionStatusResolver {}

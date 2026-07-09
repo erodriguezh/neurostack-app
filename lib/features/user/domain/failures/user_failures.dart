@@ -20,6 +20,16 @@ abstract final class UserFailures {
     message: 'This protocol is not in your stack',
   );
 
+  static const invalidProtocolLimitSelection = DomainFailure(
+    code: 'User.InvalidProtocolLimitSelection',
+    message: 'Choose exactly 2 protocols to keep',
+  );
+
+  static const duplicateProtocolSelection = DomainFailure(
+    code: 'User.DuplicateProtocolSelection',
+    message: 'Choose each protocol only once',
+  );
+
   // Session logging - INV-U4
   // Note: Trial expiration gating (INV-U5) is enforced by SubscriptionStatusResolver.
   static const onboardingNotCompleted = DomainFailure(

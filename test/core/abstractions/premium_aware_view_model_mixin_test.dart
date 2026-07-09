@@ -9,8 +9,8 @@ import 'package:neurostack/features/auth/domain/auth_state.dart';
 import 'package:neurostack/features/user/domain/entities/user.dart';
 import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
+import 'package:neurostack/paywall/domain/entitlement.dart';
 import 'package:neurostack/paywall/domain/entitlement_snapshot.dart';
-import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 
 import '../../factories/factories.dart';
 import '../../mocks/mock_services.dart';
@@ -18,22 +18,18 @@ import '../../mocks/mock_services.dart';
 /// Minimal concrete class that mixes in both
 /// [EntitlementListenerMixin] and [PremiumAwareViewModelMixin]
 /// so we can test the mixin in isolation.
-class _TestViewModel
-    with EntitlementListenerMixin, PremiumAwareViewModelMixin {
+class _TestViewModel with EntitlementListenerMixin, PremiumAwareViewModelMixin {
   _TestViewModel({
     required AuthService authService,
-    required SubscriptionStatusResolver resolver,
     required RevenueCatService revenueCatService,
     CachedUserStore? cachedUserStore,
   }) : _authService = authService,
-       _resolver = resolver,
        _revenueCatService = revenueCatService,
        _cachedUserStore = cachedUserStore {
     initPremiumAwareness();
   }
 
   final AuthService _authService;
-  final SubscriptionStatusResolver _resolver;
   final RevenueCatService _revenueCatService;
   final CachedUserStore? _cachedUserStore;
 
@@ -42,9 +38,6 @@ class _TestViewModel
 
   @override
   AuthService get premiumAuthService => _authService;
-
-  @override
-  SubscriptionStatusResolver get premiumResolver => _resolver;
 
   @override
   CachedUserStore? get premiumCachedUserStore => _cachedUserStore;
@@ -69,12 +62,10 @@ class MockCachedUserStore extends Mock implements CachedUserStore {}
 void main() {
   late MockAuthService mockAuthService;
   late MockRevenueCatService mockRevenueCatService;
-  late SubscriptionStatusResolver resolver;
 
   setUp(() {
     mockAuthService = MockAuthService();
     mockRevenueCatService = MockRevenueCatService();
-    resolver = const SubscriptionStatusResolver();
 
     // Default: null snapshot (RC unavailable, fallback to DB)
     when(
@@ -85,7 +76,6 @@ void main() {
   _TestViewModel createViewModel({CachedUserStore? cachedUserStore}) {
     return _TestViewModel(
       authService: mockAuthService,
-      resolver: resolver,
       revenueCatService: mockRevenueCatService,
       cachedUserStore: cachedUserStore,
     );
@@ -104,7 +94,9 @@ void main() {
         final vm = createViewModel();
         addTearDown(vm.dispose);
 
-        expect(vm.isPremium.value, isFalse);
+        expect(vm.entitlement.value.effectiveStatus, SubscriptionStatus.free);
+        expect(vm.entitlement.value.protocolLimit, 2);
+        expect(vm.isPremium, isFalse);
       });
 
       test('isPremium is true when user is premiumMonthly', () {
@@ -116,7 +108,12 @@ void main() {
         final vm = createViewModel();
         addTearDown(vm.dispose);
 
-        expect(vm.isPremium.value, isTrue);
+        expect(
+          vm.entitlement.value.effectiveStatus,
+          SubscriptionStatus.premiumMonthly,
+        );
+        expect(vm.entitlement.value.protocolLimit, isNull);
+        expect(vm.isPremium, isTrue);
       });
 
       test('isPremium is true when user is premiumAnnual', () {
@@ -128,7 +125,11 @@ void main() {
         final vm = createViewModel();
         addTearDown(vm.dispose);
 
-        expect(vm.isPremium.value, isTrue);
+        expect(
+          vm.entitlement.value.effectiveStatus,
+          SubscriptionStatus.premiumAnnual,
+        );
+        expect(vm.isPremium, isTrue);
       });
 
       test('isPremium is false when authState is Unauthenticated', () {
@@ -139,7 +140,8 @@ void main() {
         final vm = createViewModel();
         addTearDown(vm.dispose);
 
-        expect(vm.isPremium.value, isFalse);
+        expect(vm.entitlement.value, same(Entitlement.fallback));
+        expect(vm.isPremium, isFalse);
       });
 
       test('isPremium resolves from AuthenticatedOffline', () {
@@ -151,7 +153,11 @@ void main() {
         final vm = createViewModel();
         addTearDown(vm.dispose);
 
-        expect(vm.isPremium.value, isTrue);
+        expect(
+          vm.entitlement.value.effectiveStatus,
+          SubscriptionStatus.premiumMonthly,
+        );
+        expect(vm.isPremium, isTrue);
       });
     });
 
@@ -172,7 +178,8 @@ void main() {
         addTearDown(vm.dispose);
         vm.init();
 
-        expect(vm.isPremium.value, isFalse);
+        expect(vm.entitlement.value.effectiveStatus, SubscriptionStatus.free);
+        expect(vm.isPremium, isFalse);
 
         // Simulate entitlement change: user becomes premium via RC snapshot
         final premiumSnapshot = EntitlementSnapshotFactory.activePaidMonthly(
@@ -180,7 +187,11 @@ void main() {
         );
         snapshotNotifier.value = premiumSnapshot;
 
-        expect(vm.isPremium.value, isTrue);
+        expect(
+          vm.entitlement.value.effectiveStatus,
+          SubscriptionStatus.premiumMonthly,
+        );
+        expect(vm.isPremium, isTrue);
       });
 
       test('stays false when entitlement changes but user is still free', () {
@@ -199,7 +210,8 @@ void main() {
         addTearDown(vm.dispose);
         vm.init();
 
-        expect(vm.isPremium.value, isFalse);
+        expect(vm.entitlement.value.effectiveStatus, SubscriptionStatus.free);
+        expect(vm.isPremium, isFalse);
 
         // Snapshot changes but still no entitlement (expired trial)
         final freeSnapshot = EntitlementSnapshotFactory.expiredTrial(
@@ -207,7 +219,8 @@ void main() {
         );
         snapshotNotifier.value = freeSnapshot;
 
-        expect(vm.isPremium.value, isFalse);
+        expect(vm.entitlement.value.effectiveStatus, SubscriptionStatus.free);
+        expect(vm.isPremium, isFalse);
       });
     });
 
@@ -274,8 +287,9 @@ void main() {
         final vm = createViewModel(cachedUserStore: mockCachedUserStore);
         addTearDown(vm.dispose);
 
-        // isPremium starts false because auth state is unauthenticated
-        expect(vm.isPremium.value, isFalse);
+        // Entitlement starts at fallback because auth state is unauthenticated.
+        expect(vm.entitlement.value, same(Entitlement.fallback));
+        expect(vm.isPremium, isFalse);
 
         // Trigger onEntitlementChanged, which falls back to CachedUserStore
         vm.onEntitlementChanged();
@@ -283,7 +297,11 @@ void main() {
         // Allow the async loadUser to complete
         await pumpEventQueue();
 
-        expect(vm.isPremium.value, isTrue);
+        expect(
+          vm.entitlement.value.effectiveStatus,
+          SubscriptionStatus.premiumMonthly,
+        );
+        expect(vm.isPremium, isTrue);
         verify(() => mockCachedUserStore.loadUser()).called(1);
       });
     });
@@ -328,10 +346,7 @@ void main() {
         vm.init();
         vm.dispose();
 
-        // After dispose, changing entitlement should not update isPremium
-        // (it's already disposed, so no crash either)
-        // Note: isPremium.value is no longer accessible after dispose,
-        // but onEntitlementChanged should early-return without error.
+        // After dispose, onEntitlementChanged should early-return without error.
       });
     });
   });
