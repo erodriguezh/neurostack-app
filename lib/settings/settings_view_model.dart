@@ -10,10 +10,10 @@ import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/core/utils/userorient/userorient_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
 import 'package:neurostack/features/auth/data/cached_user_store.dart';
-import 'package:neurostack/features/auth/domain/auth_state.dart';
+import 'package:neurostack/features/user/domain/entities/user.dart';
 import 'package:neurostack/home/home_bottom_tab_coordinator.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
-import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
+import 'package:neurostack/paywall/domain/entitlement.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -27,7 +27,6 @@ class SettingsViewModel
   SettingsViewModel({
     required RouterService routerService,
     required AuthService authService,
-    required SubscriptionStatusResolver subscriptionStatusResolver,
     required RevenueCatService revenueCatService,
     required UserOrientService userOrientService,
     required NotifyService notifyService,
@@ -37,7 +36,6 @@ class SettingsViewModel
     Future<bool> Function(Uri, {LaunchMode mode})? launch,
   }) : _routerService = routerService,
        _authService = authService,
-       _resolver = subscriptionStatusResolver,
        _revenueCatService = revenueCatService,
        _userOrientService = userOrientService,
        _notifyService = notifyService,
@@ -53,7 +51,6 @@ class SettingsViewModel
 
   final RouterService _routerService;
   final AuthService _authService;
-  final SubscriptionStatusResolver _resolver;
   final RevenueCatService _revenueCatService;
   final UserOrientService _userOrientService;
   final NotifyService _notifyService;
@@ -75,9 +72,6 @@ class SettingsViewModel
 
   @override
   AuthService get premiumAuthService => _authService;
-
-  @override
-  SubscriptionStatusResolver get premiumResolver => _resolver;
 
   @override
   CachedUserStore? get premiumCachedUserStore => _cachedUserStore;
@@ -123,24 +117,14 @@ class SettingsViewModel
 
   /// Opens the UserOrient feature-request board.
   ///
-  /// Extracts the user ID from the current [AuthState] and derives
+  /// Extracts the current user and derives
   /// `isPaying` from the resolved subscription status. No-ops when the
   /// user is not authenticated.
   void openFeatureRequestBoard(BuildContext context) {
-    final state = _authService.authState.value;
-    final user = switch (state) {
-      AuthenticatedOnline(user: final u) => u,
-      AuthenticatedOffline(user: final u) => u,
-      _ => null,
-    };
+    final user = resolveAuthUser();
     if (user == null) return;
 
-    final isPaying = _resolver
-        .resolveEffectiveStatus(
-          user: user,
-          snapshot: _revenueCatService.entitlementSnapshot.value,
-        )
-        .isPremium;
+    final isPaying = _resolveEntitlement(user).isPremium;
 
     _userOrientService.openBoard(context, userId: user.id, isPaying: isPaying);
   }
@@ -150,18 +134,10 @@ class SettingsViewModel
   ///
   /// No-ops when the user is not authenticated.
   Future<void> sendFeedback() async {
-    final state = _authService.authState.value;
-    final user = switch (state) {
-      AuthenticatedOnline(user: final u) => u,
-      AuthenticatedOffline(user: final u) => u,
-      _ => null,
-    };
+    final user = resolveAuthUser();
     if (user == null) return;
 
-    final effectiveStatus = _resolver.resolveEffectiveStatus(
-      user: user,
-      snapshot: _revenueCatService.entitlementSnapshot.value,
-    );
+    final effectiveStatus = _resolveEntitlement(user).effectiveStatus;
 
     final uri = Uri(
       scheme: 'mailto',
@@ -276,38 +252,29 @@ class SettingsViewModel
   bool _computeCanAccessPremium() {
     final user = resolveAuthUser();
     if (user == null) return false;
-    final snapshot = entitlementListenerService.entitlementSnapshot.value;
-    final status = premiumResolver.resolveEffectiveStatus(
-      user: user,
-      snapshot: snapshot,
-    );
-    return status.canAccessPremium;
+
+    return _resolveEntitlement(user).canAccessPremium;
   }
 
   void _refreshCanAccessPremium() {
     final user = resolveAuthUser();
     if (user != null) {
-      final snapshot = entitlementListenerService.entitlementSnapshot.value;
-      final status = premiumResolver.resolveEffectiveStatus(
-        user: user,
-        snapshot: snapshot,
-      );
-      canAccessPremium.value = status.canAccessPremium;
+      canAccessPremium.value = _resolveEntitlement(user).canAccessPremium;
     } else {
       premiumCachedUserStore
           ?.loadUser()
           .then((cached) {
             if (cached == null || _isDisposed) return;
-            final snapshot =
-                entitlementListenerService.entitlementSnapshot.value;
-            final status = premiumResolver.resolveEffectiveStatus(
-              user: cached,
-              snapshot: snapshot,
-            );
-            canAccessPremium.value = status.canAccessPremium;
+            canAccessPremium.value =
+                _resolveEntitlement(cached).canAccessPremium;
           })
           .catchError((_) {});
     }
+  }
+
+  Entitlement _resolveEntitlement(User user) {
+    final snapshot = entitlementListenerService.entitlementSnapshot.value;
+    return Entitlement.of(user, snapshot);
   }
 
   /// Encodes query parameters for a mailto URI using [Uri.encodeComponent]

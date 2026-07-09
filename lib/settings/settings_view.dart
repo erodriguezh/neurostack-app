@@ -13,7 +13,6 @@ import 'package:neurostack/features/auth/data/cached_user_store.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:neurostack/home/widgets/home_bottom_nav.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
-import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 import 'package:neurostack/settings/settings_view_model.dart';
 import 'package:neurostack/settings/widgets/settings_support_section.dart';
 import 'package:neurostack/settings/widgets/settings_upgrade_banner.dart';
@@ -34,7 +33,6 @@ class _SettingsViewState extends State<SettingsView> {
   late final SettingsViewModel _viewModel = SettingsViewModel(
     routerService: locator<RouterService>(),
     authService: locator<AuthService>(),
-    subscriptionStatusResolver: locator<SubscriptionStatusResolver>(),
     revenueCatService: locator<RevenueCatService>(),
     userOrientService: locator<UserOrientService>(),
     notifyService: locator<NotifyService>(),
@@ -91,11 +89,11 @@ class _SettingsViewState extends State<SettingsView> {
                   SliverToBoxAdapter(
                     child: ListenableBuilder(
                       listenable: Listenable.merge([
-                        _viewModel.isPremium,
+                        _viewModel.entitlement,
                         _viewModel.canAccessPremium,
                       ]),
                       builder: (context, _) {
-                        final isPremium = _viewModel.isPremium.value;
+                        final isPremium = _viewModel.isPremium;
                         final canAccessPremium =
                             _viewModel.canAccessPremium.value;
                         return Column(

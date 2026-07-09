@@ -9,7 +9,6 @@ import 'package:neurostack/features/auth/domain/auth_state.dart';
 import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
 import 'package:neurostack/home/home_bottom_tab_coordinator.dart';
 import 'package:neurostack/paywall/domain/entitlement_snapshot.dart';
-import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 import 'package:neurostack/settings/settings_view_model.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -29,11 +28,13 @@ void main() {
   late MockUserOrientService mockUserOrientService;
   late MockNotifyService mockNotifyService;
   late MockHomeBottomTabCoordinator mockTabCoordinator;
-  late SubscriptionStatusResolver resolver;
   late List<(Uri, LaunchMode)> launchCalls;
   late BuildContext fakeContext;
 
-  Future<bool> fakeLaunch(Uri uri, {LaunchMode mode = LaunchMode.platformDefault}) async {
+  Future<bool> fakeLaunch(
+    Uri uri, {
+    LaunchMode mode = LaunchMode.platformDefault,
+  }) async {
     launchCalls.add((uri, mode));
     return true;
   }
@@ -52,7 +53,6 @@ void main() {
     mockUserOrientService = MockUserOrientService();
     mockNotifyService = MockNotifyService();
     mockTabCoordinator = MockHomeBottomTabCoordinator();
-    resolver = const SubscriptionStatusResolver();
     launchCalls = [];
     fakeContext = _FakeBuildContext();
 
@@ -69,11 +69,11 @@ void main() {
     return SettingsViewModel(
       routerService: mockRouterService,
       authService: mockAuthService,
-      subscriptionStatusResolver: resolver,
       revenueCatService: mockRevenueCatService,
       userOrientService: mockUserOrientService,
       notifyService: mockNotifyService,
-      packageInfo: packageInfo ??
+      packageInfo:
+          packageInfo ??
           PackageInfo(
             appName: 'NeuroStack',
             packageName: 'app.getneurostack',
@@ -98,7 +98,7 @@ void main() {
         final vm = createViewModel();
         addTearDown(vm.dispose);
 
-        expect(vm.isPremium.value, isFalse);
+        expect(vm.isPremium, isFalse);
       });
 
       test('is true when user is premiumMonthly', () {
@@ -110,7 +110,7 @@ void main() {
         final vm = createViewModel();
         addTearDown(vm.dispose);
 
-        expect(vm.isPremium.value, isTrue);
+        expect(vm.isPremium, isTrue);
       });
 
       test('is true when user is premiumAnnual', () {
@@ -122,7 +122,7 @@ void main() {
         final vm = createViewModel();
         addTearDown(vm.dispose);
 
-        expect(vm.isPremium.value, isTrue);
+        expect(vm.isPremium, isTrue);
       });
 
       test('is false when authState is Unauthenticated', () {
@@ -133,7 +133,7 @@ void main() {
         final vm = createViewModel();
         addTearDown(vm.dispose);
 
-        expect(vm.isPremium.value, isFalse);
+        expect(vm.isPremium, isFalse);
       });
 
       test('resolves from AuthenticatedOffline', () {
@@ -145,7 +145,7 @@ void main() {
         final vm = createViewModel();
         addTearDown(vm.dispose);
 
-        expect(vm.isPremium.value, isTrue);
+        expect(vm.isPremium, isTrue);
       });
     });
 
@@ -167,7 +167,7 @@ void main() {
         addTearDown(vm.dispose);
         vm.init();
 
-        expect(vm.isPremium.value, isFalse);
+        expect(vm.isPremium, isFalse);
 
         // Simulate entitlement change: user becomes premium via RC snapshot
         final premiumSnapshot = EntitlementSnapshotFactory.activePaidMonthly(
@@ -175,7 +175,7 @@ void main() {
         );
         snapshotNotifier.value = premiumSnapshot;
 
-        expect(vm.isPremium.value, isTrue);
+        expect(vm.isPremium, isTrue);
       });
 
       test('stays false when entitlement changes but user is still free', () {
@@ -194,7 +194,7 @@ void main() {
         addTearDown(vm.dispose);
         vm.init();
 
-        expect(vm.isPremium.value, isFalse);
+        expect(vm.isPremium, isFalse);
 
         // Snapshot changes but still no entitlement (expired trial)
         final freeSnapshot = EntitlementSnapshotFactory.expiredTrial(
@@ -202,7 +202,7 @@ void main() {
         );
         snapshotNotifier.value = freeSnapshot;
 
-        expect(vm.isPremium.value, isFalse);
+        expect(vm.isPremium, isFalse);
       });
     });
 
@@ -280,26 +280,28 @@ void main() {
     });
 
     group('openFeatureRequestBoard', () {
-      test('calls openBoard with correct userId and isPaying for premium user',
-          () {
-        final user = UserFactory.createPremiumMonthly();
-        when(
-          () => mockAuthService.authState,
-        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+      test(
+        'calls openBoard with correct userId and isPaying for premium user',
+        () {
+          final user = UserFactory.createPremiumMonthly();
+          when(
+            () => mockAuthService.authState,
+          ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
 
-        final vm = createViewModel();
-        addTearDown(vm.dispose);
+          final vm = createViewModel();
+          addTearDown(vm.dispose);
 
-        vm.openFeatureRequestBoard(fakeContext);
+          vm.openFeatureRequestBoard(fakeContext);
 
-        verify(
-          () => mockUserOrientService.openBoard(
-            any(),
-            userId: user.id,
-            isPaying: true,
-          ),
-        ).called(1);
-      });
+          verify(
+            () => mockUserOrientService.openBoard(
+              any(),
+              userId: user.id,
+              isPaying: true,
+            ),
+          ).called(1);
+        },
+      );
 
       test('calls openBoard with isPaying false for free user', () {
         final user = UserFactory.create(
@@ -393,88 +395,93 @@ void main() {
     });
 
     group('sendFeedback', () {
-      test('builds mailto URI with correct scheme, path, subject, and body',
-          () async {
-        final user = UserFactory.createPremiumMonthly();
-        when(
-          () => mockAuthService.authState,
-        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+      test(
+        'builds mailto URI with correct scheme, path, subject, and body',
+        () async {
+          final user = UserFactory.createPremiumMonthly();
+          when(
+            () => mockAuthService.authState,
+          ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
 
-        final info = PackageInfo(
-          appName: 'NeuroStack',
-          packageName: 'app.getneurostack',
-          version: '1.2.3',
-          buildNumber: '42',
-        );
+          final info = PackageInfo(
+            appName: 'NeuroStack',
+            packageName: 'app.getneurostack',
+            version: '1.2.3',
+            buildNumber: '42',
+          );
 
-        final vm = createViewModel(packageInfo: info);
-        addTearDown(vm.dispose);
+          final vm = createViewModel(packageInfo: info);
+          addTearDown(vm.dispose);
 
-        await vm.sendFeedback();
+          await vm.sendFeedback();
 
-        expect(launchCalls, hasLength(1));
-        final uri = launchCalls.first.$1;
+          expect(launchCalls, hasLength(1));
+          final uri = launchCalls.first.$1;
 
-        expect(uri.scheme, 'mailto');
-        expect(uri.path, 'feedback@getneurostack.app');
+          expect(uri.scheme, 'mailto');
+          expect(uri.path, 'feedback@getneurostack.app');
 
-        // Decode query manually (custom encoder, not standard queryParameters)
-        final params = Uri.splitQueryString(uri.query);
-        expect(params['subject'], 'NeuroStack Feedback');
+          // Decode query manually (custom encoder, not standard queryParameters)
+          final params = Uri.splitQueryString(uri.query);
+          expect(params['subject'], 'NeuroStack Feedback');
 
-        final body = params['body']!;
-        expect(body, contains('App Version: 1.2.3+42'));
-        expect(body, contains('Platform:'));
-        expect(body, contains('Subscription: premiumMonthly'));
-      });
-
-      test('encodes spaces as %20 not + (Dart SDK #43838 regression)',
-          () async {
-        final user = UserFactory.createPremiumMonthly();
-        when(
-          () => mockAuthService.authState,
-        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
-
-        final vm = createViewModel();
-        addTearDown(vm.dispose);
-
-        await vm.sendFeedback();
-
-        expect(launchCalls, hasLength(1));
-        final rawQuery = launchCalls.first.$1.query;
-
-        // subject contains a space: "NeuroStack Feedback"
-        expect(rawQuery, contains('NeuroStack%20Feedback'));
-        expect(rawQuery, isNot(contains('NeuroStack+Feedback')));
-      });
+          final body = params['body']!;
+          expect(body, contains('App Version: 1.2.3+42'));
+          expect(body, contains('Platform:'));
+          expect(body, contains('Subscription: premiumMonthly'));
+        },
+      );
 
       test(
-          'effective-status regression: DB free + RC premiumMonthly → body contains premiumMonthly',
-          () async {
-        final user = UserFactory.create(
-          subscriptionStatus: SubscriptionStatus.free,
-        );
-        final snapshot = EntitlementSnapshotFactory.activePaidMonthly(
-          userId: user.id,
-        );
-        when(
-          () => mockRevenueCatService.entitlementSnapshot,
-        ).thenReturn(ValueNotifier(snapshot));
-        when(
-          () => mockAuthService.authState,
-        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+        'encodes spaces as %20 not + (Dart SDK #43838 regression)',
+        () async {
+          final user = UserFactory.createPremiumMonthly();
+          when(
+            () => mockAuthService.authState,
+          ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
 
-        final vm = createViewModel();
-        addTearDown(vm.dispose);
+          final vm = createViewModel();
+          addTearDown(vm.dispose);
 
-        await vm.sendFeedback();
+          await vm.sendFeedback();
 
-        expect(launchCalls, hasLength(1));
-        final params = Uri.splitQueryString(launchCalls.first.$1.query);
-        final body = params['body']!;
-        expect(body, contains('Subscription: premiumMonthly'));
-        expect(body, isNot(contains('Subscription: free')));
-      });
+          expect(launchCalls, hasLength(1));
+          final rawQuery = launchCalls.first.$1.query;
+
+          // subject contains a space: "NeuroStack Feedback"
+          expect(rawQuery, contains('NeuroStack%20Feedback'));
+          expect(rawQuery, isNot(contains('NeuroStack+Feedback')));
+        },
+      );
+
+      test(
+        'effective-status regression: DB free + RC premiumMonthly → body contains premiumMonthly',
+        () async {
+          final user = UserFactory.create(
+            subscriptionStatus: SubscriptionStatus.free,
+          );
+          final snapshot = EntitlementSnapshotFactory.activePaidMonthly(
+            userId: user.id,
+          );
+          when(
+            () => mockRevenueCatService.entitlementSnapshot,
+          ).thenReturn(ValueNotifier(snapshot));
+          when(
+            () => mockAuthService.authState,
+          ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+
+          final vm = createViewModel();
+          addTearDown(vm.dispose);
+
+          await vm.sendFeedback();
+
+          expect(launchCalls, hasLength(1));
+          final params = Uri.splitQueryString(launchCalls.first.$1.query);
+          final body = params['body']!;
+          expect(body, contains('Subscription: premiumMonthly'));
+          expect(body, isNot(contains('Subscription: free')));
+        },
+      );
 
       test('calls launch with LaunchMode.externalApplication', () async {
         final user = UserFactory.create();
@@ -531,33 +538,35 @@ void main() {
         expect(params['body'], contains('App Version: 2.0.0+99'));
       });
 
-      test('ignores stale snapshot for different user and falls back to DB status',
-          () async {
-        final user = UserFactory.create(
-          subscriptionStatus: SubscriptionStatus.free,
-        );
-        // Snapshot belongs to a different user — resolver must ignore it
-        final staleSnapshot = EntitlementSnapshotFactory.activePaidMonthly(
-          userId: 'different-user-id',
-        );
-        when(
-          () => mockRevenueCatService.entitlementSnapshot,
-        ).thenReturn(ValueNotifier(staleSnapshot));
-        when(
-          () => mockAuthService.authState,
-        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+      test(
+        'ignores stale snapshot for different user and falls back to DB status',
+        () async {
+          final user = UserFactory.create(
+            subscriptionStatus: SubscriptionStatus.free,
+          );
+          // Snapshot belongs to a different user, so resolution must ignore it.
+          final staleSnapshot = EntitlementSnapshotFactory.activePaidMonthly(
+            userId: 'different-user-id',
+          );
+          when(
+            () => mockRevenueCatService.entitlementSnapshot,
+          ).thenReturn(ValueNotifier(staleSnapshot));
+          when(
+            () => mockAuthService.authState,
+          ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
 
-        final vm = createViewModel();
-        addTearDown(vm.dispose);
+          final vm = createViewModel();
+          addTearDown(vm.dispose);
 
-        await vm.sendFeedback();
+          await vm.sendFeedback();
 
-        expect(launchCalls, hasLength(1));
-        final params = Uri.splitQueryString(launchCalls.first.$1.query);
-        final body = params['body']!;
-        expect(body, contains('Subscription: free'));
-        expect(body, isNot(contains('Subscription: premiumMonthly')));
-      });
+          expect(launchCalls, hasLength(1));
+          final params = Uri.splitQueryString(launchCalls.first.$1.query);
+          final body = params['body']!;
+          expect(body, contains('Subscription: free'));
+          expect(body, isNot(contains('Subscription: premiumMonthly')));
+        },
+      );
 
       test('completes normally when launch throws', () async {
         final user = UserFactory.create();
@@ -735,69 +744,73 @@ void main() {
         verify(() => mockRevenueCatService.restorePurchases()).called(1);
       });
 
-      test('shows success toast when restore succeeds with entitlement',
-          () async {
-        final user = UserFactory.create();
-        when(
-          () => mockAuthService.authState,
-        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
-        when(
-          () => mockRevenueCatService.restorePurchases(),
-        ).thenAnswer((_) async => true);
+      test(
+        'shows success toast when restore succeeds with entitlement',
+        () async {
+          final user = UserFactory.create();
+          when(
+            () => mockAuthService.authState,
+          ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+          when(
+            () => mockRevenueCatService.restorePurchases(),
+          ).thenAnswer((_) async => true);
 
-        final snapshot = EntitlementSnapshotFactory.activePaidMonthly(
-          userId: user.id,
-        );
-        when(
-          () => mockRevenueCatService.entitlementSnapshot,
-        ).thenReturn(ValueNotifier<EntitlementSnapshot?>(snapshot));
+          final snapshot = EntitlementSnapshotFactory.activePaidMonthly(
+            userId: user.id,
+          );
+          when(
+            () => mockRevenueCatService.entitlementSnapshot,
+          ).thenReturn(ValueNotifier<EntitlementSnapshot?>(snapshot));
 
-        final vm = createViewModel();
-        addTearDown(vm.dispose);
+          final vm = createViewModel();
+          addTearDown(vm.dispose);
 
-        await vm.restorePurchases();
+          await vm.restorePurchases();
 
-        final captured = verify(
-          () => mockNotifyService.setToastEvent(captureAny()),
-        ).captured;
-        expect(captured, hasLength(1));
-        expect(captured.first, isA<ToastEventSuccess>());
-        expect(
-          (captured.first as ToastEventSuccess).message,
-          'Purchases restored successfully',
-        );
-      });
+          final captured = verify(
+            () => mockNotifyService.setToastEvent(captureAny()),
+          ).captured;
+          expect(captured, hasLength(1));
+          expect(captured.first, isA<ToastEventSuccess>());
+          expect(
+            (captured.first as ToastEventSuccess).message,
+            'Purchases restored successfully',
+          );
+        },
+      );
 
-      test('shows info toast when restore succeeds without entitlement',
-          () async {
-        final user = UserFactory.create();
-        when(
-          () => mockAuthService.authState,
-        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
-        when(
-          () => mockRevenueCatService.restorePurchases(),
-        ).thenAnswer((_) async => true);
+      test(
+        'shows info toast when restore succeeds without entitlement',
+        () async {
+          final user = UserFactory.create();
+          when(
+            () => mockAuthService.authState,
+          ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+          when(
+            () => mockRevenueCatService.restorePurchases(),
+          ).thenAnswer((_) async => true);
 
-        // No entitlement after restore
-        when(
-          () => mockRevenueCatService.entitlementSnapshot,
-        ).thenReturn(ValueNotifier<EntitlementSnapshot?>(null));
+          // No entitlement after restore
+          when(
+            () => mockRevenueCatService.entitlementSnapshot,
+          ).thenReturn(ValueNotifier<EntitlementSnapshot?>(null));
 
-        final vm = createViewModel();
-        addTearDown(vm.dispose);
+          final vm = createViewModel();
+          addTearDown(vm.dispose);
 
-        await vm.restorePurchases();
+          await vm.restorePurchases();
 
-        final captured = verify(
-          () => mockNotifyService.setToastEvent(captureAny()),
-        ).captured;
-        expect(captured, hasLength(1));
-        expect(captured.first, isA<ToastEventInfo>());
-        expect(
-          (captured.first as ToastEventInfo).message,
-          'No previous purchases found',
-        );
-      });
+          final captured = verify(
+            () => mockNotifyService.setToastEvent(captureAny()),
+          ).captured;
+          expect(captured, hasLength(1));
+          expect(captured.first, isA<ToastEventInfo>());
+          expect(
+            (captured.first as ToastEventInfo).message,
+            'No previous purchases found',
+          );
+        },
+      );
 
       test('shows error toast when restore fails', () async {
         final user = UserFactory.create();
@@ -824,42 +837,44 @@ void main() {
         );
       });
 
-      test('double-tap guard: second call while restoring is ignored',
-          () async {
-        final user = UserFactory.create();
-        when(
-          () => mockAuthService.authState,
-        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+      test(
+        'double-tap guard: second call while restoring is ignored',
+        () async {
+          final user = UserFactory.create();
+          when(
+            () => mockAuthService.authState,
+          ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
 
-        final snapshot = EntitlementSnapshotFactory.activePaidMonthly(
-          userId: user.id,
-        );
-        when(
-          () => mockRevenueCatService.entitlementSnapshot,
-        ).thenReturn(ValueNotifier<EntitlementSnapshot?>(snapshot));
+          final snapshot = EntitlementSnapshotFactory.activePaidMonthly(
+            userId: user.id,
+          );
+          when(
+            () => mockRevenueCatService.entitlementSnapshot,
+          ).thenReturn(ValueNotifier<EntitlementSnapshot?>(snapshot));
 
-        // Use a completer to control when the restore completes
-        var callCount = 0;
-        when(
-          () => mockRevenueCatService.restorePurchases(),
-        ).thenAnswer((_) async {
-          callCount++;
-          // Simulate a slow restore
-          await Future<void>.delayed(Duration.zero);
-          return true;
-        });
+          // Use a completer to control when the restore completes
+          var callCount = 0;
+          when(
+            () => mockRevenueCatService.restorePurchases(),
+          ).thenAnswer((_) async {
+            callCount++;
+            // Simulate a slow restore
+            await Future<void>.delayed(Duration.zero);
+            return true;
+          });
 
-        final vm = createViewModel();
-        addTearDown(vm.dispose);
+          final vm = createViewModel();
+          addTearDown(vm.dispose);
 
-        // Fire two restores concurrently
-        final f1 = vm.restorePurchases();
-        final f2 = vm.restorePurchases();
-        await Future.wait([f1, f2]);
+          // Fire two restores concurrently
+          final f1 = vm.restorePurchases();
+          final f2 = vm.restorePurchases();
+          await Future.wait([f1, f2]);
 
-        // Only one call should have gone through
-        expect(callCount, 1);
-      });
+          // Only one call should have gone through
+          expect(callCount, 1);
+        },
+      );
 
       test('shows error toast when restore throws', () async {
         final user = UserFactory.create();
@@ -913,74 +928,76 @@ void main() {
       });
 
       test(
-          'shows info toast when snapshot belongs to different user (stale)',
-          () async {
-        final user = UserFactory.create();
-        when(
-          () => mockAuthService.authState,
-        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
-        when(
-          () => mockRevenueCatService.restorePurchases(),
-        ).thenAnswer((_) async => true);
+        'shows info toast when snapshot belongs to different user (stale)',
+        () async {
+          final user = UserFactory.create();
+          when(
+            () => mockAuthService.authState,
+          ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+          when(
+            () => mockRevenueCatService.restorePurchases(),
+          ).thenAnswer((_) async => true);
 
-        // Snapshot for a different user — should not count as entitled
-        final staleSnapshot = EntitlementSnapshotFactory.activePaidMonthly(
-          userId: 'different-user-id',
-        );
-        when(
-          () => mockRevenueCatService.entitlementSnapshot,
-        ).thenReturn(ValueNotifier<EntitlementSnapshot?>(staleSnapshot));
+          // Snapshot for a different user — should not count as entitled
+          final staleSnapshot = EntitlementSnapshotFactory.activePaidMonthly(
+            userId: 'different-user-id',
+          );
+          when(
+            () => mockRevenueCatService.entitlementSnapshot,
+          ).thenReturn(ValueNotifier<EntitlementSnapshot?>(staleSnapshot));
 
-        final vm = createViewModel();
-        addTearDown(vm.dispose);
+          final vm = createViewModel();
+          addTearDown(vm.dispose);
 
-        await vm.restorePurchases();
+          await vm.restorePurchases();
 
-        final captured = verify(
-          () => mockNotifyService.setToastEvent(captureAny()),
-        ).captured;
-        expect(captured, hasLength(1));
-        expect(captured.first, isA<ToastEventInfo>());
-        expect(
-          (captured.first as ToastEventInfo).message,
-          'No previous purchases found',
-        );
-      });
+          final captured = verify(
+            () => mockNotifyService.setToastEvent(captureAny()),
+          ).captured;
+          expect(captured, hasLength(1));
+          expect(captured.first, isA<ToastEventInfo>());
+          expect(
+            (captured.first as ToastEventInfo).message,
+            'No previous purchases found',
+          );
+        },
+      );
 
       test(
-          'shows info toast when restore succeeds but snapshot has no entitlement',
-          () async {
-        final user = UserFactory.create();
-        when(
-          () => mockAuthService.authState,
-        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
-        when(
-          () => mockRevenueCatService.restorePurchases(),
-        ).thenAnswer((_) async => true);
+        'shows info toast when restore succeeds but snapshot has no entitlement',
+        () async {
+          final user = UserFactory.create();
+          when(
+            () => mockAuthService.authState,
+          ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+          when(
+            () => mockRevenueCatService.restorePurchases(),
+          ).thenAnswer((_) async => true);
 
-        // Snapshot present but no entitlement
-        final snapshot = EntitlementSnapshotFactory.expiredTrial(
-          userId: user.id,
-        );
-        when(
-          () => mockRevenueCatService.entitlementSnapshot,
-        ).thenReturn(ValueNotifier<EntitlementSnapshot?>(snapshot));
+          // Snapshot present but no entitlement
+          final snapshot = EntitlementSnapshotFactory.expiredTrial(
+            userId: user.id,
+          );
+          when(
+            () => mockRevenueCatService.entitlementSnapshot,
+          ).thenReturn(ValueNotifier<EntitlementSnapshot?>(snapshot));
 
-        final vm = createViewModel();
-        addTearDown(vm.dispose);
+          final vm = createViewModel();
+          addTearDown(vm.dispose);
 
-        await vm.restorePurchases();
+          await vm.restorePurchases();
 
-        final captured = verify(
-          () => mockNotifyService.setToastEvent(captureAny()),
-        ).captured;
-        expect(captured, hasLength(1));
-        expect(captured.first, isA<ToastEventInfo>());
-        expect(
-          (captured.first as ToastEventInfo).message,
-          'No previous purchases found',
-        );
-      });
+          final captured = verify(
+            () => mockNotifyService.setToastEvent(captureAny()),
+          ).captured;
+          expect(captured, hasLength(1));
+          expect(captured.first, isA<ToastEventInfo>());
+          expect(
+            (captured.first as ToastEventInfo).message,
+            'No previous purchases found',
+          );
+        },
+      );
     });
 
     group('dispose', () {
