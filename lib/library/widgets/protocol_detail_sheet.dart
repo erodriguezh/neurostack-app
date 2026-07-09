@@ -192,32 +192,35 @@ class _CitationSection extends StatelessWidget {
 
     return Theme(
       data: context.theme.copyWith(dividerColor: Colors.transparent),
-      child: ExpansionTile(
-        tilePadding: EdgeInsets.zero,
-        childrenPadding: EdgeInsets.zero,
-        iconColor: semanticColors.inkSubtle,
-        collapsedIconColor: semanticColors.inkSubtle,
-        title: Text(
-          'Research citations',
-          style: context.theme.textTheme.bodyMedium?.copyWith(
-            color: semanticColors.ink,
-            fontWeight: FontWeight.w600,
+      child: Material(
+        type: MaterialType.transparency,
+        child: ExpansionTile(
+          tilePadding: EdgeInsets.zero,
+          childrenPadding: EdgeInsets.zero,
+          iconColor: semanticColors.inkSubtle,
+          collapsedIconColor: semanticColors.inkSubtle,
+          title: Text(
+            'Research citations',
+            style: context.theme.textTheme.bodyMedium?.copyWith(
+              color: semanticColors.ink,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-        ),
-        children: protocol.citations
-            .map(
-              (citation) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Text(
-                  citation.fullCitation,
-                  style: context.theme.textTheme.bodySmall?.copyWith(
-                    color: semanticColors.inkSubtle,
-                    height: 1.4,
+          children: protocol.citations
+              .map(
+                (citation) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Text(
+                    citation.fullCitation,
+                    style: context.theme.textTheme.bodySmall?.copyWith(
+                      color: semanticColors.inkSubtle,
+                      height: 1.4,
+                    ),
                   ),
                 ),
-              ),
-            )
-            .toList(),
+              )
+              .toList(),
+        ),
       ),
     );
   }

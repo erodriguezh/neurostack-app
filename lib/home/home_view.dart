@@ -18,12 +18,15 @@ import 'package:neurostack/features/protocol/domain/repositories/protocol_reposi
 import 'package:neurostack/features/session/data/data_sources/session_local_data_source.dart';
 import 'package:neurostack/features/session/domain/repositories/session_repository.dart';
 import 'package:neurostack/features/session/presentation/log_session_modal.dart';
+import 'package:neurostack/features/user/domain/entities/user.dart';
+import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
 import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:neurostack/paywall/data/trial_expiration_decision_store.dart';
 import 'package:neurostack/paywall/data/trial_reminder_service.dart';
 import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 import 'package:neurostack/paywall/domain/trial_expiry_policy.dart';
+import 'package:neurostack/paywall/widgets/protocol_selection_modal.dart';
 import 'package:neurostack/paywall/widgets/trial_expired_modal.dart';
 import 'package:neurostack/paywall/widgets/trial_reminder_alert.dart';
 import 'package:neurostack/home/home_state.dart';
@@ -301,7 +304,7 @@ class _HomeViewState extends State<HomeView> {
     if (state.showDeactivationModal && !_showingDeactivationModal) {
       _showingDeactivationModal = true;
       WidgetsBinding.instance.addPostFrameCallback((_) async {
-        await _showDeactivationDialog();
+        await _showProtocolSelectionFromState();
         _showingDeactivationModal = false;
         if (!mounted) return;
         _viewModel.acknowledgeDeactivationModal();
@@ -352,7 +355,6 @@ class _HomeViewState extends State<HomeView> {
       },
     );
 
-    // TODO(analytics): track review prompt event
     // Fire-and-forget: decouple the 2-second delayed review prompt from
     // the modal lifecycle so _showingLogSessionModal resets immediately.
     if (sessionCountFuture != null) {
@@ -403,12 +405,16 @@ class _HomeViewState extends State<HomeView> {
           await _viewModel.markTrialExpiredDecisionResolved();
           return;
         case TrialExpiredChoice.continueWithFree:
-          final success = await _viewModel.handleUseFreeTier();
+          final user = _viewModel.state.value.user;
+          final freeLimit = SubscriptionStatus.free.protocolLimit ?? 2;
+          final success = user != null && user.activeProtocolCount > freeLimit
+              ? await _runStackTrimFlow(user)
+              : await _viewModel.handleUseFreeTier();
           if (success) {
             await _viewModel.markTrialExpiredDecisionResolved();
           }
-          // If success=false, deactivation modal shown or save failed.
-          // Either way, we exit the loop; user can retry via banner/settings.
+          // If success=false, the decision remains unresolved so the modal can
+          // retrigger on next launch.
           return;
         case null:
           // Modal dismissed without choice (shouldn't happen with barrierDismissible: false)
@@ -441,28 +447,62 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  Future<void> _showDeactivationDialog() async {
-    final semanticColors = context.semanticColors;
+  Future<bool> _runStackTrimFlow(User user) async {
+    var attempts = 0;
+    User? currentUser = user;
+    List<String>? initialSelection;
 
-    await showDialog<void>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: semanticColors.surfaceElevated,
-          surfaceTintColor: Colors.transparent,
-          title: const Text('Choose 2 Protocols to Keep'),
-          content: const Text(
-            'Deactivation flow coming soon. You will be able to pick two '
-            'protocols to keep active.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Close'),
-            ),
-          ],
-        );
-      },
+    while (attempts < 2 && currentUser != null) {
+      final keepIds = await _selectProtocolsToKeep(
+        user: currentUser,
+        initialSelection: initialSelection,
+      );
+      if (keepIds == null) {
+        return false;
+      }
+
+      final success = await _viewModel.confirmProtocolDeactivation(keepIds);
+      if (success) {
+        return true;
+      }
+
+      attempts += 1;
+      initialSelection = keepIds;
+      currentUser = _viewModel.state.value.user;
+    }
+
+    return false;
+  }
+
+  Future<void> _showProtocolSelectionFromState() async {
+    final keepIds = await _selectProtocolsToKeep();
+    if (keepIds == null) {
+      return;
+    }
+
+    await _viewModel.confirmProtocolDeactivation(keepIds);
+  }
+
+  Future<List<String>?> _selectProtocolsToKeep({
+    User? user,
+    List<String>? initialSelection,
+  }) async {
+    final currentUser = user ?? _viewModel.state.value.user;
+    if (currentUser == null) {
+      locator<NotifyService>().setToastEvent(
+        ToastEventError(message: 'Unable to identify user'),
+      );
+      return null;
+    }
+
+    final items = await _viewModel.activeProtocolSelectionItems(currentUser);
+    if (!mounted) return null;
+
+    final keepIds = await showProtocolSelectionModal(
+      context,
+      items: items,
+      initialSelection: initialSelection,
     );
+    return keepIds;
   }
 }
