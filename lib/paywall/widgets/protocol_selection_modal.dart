@@ -114,7 +114,6 @@ class _ProtocolSelectionModalState extends State<ProtocolSelectionModal> {
 
   @override
   Widget build(BuildContext context) {
-    final kitColors = context.kitColors;
     final textStyles = context.textStyles;
     final bottomInset = MediaQuery.of(context).padding.bottom;
 
@@ -129,7 +128,6 @@ class _ProtocolSelectionModalState extends State<ProtocolSelectionModal> {
               valueListenable: _viewModel.selectedProtocolIds,
               builder: (context, selectedIds, child) {
                 final selectedCount = selectedIds.length;
-                final complete = selectedCount == _selectionLimit;
 
                 return Column(
                   children: [
@@ -146,52 +144,8 @@ class _ProtocolSelectionModalState extends State<ProtocolSelectionModal> {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            curve: CustomCurves.easeOut,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: complete
-                                  ? kitColors.brandSky.withValues(alpha: 0.12)
-                                  : Colors.white.withValues(alpha: 0.05),
-                              borderRadius: BorderRadius.circular(999),
-                              border: Border.all(
-                                color: complete
-                                    ? kitColors.brandSky.withValues(alpha: 0.28)
-                                    : Colors.white.withValues(alpha: 0.08),
-                              ),
-                            ),
-                            child: DefaultTextStyle(
-                              style: GoogleFonts.jetBrainsMono(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                letterSpacing: 1.2,
-                                color: complete
-                                    ? kitColors.brandSky
-                                    : Colors.white.withValues(alpha: 0.5),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  AnimatedSwitcher(
-                                    key: const Key(
-                                      'protocol-selection-counter-switcher',
-                                    ),
-                                    duration: const Duration(milliseconds: 200),
-                                    switchInCurve: CustomCurves.easeOut,
-                                    switchOutCurve: CustomCurves.easeOut,
-                                    child: Text(
-                                      '$selectedCount',
-                                      key: ValueKey(selectedCount),
-                                    ),
-                                  ),
-                                  const Text('/$_selectionLimit SELECTED'),
-                                ],
-                              ),
-                            ),
+                          _SelectionCounter(
+                            selectedCount: selectedCount,
                           ),
                         ],
                       ),
@@ -240,6 +194,64 @@ class _ProtocolSelectionModalState extends State<ProtocolSelectionModal> {
   }
 }
 
+class _SelectionCounter extends StatelessWidget {
+  const _SelectionCounter({required this.selectedCount});
+
+  final int selectedCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final kitColors = context.kitColors;
+    final animationDuration = context.durations.duration200;
+    final complete = selectedCount == _selectionLimit;
+
+    return AnimatedContainer(
+      duration: animationDuration,
+      curve: CustomCurves.easeOut,
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 6,
+      ),
+      decoration: BoxDecoration(
+        color: complete
+            ? kitColors.brandSky.withValues(alpha: 0.12)
+            : Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: complete
+              ? kitColors.brandSky.withValues(alpha: 0.28)
+              : Colors.white.withValues(alpha: 0.08),
+        ),
+      ),
+      child: DefaultTextStyle(
+        style: GoogleFonts.jetBrainsMono(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 1.2,
+          color: complete
+              ? kitColors.brandSky
+              : Colors.white.withValues(alpha: 0.5),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedSwitcher(
+              duration: animationDuration,
+              switchInCurve: CustomCurves.easeOut,
+              switchOutCurve: CustomCurves.easeOut,
+              child: Text(
+                '$selectedCount',
+                key: ValueKey(selectedCount),
+              ),
+            ),
+            const Text('/$_selectionLimit SELECTED'),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _ProtocolSelectionRow extends StatelessWidget {
   const _ProtocolSelectionRow({
     required this.item,
@@ -254,6 +266,7 @@ class _ProtocolSelectionRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kitColors = context.kitColors;
+    final animationDuration = context.durations.duration200;
     final borderColor = selected
         ? kitColors.brandSky.withValues(alpha: 0.3)
         : Colors.white.withValues(alpha: 0.1);
@@ -264,7 +277,7 @@ class _ProtocolSelectionRow extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         onTap: onTap,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
+          duration: animationDuration,
           curve: CustomCurves.easeOut,
           constraints: const BoxConstraints(minHeight: 76),
           padding: const EdgeInsets.all(20),
@@ -284,11 +297,11 @@ class _ProtocolSelectionRow extends StatelessWidget {
           child: Row(
             children: [
               AnimatedScale(
-                duration: const Duration(milliseconds: 200),
+                duration: animationDuration,
                 curve: CustomCurves.easeOut,
                 scale: selected ? 1.05 : 1,
                 child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
+                  duration: animationDuration,
                   curve: CustomCurves.easeOut,
                   width: 26,
                   height: 26,
@@ -389,9 +402,13 @@ class _ConfirmButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kitColors = context.kitColors;
+    final animationDuration = context.durations.duration300;
+    final foregroundColor = enabled
+        ? _modalBackgroundColor
+        : Colors.white.withValues(alpha: 0.3);
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
+      duration: animationDuration,
       curve: CustomCurves.easeOut,
       width: double.infinity,
       height: 56,
@@ -417,19 +434,15 @@ class _ConfirmButton extends StatelessWidget {
       child: TextButton(
         onPressed: enabled ? onPressed : null,
         style: TextButton.styleFrom(
-          foregroundColor: enabled
-              ? _modalBackgroundColor
-              : Colors.white.withValues(alpha: 0.3),
+          foregroundColor: foregroundColor,
           disabledForegroundColor: Colors.white.withValues(alpha: 0.3),
           shape: const StadiumBorder(),
         ),
         child: AnimatedDefaultTextStyle(
-          duration: const Duration(milliseconds: 300),
+          duration: animationDuration,
           curve: CustomCurves.easeOut,
           style: GoogleFonts.inter(
-            color: enabled
-                ? _modalBackgroundColor
-                : Colors.white.withValues(alpha: 0.3),
+            color: foregroundColor,
             fontSize: 15,
             fontWeight: FontWeight.w600,
           ),
