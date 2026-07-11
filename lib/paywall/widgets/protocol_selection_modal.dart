@@ -8,6 +8,7 @@ import 'package:neurostack/home/home_state.dart';
 
 const _selectionLimit = 2;
 const _modalBackgroundColor = Color(0xFF030303);
+const _confirmSelectionLabel = 'Confirm Selection';
 
 class ProtocolSelectionViewModel {
   ProtocolSelectionViewModel({
@@ -112,9 +113,15 @@ class _ProtocolSelectionModalState extends State<ProtocolSelectionModal> {
     super.dispose();
   }
 
+  void _confirmSelection() {
+    final result = _viewModel.confirm();
+    if (result != null) {
+      Navigator.of(context).pop(result);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final kitColors = context.kitColors;
     final textStyles = context.textStyles;
     final bottomInset = MediaQuery.of(context).padding.bottom;
 
@@ -130,9 +137,6 @@ class _ProtocolSelectionModalState extends State<ProtocolSelectionModal> {
               child: ValueListenableBuilder<Set<String>>(
                 valueListenable: _viewModel.selectedProtocolIds,
                 builder: (context, selectedIds, child) {
-                  final selectedCount = selectedIds.length;
-                  final complete = selectedCount == _selectionLimit;
-
                   return Column(
                     children: [
                       Padding(
@@ -148,44 +152,8 @@ class _ProtocolSelectionModalState extends State<ProtocolSelectionModal> {
                               ),
                             ),
                             const SizedBox(height: 12),
-                            Semantics(
-                              liveRegion: true,
-                              label: '$selectedCount/$_selectionLimit selected',
-                              excludeSemantics: true,
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
-                                curve: Curves.easeOut,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: complete
-                                      ? kitColors.brandSky.withValues(
-                                          alpha: 0.12,
-                                        )
-                                      : Colors.white.withValues(alpha: 0.05),
-                                  borderRadius: BorderRadius.circular(999),
-                                  border: Border.all(
-                                    color: complete
-                                        ? kitColors.brandSky.withValues(
-                                            alpha: 0.28,
-                                          )
-                                        : Colors.white.withValues(alpha: 0.08),
-                                  ),
-                                ),
-                                child: Text(
-                                  '$selectedCount/$_selectionLimit SELECTED',
-                                  style: GoogleFonts.jetBrainsMono(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    letterSpacing: 1.2,
-                                    color: complete
-                                        ? kitColors.brandSky
-                                        : Colors.white.withValues(alpha: 0.5),
-                                  ),
-                                ),
-                              ),
+                            _SelectionCounter(
+                              selectedCount: selectedIds.length,
                             ),
                           ],
                         ),
@@ -215,13 +183,7 @@ class _ProtocolSelectionModalState extends State<ProtocolSelectionModal> {
                         ),
                         child: _ConfirmButton(
                           enabled: _viewModel.canConfirm,
-                          onPressed: () {
-                            final result = _viewModel.confirm();
-                            if (result == null) {
-                              return;
-                            }
-                            Navigator.of(context).pop(result);
-                          },
+                          onPressed: _confirmSelection,
                         ),
                       ),
                     ],
@@ -229,6 +191,52 @@ class _ProtocolSelectionModalState extends State<ProtocolSelectionModal> {
                 },
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SelectionCounter extends StatelessWidget {
+  const _SelectionCounter({required this.selectedCount});
+
+  final int selectedCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final kitColors = context.kitColors;
+    final isSelectionComplete = selectedCount == _selectionLimit;
+    final selectionStatus = '$selectedCount/$_selectionLimit';
+
+    return Semantics(
+      liveRegion: true,
+      label: '$selectionStatus selected',
+      excludeSemantics: true,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelectionComplete
+              ? kitColors.brandSky.withValues(alpha: 0.12)
+              : Colors.white.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: isSelectionComplete
+                ? kitColors.brandSky.withValues(alpha: 0.28)
+                : Colors.white.withValues(alpha: 0.08),
+          ),
+        ),
+        child: Text(
+          '$selectionStatus SELECTED',
+          style: GoogleFonts.jetBrainsMono(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 1.2,
+            color: isSelectionComplete
+                ? kitColors.brandSky
+                : Colors.white.withValues(alpha: 0.5),
           ),
         ),
       ),
@@ -250,6 +258,7 @@ class _ProtocolSelectionRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kitColors = context.kitColors;
+    final sessionSummary = '${item.sessionCount} sessions logged';
     final borderColor = selected
         ? kitColors.brandSky.withValues(alpha: 0.3)
         : Colors.white.withValues(alpha: 0.1);
@@ -258,7 +267,7 @@ class _ProtocolSelectionRow extends StatelessWidget {
       button: true,
       selected: selected,
       label: item.name,
-      value: '${item.categoryLabel}, ${item.sessionCount} sessions logged',
+      value: '${item.categoryLabel}, $sessionSummary',
       onTap: onTap,
       excludeSemantics: true,
       child: Material(
@@ -363,7 +372,7 @@ class _ProtocolSelectionRow extends StatelessWidget {
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            '${item.sessionCount} sessions logged',
+                            sessionSummary,
                             style: GoogleFonts.inter(
                               color: Colors.white.withValues(alpha: 0.4),
                               fontSize: 12,
@@ -400,7 +409,7 @@ class _ConfirmButton extends StatelessWidget {
     return Semantics(
       button: true,
       enabled: enabled,
-      label: 'Confirm Selection',
+      label: _confirmSelectionLabel,
       onTap: enabled ? onPressed : null,
       excludeSemantics: true,
       child: AnimatedContainer(
@@ -437,7 +446,7 @@ class _ConfirmButton extends StatelessWidget {
             shape: const StadiumBorder(),
           ),
           child: Text(
-            'Confirm Selection',
+            _confirmSelectionLabel,
             style: GoogleFonts.inter(
               fontSize: 15,
               fontWeight: FontWeight.w600,
