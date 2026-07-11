@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
 import 'package:neurostack/home/home_state.dart';
@@ -48,16 +49,90 @@ void main() {
   }
 
   group('ProtocolSelectionViewModel', () {
-    test('defaultsToFirstTwoProtocolsInStackOrder', () {
-      final viewModel = ProtocolSelectionViewModel(items: items);
-      addTearDown(viewModel.dispose);
+    final preselectionCases = [
+      (
+        description: 'distinct counts',
+        items: [
+          const ProtocolSelectionItem(
+            protocolId: 'first',
+            name: 'First',
+            categoryLabel: 'MIND',
+            sessionCount: 1,
+          ),
+          const ProtocolSelectionItem(
+            protocolId: 'second',
+            name: 'Second',
+            categoryLabel: 'SLEEP',
+            sessionCount: 8,
+          ),
+          const ProtocolSelectionItem(
+            protocolId: 'third',
+            name: 'Third',
+            categoryLabel: 'EXERCISE',
+            sessionCount: 5,
+          ),
+        ],
+        expected: {'second', 'third'},
+      ),
+      (
+        description: 'counts are tied',
+        items: [
+          const ProtocolSelectionItem(
+            protocolId: 'first',
+            name: 'First',
+            categoryLabel: 'MIND',
+            sessionCount: 4,
+          ),
+          const ProtocolSelectionItem(
+            protocolId: 'second',
+            name: 'Second',
+            categoryLabel: 'SLEEP',
+            sessionCount: 4,
+          ),
+          const ProtocolSelectionItem(
+            protocolId: 'third',
+            name: 'Third',
+            categoryLabel: 'EXERCISE',
+            sessionCount: 4,
+          ),
+        ],
+        expected: {'first', 'second'},
+      ),
+      (
+        description: 'all counts are zero',
+        items: [
+          const ProtocolSelectionItem(
+            protocolId: 'first',
+            name: 'First',
+            categoryLabel: 'MIND',
+            sessionCount: 0,
+          ),
+          const ProtocolSelectionItem(
+            protocolId: 'second',
+            name: 'Second',
+            categoryLabel: 'SLEEP',
+            sessionCount: 0,
+          ),
+          const ProtocolSelectionItem(
+            protocolId: 'third',
+            name: 'Third',
+            categoryLabel: 'EXERCISE',
+            sessionCount: 0,
+          ),
+        ],
+        expected: {'first', 'second'},
+      ),
+    ];
 
-      expect(viewModel.selectedProtocolIds.value, {
-        'protocol-1',
-        'protocol-2',
+    for (final testCase in preselectionCases) {
+      test('preselects top protocols when ${testCase.description}', () {
+        final viewModel = ProtocolSelectionViewModel(items: testCase.items);
+        addTearDown(viewModel.dispose);
+
+        expect(viewModel.selectedProtocolIds.value, testCase.expected);
+        expect(viewModel.canConfirm, isTrue);
       });
-      expect(viewModel.canConfirm, isTrue);
-    });
+    }
 
     test('respectsInitialSelection', () {
       final viewModel = ProtocolSelectionViewModel(
@@ -111,6 +186,20 @@ void main() {
     });
 
     testWidgets('hardCapThirdTapDoesNotChangeSelection', (tester) async {
+      final hapticCalls = <MethodCall>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          hapticCalls.add(call);
+          return null;
+        },
+      );
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        ),
+      );
       await pumpModal(tester);
 
       await tester.tap(find.text('Protocol Three'));
@@ -118,6 +207,55 @@ void main() {
 
       expect(find.text('Protocol Three'), findsOneWidget);
       expect(find.text('2/2 SELECTED'), findsOneWidget);
+      expect(
+        hapticCalls,
+        contains(
+          isA<MethodCall>()
+              .having(
+                (call) => call.method,
+                'method',
+                'HapticFeedback.vibrate',
+              )
+              .having(
+                (call) => call.arguments,
+                'arguments',
+                'HapticFeedbackType.lightImpact',
+              ),
+        ),
+      );
+    });
+
+    testWidgets('toggleAndConfirmEmitInteractionHaptics', (tester) async {
+      final hapticTypes = <Object?>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method == 'HapticFeedback.vibrate') {
+            hapticTypes.add(call.arguments);
+          }
+          return null;
+        },
+      );
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        ),
+      );
+      await pumpModal(tester);
+
+      await tester.tap(find.text('Protocol One'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Protocol Three'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Confirm Selection'));
+      await tester.pumpAndSettle();
+
+      expect(hapticTypes, [
+        'HapticFeedbackType.selectionClick',
+        'HapticFeedbackType.selectionClick',
+        'HapticFeedbackType.mediumImpact',
+      ]);
     });
 
     testWidgets('showDialogReturnsConfirmedSelection', (tester) async {

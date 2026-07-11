@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
@@ -25,9 +26,9 @@ class ProtocolSelectionViewModel {
 
   bool get canConfirm => selectedProtocolIds.value.length == _selectionLimit;
 
-  void toggle(String protocolId) {
+  bool toggle(String protocolId) {
     if (!_activeProtocolIds.contains(protocolId)) {
-      return;
+      return false;
     }
 
     final next = Set<String>.from(selectedProtocolIds.value);
@@ -35,11 +36,12 @@ class ProtocolSelectionViewModel {
       next.remove(protocolId);
     } else {
       if (next.length >= _selectionLimit) {
-        return;
+        return false;
       }
       next.add(protocolId);
     }
     selectedProtocolIds.value = Set<String>.unmodifiable(next);
+    return true;
   }
 
   List<String>? confirm() {
@@ -58,8 +60,18 @@ class ProtocolSelectionViewModel {
       return Set<String>.unmodifiable(seeded);
     }
 
+    final rankedItems = _items.indexed.toList()
+      ..sort((left, right) {
+        final countComparison = right.$2.sessionCount.compareTo(
+          left.$2.sessionCount,
+        );
+        return countComparison != 0
+            ? countComparison
+            : left.$1.compareTo(right.$1);
+      });
+
     return Set<String>.unmodifiable(
-      _items.take(_selectionLimit).map((item) => item.protocolId),
+      rankedItems.take(_selectionLimit).map((entry) => entry.$2.protocolId),
     );
   }
 
@@ -188,7 +200,16 @@ class _ProtocolSelectionModalState extends State<ProtocolSelectionModal> {
                           return _ProtocolSelectionRow(
                             item: item,
                             selected: selectedIds.contains(item.protocolId),
-                            onTap: () => _viewModel.toggle(item.protocolId),
+                            onTap: () {
+                              final changed = _viewModel.toggle(
+                                item.protocolId,
+                              );
+                              if (changed) {
+                                HapticFeedback.selectionClick();
+                              } else {
+                                HapticFeedback.lightImpact();
+                              }
+                            },
                           );
                         },
                       ),
@@ -207,6 +228,7 @@ class _ProtocolSelectionModalState extends State<ProtocolSelectionModal> {
                           if (result == null) {
                             return;
                           }
+                          HapticFeedback.mediumImpact();
                           Navigator.of(context).pop(result);
                         },
                       ),
