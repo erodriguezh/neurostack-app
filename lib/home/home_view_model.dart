@@ -5,6 +5,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:logging/logging.dart';
 import 'package:neurostack/core/abstractions/connectivity_listener_mixin.dart';
 import 'package:neurostack/core/abstractions/entitlement_listener_mixin.dart';
+import 'package:neurostack/core/abstractions/premium_aware_view_model_mixin.dart';
 import 'package:neurostack/core/failures/domain_failure.dart';
 import 'package:neurostack/core/utils/auth_helpers.dart' as auth;
 import 'package:neurostack/core/utils/connectivity/connectivity_service.dart';
@@ -15,6 +16,7 @@ import 'package:neurostack/core/utils/internal_notification/toast/toast_event.da
 import 'package:neurostack/core/utils/navigation/route_data.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
+import 'package:neurostack/features/auth/data/cached_user_store.dart';
 import 'package:neurostack/features/protocol/domain/entities/protocol.dart';
 import 'package:neurostack/features/protocol/domain/repositories/protocol_repository.dart';
 import 'package:neurostack/features/session/data/data_sources/session_local_data_source.dart';
@@ -31,10 +33,13 @@ import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:neurostack/paywall/domain/entitlement_snapshot.dart';
 import 'package:neurostack/paywall/data/trial_expiration_decision_store.dart';
 import 'package:neurostack/paywall/data/trial_reminder_service.dart';
-import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 import 'package:neurostack/paywall/domain/trial_expiry_policy.dart';
 
-class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
+class HomeViewModel
+    with
+        EntitlementListenerMixin,
+        PremiumAwareViewModelMixin,
+        ConnectivityListenerMixin {
   final Logger _logger = Logger('Home');
 
   HomeViewModel({
@@ -46,7 +51,6 @@ class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
     required SessionRepository sessionRepository,
     required SessionLocalDataSource sessionLocalDataSource,
     required ConnectivityService connectivityService,
-    required SubscriptionStatusResolver subscriptionStatusResolver,
     required TrialExpiryPolicy trialExpiryPolicy,
     required RevenueCatService revenueCatService,
     required TrialReminderService trialReminderService,
@@ -60,7 +64,6 @@ class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
        _sessionRepository = sessionRepository,
        _sessionLocalDataSource = sessionLocalDataSource,
        _connectivityService = connectivityService,
-       _resolver = subscriptionStatusResolver,
        _trialExpiryPolicy = trialExpiryPolicy,
        _revenueCatService = revenueCatService,
        _trialReminderService = trialReminderService,
@@ -69,7 +72,9 @@ class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
            tabCoordinator ??
            HomeBottomTabCoordinator(
              routerService: routerService,
-           );
+           ) {
+    initPremiumAwareness();
+  }
 
   final NotifyService _notifyService;
   final RouterService _routerService;
@@ -79,7 +84,6 @@ class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
   final SessionRepository _sessionRepository;
   final SessionLocalDataSource _sessionLocalDataSource;
   final ConnectivityService _connectivityService;
-  final SubscriptionStatusResolver _resolver;
   final TrialExpiryPolicy _trialExpiryPolicy;
   final RevenueCatService _revenueCatService;
   final TrialReminderService _trialReminderService;
@@ -99,10 +103,17 @@ class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
   RevenueCatService get entitlementListenerService => _revenueCatService;
 
   @override
+  AuthService get premiumAuthService => _authService;
+
+  @override
+  CachedUserStore? get premiumCachedUserStore => null;
+
+  @override
   ConnectivityService get connectivityListenerService => _connectivityService;
 
   @override
   void onEntitlementChanged() {
+    super.onEntitlementChanged();
     _logger.fine('Entitlement changed, refreshing home');
     refresh();
   }
@@ -176,7 +187,10 @@ class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
     }
 
     final now = DateTime.now();
-    final result = user.canLogSession(protocolId);
+    final result = user.canLogSession(
+      protocolId,
+      limit: entitlement.value.protocolLimit,
+    );
 
     if (result.isLeft()) {
       final failure = result.getLeft().getOrElse(
@@ -247,7 +261,7 @@ class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
       return false;
     }
 
-    final freeLimit = SubscriptionStatus.free.protocolLimit ?? 2;
+    final freeLimit = SubscriptionStatus.free.protocolLimit!;
     if (user.activeProtocolCount > freeLimit) {
       state.value = state.value.copyWith(showDeactivationModal: true);
       return false;
@@ -332,14 +346,9 @@ class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
     if (user == null) return;
 
     // Persist the current effective status so we don't re-trigger on future launches
-    final snapshot = _revenueCatService.entitlementSnapshot.value;
-    final effectiveStatus = _resolver.resolveEffectiveStatus(
-      user: user,
-      snapshot: snapshot,
-    );
     await _trialExpirationDecisionStore?.saveLastSeenStatus(
       userId: user.id,
-      status: effectiveStatus,
+      status: entitlement.value.effectiveStatus,
     );
   }
 
@@ -351,12 +360,8 @@ class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
   /// Note: This is a synchronous check of current state. The full modal
   /// trigger logic including status transition detection is in
   /// [_maybeTriggerExpiredModal].
-  bool isTrialOrPremiumExpired(User user) {
-    final snapshot = _revenueCatService.entitlementSnapshot.value;
-    final effectiveStatus = _resolver.resolveEffectiveStatus(
-      user: user,
-      snapshot: snapshot,
-    );
+  bool get isTrialOrPremiumExpired {
+    final effectiveStatus = entitlement.value.effectiveStatus;
 
     // Check for expired states
     return effectiveStatus == SubscriptionStatus.expired ||
@@ -414,6 +419,7 @@ class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
   void dispose() {
     disposeConnectivityListener();
     disposeEntitlementListener();
+    disposePremiumAwareness();
     state.dispose();
   }
 
@@ -611,15 +617,6 @@ class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
     return loggedToday;
   }
 
-  // NOTE: Snapshot scoping (`_scopedSnapshot`) was intentionally removed.
-  // Cross-user safety is guaranteed by two independent invariants:
-  //   1. RevenueCatService only sets entitlementSnapshot.value when
-  //      snapshot.appUserId == _identifiedUserId (see its doc comment).
-  //   2. SubscriptionStatusResolver.resolveEffectiveStatus checks
-  //      snapshot.isForUser(user.id) internally and falls back to DB.
-  // If either invariant changes, snapshot scoping should be reintroduced
-  // (e.g., in EntitlementListenerMixin).
-
   Future<HomeViewState> _maybeTriggerExpiredModal(
     HomeViewState state,
     User user,
@@ -637,10 +634,7 @@ class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
     final lastSeenStatus = await _trialExpirationDecisionStore
         ?.getLastSeenStatus(user.id);
 
-    final effectiveStatus = _resolver.resolveEffectiveStatus(
-      user: user,
-      snapshot: snapshot,
-    );
+    final effectiveStatus = entitlement.value.effectiveStatus;
 
     final shouldShowExpiredTrialModal = _trialExpiryPolicy
         .shouldShowExpiredModal(
@@ -741,12 +735,9 @@ class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
 
     final user = next.user!;
 
-    // Use resolver to get effective status (RC or DB fallback)
     final snapshot = _revenueCatService.entitlementSnapshot.value;
-    final effectiveStatus = _resolver.resolveEffectiveStatus(
-      user: user,
-      snapshot: snapshot,
-    );
+    final resolvedEntitlement = entitlement.value;
+    final effectiveStatus = resolvedEntitlement.effectiveStatus;
 
     switch (effectiveStatus) {
       case SubscriptionStatus.trial:
@@ -784,7 +775,7 @@ class HomeViewModel with EntitlementListenerMixin, ConnectivityListenerMixin {
           isTappable: true,
         );
       case SubscriptionStatus.free:
-        final limit = effectiveStatus.protocolLimit ?? user.activeProtocolCount;
+        final limit = resolvedEntitlement.protocolLimit!;
         return HomeBannerModel(
           type: HomeBannerType.free,
           message: '${user.activeProtocolCount}/$limit active',

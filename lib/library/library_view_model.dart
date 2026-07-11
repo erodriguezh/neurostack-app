@@ -3,6 +3,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:logging/logging.dart';
 import 'package:neurostack/core/abstractions/connectivity_listener_mixin.dart';
 import 'package:neurostack/core/abstractions/entitlement_listener_mixin.dart';
+import 'package:neurostack/core/abstractions/premium_aware_view_model_mixin.dart';
 import 'package:neurostack/core/failures/domain_failure.dart';
 import 'package:neurostack/core/models/home_bottom_tab.dart';
 import 'package:neurostack/core/utils/auth_helpers.dart' as auth;
@@ -22,18 +23,19 @@ import 'package:neurostack/features/protocol/domain/repositories/protocol_reposi
 import 'package:neurostack/features/session/domain/entities/session.dart';
 import 'package:neurostack/features/session/domain/repositories/session_repository.dart';
 import 'package:neurostack/features/user/domain/entities/user.dart';
-import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
 import 'package:neurostack/features/user/domain/failures/user_failures.dart';
 import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
 import 'package:neurostack/home/home_bottom_tab_coordinator.dart';
 import 'package:neurostack/library/library_state.dart';
 import 'package:neurostack/library/library_stats.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
-import 'package:neurostack/paywall/domain/entitlement_snapshot.dart';
-import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
+import 'package:neurostack/paywall/domain/entitlement.dart';
 
 class LibraryViewModel
-    with EntitlementListenerMixin, ConnectivityListenerMixin {
+    with
+        EntitlementListenerMixin,
+        PremiumAwareViewModelMixin,
+        ConnectivityListenerMixin {
   final Logger _logger = Logger('Library');
 
   LibraryViewModel({
@@ -44,7 +46,6 @@ class LibraryViewModel
     required ProtocolRepository protocolRepository,
     required SessionRepository sessionRepository,
     required ConnectivityService connectivityService,
-    required SubscriptionStatusResolver subscriptionStatusResolver,
     required RevenueCatService revenueCatService,
     CachedUserStore? cachedUserStore,
     CachedProtocolStore? cachedProtocolStore,
@@ -56,7 +57,6 @@ class LibraryViewModel
        _protocolRepository = protocolRepository,
        _sessionRepository = sessionRepository,
        _connectivityService = connectivityService,
-       _resolver = subscriptionStatusResolver,
        _revenueCatService = revenueCatService,
        _cachedUserStore = cachedUserStore,
        _cachedProtocolStore = cachedProtocolStore,
@@ -64,7 +64,9 @@ class LibraryViewModel
            tabCoordinator ??
            HomeBottomTabCoordinator(
              routerService: routerService,
-           );
+           ) {
+    initPremiumAwareness();
+  }
 
   final NotifyService _notifyService;
   final RouterService _routerService;
@@ -73,7 +75,6 @@ class LibraryViewModel
   final ProtocolRepository _protocolRepository;
   final SessionRepository _sessionRepository;
   final ConnectivityService _connectivityService;
-  final SubscriptionStatusResolver _resolver;
   final RevenueCatService _revenueCatService;
   final CachedUserStore? _cachedUserStore;
   final CachedProtocolStore? _cachedProtocolStore;
@@ -95,10 +96,17 @@ class LibraryViewModel
   RevenueCatService get entitlementListenerService => _revenueCatService;
 
   @override
+  AuthService get premiumAuthService => _authService;
+
+  @override
+  CachedUserStore? get premiumCachedUserStore => _cachedUserStore;
+
+  @override
   ConnectivityService get connectivityListenerService => _connectivityService;
 
   @override
   void onEntitlementChanged() {
+    super.onEntitlementChanged();
     _logger.fine('Entitlement changed, refreshing library');
     refresh();
   }
@@ -117,11 +125,10 @@ class LibraryViewModel
       if (_cachedUser != null &&
           _cachedProtocols.isNotEmpty &&
           _cachedProtocolsUserId == _cachedUser!.id) {
-        final snapshot = _revenueCatService.entitlementSnapshot.value;
         final cards = _buildCards(
           _cachedUser!,
           _cachedProtocols,
-          snapshot: snapshot,
+          resolvedEntitlement: entitlement.value,
           isOffline: true,
         );
         final sections = _buildSections(cards);
@@ -178,7 +185,10 @@ class LibraryViewModel
       return;
     }
 
-    final result = user.canLogSession(protocolId);
+    final result = user.canLogSession(
+      protocolId,
+      limit: entitlement.value.protocolLimit,
+    );
 
     if (result.isLeft()) {
       final failure = result.getLeft().getOrElse(
@@ -207,7 +217,10 @@ class LibraryViewModel
       return;
     }
 
-    final result = user.activateProtocol(protocolId);
+    final result = user.activateProtocol(
+      protocolId,
+      limit: entitlement.value.protocolLimit,
+    );
 
     if (result.isLeft()) {
       final failure = result.getLeft().getOrElse(
@@ -326,6 +339,7 @@ class LibraryViewModel
     _isDisposed = true;
     disposeConnectivityListener();
     disposeEntitlementListener();
+    disposePremiumAwareness();
     state.dispose();
   }
 
@@ -418,11 +432,10 @@ class LibraryViewModel
     String? highlightProtocolId,
   }) {
     final isOffline = state.value.isOffline;
-    final snapshot = _revenueCatService.entitlementSnapshot.value;
     final cards = _buildCards(
       user,
       protocols,
-      snapshot: snapshot,
+      resolvedEntitlement: entitlement.value,
       isOffline: isOffline,
       highlightProtocolId: highlightProtocolId,
     );
@@ -446,19 +459,15 @@ class LibraryViewModel
 
   /// Builds library protocol cards from the given data.
   ///
-  /// Pure function: receives the entitlement [snapshot] as a parameter
-  /// instead of reading it from the service, making it easier to test.
+  /// Pure function: receives the already-resolved [Entitlement].
   List<LibraryProtocolCardModel> _buildCards(
     User user,
     List<Protocol> protocols, {
-    required EntitlementSnapshot? snapshot,
+    required Entitlement resolvedEntitlement,
     required bool isOffline,
     String? highlightProtocolId,
   }) {
-    final effectiveStatus = _resolver.resolveEffectiveStatus(
-      user: user,
-      snapshot: snapshot,
-    );
+    final limit = resolvedEntitlement.protocolLimit;
     final sorted = List<Protocol>.from(protocols)
       ..sort((a, b) {
         final categoryCompare = a.category.index.compareTo(b.category.index);
@@ -468,10 +477,10 @@ class LibraryViewModel
 
         final statusCompare =
             _statusRank(
-              _deriveCardStatus(user, a.id, effectiveStatus),
+              _deriveCardStatus(user, a.id, limit),
             ).compareTo(
               _statusRank(
-                _deriveCardStatus(user, b.id, effectiveStatus),
+                _deriveCardStatus(user, b.id, limit),
               ),
             );
         if (statusCompare != 0) {
@@ -482,7 +491,7 @@ class LibraryViewModel
       });
 
     return sorted.map((protocol) {
-      final status = _deriveCardStatus(user, protocol.id, effectiveStatus);
+      final status = _deriveCardStatus(user, protocol.id, limit);
       final disableBadge = isOffline && status == LibraryCardStatus.available;
 
       return LibraryProtocolCardModel(
@@ -539,13 +548,12 @@ class LibraryViewModel
   LibraryCardStatus _deriveCardStatus(
     User user,
     String protocolId,
-    SubscriptionStatus effectiveStatus,
+    int? limit,
   ) {
     if (user.activeProtocolIds.contains(protocolId)) {
       return LibraryCardStatus.inStack;
     }
 
-    final limit = effectiveStatus.protocolLimit;
     if (limit != null && user.activeProtocolCount >= limit) {
       return LibraryCardStatus.locked;
     }

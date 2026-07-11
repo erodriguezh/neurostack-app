@@ -1,14 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
-import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 import 'package:neurostack/paywall/domain/trial_expiry_policy.dart';
 
 import '../../factories/entitlement_snapshot_factory.dart';
 
 void main() {
-  const policy = TrialExpiryPolicy(
-    resolver: SubscriptionStatusResolver(),
-  );
+  const policy = TrialExpiryPolicy();
 
   group('TrialExpiryPolicy', () {
     group('shouldShowReminder', () {

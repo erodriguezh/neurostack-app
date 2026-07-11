@@ -45,8 +45,8 @@ class UserRemoteDataSource {
 
   /// Persists a user (insert or update).
   ///
-  /// Trial/subscription gating is handled by SubscriptionStatusResolver,
-  /// not at the database level.
+  /// Trial/subscription gating is handled by Entitlement, not at the database
+  /// level.
   Future<void> saveUser(UserDto dto) async {
     await _dataSource.from(_table).upsert(dto.toJson());
   }

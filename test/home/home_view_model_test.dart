@@ -12,7 +12,6 @@ import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
 import 'package:neurostack/features/user/domain/failures/user_failures.dart';
 import 'package:neurostack/home/home_view_model.dart';
 import 'package:neurostack/paywall/domain/entitlement_snapshot.dart';
-import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 import 'package:neurostack/paywall/domain/trial_expiry_policy.dart';
 
 import '../factories/factories.dart';
@@ -30,7 +29,6 @@ void main() {
   late MockRevenueCatService mockRevenueCatService;
   late MockTrialReminderService mockTrialReminderService;
   late MockTrialExpirationDecisionStore mockTrialExpirationDecisionStore;
-  late SubscriptionStatusResolver subscriptionStatusResolver;
   late TrialExpiryPolicy trialExpiryPolicy;
 
   setUpAll(() {
@@ -51,11 +49,11 @@ void main() {
     mockRevenueCatService = MockRevenueCatService();
     mockTrialReminderService = MockTrialReminderService();
     mockTrialExpirationDecisionStore = MockTrialExpirationDecisionStore();
-    // Use real resolver since it's pure functions
-    subscriptionStatusResolver = const SubscriptionStatusResolver();
-    trialExpiryPolicy = TrialExpiryPolicy(
-      resolver: subscriptionStatusResolver,
-    );
+    trialExpiryPolicy = const TrialExpiryPolicy();
+
+    when(
+      () => mockAuthService.authState,
+    ).thenReturn(ValueNotifier(const Unauthenticated()));
 
     // Default connectivity setup
     when(
@@ -92,7 +90,15 @@ void main() {
     ).thenAnswer((_) async {});
   });
 
-  HomeViewModel createViewModel({bool includeDecisionStore = false}) {
+  HomeViewModel createViewModel({
+    bool includeDecisionStore = false,
+    User? entitlementUser,
+  }) {
+    if (entitlementUser != null) {
+      when(
+        () => mockAuthService.authState,
+      ).thenReturn(ValueNotifier(AuthenticatedOnline(entitlementUser)));
+    }
     return HomeViewModel(
       notifyService: mockNotifyService,
       routerService: mockRouterService,
@@ -102,7 +108,6 @@ void main() {
       sessionRepository: mockSessionRepository,
       sessionLocalDataSource: mockSessionLocalDataSource,
       connectivityService: mockConnectivityService,
-      subscriptionStatusResolver: subscriptionStatusResolver,
       trialExpiryPolicy: trialExpiryPolicy,
       revenueCatService: mockRevenueCatService,
       trialReminderService: mockTrialReminderService,
@@ -587,8 +592,7 @@ void main() {
             // Regression guard: After removing _scopedSnapshot from HomeViewModel,
             // ensure that a mismatched entitlement snapshot (belonging to a
             // different user) does NOT influence the effective status.
-            // Safety relies on SubscriptionStatusResolver.resolveEffectiveStatus
-            // checking snapshot.isForUser(user.id) internally.
+            // Entitlement.of checks snapshot.isForUser(user.id) internally.
             final user = UserFactory.create(
               id: 'user-a',
               subscriptionStatus: SubscriptionStatus.free,
@@ -633,8 +637,8 @@ void main() {
             final viewModel = createViewModel();
             addTearDown(viewModel.dispose);
 
-            // Act - isTrialOrPremiumExpired uses the raw snapshot
-            final result = viewModel.isTrialOrPremiumExpired(user);
+            // Act - the published Entitlement ignores the mismatched snapshot.
+            final result = viewModel.isTrialOrPremiumExpired;
 
             // Assert - should use DB status (free), not the mismatched
             // snapshot's premiumMonthly. Free status IS considered expired
@@ -668,11 +672,11 @@ void main() {
               ValueNotifier<EntitlementSnapshot?>(mismatchedSnapshot),
             );
 
-            final viewModel = createViewModel();
+            final viewModel = createViewModel(entitlementUser: user);
             addTearDown(viewModel.dispose);
 
             // Act
-            final result = viewModel.isTrialOrPremiumExpired(user);
+            final result = viewModel.isTrialOrPremiumExpired;
 
             // Assert - should use DB status (premiumMonthly), not the
             // mismatched snapshot's expired state. Premium = not expired.
@@ -683,7 +687,7 @@ void main() {
     );
 
     group('isTrialOrPremiumExpired', () {
-      // Note: isTrialOrPremiumExpired() is synchronous and checks
+      // Note: isTrialOrPremiumExpired is synchronous and checks
       // effective status (expired/free).
 
       test('returns false for trial status', () {
@@ -695,11 +699,11 @@ void main() {
           onboardingCompleted: true,
         );
 
-        final viewModel = createViewModel();
+        final viewModel = createViewModel(entitlementUser: user);
         addTearDown(viewModel.dispose);
 
         // Act
-        final result = viewModel.isTrialOrPremiumExpired(user);
+        final result = viewModel.isTrialOrPremiumExpired;
 
         // Assert - trial is not expired/free, so returns false
         expect(result, isFalse);
@@ -712,11 +716,11 @@ void main() {
           onboardingCompleted: true,
         );
 
-        final viewModel = createViewModel();
+        final viewModel = createViewModel(entitlementUser: user);
         addTearDown(viewModel.dispose);
 
         // Act
-        final result = viewModel.isTrialOrPremiumExpired(user);
+        final result = viewModel.isTrialOrPremiumExpired;
 
         // Assert
         expect(result, isTrue);
@@ -729,11 +733,11 @@ void main() {
           onboardingCompleted: true,
         );
 
-        final viewModel = createViewModel();
+        final viewModel = createViewModel(entitlementUser: user);
         addTearDown(viewModel.dispose);
 
         // Act
-        final result = viewModel.isTrialOrPremiumExpired(user);
+        final result = viewModel.isTrialOrPremiumExpired;
 
         // Assert
         expect(result, isTrue);
@@ -746,11 +750,11 @@ void main() {
           onboardingCompleted: true,
         );
 
-        final viewModel = createViewModel();
+        final viewModel = createViewModel(entitlementUser: user);
         addTearDown(viewModel.dispose);
 
         // Act
-        final result = viewModel.isTrialOrPremiumExpired(user);
+        final result = viewModel.isTrialOrPremiumExpired;
 
         // Assert
         expect(result, isFalse);
@@ -763,11 +767,11 @@ void main() {
           onboardingCompleted: true,
         );
 
-        final viewModel = createViewModel();
+        final viewModel = createViewModel(entitlementUser: user);
         addTearDown(viewModel.dispose);
 
         // Act
-        final result = viewModel.isTrialOrPremiumExpired(user);
+        final result = viewModel.isTrialOrPremiumExpired;
 
         // Assert
         expect(result, isFalse);
@@ -780,11 +784,11 @@ void main() {
           onboardingCompleted: true,
         );
 
-        final viewModel = createViewModel();
+        final viewModel = createViewModel(entitlementUser: user);
         addTearDown(viewModel.dispose);
 
         // Act
-        final result = viewModel.isTrialOrPremiumExpired(user);
+        final result = viewModel.isTrialOrPremiumExpired;
 
         // Assert
         expect(result, isFalse);

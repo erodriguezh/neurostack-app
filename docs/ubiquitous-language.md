@@ -8,7 +8,6 @@ This is the canonical glossary for the Neurostack app (a single bounded context)
 - **Definition lists** (Definition · Properties · Example · UI Label) are used for product and monetization nouns that carry UI copy and concrete examples.
 - Terms are ordered **logically** within each section (temporal/lifecycle or dependency order), not alphabetically.
 - Cross-references appear as **bold term names**. See **Flagged Ambiguities** for overloaded words that must always be qualified.
-- ⏳ **Planned (#NN)** marks vocabulary that describes the **target state of epic #16** ("Deepen monetization gating into one Entitlement module", slices #17–#21) and **has not shipped yet**; the marker names the slice that introduces or finalizes it. This doc deliberately leads the refactor — delete each marker as its slice merges. Until then, the live mechanism noted in the marker (typically `SubscriptionStatusResolver`) is what the running code uses.
 
 ---
 
@@ -102,9 +101,9 @@ This is the canonical glossary for the Neurostack app (a single bounded context)
 | Term | Definition | Aliases to avoid |
 |------|-----------|-----------------|
 | **Active Protocol** | A **Protocol** currently present in the **User**'s **Stack** | Active (unqualified), enabled protocol |
-| **Activation** | Adding a **Protocol** to the **Stack** via `User.activateProtocol(id)` | Add, enable, opt-in |
+| **Activation** | Adding a **Protocol** to the **Stack** via `User.activateProtocol(id, limit:)` | Add, enable, opt-in |
 | **Deactivation** | Removing a single **Protocol** from the **Stack** via `User.deactivateProtocol(id)`; raises one `ProtocolDeactivatedEvent` | Remove (unqualified — also used for sessions), disable |
-| **Protocol Limit** | The maximum **Active Protocols** allowed by the **User**'s **Effective Status**, sourced from `SubscriptionStatus.protocolLimit` — **2** for `free`/`expired`, `null` (unlimited) for `trial`/`premium*`/`grace`. See the canonical **Protocol Limit Rule** in Core Invariants. UI: "X/2 protocols active" (free) or "Unlimited" (premium). ⏳ Today the **User** aggregate reads this off the enum directly; #19 makes it an injected input computed by **Entitlement** — same values, one place. | Cap (overloaded), max protocols |
+| **Protocol Limit** | The maximum **Active Protocols** allowed by the **User**'s **Effective Status**, sourced from `Entitlement.protocolLimit` — **2** for `free`/`expired`, `null` (unlimited) for `trial`/`premium*`/`grace`. The **User** aggregate receives it as an explicit input. See the canonical **Protocol Limit Rule** in Core Invariants. UI: "X/2 protocols active" (free) or "Unlimited" (premium). | Cap (overloaded), max protocols |
 | **Stack Trim** | The user-driven operation that reduces **Stack** count to the **Protocol Limit** by selecting which protocols to keep; canonical multi-protocol intent (vs. single-protocol **Deactivation**) | Prune, batch deactivation, downgrade trim |
 | **Session Count** | For a given **Active Protocol**, the number of `Session` records logged by the **User**; used by **Pre-selection** in the **Protocol Selection Modal** | Sessions, log count |
 
@@ -158,8 +157,6 @@ This is the canonical glossary for the Neurostack app (a single bounded context)
 > - **#3 — Webhook-only writer.** Only the **Webhook (RevenueCat)** writes Subscription Status to the DB; the client never persists subscription state.
 > - **#8 — Caller supplies time.** Time-based decisions take `now` as a parameter (testability).
 > - **#10 — User-scoped snapshot.** An **EntitlementSnapshot** is authoritative only when its `appUserId` equals the current user's id.
->
-> ⏳ This whole section describes the **target** vocabulary of epic #16. Until #21 lands, the live implementation is `SubscriptionStatusResolver` (`lib/paywall/domain/subscription_status_resolver.dart`); the markers below name what replaces it.
 
 **Entitlement** (domain value object) — *canonical*
 
@@ -170,7 +167,7 @@ This is the canonical glossary for the Neurostack app (a single bounded context)
 - Distinction: `EntitlementSnapshot` is the raw RevenueCat input; **Entitlement** is the resolved domain output. Bare "Entitlement" means **this**, never the store-side **RevenueCat Entitlement** — see **Flagged Ambiguities**.
 - Enforcement note: the **User** aggregate still enforces the limit (`activateProtocol` blocks at `count >= limit`, `canLogSession` at `count > limit`) but receives the limit as **input** from Entitlement; the entity never imports a RevenueCat type.
 - Location: `lib/paywall/domain/entitlement.dart` (beside `entitlement_snapshot.dart`)
-- ⏳ **Planned — introduced #17, finalized #21.** In #17 `Entitlement.of` *delegates to* `SubscriptionStatusResolver` byte-for-byte (adds the seam, changes no logic). #21 inlines the resolver's `resolveEffectiveStatus` + `mapSnapshotToStatus` here as private implementation and deletes the resolver. Published reactively as `ValueNotifier<Entitlement>` by **PremiumAwareViewModelMixin** (#17), which every screen reads (#20).
+- Published reactively as `ValueNotifier<Entitlement>` by **PremiumAwareViewModelMixin**, which Home, Library, and Settings read.
 
 **EntitlementSnapshot** (value object) — *exists today*
 
@@ -181,9 +178,8 @@ This is the canonical glossary for the Neurostack app (a single bounded context)
 
 **Effective Status**
 
-- Definition: The `SubscriptionStatus` value the UI gates on — exposed as `Entitlement.effectiveStatus`. Computed from the raw `User.subscriptionStatus` + the RevenueCat `EntitlementSnapshot` (+ **Last-Seen Status** for the modal decisions). The snapshot→status mapping: no pro entitlement → `free` (or `expired` if `wasPaidThatExpired`); grace → `grace`; trial → `trial`; monthly/annual product → `premiumMonthly`/`premiumAnnual`.
+- Definition: The `SubscriptionStatus` value the UI gates on — exposed as `Entitlement.effectiveStatus`. Computed from the raw `User.subscriptionStatus` + the RevenueCat `EntitlementSnapshot`. The snapshot→status mapping: no pro entitlement → `free` (or `expired` if `wasPaidThatExpired`); grace → `grace`; trial → `trial`; monthly/annual product → `premiumMonthly`/`premiumAnnual`.
 - Aliases to avoid: Computed status, derived status, current status
-- ⏳ Until #21 this value is produced by `SubscriptionStatusResolver.resolveEffectiveStatus`; `Entitlement.of` delegates to it in the interim.
 
 **Trial Expiry Policy** (decision module) — *canonical*
 
@@ -191,7 +187,6 @@ This is the canonical glossary for the Neurostack app (a single bounded context)
 - Decisions: `shouldShowReminder(snapshot, now)` (within the 24h window before expiry, INV-P4); `shouldShowExpiredModal(effectiveStatus, lastSeen, snapshot)` (the `trial` → `free`/`expired` transition, plus the fresh-install gate: `lastSeen == null` **and** `snapshot.wasTrialThatExpired`)
 - Inputs: effective status (from **Entitlement**), **Last-Seen Status** (from `TrialExpirationDecisionStore`), current time, `EntitlementSnapshot`
 - Location: `lib/paywall/domain/trial_expiry_policy.dart`
-- ⏳ **Planned — introduced #18, finalized #21.** Absorbs the resolver's `shouldShowTrialReminder` + `shouldShowTrialExpiredModal`.
 
 **Last-Seen Status**
 
@@ -283,8 +278,8 @@ Logging facet (INV-U5): a status with a non-null limit and count > limit cannot 
   Stack is trimmed; the realistic trigger is a Downgrade (premium → free/expired) dropping the limit below
   the current count.
 → The >= vs > difference is intentional and must be preserved (Activation asks "can I add one more?";
-  Logging asks "is my Stack already over the limit?"). #19 moves the limit lookup into Entitlement
-  (limit-as-input) without changing these values or operators.
+  Logging asks "is my Stack already over the limit?"). Entitlement owns the limit lookup; the User
+  aggregate receives it as input without changing these values or operators.
 ```
 
 ### Monetization Invariants
@@ -605,10 +600,9 @@ INV-SET2: Send Feedback MUST NOT provide an in-app fallback
 ## Flagged Ambiguities
 
 - **"Entitlement"** is overloaded across **three** distinct things — always qualify:
-  - **Entitlement** (bare, canonical) — the domain value object (`lib/paywall/domain/entitlement.dart`), the resolved "what can this user do right now," computed by `Entitlement.of(user, snapshot)`. ⏳ Lands in #17.
+  - **Entitlement** (bare, canonical) — the domain value object (`lib/paywall/domain/entitlement.dart`), the resolved "what can this user do right now," computed by `Entitlement.of(user, snapshot)`.
   - **EntitlementSnapshot** — the raw RevenueCat input read (`hasProEntitlement`, trial/grace flags, product id…). The input, not the answer.
   - **RevenueCat Entitlement** ("pro") — the store-dashboard entitlement RevenueCat owns and is the source of truth for. This is what File 1 used to call simply "Entitlement."
-- **`SubscriptionStatusResolver`** is **being deleted** (#21) — it is *not* canonical vocabulary. Its resolution + status-mapping logic moves into **Entitlement** (private impl); its two modal-decision functions move into **Trial Expiry Policy**. It still exists and is load-bearing in the running code until #21 merges; new code should target **Entitlement** / **Trial Expiry Policy**. Likewise `CheckEligibilityUseCase` is removed by the epic (its delegation folds into the caller computing the limit from **Entitlement** and calling `canLogSession(id, limit:)`).
 - **"splash screen"** was used to mean both the **Native launch surface** (OS-rendered) and the **Flutter splash** (Dart widget). These are distinct: the native surface covers engine startup, the Flutter splash covers **Bootstrap**. Always qualify which one.
 - **"restart"** was used interchangeably with **Retry**. In this codebase, `restartApp()` in `AppLifecycleService` delegates to `retryInitialization()` in `StartupViewModel`. Use **Retry** for the user-facing concept and `restartApp()`/`retryInitialization()` for the code path.
 - **"delay"** was used to describe the **Minimum splash duration**, but it is not an artificial delay — it is a floor that only adds wait time when **Bootstrap** is faster than 500ms. Prefer "minimum duration" over "delay."
@@ -621,5 +615,5 @@ INV-SET2: Send Feedback MUST NOT provide an in-app fallback
 - **"Active"** is overloaded across protocols and subscriptions: an **Active Protocol** lives in the **Stack**; an "active subscription" means **Subscription Status** ∈ `{trial, premium*, grace}`. Always qualify — never bare "active" in domain conversation.
 - **"Trim"** vs **"Prune"** vs **"Batch Deactivation"** — canonical: **Stack Trim** is the multi-protocol operation that reduces the **Stack** to the **Protocol Limit**; **Deactivation** is the single-protocol operation. "Prune" is not used.
 - **"Downgrade"** is strictly a **Subscription Status** transition driven by the **Webhook (RevenueCat)**. The client never *performs* a downgrade — it only performs a **Stack Trim** in response. Saying "the modal downgrades the user" is wrong; the modal trims the stack while the downgrade is webhook-driven.
-- **"Subscription Status"** vs **"Effective Status"** — **Subscription Status** is the raw, webhook-written cache field on **User**; **Effective Status** is what the **Entitlement** value object returns (`Entitlement.of`; ⏳ `SubscriptionStatusResolver` until #21) after consulting the RevenueCat snapshot and **Last-Seen Status**. UI gating decisions and **Protocol Limit** use **Effective Status**. They diverge only when the live snapshot disagrees with the stale cache.
+- **"Subscription Status"** vs **"Effective Status"** — **Subscription Status** is the raw, webhook-written cache field on **User**; **Effective Status** is what `Entitlement.of` returns after consulting the RevenueCat snapshot. **Last-Seen Status** belongs only to **Trial Expiry Policy**. UI gating decisions and **Protocol Limit** use **Effective Status**. They diverge only when the live snapshot disagrees with the stale cache.
 - **"Selection"** is overloaded: in this build it means the user's transient set of selected rows in the **Protocol Selection Modal**, captured at confirm time as **KeepIds**. Do not conflate with the **Entitlement** value object's resolution of effective status.

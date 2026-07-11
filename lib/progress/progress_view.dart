@@ -23,6 +23,7 @@ import 'package:neurostack/features/protocol/domain/repositories/protocol_reposi
 import 'package:neurostack/features/session/data/data_sources/session_local_data_source.dart';
 import 'package:neurostack/features/session/domain/repositories/session_repository.dart';
 import 'package:neurostack/features/session/presentation/log_session_modal.dart';
+import 'package:neurostack/features/user/domain/entities/user.dart';
 import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
 import 'package:neurostack/home/home_state.dart';
 import 'package:neurostack/home/widgets/home_bottom_nav.dart';
@@ -31,6 +32,8 @@ import 'package:neurostack/progress/data/cached_week_progress_store.dart';
 import 'package:neurostack/progress/progress_state.dart';
 import 'package:neurostack/progress/progress_view_model.dart';
 import 'package:neurostack/progress/widgets/progress_grid.dart';
+import 'package:neurostack/paywall/data/revenuecat_service.dart';
+import 'package:neurostack/paywall/domain/entitlement.dart';
 
 const _progressOfflineBanner = HomeBannerModel(
   type: HomeBannerType.offline,
@@ -262,10 +265,13 @@ class _ProgressViewState extends State<ProgressView>
     // Resolve userId from auth state
     final authState = locator<AuthService>().authState.value;
     String? userId;
+    User? user;
     if (authState is AuthenticatedOnline) {
       userId = authState.user.id;
+      user = authState.user;
     } else if (authState is AuthenticatedOffline) {
       userId = authState.user.id;
+      user = authState.user;
     }
 
     if (userId == null) {
@@ -307,10 +313,15 @@ class _ProgressViewState extends State<ProgressView>
       context,
       protocol: protocol,
       userId: userId,
+      protocolLimit: Entitlement.of(
+        user!,
+        locator<RevenueCatService>().entitlementSnapshot.value,
+      ).protocolLimit,
       initialDate: day,
       onSessionLogged: (session) {
-        sessionCountFuture =
-            locator<ReviewTriggerHelper>().captureSessionCount(resolvedUserId);
+        sessionCountFuture = locator<ReviewTriggerHelper>().captureSessionCount(
+          resolvedUserId,
+        );
         _viewModel.onSessionLogged(session);
       },
     );
@@ -323,8 +334,10 @@ class _ProgressViewState extends State<ProgressView>
         () async {
           try {
             final count = await sessionCountFuture!;
-            await locator<ReviewTriggerHelper>()
-                .triggerReviewIfNeeded(count, resolvedUserId);
+            await locator<ReviewTriggerHelper>().triggerReviewIfNeeded(
+              count,
+              resolvedUserId,
+            );
           } catch (_) {
             // Non-critical — review prompt is best-effort
           }

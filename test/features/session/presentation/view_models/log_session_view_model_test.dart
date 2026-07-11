@@ -8,34 +8,37 @@ import 'package:neurostack/core/utils/internal_notification/toast/toast_event.da
 import 'package:neurostack/features/session/data/data_sources/session_local_data_source.dart';
 import 'package:neurostack/features/session/domain/entities/pending_session.dart';
 import 'package:neurostack/features/session/domain/failures/session_failures.dart';
-import 'package:neurostack/features/session/domain/use_cases/check_eligibility_use_case.dart';
 import 'package:neurostack/features/session/presentation/view_models/log_session_state.dart';
 import 'package:neurostack/features/session/presentation/view_models/log_session_view_model.dart';
 import 'package:neurostack/features/user/domain/failures/user_failures.dart';
 
 import '../../../../constants/test_constants.dart';
-import '../../../../factories/protocol_factory.dart';
+import '../../../../factories/factories.dart';
 import '../../../../mocks/fake_params.dart';
 import '../../../../mocks/mock_services.dart';
+
+final _eligibleUser = UserFactory.create(
+  onboardingCompleted: true,
+  stack: StackFactory.withProtocol(ProtocolFactory.reconstitute().id),
+);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(() {
-    registerFallbackValue(FakeCheckEligibilityParams());
     registerFallbackValue(FakePendingSession());
   });
 
   group('LogSessionViewModel', () {
     LogSessionViewModel? viewModel;
-    late MockCheckEligibilityUseCase mockCheckEligibility;
+    late MockUserRepository mockCheckEligibility;
     late MockSessionLocalDataSource mockLocalDataSource;
     late MockSessionSyncService mockSyncService;
     late MockNotifyService mockNotifyService;
     late MockUuid mockUuid;
 
     setUp(() {
-      mockCheckEligibility = MockCheckEligibilityUseCase();
+      mockCheckEligibility = MockUserRepository();
       mockLocalDataSource = MockSessionLocalDataSource();
       mockSyncService = MockSessionSyncService();
       mockNotifyService = MockNotifyService();
@@ -56,7 +59,8 @@ void main() {
         protocol: ProtocolFactory.reconstitute(),
         initialDate: initialDate ?? DateTime.now(),
         userId: userId ?? TestConstants.user.id,
-        checkEligibilityUseCase: mockCheckEligibility,
+        userRepository: mockCheckEligibility,
+        protocolLimit: null,
         sessionLocalDataSource: mockLocalDataSource,
         sessionSyncService: mockSyncService,
         notifyService: mockNotifyService,
@@ -72,8 +76,8 @@ void main() {
       test('init_whenEligible_setsLogSessionReadyState', () async {
         // Arrange
         when(
-          () => mockCheckEligibility.execute(any()),
-        ).thenAnswer((_) async => right(unit));
+          () => mockCheckEligibility.getById(any()),
+        ).thenAnswer((_) async => right(_eligibleUser));
         viewModel = createViewModel();
 
         // Act
@@ -83,31 +87,25 @@ void main() {
         expect(viewModel!.state.value, isA<LogSessionReady>());
       });
 
-      test('init_passesCorrectParamsToCheckEligibility', () async {
+      test('init_loadsTheCorrectUser', () async {
         // Arrange
         when(
-          () => mockCheckEligibility.execute(any()),
-        ).thenAnswer((_) async => right(unit));
+          () => mockCheckEligibility.getById(any()),
+        ).thenAnswer((_) async => right(_eligibleUser));
         viewModel = createViewModel();
 
         // Act
         await viewModel!.init();
 
-        // Assert - capture and verify params
-        final captured =
-            verify(
-                  () => mockCheckEligibility.execute(captureAny()),
-                ).captured.single
-                as CheckEligibilityParams;
-
-        expect(captured.userId, TestConstants.user.id);
-        expect(captured.protocolId, viewModel!.protocol.id);
+        verify(
+          () => mockCheckEligibility.getById(TestConstants.user.id),
+        ).called(1);
       });
 
       test('init_whenTooManyProtocols_setsLogSessionIneligibleState', () async {
         // Arrange
         when(
-          () => mockCheckEligibility.execute(any()),
+          () => mockCheckEligibility.getById(any()),
         ).thenAnswer((_) async => left(UserFailures.tooManyActiveProtocols));
         viewModel = createViewModel();
 
@@ -127,7 +125,7 @@ void main() {
           message: 'User not found',
         );
         when(
-          () => mockCheckEligibility.execute(any()),
+          () => mockCheckEligibility.getById(any()),
         ).thenAnswer((_) async => left(otherFailure));
         viewModel = createViewModel();
 
@@ -144,8 +142,8 @@ void main() {
     group('date clamping', () {
       setUp(() {
         when(
-          () => mockCheckEligibility.execute(any()),
-        ).thenAnswer((_) async => right(unit));
+          () => mockCheckEligibility.getById(any()),
+        ).thenAnswer((_) async => right(_eligibleUser));
       });
 
       test('initialDate_clampsFutureDateToToday', () async {
@@ -204,8 +202,8 @@ void main() {
       setUp(() {
         // Set up eligible user for submit tests
         when(
-          () => mockCheckEligibility.execute(any()),
-        ).thenAnswer((_) async => right(unit));
+          () => mockCheckEligibility.getById(any()),
+        ).thenAnswer((_) async => right(_eligibleUser));
       });
 
       test(
@@ -303,8 +301,8 @@ void main() {
       setUp(() {
         // Set up eligible user for submit tests
         when(
-          () => mockCheckEligibility.execute(any()),
-        ).thenAnswer((_) async => right(unit));
+          () => mockCheckEligibility.getById(any()),
+        ).thenAnswer((_) async => right(_eligibleUser));
       });
 
       test(
@@ -458,8 +456,8 @@ void main() {
     group('form state', () {
       setUp(() {
         when(
-          () => mockCheckEligibility.execute(any()),
-        ).thenAnswer((_) async => right(unit));
+          () => mockCheckEligibility.getById(any()),
+        ).thenAnswer((_) async => right(_eligibleUser));
       });
 
       test('selectedDate_updatesCorrectly', () async {
@@ -536,8 +534,8 @@ void main() {
     group('submit guards', () {
       setUp(() {
         when(
-          () => mockCheckEligibility.execute(any()),
-        ).thenAnswer((_) async => right(unit));
+          () => mockCheckEligibility.getById(any()),
+        ).thenAnswer((_) async => right(_eligibleUser));
       });
 
       test('submit_whenInitialState_doesNothing', () async {
@@ -562,7 +560,7 @@ void main() {
       test('submit_whenIneligible_doesNothing', () async {
         // Arrange
         when(
-          () => mockCheckEligibility.execute(any()),
+          () => mockCheckEligibility.getById(any()),
         ).thenAnswer((_) async => left(UserFailures.tooManyActiveProtocols));
         final now = DateTime.now();
         viewModel = createViewModel(initialDate: now);
@@ -647,8 +645,8 @@ void main() {
     group('error handling', () {
       setUp(() {
         when(
-          () => mockCheckEligibility.execute(any()),
-        ).thenAnswer((_) async => right(unit));
+          () => mockCheckEligibility.getById(any()),
+        ).thenAnswer((_) async => right(_eligibleUser));
       });
 
       test('submit_whenLocalSaveFails_setsErrorStateWithToast', () async {

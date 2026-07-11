@@ -53,6 +53,7 @@ void main() {
       protocolId: TestConstants.session.protocolId,
       completedAt: TestConstants.session.validCompletedAt,
       currentTime: TestConstants.session.currentTime,
+      protocolLimit: null,
     );
   });
 
@@ -151,40 +152,27 @@ void main() {
         verifyNever(() => mockSessionRepository.create(any()));
       });
 
-      // Trial expiration gating is now handled by SubscriptionStatusResolver,
-      // not the User entity. An expired trial user with >2 protocols is still
-      // treated as trial (unlimited) by the entity, so canLogSession succeeds
-      // and the session is created.
       test(
-        'whenExpiredTrialOverLimit_succeedsBecauseEntityNoLongerGatesOnTrialExpiry',
+        'whenResolvedLimitIsExceeded_returnsTooManyActiveProtocols',
         () async {
-          // Arrange
           final expiredTrialUser = UserFactory.createExpiredTrialOverLimit();
 
           when(
             () => mockUserRepository.getById(any()),
           ).thenAnswer((_) async => right(expiredTrialUser));
 
-          final createdSession = SessionFactory.reconstitute();
-          when(
-            () => mockSessionRepository.create(any()),
-          ).thenAnswer((_) async => right(createdSession));
-
-          // Use protocol from the expired user's stack
           final paramsWithStackProtocol = LogSessionParams(
             userId: validParams.userId,
             protocolId: StackFactory.protocol1,
             completedAt: validParams.completedAt,
-            currentTime:
-                validParams.currentTime, // Still needed for SessionDraft
+            currentTime: validParams.currentTime,
+            protocolLimit: 2,
           );
 
-          // Act
           final result = await useCase.execute(paramsWithStackProtocol);
 
-          // Assert - succeeds; trial status has no protocol limit
-          expect(result, isRight<Session>());
-          verify(() => mockSessionRepository.create(any())).called(1);
+          expect(result, isLeftWith(UserFailures.tooManyActiveProtocols));
+          verifyNever(() => mockSessionRepository.create(any()));
         },
       );
 
@@ -205,6 +193,7 @@ void main() {
           protocolId: validParams.protocolId,
           completedAt: TestConstants.session.futureCompletedAt,
           currentTime: TestConstants.session.currentTime,
+          protocolLimit: null,
         );
 
         // Act

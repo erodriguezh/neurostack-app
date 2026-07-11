@@ -1,13 +1,12 @@
+import 'package:logging/logging.dart';
+
 import '../../features/user/domain/entities/user.dart';
 import '../../features/user/domain/enums/subscription_status.dart';
+import '../paywall_constants.dart';
 import 'entitlement_snapshot.dart';
-import 'subscription_status_resolver.dart';
 
 /// Resolved domain answer for what a user can do right now.
 ///
-/// In this migration slice the resolution delegates to
-/// [SubscriptionStatusResolver] so behavior stays identical while callers move
-/// to the new seam.
 class Entitlement {
   const Entitlement._(this.effectiveStatus);
 
@@ -17,10 +16,13 @@ class Entitlement {
   /// Resolves entitlement from the persisted user status and nullable
   /// RevenueCat snapshot.
   factory Entitlement.of(User user, EntitlementSnapshot? snapshot) {
-    final effectiveStatus = const SubscriptionStatusResolver()
-        .resolveEffectiveStatus(user: user, snapshot: snapshot);
+    final effectiveStatus = snapshot == null || !snapshot.isForUser(user.id)
+        ? user.subscriptionStatus
+        : _mapSnapshotToStatus(snapshot);
     return Entitlement._(effectiveStatus);
   }
+
+  static final Logger _logger = Logger('Entitlement');
 
   /// Subscription Status used for gating after applying snapshot precedence.
   final SubscriptionStatus effectiveStatus;
@@ -33,4 +35,28 @@ class Entitlement {
 
   /// True for trial, paid Premium statuses, and grace period.
   bool get canAccessPremium => effectiveStatus.canAccessPremium;
+
+  static SubscriptionStatus _mapSnapshotToStatus(
+    EntitlementSnapshot snapshot,
+  ) {
+    if (!snapshot.hasProEntitlement) {
+      if (snapshot.wasTrialThatExpired) return SubscriptionStatus.free;
+      return snapshot.wasPaidThatExpired
+          ? SubscriptionStatus.expired
+          : SubscriptionStatus.free;
+    }
+    if (snapshot.isInGracePeriod) return SubscriptionStatus.grace;
+    if (snapshot.isTrialPeriod) return SubscriptionStatus.trial;
+    if (snapshot.productId == kProductMonthly) {
+      return SubscriptionStatus.premiumMonthly;
+    }
+    if (snapshot.productId == kProductYearly) {
+      return SubscriptionStatus.premiumAnnual;
+    }
+
+    _logger.warning(
+      'Unknown productId: ${snapshot.productId} - defaulting to premiumMonthly',
+    );
+    return SubscriptionStatus.premiumMonthly;
+  }
 }

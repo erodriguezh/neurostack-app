@@ -7,7 +7,6 @@ import 'package:neurostack/features/protocol/domain/repositories/protocol_reposi
 import 'package:neurostack/features/session/data/data_sources/session_local_data_source.dart';
 import 'package:neurostack/features/session/data/services/session_sync_service.dart';
 import 'package:neurostack/features/session/domain/repositories/session_repository.dart';
-import 'package:neurostack/features/session/domain/use_cases/check_eligibility_use_case.dart';
 import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
 import 'package:neurostack/core/utils/userorient/userorient_service.dart';
 import 'package:neurostack/core/utils/in_app_review/in_app_review_adapter.dart';
@@ -16,7 +15,6 @@ import 'package:neurostack/core/utils/in_app_review/review_trigger_helper.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:neurostack/paywall/data/trial_expiration_decision_store.dart';
 import 'package:neurostack/paywall/data/trial_reminder_service.dart';
-import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 import 'package:uuid/uuid.dart';
 
 /// Shared mock declarations for service and repository testing.
@@ -43,9 +41,6 @@ class MockConnectivityService extends Mock implements ConnectivityService {}
 
 class MockRevenueCatService extends Mock implements RevenueCatService {}
 
-class MockCheckEligibilityUseCase extends Mock
-    implements CheckEligibilityUseCase {}
-
 class MockSessionSyncService extends Mock implements SessionSyncService {}
 
 class MockUuid extends Mock implements Uuid {}
@@ -54,9 +49,6 @@ class MockTrialReminderService extends Mock implements TrialReminderService {}
 
 class MockTrialExpirationDecisionStore extends Mock
     implements TrialExpirationDecisionStore {}
-
-class MockSubscriptionStatusResolver extends Mock
-    implements SubscriptionStatusResolver {}
 
 class MockUserOrientService extends Mock implements UserOrientService {}
 

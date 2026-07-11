@@ -1,11 +1,29 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
+import 'package:neurostack/features/user/domain/failures/user_failures.dart';
 import 'package:neurostack/paywall/domain/entitlement.dart';
 
 import '../../factories/factories.dart';
+import '../../matchers/either_matchers.dart';
 
 void main() {
   group('Entitlement', () {
+    test('free tier user is blocked from activating a third protocol', () {
+      final user = UserFactory.create(
+        subscriptionStatus: SubscriptionStatus.free,
+        stack: StackFactory.atFreeCapacity(),
+        onboardingCompleted: true,
+      );
+      final entitlement = Entitlement.of(user, null);
+
+      final result = user.activateProtocol(
+        'protocol-3',
+        limit: entitlement.protocolLimit,
+      );
+
+      expect(result, isLeftWith(UserFailures.protocolLimitReached));
+    });
+
     test(
       'falls back to persisted free status when snapshot is unavailable',
       () {
@@ -91,6 +109,19 @@ void main() {
       expect(entitlement.effectiveStatus, SubscriptionStatus.expired);
       expect(entitlement.protocolLimit, 2);
       expect(entitlement.isPremium, isFalse);
+      expect(entitlement.canAccessPremium, isFalse);
+    });
+
+    test('resolves expired trial snapshot as free', () {
+      final user = UserFactory.createPremiumMonthly();
+      final snapshot = EntitlementSnapshotFactory.expiredTrial(
+        userId: user.id,
+      );
+
+      final entitlement = Entitlement.of(user, snapshot);
+
+      expect(entitlement.effectiveStatus, SubscriptionStatus.free);
+      expect(entitlement.protocolLimit, 2);
       expect(entitlement.canAccessPremium, isFalse);
     });
 

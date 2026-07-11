@@ -88,14 +88,11 @@ class _SettingsViewState extends State<SettingsView> {
                   // Upgrade banner + Support & Resources section
                   SliverToBoxAdapter(
                     child: ListenableBuilder(
-                      listenable: Listenable.merge([
-                        _viewModel.entitlement,
-                        _viewModel.canAccessPremium,
-                      ]),
+                      listenable: _viewModel.entitlement,
                       builder: (context, _) {
                         final isPremium = _viewModel.isPremium;
                         final canAccessPremium =
-                            _viewModel.canAccessPremium.value;
+                            _viewModel.entitlement.value.canAccessPremium;
                         return Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [

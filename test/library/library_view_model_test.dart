@@ -11,7 +11,6 @@ import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
 import 'package:neurostack/library/library_state.dart';
 import 'package:neurostack/library/library_view_model.dart';
 import 'package:neurostack/paywall/domain/entitlement_snapshot.dart';
-import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 
 import '../factories/factories.dart';
 import '../mocks/mock_services.dart';
@@ -25,7 +24,6 @@ void main() {
   late MockSessionRepository mockSessionRepository;
   late MockConnectivityService mockConnectivityService;
   late MockRevenueCatService mockRevenueCatService;
-  late SubscriptionStatusResolver subscriptionStatusResolver;
 
   setUpAll(() {
     registerFallbackValue(ToastEventError(message: 'fallback'));
@@ -41,8 +39,10 @@ void main() {
     mockSessionRepository = MockSessionRepository();
     mockConnectivityService = MockConnectivityService();
     mockRevenueCatService = MockRevenueCatService();
-    // Use real resolver since it's pure functions
-    subscriptionStatusResolver = const SubscriptionStatusResolver();
+
+    when(
+      () => mockAuthService.authState,
+    ).thenReturn(ValueNotifier(const Unauthenticated()));
 
     // Default connectivity setup
     when(
@@ -64,13 +64,12 @@ void main() {
       protocolRepository: mockProtocolRepository,
       sessionRepository: mockSessionRepository,
       connectivityService: mockConnectivityService,
-      subscriptionStatusResolver: subscriptionStatusResolver,
       revenueCatService: mockRevenueCatService,
     );
   }
 
   group('LibraryViewModel', () {
-    group('card locking (resolver-based)', () {
+    group('card locking (Entitlement-based)', () {
       test('free user at capacity - extra protocols are locked', () async {
         // Arrange: free user with 2 active protocols, 3 total protocols available
         final user = UserFactory.create(

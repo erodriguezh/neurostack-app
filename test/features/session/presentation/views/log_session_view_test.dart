@@ -10,27 +10,31 @@ import 'package:neurostack/features/session/presentation/view_models/log_session
 import 'package:neurostack/features/session/presentation/views/log_session_view.dart';
 
 import '../../../../constants/test_constants.dart';
-import '../../../../factories/protocol_factory.dart';
+import '../../../../factories/factories.dart';
 import '../../../../mocks/fake_params.dart';
 import '../../../../mocks/mock_services.dart';
+
+final _eligibleUser = UserFactory.create(
+  onboardingCompleted: true,
+  stack: StackFactory.withProtocol(ProtocolFactory.reconstitute().id),
+);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(() {
-    registerFallbackValue(FakeCheckEligibilityParams());
     registerFallbackValue(FakePendingSession());
   });
 
   group('LogSessionView', () {
-    late MockCheckEligibilityUseCase mockCheckEligibility;
+    late MockUserRepository mockCheckEligibility;
     late MockSessionLocalDataSource mockLocalDataSource;
     late MockSessionSyncService mockSyncService;
     late MockNotifyService mockNotifyService;
     late MockUuid mockUuid;
 
     setUp(() {
-      mockCheckEligibility = MockCheckEligibilityUseCase();
+      mockCheckEligibility = MockUserRepository();
       mockLocalDataSource = MockSessionLocalDataSource();
       mockSyncService = MockSessionSyncService();
       mockNotifyService = MockNotifyService();
@@ -51,7 +55,8 @@ void main() {
         protocol: ProtocolFactory.reconstitute(),
         initialDate: initialDate ?? DateTime.now(),
         userId: userId ?? TestConstants.user.id,
-        checkEligibilityUseCase: mockCheckEligibility,
+        userRepository: mockCheckEligibility,
+        protocolLimit: null,
         sessionLocalDataSource: mockLocalDataSource,
         sessionSyncService: mockSyncService,
         notifyService: mockNotifyService,
@@ -76,8 +81,8 @@ void main() {
         (tester) async {
           // Arrange
           when(
-            () => mockCheckEligibility.execute(any()),
-          ).thenAnswer((_) async => right(unit));
+            () => mockCheckEligibility.getById(any()),
+          ).thenAnswer((_) async => right(_eligibleUser));
 
           final viewModel = createViewModel();
           await viewModel.init();
@@ -109,8 +114,8 @@ void main() {
         (tester) async {
           // Arrange
           when(
-            () => mockCheckEligibility.execute(any()),
-          ).thenAnswer((_) async => right(unit));
+            () => mockCheckEligibility.getById(any()),
+          ).thenAnswer((_) async => right(_eligibleUser));
 
           final viewModel = createViewModel();
           await viewModel.init();
@@ -142,8 +147,8 @@ void main() {
         (tester) async {
           // Arrange
           when(
-            () => mockCheckEligibility.execute(any()),
-          ).thenAnswer((_) async => right(unit));
+            () => mockCheckEligibility.getById(any()),
+          ).thenAnswer((_) async => right(_eligibleUser));
 
           final viewModel = createViewModel();
           await viewModel.init();
@@ -182,8 +187,8 @@ void main() {
         (tester) async {
           // Arrange
           when(
-            () => mockCheckEligibility.execute(any()),
-          ).thenAnswer((_) async => right(unit));
+            () => mockCheckEligibility.getById(any()),
+          ).thenAnswer((_) async => right(_eligibleUser));
 
           final viewModel = createViewModel();
           await viewModel.init();
@@ -224,8 +229,8 @@ void main() {
         (tester) async {
           // Arrange
           when(
-            () => mockCheckEligibility.execute(any()),
-          ).thenAnswer((_) async => right(unit));
+            () => mockCheckEligibility.getById(any()),
+          ).thenAnswer((_) async => right(_eligibleUser));
           when(() => mockUuid.v4()).thenReturn('test-uuid');
           when(() => mockSyncService.sync()).thenAnswer((_) async {});
 
@@ -276,8 +281,8 @@ void main() {
         (tester) async {
           // Arrange
           when(
-            () => mockCheckEligibility.execute(any()),
-          ).thenAnswer((_) async => right(unit));
+            () => mockCheckEligibility.getById(any()),
+          ).thenAnswer((_) async => right(_eligibleUser));
 
           final viewModel = createViewModel();
           await viewModel.init();
@@ -309,8 +314,8 @@ void main() {
         (tester) async {
           // Arrange
           when(
-            () => mockCheckEligibility.execute(any()),
-          ).thenAnswer((_) async => right(unit));
+            () => mockCheckEligibility.getById(any()),
+          ).thenAnswer((_) async => right(_eligibleUser));
           when(() => mockUuid.v4()).thenReturn('test-uuid');
 
           final viewModel = createViewModel();
@@ -378,8 +383,8 @@ void main() {
         (tester) async {
           // Arrange
           when(
-            () => mockCheckEligibility.execute(any()),
-          ).thenAnswer((_) async => right(unit));
+            () => mockCheckEligibility.getById(any()),
+          ).thenAnswer((_) async => right(_eligibleUser));
 
           final viewModel = createViewModel();
           await viewModel.init();
@@ -409,8 +414,8 @@ void main() {
         (tester) async {
           // Arrange
           when(
-            () => mockCheckEligibility.execute(any()),
-          ).thenAnswer((_) async => right(unit));
+            () => mockCheckEligibility.getById(any()),
+          ).thenAnswer((_) async => right(_eligibleUser));
           when(() => mockUuid.v4()).thenReturn('test-uuid');
 
           final viewModel = createViewModel();
