@@ -6,7 +6,6 @@ import '../paywall_constants.dart';
 import 'entitlement_snapshot.dart';
 
 /// Resolved domain answer for what a user can do right now.
-///
 class Entitlement {
   const Entitlement._(this.effectiveStatus);
 
@@ -16,10 +15,11 @@ class Entitlement {
   /// Resolves entitlement from the persisted user status and nullable
   /// RevenueCat snapshot.
   factory Entitlement.of(User user, EntitlementSnapshot? snapshot) {
-    final effectiveStatus = snapshot == null || !snapshot.isForUser(user.id)
-        ? user.subscriptionStatus
-        : _mapSnapshotToStatus(snapshot);
-    return Entitlement._(effectiveStatus);
+    if (snapshot == null || !snapshot.isForUser(user.id)) {
+      return Entitlement._(user.subscriptionStatus);
+    }
+
+    return Entitlement._(_mapSnapshotToStatus(snapshot));
   }
 
   static final Logger _logger = Logger('Entitlement');
@@ -41,9 +41,8 @@ class Entitlement {
   ) {
     if (!snapshot.hasProEntitlement) {
       if (snapshot.wasTrialThatExpired) return SubscriptionStatus.free;
-      return snapshot.wasPaidThatExpired
-          ? SubscriptionStatus.expired
-          : SubscriptionStatus.free;
+      if (snapshot.wasPaidThatExpired) return SubscriptionStatus.expired;
+      return SubscriptionStatus.free;
     }
     if (snapshot.isInGracePeriod) return SubscriptionStatus.grace;
     if (snapshot.isTrialPeriod) return SubscriptionStatus.trial;

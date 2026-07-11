@@ -33,6 +33,7 @@ import 'views/log_session_view.dart';
 ///   context,
 ///   protocol: myProtocol,
 ///   userId: currentUserId,
+///   protocolLimit: currentEntitlement.protocolLimit,
 ///   onSessionLogged: (session) {
 ///     // Handle the new session
 ///     viewModel.refresh();

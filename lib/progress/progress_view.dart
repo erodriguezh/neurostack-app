@@ -33,7 +33,6 @@ import 'package:neurostack/progress/progress_state.dart';
 import 'package:neurostack/progress/progress_view_model.dart';
 import 'package:neurostack/progress/widgets/progress_grid.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
-import 'package:neurostack/paywall/domain/entitlement.dart';
 
 const _progressOfflineBanner = HomeBannerModel(
   type: HomeBannerType.offline,
@@ -60,6 +59,7 @@ class _ProgressViewState extends State<ProgressView>
     sessionRepository: locator<SessionRepository>(),
     sessionLocalDataSource: locator<SessionLocalDataSource>(),
     connectivityService: locator<ConnectivityService>(),
+    revenueCatService: locator<RevenueCatService>(),
     cachedUserStore: locator<CachedUserStore>(),
     cachedWeekProgressStore: locator<CachedWeekProgressStore>(),
   );
@@ -262,24 +262,20 @@ class _ProgressViewState extends State<ProgressView>
     required String protocolId,
     required DateTime day,
   }) async {
-    // Resolve userId from auth state
     final authState = locator<AuthService>().authState.value;
-    String? userId;
-    User? user;
-    if (authState is AuthenticatedOnline) {
-      userId = authState.user.id;
-      user = authState.user;
-    } else if (authState is AuthenticatedOffline) {
-      userId = authState.user.id;
-      user = authState.user;
-    }
+    final User? user = switch (authState) {
+      AuthenticatedOnline(:final user) => user,
+      AuthenticatedOffline(:final user) => user,
+      _ => null,
+    };
 
-    if (userId == null) {
+    if (user == null) {
       locator<NotifyService>().setToastEvent(
         ToastEventError(message: 'Unable to identify user'),
       );
       return;
     }
+    final userId = user.id;
 
     // Resolve Protocol: try cache first, then repository fallback
     final cachedProtocols = await locator<CachedProtocolStore>().loadProtocols(
@@ -313,10 +309,7 @@ class _ProgressViewState extends State<ProgressView>
       context,
       protocol: protocol,
       userId: userId,
-      protocolLimit: Entitlement.of(
-        user!,
-        locator<RevenueCatService>().entitlementSnapshot.value,
-      ).protocolLimit,
+      protocolLimit: _viewModel.protocolLimitFor(user),
       initialDate: day,
       onSessionLogged: (session) {
         sessionCountFuture = locator<ReviewTriggerHelper>().captureSessionCount(

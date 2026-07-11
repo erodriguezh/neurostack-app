@@ -19,6 +19,8 @@ import 'package:neurostack/features/session/domain/repositories/session_reposito
 import 'package:neurostack/features/user/domain/entities/user.dart';
 import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
 import 'package:neurostack/home/home_bottom_tab_coordinator.dart';
+import 'package:neurostack/paywall/data/revenuecat_service.dart';
+import 'package:neurostack/paywall/domain/entitlement.dart';
 import 'package:neurostack/progress/data/cached_week_progress_store.dart';
 import 'package:neurostack/progress/progress_state.dart';
 
@@ -34,6 +36,7 @@ class ProgressViewModel {
     required SessionRepository sessionRepository,
     required SessionLocalDataSource sessionLocalDataSource,
     required ConnectivityService connectivityService,
+    required RevenueCatService revenueCatService,
     CachedUserStore? cachedUserStore,
     CachedWeekProgressStore? cachedWeekProgressStore,
     HomeBottomTabCoordinator? tabCoordinator,
@@ -44,6 +47,7 @@ class ProgressViewModel {
        _sessionRepository = sessionRepository,
        _sessionLocalDataSource = sessionLocalDataSource,
        _connectivityService = connectivityService,
+       _revenueCatService = revenueCatService,
        _cachedUserStore = cachedUserStore,
        _cachedWeekProgressStore = cachedWeekProgressStore,
        _tabCoordinator =
@@ -59,6 +63,7 @@ class ProgressViewModel {
   final SessionRepository _sessionRepository;
   final SessionLocalDataSource _sessionLocalDataSource;
   final ConnectivityService _connectivityService;
+  final RevenueCatService _revenueCatService;
   final CachedUserStore? _cachedUserStore;
   final CachedWeekProgressStore? _cachedWeekProgressStore;
   final HomeBottomTabCoordinator _tabCoordinator;
@@ -86,6 +91,14 @@ class ProgressViewModel {
 
   Future<void> onAppResumed() async {
     await _loadWeek(showLoading: false);
+  }
+
+  /// Resolves the current Protocol Limit for session logging.
+  int? protocolLimitFor(User user) {
+    return Entitlement.of(
+      user,
+      _revenueCatService.entitlementSnapshot.value,
+    ).protocolLimit;
   }
 
   void onSelectBottomTab(HomeBottomTab tab) {

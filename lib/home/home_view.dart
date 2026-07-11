@@ -405,8 +405,8 @@ class _HomeViewState extends State<HomeView> {
           return;
         case TrialExpiredChoice.continueWithFree:
           final user = _viewModel.state.value.user;
-          final freeLimit = SubscriptionStatus.free.protocolLimit!;
-          final success = user != null && user.activeProtocolCount > freeLimit
+          final success =
+              user != null && user.activeProtocolCount > kFreeProtocolLimit
               ? await _runStackTrimFlow(user)
               : await _viewModel.handleUseFreeTier();
           if (success) {

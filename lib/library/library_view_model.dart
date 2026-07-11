@@ -431,6 +431,7 @@ class LibraryViewModel
     List<Protocol> protocols, {
     String? highlightProtocolId,
   }) {
+    updateEntitlement(user);
     final isOffline = state.value.isOffline;
     final cards = _buildCards(
       user,
@@ -467,7 +468,7 @@ class LibraryViewModel
     required bool isOffline,
     String? highlightProtocolId,
   }) {
-    final limit = resolvedEntitlement.protocolLimit;
+    final protocolLimit = resolvedEntitlement.protocolLimit;
     final sorted = List<Protocol>.from(protocols)
       ..sort((a, b) {
         final categoryCompare = a.category.index.compareTo(b.category.index);
@@ -477,10 +478,10 @@ class LibraryViewModel
 
         final statusCompare =
             _statusRank(
-              _deriveCardStatus(user, a.id, limit),
+              _deriveCardStatus(user, a.id, protocolLimit),
             ).compareTo(
               _statusRank(
-                _deriveCardStatus(user, b.id, limit),
+                _deriveCardStatus(user, b.id, protocolLimit),
               ),
             );
         if (statusCompare != 0) {
@@ -491,7 +492,7 @@ class LibraryViewModel
       });
 
     return sorted.map((protocol) {
-      final status = _deriveCardStatus(user, protocol.id, limit);
+      final status = _deriveCardStatus(user, protocol.id, protocolLimit);
       final disableBadge = isOffline && status == LibraryCardStatus.available;
 
       return LibraryProtocolCardModel(
@@ -548,13 +549,13 @@ class LibraryViewModel
   LibraryCardStatus _deriveCardStatus(
     User user,
     String protocolId,
-    int? limit,
+    int? protocolLimit,
   ) {
     if (user.activeProtocolIds.contains(protocolId)) {
       return LibraryCardStatus.inStack;
     }
 
-    if (limit != null && user.activeProtocolCount >= limit) {
+    if (protocolLimit != null && user.activeProtocolCount >= protocolLimit) {
       return LibraryCardStatus.locked;
     }
 

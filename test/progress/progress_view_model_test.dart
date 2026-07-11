@@ -27,9 +27,11 @@ import 'package:neurostack/features/user/domain/value_objects/stack.dart'
 import 'package:neurostack/progress/data/cached_week_progress_store.dart';
 import 'package:neurostack/progress/progress_state.dart';
 import 'package:neurostack/progress/progress_view_model.dart';
+import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../factories/factories.dart';
+import '../mocks/fake_revenuecat_client.dart';
 
 void main() {
   group('ProgressViewModel', () {
@@ -142,6 +144,7 @@ void main() {
           sessionRepository: FakeSessionRepository(),
           sessionLocalDataSource: sessionLocalDataSource,
           connectivityService: FakeConnectivityService(),
+          revenueCatService: RevenueCatService(FakeRevenueCatClient()),
           cachedUserStore: FakeCachedUserStore(),
           cachedWeekProgressStore: cachedWeekProgressStore,
         );
@@ -374,6 +377,7 @@ void main() {
           sessionRepository: sessionRepository,
           sessionLocalDataSource: sessionLocalDataSource,
           connectivityService: connectivityService,
+          revenueCatService: RevenueCatService(FakeRevenueCatClient()),
           cachedUserStore: cachedUserStore,
           cachedWeekProgressStore: FakeCachedWeekProgressStore(),
         );

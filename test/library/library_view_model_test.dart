@@ -126,11 +126,17 @@ void main() {
         expect(card3.status, LibraryCardStatus.locked);
       });
 
-      test('premium user - all protocols available (no locking)', () async {
-        // Arrange: premium user with 2 active protocols
+      test('repository premium status overrides stale auth status', () async {
+        // Arrange: the repository has a fresher status than AuthService.
         final user = UserFactory.create(
           subscriptionStatus: SubscriptionStatus.premiumMonthly,
           stack: StackFactory.atFreeCapacity(), // protocol-1, protocol-2
+          onboardingCompleted: true,
+        );
+        final staleAuthUser = UserFactory.create(
+          id: user.id,
+          subscriptionStatus: SubscriptionStatus.free,
+          stack: StackFactory.atFreeCapacity(),
           onboardingCompleted: true,
         );
 
@@ -149,7 +155,7 @@ void main() {
 
         when(
           () => mockAuthService.authState,
-        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(staleAuthUser)));
         when(
           () => mockUserRepository.getById(any()),
         ).thenAnswer((_) async => right(user));

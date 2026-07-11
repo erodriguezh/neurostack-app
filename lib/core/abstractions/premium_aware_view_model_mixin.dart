@@ -107,7 +107,7 @@ mixin PremiumAwareViewModelMixin on EntitlementListenerMixin {
 
     final user = resolveAuthUser();
     if (user != null) {
-      _updateEntitlement(user);
+      updateEntitlement(user);
       return;
     }
 
@@ -116,7 +116,7 @@ mixin PremiumAwareViewModelMixin on EntitlementListenerMixin {
     premiumCachedUserStore
         ?.loadUser()
         .then((cached) {
-          if (cached != null && !_premiumDisposed) _updateEntitlement(cached);
+          if (cached != null && !_premiumDisposed) updateEntitlement(cached);
         })
         .catchError((_) {});
   }
@@ -139,6 +139,18 @@ mixin PremiumAwareViewModelMixin on EntitlementListenerMixin {
     };
   }
 
+  /// Re-resolves [entitlement] for a user loaded after construction.
+  ///
+  /// ViewModels should call this when a repository or cache provides a fresher
+  /// user than the snapshot currently held by [premiumAuthService].
+  @protected
+  void updateEntitlement(User user) {
+    if (_premiumDisposed) return;
+
+    final snapshot = entitlementListenerService.entitlementSnapshot.value;
+    entitlement.value = Entitlement.of(user, snapshot);
+  }
+
   // ---------------------------------------------------------------------------
   // Private
   // ---------------------------------------------------------------------------
@@ -149,11 +161,5 @@ mixin PremiumAwareViewModelMixin on EntitlementListenerMixin {
 
     final snapshot = entitlementListenerService.entitlementSnapshot.value;
     return Entitlement.of(user, snapshot);
-  }
-
-  void _updateEntitlement(User user) {
-    if (_premiumDisposed) return;
-    final snapshot = entitlementListenerService.entitlementSnapshot.value;
-    entitlement.value = Entitlement.of(user, snapshot);
   }
 }

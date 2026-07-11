@@ -261,8 +261,7 @@ class HomeViewModel
       return false;
     }
 
-    final freeLimit = SubscriptionStatus.free.protocolLimit!;
-    if (user.activeProtocolCount > freeLimit) {
+    if (user.activeProtocolCount > kFreeProtocolLimit) {
       state.value = state.value.copyWith(showDeactivationModal: true);
       return false;
     }
@@ -461,6 +460,7 @@ class HomeViewModel
     if (cards == null) {
       return;
     }
+    updateEntitlement(user);
 
     final status = user.activeProtocolIds.isEmpty
         ? HomeStatus.empty
@@ -775,10 +775,9 @@ class HomeViewModel
           isTappable: true,
         );
       case SubscriptionStatus.free:
-        final limit = resolvedEntitlement.protocolLimit!;
         return HomeBannerModel(
           type: HomeBannerType.free,
-          message: '${user.activeProtocolCount}/$limit active',
+          message: '${user.activeProtocolCount}/$kFreeProtocolLimit active',
           isTappable: false,
         );
       case SubscriptionStatus.expired:

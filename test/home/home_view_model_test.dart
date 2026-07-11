@@ -460,16 +460,21 @@ void main() {
         },
       );
 
-      test('triggers for premium expiration (expired status)', () async {
+      test('triggers when repository reports premium expiration', () async {
         // Arrange
         final user = UserFactory.create(
           subscriptionStatus: SubscriptionStatus.expired,
           onboardingCompleted: true,
         );
+        final staleAuthUser = UserFactory.create(
+          id: user.id,
+          subscriptionStatus: SubscriptionStatus.trial,
+          onboardingCompleted: true,
+        );
 
         when(
           () => mockAuthService.authState,
-        ).thenReturn(ValueNotifier(AuthenticatedOnline(user)));
+        ).thenReturn(ValueNotifier(AuthenticatedOnline(staleAuthUser)));
         when(
           () => mockUserRepository.getById(any()),
         ).thenAnswer((_) async => right(user));

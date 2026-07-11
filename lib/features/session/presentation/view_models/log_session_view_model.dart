@@ -112,8 +112,6 @@ class LogSessionViewModel {
 
     result.fold(
       (failure) {
-        // BUG D fix: Only TooManyActiveProtocols -> LogSessionIneligible
-        // Other failures should be LogSessionError
         if (failure.code == UserFailures.tooManyActiveProtocols.code) {
           state.value = LogSessionIneligible(failure);
         } else {

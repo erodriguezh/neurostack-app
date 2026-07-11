@@ -102,7 +102,6 @@ class _TrialExpiredModalState extends State<TrialExpiredModal>
 
   @override
   Widget build(BuildContext context) {
-    final freeProtocolLimit = SubscriptionStatus.free.protocolLimit!;
     final kitColors = context.kitColors;
     final spacing = context.spacing;
 
@@ -168,12 +167,12 @@ class _TrialExpiredModalState extends State<TrialExpiredModal>
                           height: 1.2,
                         ),
                       ),
-                      if (widget.activeProtocolCount > freeProtocolLimit) ...[
+                      if (widget.activeProtocolCount > kFreeProtocolLimit) ...[
                         SizedBox(height: spacing.md),
                         ConstrainedBox(
                           constraints: const BoxConstraints(maxWidth: 280),
                           child: Text(
-                            'You currently have ${widget.activeProtocolCount} active protocols. The free tier allows $freeProtocolLimit.',
+                            'You currently have ${widget.activeProtocolCount} active protocols. The free tier allows $kFreeProtocolLimit.',
                             textAlign: TextAlign.center,
                             style: GoogleFonts.inter(
                               fontSize: 15,

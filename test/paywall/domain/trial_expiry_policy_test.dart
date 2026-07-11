@@ -50,6 +50,43 @@ void main() {
 
         expect(result, isFalse);
       });
+
+      test('exactReminderWindowBoundaries_returnTrue', () {
+        final now = DateTime(2026, 6, 19, 10);
+
+        for (final expirationDate in [
+          now,
+          now.add(const Duration(hours: 24)),
+        ]) {
+          final snapshot = EntitlementSnapshotFactory.activeTrial(
+            expirationDate: expirationDate,
+          );
+
+          expect(
+            policy.shouldShowReminder(snapshot: snapshot, now: now),
+            isTrue,
+          );
+        }
+      });
+
+      test('nonActiveTrialInputs_returnFalse', () {
+        final now = DateTime(2026, 6, 19, 10);
+        final snapshots = [
+          null,
+          EntitlementSnapshotFactory.expiredTrial(),
+          EntitlementSnapshotFactory.activePaidMonthly(
+            expirationDate: now.add(const Duration(hours: 12)),
+          ),
+          EntitlementSnapshotFactory.activeTrial(),
+        ];
+
+        for (final snapshot in snapshots) {
+          expect(
+            policy.shouldShowReminder(snapshot: snapshot, now: now),
+            isFalse,
+          );
+        }
+      });
     });
 
     group('shouldShowExpiredModal', () {
@@ -105,6 +142,25 @@ void main() {
         );
 
         expect(result, isFalse);
+      });
+
+      test('freshInstallWithoutExpiredTrial_returnsFalse', () {
+        final snapshots = [
+          null,
+          EntitlementSnapshotFactory.expiredPaid(),
+          EntitlementSnapshotFactory.activeTrial(),
+        ];
+
+        for (final snapshot in snapshots) {
+          expect(
+            policy.shouldShowExpiredModal(
+              effectiveStatus: SubscriptionStatus.free,
+              lastSeen: null,
+              snapshot: snapshot,
+            ),
+            isFalse,
+          );
+        }
       });
     });
   });
