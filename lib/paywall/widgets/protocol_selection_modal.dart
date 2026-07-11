@@ -60,18 +60,22 @@ class ProtocolSelectionViewModel {
       return Set<String>.unmodifiable(seeded);
     }
 
-    final rankedItems = _items.indexed.toList()
-      ..sort((left, right) {
-        final countComparison = right.$2.sessionCount.compareTo(
-          left.$2.sessionCount,
-        );
-        return countComparison != 0
-            ? countComparison
-            : left.$1.compareTo(right.$1);
-      });
+    final rankedItems = [
+      for (final (stackIndex, item) in _items.indexed)
+        (stackIndex: stackIndex, item: item),
+    ];
+    rankedItems.sort((left, right) {
+      final sessionCountComparison = right.item.sessionCount.compareTo(
+        left.item.sessionCount,
+      );
+      if (sessionCountComparison != 0) {
+        return sessionCountComparison;
+      }
+      return left.stackIndex.compareTo(right.stackIndex);
+    });
 
     return Set<String>.unmodifiable(
-      rankedItems.take(_selectionLimit).map((entry) => entry.$2.protocolId),
+      rankedItems.take(_selectionLimit).map((entry) => entry.item.protocolId),
     );
   }
 
@@ -200,16 +204,7 @@ class _ProtocolSelectionModalState extends State<ProtocolSelectionModal> {
                           return _ProtocolSelectionRow(
                             item: item,
                             selected: selectedIds.contains(item.protocolId),
-                            onTap: () {
-                              final changed = _viewModel.toggle(
-                                item.protocolId,
-                              );
-                              if (changed) {
-                                HapticFeedback.selectionClick();
-                              } else {
-                                HapticFeedback.lightImpact();
-                              }
-                            },
+                            onTap: () => _toggleProtocol(item.protocolId),
                           );
                         },
                       ),
@@ -223,14 +218,7 @@ class _ProtocolSelectionModalState extends State<ProtocolSelectionModal> {
                       ),
                       child: _ConfirmButton(
                         enabled: _viewModel.canConfirm,
-                        onPressed: () {
-                          final result = _viewModel.confirm();
-                          if (result == null) {
-                            return;
-                          }
-                          HapticFeedback.mediumImpact();
-                          Navigator.of(context).pop(result);
-                        },
+                        onPressed: _confirmSelection,
                       ),
                     ),
                   ],
@@ -241,6 +229,24 @@ class _ProtocolSelectionModalState extends State<ProtocolSelectionModal> {
         ),
       ),
     );
+  }
+
+  void _toggleProtocol(String protocolId) {
+    final selectionChanged = _viewModel.toggle(protocolId);
+    if (selectionChanged) {
+      HapticFeedback.selectionClick();
+      return;
+    }
+    HapticFeedback.lightImpact();
+  }
+
+  void _confirmSelection() {
+    final selectedProtocolIds = _viewModel.confirm();
+    if (selectedProtocolIds == null) {
+      return;
+    }
+    HapticFeedback.mediumImpact();
+    Navigator.of(context).pop(selectedProtocolIds);
   }
 }
 

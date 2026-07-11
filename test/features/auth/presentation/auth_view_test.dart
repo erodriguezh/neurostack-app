@@ -96,7 +96,7 @@ void main() {
 
       // Assert
       expect(
-        find.text(const SupaMagicAuthLocalization().validEmailError),
+        find.text('Please enter a valid email address'),
         findsOneWidget,
       );
     },
