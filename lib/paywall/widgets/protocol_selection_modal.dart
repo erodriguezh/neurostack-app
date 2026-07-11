@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
+import 'package:neurostack/core/ui/constants/curves.dart';
 import 'package:neurostack/core/ui/widgets/dark_theme_scope.dart';
 import 'package:neurostack/home/home_state.dart';
 
@@ -147,7 +148,7 @@ class _ProtocolSelectionModalState extends State<ProtocolSelectionModal> {
                           const SizedBox(height: 12),
                           AnimatedContainer(
                             duration: const Duration(milliseconds: 200),
-                            curve: Curves.easeOut,
+                            curve: CustomCurves.easeOut,
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
                               vertical: 6,
@@ -163,8 +164,7 @@ class _ProtocolSelectionModalState extends State<ProtocolSelectionModal> {
                                     : Colors.white.withValues(alpha: 0.08),
                               ),
                             ),
-                            child: Text(
-                              '$selectedCount/$_selectionLimit SELECTED',
+                            child: DefaultTextStyle(
                               style: GoogleFonts.jetBrainsMono(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
@@ -172,6 +172,24 @@ class _ProtocolSelectionModalState extends State<ProtocolSelectionModal> {
                                 color: complete
                                     ? kitColors.brandSky
                                     : Colors.white.withValues(alpha: 0.5),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  AnimatedSwitcher(
+                                    key: const Key(
+                                      'protocol-selection-counter-switcher',
+                                    ),
+                                    duration: const Duration(milliseconds: 200),
+                                    switchInCurve: CustomCurves.easeOut,
+                                    switchOutCurve: CustomCurves.easeOut,
+                                    child: Text(
+                                      '$selectedCount',
+                                      key: ValueKey(selectedCount),
+                                    ),
+                                  ),
+                                  const Text('/$_selectionLimit SELECTED'),
+                                ],
                               ),
                             ),
                           ),
@@ -247,7 +265,7 @@ class _ProtocolSelectionRow extends StatelessWidget {
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOut,
+          curve: CustomCurves.easeOut,
           constraints: const BoxConstraints(minHeight: 76),
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
@@ -267,11 +285,11 @@ class _ProtocolSelectionRow extends StatelessWidget {
             children: [
               AnimatedScale(
                 duration: const Duration(milliseconds: 200),
-                curve: Curves.easeOut,
+                curve: CustomCurves.easeOut,
                 scale: selected ? 1.05 : 1,
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeOut,
+                  curve: CustomCurves.easeOut,
                   width: 26,
                   height: 26,
                   decoration: BoxDecoration(
@@ -374,7 +392,7 @@ class _ConfirmButton extends StatelessWidget {
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOut,
+      curve: CustomCurves.easeOut,
       width: double.infinity,
       height: 56,
       decoration: BoxDecoration(
@@ -405,12 +423,17 @@ class _ConfirmButton extends StatelessWidget {
           disabledForegroundColor: Colors.white.withValues(alpha: 0.3),
           shape: const StadiumBorder(),
         ),
-        child: Text(
-          'Confirm Selection',
+        child: AnimatedDefaultTextStyle(
+          duration: const Duration(milliseconds: 300),
+          curve: CustomCurves.easeOut,
           style: GoogleFonts.inter(
+            color: enabled
+                ? _modalBackgroundColor
+                : Colors.white.withValues(alpha: 0.3),
             fontSize: 15,
             fontWeight: FontWeight.w600,
           ),
+          child: const Text('Confirm Selection'),
         ),
       ),
     );

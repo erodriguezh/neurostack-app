@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
 import 'package:neurostack/home/home_state.dart';
 import 'package:neurostack/paywall/widgets/protocol_selection_modal.dart';
@@ -86,15 +87,58 @@ void main() {
   });
 
   group('ProtocolSelectionModal', () {
+    testWidgets('usesTheSpecifiedSelectionAnimations', (tester) async {
+      await pumpModal(tester);
+
+      final checkboxAnimations = tester.widgetList<AnimatedContainer>(
+        find.ancestor(
+          of: find.byIcon(LucideIcons.check),
+          matching: find.byType(AnimatedContainer),
+        ),
+      );
+      expect(
+        checkboxAnimations,
+        contains(
+          isA<AnimatedContainer>()
+              .having(
+                (animation) => animation.duration,
+                'duration',
+                const Duration(milliseconds: 200),
+              )
+              .having(
+                (animation) => animation.curve,
+                'curve',
+                Curves.easeOut,
+              ),
+        ),
+      );
+
+      final confirmAnimation = tester.widget<AnimatedContainer>(
+        find.ancestor(
+          of: find.widgetWithText(TextButton, 'Confirm Selection'),
+          matching: find.byType(AnimatedContainer),
+        ),
+      );
+      expect(confirmAnimation.duration, const Duration(milliseconds: 300));
+      expect(confirmAnimation.curve, Curves.easeOut);
+
+      final counterAnimation = tester.widget<AnimatedSwitcher>(
+        find.byKey(const Key('protocol-selection-counter-switcher')),
+      );
+      expect(counterAnimation.duration, const Duration(milliseconds: 200));
+    });
+
     testWidgets('toggleUpdatesCounterAndConfirmBoundary', (tester) async {
       await pumpModal(tester);
 
-      expect(find.text('2/2 SELECTED'), findsOneWidget);
+      expect(find.text('2'), findsOneWidget);
+      expect(find.text('/2 SELECTED'), findsOneWidget);
 
       await tester.tap(find.text('Protocol One'));
       await tester.pumpAndSettle();
 
-      expect(find.text('1/2 SELECTED'), findsOneWidget);
+      expect(find.text('1'), findsOneWidget);
+      expect(find.text('/2 SELECTED'), findsOneWidget);
       final button = tester.widget<TextButton>(
         find.widgetWithText(TextButton, 'Confirm Selection'),
       );
@@ -103,7 +147,8 @@ void main() {
       await tester.tap(find.text('Protocol Three'));
       await tester.pumpAndSettle();
 
-      expect(find.text('2/2 SELECTED'), findsOneWidget);
+      expect(find.text('2'), findsOneWidget);
+      expect(find.text('/2 SELECTED'), findsOneWidget);
       final enabledButton = tester.widget<TextButton>(
         find.widgetWithText(TextButton, 'Confirm Selection'),
       );
@@ -117,7 +162,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Protocol Three'), findsOneWidget);
-      expect(find.text('2/2 SELECTED'), findsOneWidget);
+      expect(find.text('2'), findsOneWidget);
+      expect(find.text('/2 SELECTED'), findsOneWidget);
     });
 
     testWidgets('showDialogReturnsConfirmedSelection', (tester) async {
