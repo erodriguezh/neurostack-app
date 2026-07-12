@@ -56,8 +56,8 @@ dependencies:
   json_annotation: ^4.9.0
   google_fonts: ^6.2.1
   supabase_flutter: ^2.10.3
-  supabase_auth_ui: ^0.6.1
-  email_validator: ^3.0.0
+  supabase_auth_ui: ^0.5.5
+  email_validator: ^2.0.1
   shared_preferences: ^2.3.5
   connectivity_plus: ^6.1.4
   flutter_svg: ^2.2.3

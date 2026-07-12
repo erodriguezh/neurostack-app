@@ -30,7 +30,7 @@ Future<void> initDataSource() async {
           'SUPABASE_URL',
           defaultValue: '',
         ),
-        publishableKey: const String.fromEnvironment(
+        anonKey: const String.fromEnvironment(
           'SUPABASE_PUBLISHABLE_KEY',
           defaultValue: '',
         ),
