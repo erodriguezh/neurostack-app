@@ -31,7 +31,10 @@ void main() {
     ),
   ];
 
-  Future<void> pumpModal(WidgetTester tester) async {
+  Future<void> pumpModal(
+    WidgetTester tester, {
+    List<ProtocolSelectionItem>? modalItems,
+  }) async {
     tester.view.physicalSize = const Size(800, 1200);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(() {
@@ -43,24 +46,82 @@ void main() {
       MaterialApp(
         theme: AppTheme.buildTheme(Brightness.dark),
         home: Scaffold(
-          body: ProtocolSelectionModal(items: items),
+          body: ProtocolSelectionModal(items: modalItems ?? items),
         ),
       ),
     );
     await tester.pumpAndSettle();
   }
 
-  group('ProtocolSelectionViewModel', () {
-    test('defaultsToFirstTwoProtocolsInStackOrder', () {
-      final viewModel = ProtocolSelectionViewModel(items: items);
-      addTearDown(viewModel.dispose);
+  List<Object?> captureHapticFeedback(WidgetTester tester) {
+    final hapticTypes = <Object?>[];
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async {
+        if (call.method == 'HapticFeedback.vibrate') {
+          hapticTypes.add(call.arguments);
+        }
+        return null;
+      },
+    );
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      ),
+    );
+    return hapticTypes;
+  }
 
-      expect(viewModel.selectedProtocolIds.value, {
-        'protocol-1',
-        'protocol-2',
+  ProtocolSelectionItem selectionItem(String id, int sessionCount) {
+    return ProtocolSelectionItem(
+      protocolId: id,
+      name: id,
+      categoryLabel: 'MIND',
+      sessionCount: sessionCount,
+    );
+  }
+
+  group('ProtocolSelectionViewModel', () {
+    final preselectionCases = [
+      (
+        scenario: 'withDistinctSessionCounts',
+        items: [
+          selectionItem('first', 1),
+          selectionItem('second', 8),
+          selectionItem('third', 5),
+        ],
+        expected: {'second', 'third'},
+      ),
+      (
+        scenario: 'withTiedSessionCounts',
+        items: [
+          selectionItem('first', 4),
+          selectionItem('second', 4),
+          selectionItem('third', 4),
+        ],
+        expected: {'first', 'second'},
+      ),
+      (
+        scenario: 'withZeroSessionCounts',
+        items: [
+          selectionItem('first', 0),
+          selectionItem('second', 0),
+          selectionItem('third', 0),
+        ],
+        expected: {'first', 'second'},
+      ),
+    ];
+
+    for (final testCase in preselectionCases) {
+      test('constructor_${testCase.scenario}_preselectsTopProtocols', () {
+        final viewModel = ProtocolSelectionViewModel(items: testCase.items);
+        addTearDown(viewModel.dispose);
+
+        expect(viewModel.selectedProtocolIds.value, testCase.expected);
+        expect(viewModel.canConfirm, isTrue);
       });
-      expect(viewModel.canConfirm, isTrue);
-    });
+    }
 
     test('respectsInitialSelection', () {
       final viewModel = ProtocolSelectionViewModel(
@@ -75,7 +136,7 @@ void main() {
       });
     });
 
-    test('hardCapPreventsThirdSelection', () {
+    test('toggle_atSelectionLimit_preservesSelection', () {
       final viewModel = ProtocolSelectionViewModel(items: items);
       addTearDown(viewModel.dispose);
 
@@ -89,6 +150,57 @@ void main() {
   });
 
   group('ProtocolSelectionModal', () {
+    final preselectionRenderingCases = [
+      (
+        scenario: 'withHighestSessionCounts',
+        items: [
+          selectionItem('first', 1),
+          selectionItem('second', 8),
+          selectionItem('third', 5),
+        ],
+        expectedSelected: {'second', 'third'},
+      ),
+      (
+        // Two protocols tie at 5 sessions; stack order breaks the tie.
+        scenario: 'withPartiallyTiedSessionCounts',
+        items: [
+          selectionItem('first', 8),
+          selectionItem('second', 5),
+          selectionItem('third', 5),
+        ],
+        expectedSelected: {'first', 'second'},
+      ),
+      (
+        scenario: 'withAllZeroSessionCounts',
+        items: [
+          selectionItem('first', 0),
+          selectionItem('second', 0),
+          selectionItem('third', 0),
+        ],
+        expectedSelected: {'first', 'second'},
+      ),
+    ];
+
+    for (final testCase in preselectionRenderingCases) {
+      testWidgets('render_${testCase.scenario}_preselectsExpectedRows', (
+        tester,
+      ) async {
+        final semantics = tester.ensureSemantics();
+        await pumpModal(tester, modalItems: testCase.items);
+
+        for (final item in testCase.items) {
+          final row = tester.getSemantics(find.text(item.name));
+          expect(
+            row.hasFlag(SemanticsFlag.isSelected),
+            testCase.expectedSelected.contains(item.protocolId),
+            reason: '${item.name} selection state',
+          );
+        }
+        expect(find.text('2/2 SELECTED'), findsOneWidget);
+        semantics.dispose();
+      });
+    }
+
     testWidgets('rowsExposeAccessibleSelectionStateAndDetails', (
       tester,
     ) async {
@@ -173,7 +285,10 @@ void main() {
       expect(enabledButton.onPressed, isNotNull);
     });
 
-    testWidgets('hardCapThirdTapDoesNotChangeSelection', (tester) async {
+    testWidgets('tapProtocol_atSelectionLimit_emitsLightImpact', (
+      tester,
+    ) async {
+      final hapticTypes = captureHapticFeedback(tester);
       await pumpModal(tester);
 
       await tester.tap(find.text('Protocol Three'));
@@ -181,6 +296,27 @@ void main() {
 
       expect(find.text('Protocol Three'), findsOneWidget);
       expect(find.text('2/2 SELECTED'), findsOneWidget);
+      expect(hapticTypes, ['HapticFeedbackType.lightImpact']);
+    });
+
+    testWidgets('toggleAndConfirm_withValidSelection_emitsHaptics', (
+      tester,
+    ) async {
+      final hapticTypes = captureHapticFeedback(tester);
+      await pumpModal(tester);
+
+      await tester.tap(find.text('Protocol One'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Protocol Three'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Confirm Selection'));
+      await tester.pumpAndSettle();
+
+      expect(hapticTypes, [
+        'HapticFeedbackType.selectionClick',
+        'HapticFeedbackType.selectionClick',
+        'HapticFeedbackType.mediumImpact',
+      ]);
     });
 
     testWidgets('showDialogReturnsConfirmedSelection', (tester) async {

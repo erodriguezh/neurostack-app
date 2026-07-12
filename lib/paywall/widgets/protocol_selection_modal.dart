@@ -27,9 +27,9 @@ class ProtocolSelectionViewModel {
 
   bool get canConfirm => selectedProtocolIds.value.length == _selectionLimit;
 
-  void toggle(String protocolId) {
+  bool toggle(String protocolId) {
     if (!_activeProtocolIds.contains(protocolId)) {
-      return;
+      return false;
     }
 
     final next = Set<String>.from(selectedProtocolIds.value);
@@ -37,11 +37,12 @@ class ProtocolSelectionViewModel {
       next.remove(protocolId);
     } else {
       if (next.length >= _selectionLimit) {
-        return;
+        return false;
       }
       next.add(protocolId);
     }
     selectedProtocolIds.value = Set<String>.unmodifiable(next);
+    return true;
   }
 
   List<String>? confirm() {
@@ -60,8 +61,22 @@ class ProtocolSelectionViewModel {
       return Set<String>.unmodifiable(seeded);
     }
 
+    final rankedItems = [
+      for (final (stackIndex, item) in _items.indexed)
+        (stackIndex: stackIndex, item: item),
+    ];
+    rankedItems.sort((left, right) {
+      final sessionCountComparison = right.item.sessionCount.compareTo(
+        left.item.sessionCount,
+      );
+      if (sessionCountComparison != 0) {
+        return sessionCountComparison;
+      }
+      return left.stackIndex.compareTo(right.stackIndex);
+    });
+
     return Set<String>.unmodifiable(
-      _items.take(_selectionLimit).map((item) => item.protocolId),
+      rankedItems.take(_selectionLimit).map((entry) => entry.item.protocolId),
     );
   }
 
@@ -113,13 +128,6 @@ class _ProtocolSelectionModalState extends State<ProtocolSelectionModal> {
     super.dispose();
   }
 
-  void _confirmSelection() {
-    final result = _viewModel.confirm();
-    if (result != null) {
-      Navigator.of(context).pop(result);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final textStyles = context.textStyles;
@@ -169,7 +177,7 @@ class _ProtocolSelectionModalState extends State<ProtocolSelectionModal> {
                             return _ProtocolSelectionRow(
                               item: item,
                               selected: selectedIds.contains(item.protocolId),
-                              onTap: () => _viewModel.toggle(item.protocolId),
+                              onTap: () => _toggleProtocol(item.protocolId),
                             );
                           },
                         ),
@@ -195,6 +203,24 @@ class _ProtocolSelectionModalState extends State<ProtocolSelectionModal> {
         ),
       ),
     );
+  }
+
+  void _toggleProtocol(String protocolId) {
+    final selectionChanged = _viewModel.toggle(protocolId);
+    if (selectionChanged) {
+      HapticFeedback.selectionClick();
+      return;
+    }
+    HapticFeedback.lightImpact();
+  }
+
+  void _confirmSelection() {
+    final selectedProtocolIds = _viewModel.confirm();
+    if (selectedProtocolIds == null) {
+      return;
+    }
+    HapticFeedback.mediumImpact();
+    Navigator.of(context).pop(selectedProtocolIds);
   }
 }
 
