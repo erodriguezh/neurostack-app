@@ -5,7 +5,6 @@ import 'package:neurostack/core/ui/app_theme.dart';
 import 'package:neurostack/core/ui/constants/curves.dart';
 import 'package:neurostack/core/ui/constants/durations.dart';
 import 'package:neurostack/core/ui/constants/widget_keys.dart';
-import 'package:neurostack/core/ui/widgets/app_primary_cta.dart';
 import 'package:neurostack/core/utils/internal_notification/notify_service.dart';
 import 'package:neurostack/core/utils/locator.dart';
 import 'package:neurostack/core/utils/l10n/translate_extension.dart';
@@ -13,10 +12,8 @@ import 'package:neurostack/core/utils/navigation/navigation_intent_store.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/features/auth/presentation/auth_view_model.dart';
 import 'package:neurostack/features/auth/presentation/widgets/auth_background.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-
-const _emailLabel = 'Email';
-const _validEmailError = 'Please enter a valid email address';
+import 'package:neurostack/core/ui/widgets/app_primary_cta.dart';
+import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 
 class AuthView extends StatefulWidget {
   const AuthView({super.key});
@@ -132,7 +129,10 @@ class _AuthViewState extends State<AuthView>
                         SizedBox(height: context.spacing.xxl),
                         _MagicLinkAuth(
                           key: const ValueKey('auth_magic_link'),
-                          submitLabel: context.translate.authSendCode,
+                          localization: SupaMagicAuthLocalization(
+                            continueWithMagicLink:
+                                context.translate.authSendCode,
+                          ),
                           onMagicLinkSent: _viewModel.handleMagicLinkSent,
                           onError: _viewModel.handleAuthError,
                         ),
@@ -150,21 +150,21 @@ class _AuthViewState extends State<AuthView>
   }
 }
 
-class _MagicLinkAuth extends StatefulWidget {
+class _MagicLinkAuth extends SupaMagicAuth {
   const _MagicLinkAuth({
     super.key,
     required this.onMagicLinkSent,
-    required this.submitLabel,
-    this.onError,
-  });
+    super.onError,
+    super.localization = const SupaMagicAuthLocalization(),
+  }) : super(onSuccess: _noopAuthSuccess);
 
   final void Function(String email) onMagicLinkSent;
-  final String submitLabel;
-  final void Function(Object error)? onError;
 
   @override
   State<_MagicLinkAuth> createState() => _MagicLinkAuthState();
 }
+
+void _noopAuthSuccess(Object? _) {}
 
 class _MagicLinkAuthState extends State<_MagicLinkAuth> {
   final _formKey = GlobalKey<FormState>();
@@ -195,6 +195,7 @@ class _MagicLinkAuthState extends State<_MagicLinkAuth> {
   Widget build(BuildContext context) {
     final kitColors = context.kitColors;
     final textTheme = context.theme.textTheme;
+    final localization = widget.localization;
     final isEnabled = !_isLoading && _isValidEmail();
 
     return Form(
@@ -203,7 +204,7 @@ class _MagicLinkAuthState extends State<_MagicLinkAuth> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            _emailLabel.toUpperCase(),
+            localization.enterEmail.toUpperCase(),
             style: textTheme.labelSmall?.copyWith(
               color: kitColors.white40,
               letterSpacing: 2,
@@ -237,7 +238,7 @@ class _MagicLinkAuthState extends State<_MagicLinkAuth> {
                   : AutovalidateMode.disabled,
               validator: (_) {
                 if (!_isValidEmail()) {
-                  return _validEmailError;
+                  return localization.validEmailError;
                 }
                 return null;
               },
@@ -300,7 +301,7 @@ class _MagicLinkAuthState extends State<_MagicLinkAuth> {
           SizedBox(height: context.spacing.lg),
           AppPrimaryCta(
             key: WidgetKeys.authSubmitButton,
-            label: widget.submitLabel,
+            label: localization.continueWithMagicLink,
             onPressed: _sendMagicLink,
             enabled: isEnabled,
             loading: _isLoading,
