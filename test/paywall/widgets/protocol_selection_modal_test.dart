@@ -1,3 +1,5 @@
+import 'dart:ui' show SemanticsFlag;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -145,6 +147,66 @@ void main() {
   });
 
   group('ProtocolSelectionModal', () {
+    testWidgets('rowsExposeAccessibleSelectionStateAndDetails', (
+      tester,
+    ) async {
+      final semantics = tester.ensureSemantics();
+      await pumpModal(tester);
+
+      var row = tester.getSemantics(find.text('Protocol One'));
+      expect(row.label, 'Protocol One');
+      expect(row.value, 'EXERCISE, 3 sessions logged');
+      expect(row.hasFlag(SemanticsFlag.isButton), isTrue);
+      expect(row.hasFlag(SemanticsFlag.hasSelectedState), isTrue);
+      expect(row.hasFlag(SemanticsFlag.isSelected), isTrue);
+
+      await tester.tap(find.text('Protocol One'));
+      await tester.pumpAndSettle();
+
+      row = tester.getSemantics(find.text('Protocol One'));
+      expect(row.hasFlag(SemanticsFlag.hasSelectedState), isTrue);
+      expect(row.hasFlag(SemanticsFlag.isSelected), isFalse);
+      semantics.dispose();
+    });
+
+    testWidgets('counterIsLiveRegionAndConfirmExposesEnabledState', (
+      tester,
+    ) async {
+      final semantics = tester.ensureSemantics();
+      await pumpModal(tester);
+
+      final counter = tester.getSemantics(find.text('2/2 SELECTED'));
+      expect(counter.label, '2/2 selected');
+      expect(counter.hasFlag(SemanticsFlag.isLiveRegion), isTrue);
+
+      var confirm = tester.getSemantics(find.text('Confirm Selection'));
+      expect(confirm.label, 'Confirm Selection');
+      expect(confirm.hasFlag(SemanticsFlag.isButton), isTrue);
+      expect(confirm.hasFlag(SemanticsFlag.hasEnabledState), isTrue);
+      expect(confirm.hasFlag(SemanticsFlag.isEnabled), isTrue);
+
+      await tester.tap(find.text('Protocol One'));
+      await tester.pumpAndSettle();
+
+      confirm = tester.getSemantics(find.text('Confirm Selection'));
+      expect(confirm.hasFlag(SemanticsFlag.hasEnabledState), isTrue);
+      expect(confirm.hasFlag(SemanticsFlag.isEnabled), isFalse);
+      semantics.dispose();
+    });
+
+    testWidgets('usesLightSystemUiWhileMounted', (tester) async {
+      await pumpModal(tester);
+
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is AnnotatedRegion<SystemUiOverlayStyle> &&
+              widget.value == SystemUiOverlayStyle.light,
+        ),
+        findsOneWidget,
+      );
+    });
+
     testWidgets('toggleUpdatesCounterAndConfirmBoundary', (tester) async {
       await pumpModal(tester);
 
