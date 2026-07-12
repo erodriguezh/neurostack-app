@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
+import 'package:neurostack/core/ui/constants/curves.dart';
 import 'package:neurostack/core/ui/widgets/dark_theme_scope.dart';
 import 'package:neurostack/home/home_state.dart';
 
@@ -232,6 +233,7 @@ class _SelectionCounter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kitColors = context.kitColors;
+    final animationDuration = context.durations.duration200;
     final isSelectionComplete = selectedCount == _selectionLimit;
     final selectionStatus = '$selectedCount/$_selectionLimit';
 
@@ -240,8 +242,8 @@ class _SelectionCounter extends StatelessWidget {
       label: '$selectionStatus selected',
       excludeSemantics: true,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOut,
+        duration: animationDuration,
+        curve: CustomCurves.easeOut,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         decoration: BoxDecoration(
           color: isSelectionComplete
@@ -254,8 +256,7 @@ class _SelectionCounter extends StatelessWidget {
                 : Colors.white.withValues(alpha: 0.08),
           ),
         ),
-        child: Text(
-          '$selectionStatus SELECTED',
+        child: DefaultTextStyle(
           style: GoogleFonts.jetBrainsMono(
             fontSize: 12,
             fontWeight: FontWeight.w500,
@@ -263,6 +264,21 @@ class _SelectionCounter extends StatelessWidget {
             color: isSelectionComplete
                 ? kitColors.brandSky
                 : Colors.white.withValues(alpha: 0.5),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedSwitcher(
+                duration: animationDuration,
+                switchInCurve: CustomCurves.easeOut,
+                switchOutCurve: CustomCurves.easeOut,
+                child: Text(
+                  '$selectedCount',
+                  key: ValueKey(selectedCount),
+                ),
+              ),
+              const Text('/$_selectionLimit SELECTED'),
+            ],
           ),
         ),
       ),
@@ -284,6 +300,7 @@ class _ProtocolSelectionRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kitColors = context.kitColors;
+    final animationDuration = context.durations.duration200;
     final sessionSummary = '${item.sessionCount} sessions logged';
     final borderColor = selected
         ? kitColors.brandSky.withValues(alpha: 0.3)
@@ -303,8 +320,8 @@ class _ProtocolSelectionRow extends StatelessWidget {
           onTap: onTap,
           excludeFromSemantics: true,
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeOut,
+            duration: animationDuration,
+            curve: CustomCurves.easeOut,
             constraints: const BoxConstraints(minHeight: 76),
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -323,12 +340,12 @@ class _ProtocolSelectionRow extends StatelessWidget {
             child: Row(
               children: [
                 AnimatedScale(
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeOut,
+                  duration: animationDuration,
+                  curve: CustomCurves.easeOut,
                   scale: selected ? 1.05 : 1,
                   child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeOut,
+                    duration: animationDuration,
+                    curve: CustomCurves.easeOut,
                     width: 26,
                     height: 26,
                     decoration: BoxDecoration(
@@ -431,6 +448,10 @@ class _ConfirmButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kitColors = context.kitColors;
+    final animationDuration = context.durations.duration300;
+    final foregroundColor = enabled
+        ? _modalBackgroundColor
+        : Colors.white.withValues(alpha: 0.3);
 
     return Semantics(
       button: true,
@@ -439,8 +460,8 @@ class _ConfirmButton extends StatelessWidget {
       onTap: enabled ? onPressed : null,
       excludeSemantics: true,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
+        duration: animationDuration,
+        curve: CustomCurves.easeOut,
         width: double.infinity,
         height: 56,
         decoration: BoxDecoration(
@@ -465,18 +486,19 @@ class _ConfirmButton extends StatelessWidget {
         child: TextButton(
           onPressed: enabled ? onPressed : null,
           style: TextButton.styleFrom(
-            foregroundColor: enabled
-                ? _modalBackgroundColor
-                : Colors.white.withValues(alpha: 0.3),
+            foregroundColor: foregroundColor,
             disabledForegroundColor: Colors.white.withValues(alpha: 0.3),
             shape: const StadiumBorder(),
           ),
-          child: Text(
-            _confirmSelectionLabel,
+          child: AnimatedDefaultTextStyle(
+            duration: animationDuration,
+            curve: CustomCurves.easeOut,
             style: GoogleFonts.inter(
+              color: foregroundColor,
               fontSize: 15,
               fontWeight: FontWeight.w600,
             ),
+            child: const Text(_confirmSelectionLabel),
           ),
         ),
       ),

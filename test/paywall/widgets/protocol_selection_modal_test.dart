@@ -53,6 +53,15 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  // The counter renders the digit and the '/2 SELECTED' suffix as separate
+  // Text widgets so the digit can animate independently. Assistive tech
+  // still receives a single '$count/2 selected' announcement, asserted in
+  // counterIsLiveRegionAndConfirmExposesEnabledState below.
+  void expectCounterShows(int selectedCount) {
+    expect(find.text('$selectedCount'), findsOneWidget);
+    expect(find.text('/2 SELECTED'), findsOneWidget);
+  }
+
   List<Object?> captureHapticFeedback(WidgetTester tester) {
     final hapticTypes = <Object?>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
@@ -196,7 +205,11 @@ void main() {
             reason: '${item.name} selection state',
           );
         }
-        expect(find.text('2/2 SELECTED'), findsOneWidget);
+        expectCounterShows(2);
+        expect(
+          tester.getSemantics(find.text('/2 SELECTED')).label,
+          '2/2 selected',
+        );
         semantics.dispose();
       });
     }
@@ -229,7 +242,7 @@ void main() {
       final semantics = tester.ensureSemantics();
       await pumpModal(tester);
 
-      final counter = tester.getSemantics(find.text('2/2 SELECTED'));
+      final counter = tester.getSemantics(find.text('/2 SELECTED'));
       expect(counter.label, '2/2 selected');
       expect(counter.hasFlag(SemanticsFlag.isLiveRegion), isTrue);
 
@@ -241,6 +254,9 @@ void main() {
 
       await tester.tap(find.text('Protocol One'));
       await tester.pumpAndSettle();
+
+      final updatedCounter = tester.getSemantics(find.text('/2 SELECTED'));
+      expect(updatedCounter.label, '1/2 selected');
 
       confirm = tester.getSemantics(find.text('Confirm Selection'));
       expect(confirm.hasFlag(SemanticsFlag.hasEnabledState), isTrue);
@@ -261,15 +277,31 @@ void main() {
       );
     });
 
+    testWidgets('counter_whenSelectionChanges_animatesBetweenValues', (
+      tester,
+    ) async {
+      await pumpModal(tester);
+
+      await tester.tap(find.text('Protocol One'));
+      await tester.pump();
+
+      expect(find.text('1'), findsOneWidget);
+      expect(find.text('2'), findsOneWidget);
+
+      await tester.pumpAndSettle();
+      expect(find.text('1'), findsOneWidget);
+      expect(find.text('2'), findsNothing);
+    });
+
     testWidgets('toggleUpdatesCounterAndConfirmBoundary', (tester) async {
       await pumpModal(tester);
 
-      expect(find.text('2/2 SELECTED'), findsOneWidget);
+      expectCounterShows(2);
 
       await tester.tap(find.text('Protocol One'));
       await tester.pumpAndSettle();
 
-      expect(find.text('1/2 SELECTED'), findsOneWidget);
+      expectCounterShows(1);
       final button = tester.widget<TextButton>(
         find.widgetWithText(TextButton, 'Confirm Selection'),
       );
@@ -278,7 +310,7 @@ void main() {
       await tester.tap(find.text('Protocol Three'));
       await tester.pumpAndSettle();
 
-      expect(find.text('2/2 SELECTED'), findsOneWidget);
+      expectCounterShows(2);
       final enabledButton = tester.widget<TextButton>(
         find.widgetWithText(TextButton, 'Confirm Selection'),
       );
@@ -295,7 +327,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Protocol Three'), findsOneWidget);
-      expect(find.text('2/2 SELECTED'), findsOneWidget);
+      expectCounterShows(2);
       expect(hapticTypes, ['HapticFeedbackType.lightImpact']);
     });
 
