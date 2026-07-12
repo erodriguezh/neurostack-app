@@ -19,6 +19,7 @@ class LogSessionParams {
     required this.protocolId,
     required this.completedAt,
     required this.currentTime,
+    required this.protocolLimit,
     this.duration,
     this.notes,
   });
@@ -27,6 +28,7 @@ class LogSessionParams {
   final String protocolId;
   final DateTime completedAt;
   final DateTime currentTime; // Injected for testability
+  final int? protocolLimit;
   final SessionDuration? duration;
   final String? notes;
 }
@@ -59,9 +61,8 @@ class LogSessionUseCase {
   /// - Session validation fails (INV-S2: timestamp in future)
   /// - Create operation fails (from SessionRepository)
   ///
-  /// Note: Time-based trial expiration (INV-U5) is enforced by
-  /// [SubscriptionStatusResolver] / RevenueCat. This use case relies on the
-  /// User's current [subscriptionStatus] as the source of truth.
+  /// The caller supplies the protocol limit from the current Entitlement so
+  /// RevenueCat state and persisted fallback semantics remain centralized.
   Future<Either<DomainFailure, Session>> execute(
     LogSessionParams params,
   ) async {
@@ -70,7 +71,12 @@ class LogSessionUseCase {
 
     // Steps 2-3: Chain sync validations with flatMap
     final sessionDraftResult = userResult
-        .flatMap((user) => user.canLogSession(params.protocolId))
+        .flatMap(
+          (user) => user.canLogSession(
+            params.protocolId,
+            limit: params.protocolLimit,
+          ),
+        )
         .flatMap(
           (_) => SessionDraft.create(
             protocolId: params.protocolId,

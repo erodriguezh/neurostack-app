@@ -13,9 +13,9 @@ import '../../data/services/session_sync_service.dart';
 import '../../domain/entities/pending_session.dart';
 import '../../domain/entities/session.dart';
 import '../../domain/entities/session_draft.dart';
-import '../../domain/use_cases/check_eligibility_use_case.dart';
 import '../../domain/value_objects/session_duration.dart';
 import '../../../user/domain/failures/user_failures.dart';
+import '../../../user/domain/repositories/user_repository.dart';
 import 'log_session_state.dart';
 
 /// ViewModel for the Log Session Modal.
@@ -30,14 +30,16 @@ class LogSessionViewModel {
     required Protocol protocol,
     required DateTime initialDate,
     required String userId,
-    required CheckEligibilityUseCase checkEligibilityUseCase,
+    required UserRepository userRepository,
+    required int? protocolLimit,
     required SessionLocalDataSource sessionLocalDataSource,
     required SessionSyncService sessionSyncService,
     required NotifyService notifyService,
     Uuid? uuid,
   }) : _protocol = protocol,
        _userId = userId,
-       _checkEligibilityUseCase = checkEligibilityUseCase,
+       _userRepository = userRepository,
+       _protocolLimit = protocolLimit,
        _sessionLocalDataSource = sessionLocalDataSource,
        _sessionSyncService = sessionSyncService,
        _notifyService = notifyService,
@@ -48,7 +50,8 @@ class LogSessionViewModel {
 
   final Protocol _protocol;
   final String _userId;
-  final CheckEligibilityUseCase _checkEligibilityUseCase;
+  final UserRepository _userRepository;
+  final int? _protocolLimit;
   final SessionLocalDataSource _sessionLocalDataSource;
   final SessionSyncService _sessionSyncService;
   final NotifyService _notifyService;
@@ -97,10 +100,11 @@ class LogSessionViewModel {
   Future<void> init() async {
     if (_isDisposed) return;
 
-    final result = await _checkEligibilityUseCase.execute(
-      CheckEligibilityParams(
-        userId: _userId,
-        protocolId: _protocol.id,
+    final userResult = await _userRepository.getById(_userId);
+    final result = userResult.flatMap(
+      (user) => user.canLogSession(
+        _protocol.id,
+        limit: _protocolLimit,
       ),
     );
 
@@ -108,8 +112,6 @@ class LogSessionViewModel {
 
     result.fold(
       (failure) {
-        // BUG D fix: Only TooManyActiveProtocols -> LogSessionIneligible
-        // Other failures should be LogSessionError
         if (failure.code == UserFailures.tooManyActiveProtocols.code) {
           state.value = LogSessionIneligible(failure);
         } else {

@@ -1,3 +1,6 @@
+/// Maximum number of protocols available on the Free Tier.
+const kFreeProtocolLimit = 2;
+
 /// User's payment/subscription state.
 ///
 /// Determines protocol limits and feature access.
@@ -7,7 +10,7 @@ enum SubscriptionStatus {
   trial(protocolLimit: null, canAccessPremium: true),
 
   /// Free tier with 2 protocol limit. No time limit (INV-M1, INV-B5).
-  free(protocolLimit: 2, canAccessPremium: false),
+  free(protocolLimit: kFreeProtocolLimit, canAccessPremium: false),
 
   /// Monthly premium subscription ($7.99/month).
   premiumMonthly(protocolLimit: null, canAccessPremium: true),
@@ -16,7 +19,7 @@ enum SubscriptionStatus {
   premiumAnnual(protocolLimit: null, canAccessPremium: true),
 
   /// Subscription expired but not yet downgraded.
-  expired(protocolLimit: 2, canAccessPremium: false),
+  expired(protocolLimit: kFreeProtocolLimit, canAccessPremium: false),
 
   /// Grace period for failed payment (retrying).
   grace(protocolLimit: null, canAccessPremium: true);

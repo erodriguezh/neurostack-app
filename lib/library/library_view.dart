@@ -17,7 +17,6 @@ import 'package:neurostack/features/protocol/domain/repositories/protocol_reposi
 import 'package:neurostack/features/session/domain/repositories/session_repository.dart';
 import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
-import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 import 'package:neurostack/home/home_state.dart';
 import 'package:neurostack/home/widgets/home_bottom_nav.dart';
 import 'package:neurostack/home/widgets/home_status_banner.dart';
@@ -50,7 +49,6 @@ class _LibraryViewState extends State<LibraryView> {
     protocolRepository: locator<ProtocolRepository>(),
     sessionRepository: locator<SessionRepository>(),
     connectivityService: locator<ConnectivityService>(),
-    subscriptionStatusResolver: locator<SubscriptionStatusResolver>(),
     revenueCatService: locator<RevenueCatService>(),
     cachedUserStore: locator<CachedUserStore>(),
     cachedProtocolStore: locator<CachedProtocolStore>(),

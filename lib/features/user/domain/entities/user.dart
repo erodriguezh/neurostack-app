@@ -12,10 +12,8 @@ import '../value_objects/stack.dart';
 /// and onboarding state.
 ///
 /// This aggregate enforces:
-/// - **INV-U1**: Free Tier users CANNOT activate more than 2 protocols
-/// - **INV-U2**: Trial/Premium users CAN activate unlimited protocols,
-///              based on the stored [subscriptionStatus]. Time-based
-///              expiry is handled externally.
+/// - **INV-U1**: Users CANNOT activate beyond the supplied protocol limit
+/// - **INV-U2**: A null supplied limit allows unlimited protocols
 /// - **INV-U4**: Users MUST complete onboarding before tracking Sessions
 /// - **INV-M1**: Free Tier MUST have no time limit
 /// - **INV-M5**: Free Tier users CANNOT activate more than 2 protocols
@@ -23,9 +21,8 @@ import '../value_objects/stack.dart';
 /// - **INV-B5**: Users MUST be able to use Free Tier indefinitely
 /// - **INV-P6**: New users MUST start with `free` status (not `trial`)
 ///
-/// Note: Time-based trial invariants (**INV-U5**, **INV-M2**, **INV-M4**) are
-/// enforced by [SubscriptionStatusResolver] / RevenueCat entitlements.
-/// This entity treats [subscriptionStatus] as the source of truth.
+/// Entitlement resolution is external. This aggregate receives the resolved
+/// protocol limit as input and remains independent of RevenueCat types.
 class User with EntityMixin<String>, AggregateRootMixin<String> {
   User._({
     required this.id,
@@ -40,8 +37,7 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
 
   /// Current subscription status as persisted.
   ///
-  /// Gating decisions are handled by [SubscriptionStatusResolver] using
-  /// RevenueCat entitlements. Internal methods use this field directly.
+  /// Gating decisions are resolved externally from this persisted fallback.
   final SubscriptionStatus subscriptionStatus;
 
   /// User's active protocol collection.
@@ -111,13 +107,14 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
   /// Returns [Left] with:
   /// - [UserFailures.protocolAlreadyActive] if already in stack
   /// - [UserFailures.protocolLimitReached] if at limit
-  Either<DomainFailure, User> activateProtocol(String protocolId) {
+  Either<DomainFailure, User> activateProtocol(
+    String protocolId, {
+    required int? limit,
+  }) {
     // Check if already active
     if (_stack.contains(protocolId)) {
       return left(UserFailures.protocolAlreadyActive);
     }
-
-    final limit = subscriptionStatus.protocolLimit;
 
     // INV-U1, INV-M5, INV-B2: Check protocol limit
     if (limit != null && _stack.count >= limit) {
@@ -228,15 +225,15 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
   ///
   /// Enforces:
   /// - **INV-U4**: Must complete onboarding first
-  /// - Protocol limit based on stored [subscriptionStatus]
-  ///
-  /// Note: **INV-U5** (expired trial gating) is now enforced by
-  /// [SubscriptionStatusResolver], not this entity.
+  /// - Active stack must not exceed the supplied protocol limit
   ///
   /// - [protocolId]: Protocol to log session for.
   ///
   /// Returns [Left] with appropriate failure if cannot log.
-  Either<DomainFailure, Unit> canLogSession(String protocolId) {
+  Either<DomainFailure, Unit> canLogSession(
+    String protocolId, {
+    required int? limit,
+  }) {
     // INV-U4: Must complete onboarding
     if (!onboardingCompleted) {
       return left(UserFailures.onboardingNotCompleted);
@@ -246,8 +243,6 @@ class User with EntityMixin<String>, AggregateRootMixin<String> {
     if (!_stack.contains(protocolId)) {
       return left(UserFailures.protocolNotInStack);
     }
-
-    final limit = subscriptionStatus.protocolLimit;
 
     // Protocol count exceeds limit for current subscription tier
     if (limit != null && _stack.count > limit) {

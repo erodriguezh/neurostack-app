@@ -10,10 +10,8 @@ import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/core/utils/userorient/userorient_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
 import 'package:neurostack/features/auth/data/cached_user_store.dart';
-import 'package:neurostack/features/user/domain/entities/user.dart';
 import 'package:neurostack/home/home_bottom_tab_coordinator.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
-import 'package:neurostack/paywall/domain/entitlement.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -46,7 +44,6 @@ class SettingsViewModel
            HomeBottomTabCoordinator(routerService: routerService),
        _launch = launch ?? launchUrl {
     initPremiumAwareness();
-    canAccessPremium = ValueNotifier<bool>(_computeCanAccessPremium());
   }
 
   final RouterService _routerService;
@@ -61,9 +58,6 @@ class SettingsViewModel
 
   bool _isDisposed = false;
   bool _isRestoring = false;
-
-  /// Whether the user can access premium features (premium + trial).
-  late final ValueNotifier<bool> canAccessPremium;
 
   // --- Mixin wiring ---
 
@@ -80,7 +74,6 @@ class SettingsViewModel
   void onEntitlementChanged() {
     if (_isDisposed) return;
     super.onEntitlementChanged();
-    _refreshCanAccessPremium();
   }
 
   // --- Public API ---
@@ -124,7 +117,7 @@ class SettingsViewModel
     final user = resolveAuthUser();
     if (user == null) return;
 
-    final isPaying = _resolveEntitlement(user).isPremium;
+    final isPaying = entitlement.value.isPremium;
 
     _userOrientService.openBoard(context, userId: user.id, isPaying: isPaying);
   }
@@ -137,7 +130,7 @@ class SettingsViewModel
     final user = resolveAuthUser();
     if (user == null) return;
 
-    final effectiveStatus = _resolveEntitlement(user).effectiveStatus;
+    final effectiveStatus = entitlement.value.effectiveStatus;
 
     final uri = Uri(
       scheme: 'mailto',
@@ -169,10 +162,12 @@ class SettingsViewModel
   /// No-ops on unsupported platforms (Windows, Linux, Fuchsia).
   Future<void> openSubscriptionManagement() async {
     final uri = switch (defaultTargetPlatform) {
-      TargetPlatform.android =>
-        Uri.parse('https://play.google.com/store/account/subscriptions'),
-      TargetPlatform.iOS || TargetPlatform.macOS =>
-        Uri.parse('https://apps.apple.com/account/subscriptions'),
+      TargetPlatform.android => Uri.parse(
+        'https://play.google.com/store/account/subscriptions',
+      ),
+      TargetPlatform.iOS || TargetPlatform.macOS => Uri.parse(
+        'https://apps.apple.com/account/subscriptions',
+      ),
       _ => null, // Unsupported platform
     };
 
@@ -208,7 +203,8 @@ class SettingsViewModel
       if (success) {
         final snapshot = _revenueCatService.entitlementSnapshot.value;
         final user = resolveAuthUser();
-        final isEntitled = snapshot != null &&
+        final isEntitled =
+            snapshot != null &&
             user != null &&
             snapshot.isForUser(user.id) &&
             snapshot.hasProEntitlement;
@@ -242,40 +238,11 @@ class SettingsViewModel
 
   void dispose() {
     _isDisposed = true;
-    canAccessPremium.dispose();
     disposeEntitlementListener();
     disposePremiumAwareness();
   }
 
   // --- Private helpers ---
-
-  bool _computeCanAccessPremium() {
-    final user = resolveAuthUser();
-    if (user == null) return false;
-
-    return _resolveEntitlement(user).canAccessPremium;
-  }
-
-  void _refreshCanAccessPremium() {
-    final user = resolveAuthUser();
-    if (user != null) {
-      canAccessPremium.value = _resolveEntitlement(user).canAccessPremium;
-    } else {
-      premiumCachedUserStore
-          ?.loadUser()
-          .then((cached) {
-            if (cached == null || _isDisposed) return;
-            canAccessPremium.value =
-                _resolveEntitlement(cached).canAccessPremium;
-          })
-          .catchError((_) {});
-    }
-  }
-
-  Entitlement _resolveEntitlement(User user) {
-    final snapshot = entitlementListenerService.entitlementSnapshot.value;
-    return Entitlement.of(user, snapshot);
-  }
 
   /// Encodes query parameters for a mailto URI using [Uri.encodeComponent]
   /// per value instead of [Uri.queryParameters] which encodes spaces as `+`.

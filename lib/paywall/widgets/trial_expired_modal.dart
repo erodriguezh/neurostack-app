@@ -6,6 +6,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
 import 'package:neurostack/core/ui/widgets/dark_theme_scope.dart';
 import 'package:neurostack/core/ui/widgets/spotlight_card.dart';
+import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
 
 /// The user's choice when the trial expired modal is dismissed.
 enum TrialExpiredChoice {
@@ -166,13 +167,12 @@ class _TrialExpiredModalState extends State<TrialExpiredModal>
                           height: 1.2,
                         ),
                       ),
-                      // Conditional subtext when activeProtocolCount > 2
-                      if (widget.activeProtocolCount > 2) ...[
+                      if (widget.activeProtocolCount > kFreeProtocolLimit) ...[
                         SizedBox(height: spacing.md),
                         ConstrainedBox(
                           constraints: const BoxConstraints(maxWidth: 280),
                           child: Text(
-                            'You currently have ${widget.activeProtocolCount} active protocols. The free tier allows 2.',
+                            'You currently have ${widget.activeProtocolCount} active protocols. The free tier allows $kFreeProtocolLimit.',
                             textAlign: TextAlign.center,
                             style: GoogleFonts.inter(
                               fontSize: 15,
