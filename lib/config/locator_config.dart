@@ -43,7 +43,6 @@ import 'package:neurostack/features/session/data/services/session_sync_service.d
 import 'package:neurostack/paywall/data/revenuecat_client.dart';
 import 'package:neurostack/paywall/data/revenuecat_client_factory.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
-import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 import 'package:neurostack/paywall/domain/trial_expiry_policy.dart';
 
 // UserOrient
@@ -53,9 +52,6 @@ import 'package:neurostack/core/utils/userorient/userorient_service.dart';
 import 'package:neurostack/core/utils/in_app_review/in_app_review_adapter.dart';
 import 'package:neurostack/core/utils/in_app_review/in_app_review_service.dart';
 import 'package:neurostack/core/utils/in_app_review/review_trigger_helper.dart';
-
-// Use cases
-import 'package:neurostack/features/session/domain/use_cases/check_eligibility_use_case.dart';
 
 List<Module> buildModules({
   required SharedPreferences sharedPreferences,
@@ -151,16 +147,8 @@ List<Module> buildModules({
     lazy: true,
   ),
 
-  // Subscription resolver (centralized policy for UI gating)
-  Module<SubscriptionStatusResolver>(
-    builder: () => const SubscriptionStatusResolver(),
-    lazy: true,
-  ),
-
   Module<TrialExpiryPolicy>(
-    builder: () => TrialExpiryPolicy(
-      resolver: locator<SubscriptionStatusResolver>(),
-    ),
+    builder: () => const TrialExpiryPolicy(),
     lazy: true,
   ),
 
@@ -238,14 +226,6 @@ List<Module> buildModules({
       connectivity: locator<ConnectivityService>(),
       dataSource: locator<DataSourceAbstraction>(),
       appLifecycle: locator<AppLifecycleService>(),
-    ),
-    lazy: true,
-  ),
-
-  // Use cases
-  Module<CheckEligibilityUseCase>(
-    builder: () => CheckEligibilityUseCase(
-      userRepository: locator<UserRepository>(),
     ),
     lazy: true,
   ),

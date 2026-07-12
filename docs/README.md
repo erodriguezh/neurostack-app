@@ -104,7 +104,7 @@
 - **App Environment** - `lib/core/utils/app_environment.dart` - environment flags and config access
 - **App Lifecycle Service** - `lib/core/utils/app_lifecycle_service.dart` - app lifecycle hooks and foreground/background handling
 - **Service Locator** - `lib/core/utils/locator.dart` - locator access helpers and instance lookup
-- **Core Abstractions** - `lib/core/abstractions/` - `EntitlementListenerMixin` (entitlement change subscription), `PremiumAwareViewModelMixin` (isPremium computation + listener), `ConnectivityListenerMixin` (online/offline listener), `LoggingAbstraction` (structured logging)
+- **Core Abstractions** - `lib/core/abstractions/` - `EntitlementListenerMixin` (entitlement change subscription), `PremiumAwareViewModelMixin` (published resolved Entitlement + compatibility `isPremium` getter), `ConnectivityListenerMixin` (online/offline listener), `LoggingAbstraction` (structured logging)
 
 ### App Configuration (Implemented)
 - **Route Configuration** - `lib/config/route_config.dart` - route definitions, screen wiring, navigation entry points

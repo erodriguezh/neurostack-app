@@ -31,6 +31,6 @@ abstract interface class UserRepository {
   /// Persists a user (insert or update).
   ///
   /// Returns [Unit] on success, [DomainFailure] on infrastructure errors.
-  /// Trial/subscription gating is handled by `SubscriptionStatusResolver`.
+  /// Trial/subscription gating is handled by `Entitlement`.
   Future<Either<DomainFailure, Unit>> save(User user);
 }

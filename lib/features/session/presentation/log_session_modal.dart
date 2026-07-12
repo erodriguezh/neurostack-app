@@ -9,7 +9,7 @@ import '../../protocol/domain/entities/protocol.dart';
 import '../data/data_sources/session_local_data_source.dart';
 import '../data/services/session_sync_service.dart';
 import '../domain/entities/session.dart';
-import '../domain/use_cases/check_eligibility_use_case.dart';
+import '../../user/domain/repositories/user_repository.dart';
 import 'view_models/log_session_view_model.dart';
 import 'views/log_session_view.dart';
 
@@ -23,6 +23,7 @@ import 'views/log_session_view.dart';
 /// - [context]: The build context for showing the modal.
 /// - [protocol]: The protocol to log a session for.
 /// - [userId]: The current user's ID.
+/// - [protocolLimit]: The resolved Entitlement limit; null means unlimited.
 /// - [initialDate]: Optional initial date for the session (defaults to today).
 /// - [onSessionLogged]: Callback invoked when a session is successfully logged.
 ///
@@ -32,6 +33,7 @@ import 'views/log_session_view.dart';
 ///   context,
 ///   protocol: myProtocol,
 ///   userId: currentUserId,
+///   protocolLimit: currentEntitlement.protocolLimit,
 ///   onSessionLogged: (session) {
 ///     // Handle the new session
 ///     viewModel.refresh();
@@ -42,6 +44,7 @@ Future<void> showLogSessionModal(
   BuildContext context, {
   required Protocol protocol,
   required String userId,
+  required int? protocolLimit,
   DateTime? initialDate,
   required void Function(Session session) onSessionLogged,
 }) async {
@@ -50,7 +53,8 @@ Future<void> showLogSessionModal(
     protocol: protocol,
     initialDate: initialDate ?? DateTime.now(),
     userId: userId,
-    checkEligibilityUseCase: locator<CheckEligibilityUseCase>(),
+    userRepository: locator<UserRepository>(),
+    protocolLimit: protocolLimit,
     sessionLocalDataSource: locator<SessionLocalDataSource>(),
     sessionSyncService: locator<SessionSyncService>(),
     notifyService: locator<NotifyService>(),

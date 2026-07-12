@@ -650,7 +650,7 @@ void main() {
         final vm = createViewModel();
         addTearDown(vm.dispose);
 
-        expect(vm.canAccessPremium.value, isTrue);
+        expect(vm.entitlement.value.canAccessPremium, isTrue);
       });
 
       test('is false when user is free', () {
@@ -664,7 +664,7 @@ void main() {
         final vm = createViewModel();
         addTearDown(vm.dispose);
 
-        expect(vm.canAccessPremium.value, isFalse);
+        expect(vm.entitlement.value.canAccessPremium, isFalse);
       });
 
       test('is true when user is premiumMonthly', () {
@@ -676,7 +676,7 @@ void main() {
         final vm = createViewModel();
         addTearDown(vm.dispose);
 
-        expect(vm.canAccessPremium.value, isTrue);
+        expect(vm.entitlement.value.canAccessPremium, isTrue);
       });
 
       test('is false when authState is Unauthenticated', () {
@@ -687,7 +687,7 @@ void main() {
         final vm = createViewModel();
         addTearDown(vm.dispose);
 
-        expect(vm.canAccessPremium.value, isFalse);
+        expect(vm.entitlement.value.canAccessPremium, isFalse);
       });
 
       test('updates when entitlement changes', () {
@@ -706,7 +706,7 @@ void main() {
         addTearDown(vm.dispose);
         vm.init();
 
-        expect(vm.canAccessPremium.value, isFalse);
+        expect(vm.entitlement.value.canAccessPremium, isFalse);
 
         // Simulate trial activation via RC snapshot
         final trialSnapshot = EntitlementSnapshotFactory.activeTrial(
@@ -714,7 +714,7 @@ void main() {
         );
         snapshotNotifier.value = trialSnapshot;
 
-        expect(vm.canAccessPremium.value, isTrue);
+        expect(vm.entitlement.value.canAccessPremium, isTrue);
       });
     });
 

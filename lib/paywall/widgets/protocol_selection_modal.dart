@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:neurostack/core/ui/app_theme.dart';
@@ -8,6 +9,7 @@ import 'package:neurostack/home/home_state.dart';
 
 const _selectionLimit = 2;
 const _modalBackgroundColor = Color(0xFF030303);
+const _confirmSelectionLabel = 'Confirm Selection';
 
 class ProtocolSelectionViewModel {
   ProtocolSelectionViewModel({
@@ -26,9 +28,9 @@ class ProtocolSelectionViewModel {
 
   bool get canConfirm => selectedProtocolIds.value.length == _selectionLimit;
 
-  void toggle(String protocolId) {
+  bool toggle(String protocolId) {
     if (!_activeProtocolIds.contains(protocolId)) {
-      return;
+      return false;
     }
 
     final next = Set<String>.from(selectedProtocolIds.value);
@@ -36,11 +38,12 @@ class ProtocolSelectionViewModel {
       next.remove(protocolId);
     } else {
       if (next.length >= _selectionLimit) {
-        return;
+        return false;
       }
       next.add(protocolId);
     }
     selectedProtocolIds.value = Set<String>.unmodifiable(next);
+    return true;
   }
 
   List<String>? confirm() {
@@ -59,8 +62,22 @@ class ProtocolSelectionViewModel {
       return Set<String>.unmodifiable(seeded);
     }
 
+    final rankedItems = [
+      for (final (stackIndex, item) in _items.indexed)
+        (stackIndex: stackIndex, item: item),
+    ];
+    rankedItems.sort((left, right) {
+      final sessionCountComparison = right.item.sessionCount.compareTo(
+        left.item.sessionCount,
+      );
+      if (sessionCountComparison != 0) {
+        return sessionCountComparison;
+      }
+      return left.stackIndex.compareTo(right.stackIndex);
+    });
+
     return Set<String>.unmodifiable(
-      _items.take(_selectionLimit).map((item) => item.protocolId),
+      rankedItems.take(_selectionLimit).map((entry) => entry.item.protocolId),
     );
   }
 
@@ -117,80 +134,94 @@ class _ProtocolSelectionModalState extends State<ProtocolSelectionModal> {
     final textStyles = context.textStyles;
     final bottomInset = MediaQuery.of(context).padding.bottom;
 
-    return DarkThemeScope(
-      child: PopScope(
-        canPop: false,
-        child: Scaffold(
-          backgroundColor: _modalBackgroundColor,
-          body: SafeArea(
-            bottom: false,
-            child: ValueListenableBuilder<Set<String>>(
-              valueListenable: _viewModel.selectedProtocolIds,
-              builder: (context, selectedIds, child) {
-                final selectedCount = selectedIds.length;
-
-                return Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
-                      child: Column(
-                        children: [
-                          Text(
-                            'Choose 2 Protocols to Keep',
-                            textAlign: TextAlign.center,
-                            style: textStyles.h2.copyWith(
-                              color: Colors.white.withValues(alpha: 0.9),
-                              fontSize: 26,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: DarkThemeScope(
+        child: PopScope(
+          canPop: false,
+          child: Scaffold(
+            backgroundColor: _modalBackgroundColor,
+            body: SafeArea(
+              bottom: false,
+              child: ValueListenableBuilder<Set<String>>(
+                valueListenable: _viewModel.selectedProtocolIds,
+                builder: (context, selectedIds, child) {
+                  return Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
+                        child: Column(
+                          children: [
+                            Text(
+                              'Choose 2 Protocols to Keep',
+                              textAlign: TextAlign.center,
+                              style: textStyles.h2.copyWith(
+                                color: Colors.white.withValues(alpha: 0.9),
+                                fontSize: 26,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 12),
-                          _SelectionCounter(
-                            selectedCount: selectedCount,
-                          ),
-                        ],
+                            const SizedBox(height: 12),
+                            _SelectionCounter(
+                              selectedCount: selectedIds.length,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    Expanded(
-                      child: ListView.separated(
-                        padding: const EdgeInsets.fromLTRB(24, 32, 24, 20),
-                        itemCount: widget.items.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 12),
-                        itemBuilder: (context, index) {
-                          final item = widget.items[index];
-                          return _ProtocolSelectionRow(
-                            item: item,
-                            selected: selectedIds.contains(item.protocolId),
-                            onTap: () => _viewModel.toggle(item.protocolId),
-                          );
-                        },
+                      Expanded(
+                        child: ListView.separated(
+                          padding: const EdgeInsets.fromLTRB(24, 32, 24, 20),
+                          itemCount: widget.items.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 12),
+                          itemBuilder: (context, index) {
+                            final item = widget.items[index];
+                            return _ProtocolSelectionRow(
+                              item: item,
+                              selected: selectedIds.contains(item.protocolId),
+                              onTap: () => _toggleProtocol(item.protocolId),
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(
-                        24,
-                        0,
-                        24,
-                        40 + bottomInset,
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          24,
+                          0,
+                          24,
+                          40 + bottomInset,
+                        ),
+                        child: _ConfirmButton(
+                          enabled: _viewModel.canConfirm,
+                          onPressed: _confirmSelection,
+                        ),
                       ),
-                      child: _ConfirmButton(
-                        enabled: _viewModel.canConfirm,
-                        onPressed: () {
-                          final result = _viewModel.confirm();
-                          if (result == null) {
-                            return;
-                          }
-                          Navigator.of(context).pop(result);
-                        },
-                      ),
-                    ),
-                  ],
-                );
-              },
+                    ],
+                  );
+                },
+              ),
             ),
           ),
         ),
       ),
     );
+  }
+
+  void _toggleProtocol(String protocolId) {
+    final selectionChanged = _viewModel.toggle(protocolId);
+    if (selectionChanged) {
+      HapticFeedback.selectionClick();
+      return;
+    }
+    HapticFeedback.lightImpact();
+  }
+
+  void _confirmSelection() {
+    final selectedProtocolIds = _viewModel.confirm();
+    if (selectedProtocolIds == null) {
+      return;
+    }
+    HapticFeedback.mediumImpact();
+    Navigator.of(context).pop(selectedProtocolIds);
   }
 }
 
@@ -203,49 +234,52 @@ class _SelectionCounter extends StatelessWidget {
   Widget build(BuildContext context) {
     final kitColors = context.kitColors;
     final animationDuration = context.durations.duration200;
-    final complete = selectedCount == _selectionLimit;
+    final isSelectionComplete = selectedCount == _selectionLimit;
+    final selectionStatus = '$selectedCount/$_selectionLimit';
 
-    return AnimatedContainer(
-      duration: animationDuration,
-      curve: CustomCurves.easeOut,
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 6,
-      ),
-      decoration: BoxDecoration(
-        color: complete
-            ? kitColors.brandSky.withValues(alpha: 0.12)
-            : Colors.white.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: complete
-              ? kitColors.brandSky.withValues(alpha: 0.28)
-              : Colors.white.withValues(alpha: 0.08),
+    return Semantics(
+      liveRegion: true,
+      label: '$selectionStatus selected',
+      excludeSemantics: true,
+      child: AnimatedContainer(
+        duration: animationDuration,
+        curve: CustomCurves.easeOut,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelectionComplete
+              ? kitColors.brandSky.withValues(alpha: 0.12)
+              : Colors.white.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: isSelectionComplete
+                ? kitColors.brandSky.withValues(alpha: 0.28)
+                : Colors.white.withValues(alpha: 0.08),
+          ),
         ),
-      ),
-      child: DefaultTextStyle(
-        style: GoogleFonts.jetBrainsMono(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          letterSpacing: 1.2,
-          color: complete
-              ? kitColors.brandSky
-              : Colors.white.withValues(alpha: 0.5),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AnimatedSwitcher(
-              duration: animationDuration,
-              switchInCurve: CustomCurves.easeOut,
-              switchOutCurve: CustomCurves.easeOut,
-              child: Text(
-                '$selectedCount',
-                key: ValueKey(selectedCount),
+        child: DefaultTextStyle(
+          style: GoogleFonts.jetBrainsMono(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 1.2,
+            color: isSelectionComplete
+                ? kitColors.brandSky
+                : Colors.white.withValues(alpha: 0.5),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedSwitcher(
+                duration: animationDuration,
+                switchInCurve: CustomCurves.easeOut,
+                switchOutCurve: CustomCurves.easeOut,
+                child: Text(
+                  '$selectedCount',
+                  key: ValueKey(selectedCount),
+                ),
               ),
-            ),
-            const Text('/$_selectionLimit SELECTED'),
-          ],
+              const Text('/$_selectionLimit SELECTED'),
+            ],
+          ),
         ),
       ),
     );
@@ -267,122 +301,134 @@ class _ProtocolSelectionRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final kitColors = context.kitColors;
     final animationDuration = context.durations.duration200;
+    final sessionSummary = '${item.sessionCount} sessions logged';
     final borderColor = selected
         ? kitColors.brandSky.withValues(alpha: 0.3)
         : Colors.white.withValues(alpha: 0.1);
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(24),
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: animationDuration,
-          curve: CustomCurves.easeOut,
-          constraints: const BoxConstraints(minHeight: 76),
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.02),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: borderColor),
-            boxShadow: selected
-                ? [
-                    BoxShadow(
-                      color: kitColors.brandSky.withValues(alpha: 0.12),
-                      blurRadius: 18,
-                    ),
-                  ]
-                : const [],
-          ),
-          child: Row(
-            children: [
-              AnimatedScale(
-                duration: animationDuration,
-                curve: CustomCurves.easeOut,
-                scale: selected ? 1.05 : 1,
-                child: AnimatedContainer(
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: item.name,
+      value: '${item.categoryLabel}, $sessionSummary',
+      onTap: onTap,
+      excludeSemantics: true,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(24),
+          onTap: onTap,
+          excludeFromSemantics: true,
+          child: AnimatedContainer(
+            duration: animationDuration,
+            curve: CustomCurves.easeOut,
+            constraints: const BoxConstraints(minHeight: 76),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.02),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: borderColor),
+              boxShadow: selected
+                  ? [
+                      BoxShadow(
+                        color: kitColors.brandSky.withValues(alpha: 0.12),
+                        blurRadius: 18,
+                      ),
+                    ]
+                  : const [],
+            ),
+            child: Row(
+              children: [
+                AnimatedScale(
                   duration: animationDuration,
                   curve: CustomCurves.easeOut,
-                  width: 26,
-                  height: 26,
-                  decoration: BoxDecoration(
-                    color: selected
-                        ? kitColors.brandSky
-                        : Colors.white.withValues(alpha: 0.02),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      width: 2,
+                  scale: selected ? 1.05 : 1,
+                  child: AnimatedContainer(
+                    duration: animationDuration,
+                    curve: CustomCurves.easeOut,
+                    width: 26,
+                    height: 26,
+                    decoration: BoxDecoration(
                       color: selected
                           ? kitColors.brandSky
-                          : Colors.white.withValues(alpha: 0.2),
+                          : Colors.white.withValues(alpha: 0.02),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        width: 2,
+                        color: selected
+                            ? kitColors.brandSky
+                            : Colors.white.withValues(alpha: 0.2),
+                      ),
+                      boxShadow: selected
+                          ? [
+                              BoxShadow(
+                                color: kitColors.brandSky.withValues(
+                                  alpha: 0.3,
+                                ),
+                                blurRadius: 10,
+                              ),
+                            ]
+                          : const [],
                     ),
-                    boxShadow: selected
-                        ? [
-                            BoxShadow(
-                              color: kitColors.brandSky.withValues(alpha: 0.3),
-                              blurRadius: 10,
-                            ),
-                          ]
-                        : const [],
+                    child: selected
+                        ? const Icon(
+                            LucideIcons.check,
+                            color: _modalBackgroundColor,
+                            size: 16,
+                          )
+                        : null,
                   ),
-                  child: selected
-                      ? const Icon(
-                          LucideIcons.check,
-                          color: _modalBackgroundColor,
-                          size: 16,
-                        )
-                      : null,
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      item.name,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      item.categoryLabel,
-                      style: GoogleFonts.jetBrainsMono(
-                        color: Colors.white.withValues(alpha: 0.5),
-                        fontSize: 10,
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: 1.5,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(
-                          LucideIcons.activity,
-                          size: 12,
-                          color: Colors.white.withValues(alpha: 0.35),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        item.name,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(
+                          color: Colors.white.withValues(alpha: 0.9),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
                         ),
-                        const SizedBox(width: 6),
-                        Text(
-                          '${item.sessionCount} sessions logged',
-                          style: GoogleFonts.inter(
-                            color: Colors.white.withValues(alpha: 0.4),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w300,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        item.categoryLabel,
+                        style: GoogleFonts.jetBrainsMono(
+                          color: Colors.white.withValues(alpha: 0.5),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(
+                            LucideIcons.activity,
+                            size: 12,
+                            color: Colors.white.withValues(alpha: 0.35),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                          const SizedBox(width: 6),
+                          Text(
+                            sessionSummary,
+                            style: GoogleFonts.inter(
+                              color: Colors.white.withValues(alpha: 0.4),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w300,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -407,46 +453,53 @@ class _ConfirmButton extends StatelessWidget {
         ? _modalBackgroundColor
         : Colors.white.withValues(alpha: 0.3);
 
-    return AnimatedContainer(
-      duration: animationDuration,
-      curve: CustomCurves.easeOut,
-      width: double.infinity,
-      height: 56,
-      decoration: BoxDecoration(
-        color: enabled
-            ? kitColors.brandSky
-            : Colors.white.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: _confirmSelectionLabel,
+      onTap: enabled ? onPressed : null,
+      excludeSemantics: true,
+      child: AnimatedContainer(
+        duration: animationDuration,
+        curve: CustomCurves.easeOut,
+        width: double.infinity,
+        height: 56,
+        decoration: BoxDecoration(
           color: enabled
               ? kitColors.brandSky
-              : Colors.white.withValues(alpha: 0.1),
-        ),
-        boxShadow: enabled
-            ? [
-                BoxShadow(
-                  color: kitColors.brandSky.withValues(alpha: 0.3),
-                  blurRadius: 20,
-                ),
-              ]
-            : const [],
-      ),
-      child: TextButton(
-        onPressed: enabled ? onPressed : null,
-        style: TextButton.styleFrom(
-          foregroundColor: foregroundColor,
-          disabledForegroundColor: Colors.white.withValues(alpha: 0.3),
-          shape: const StadiumBorder(),
-        ),
-        child: AnimatedDefaultTextStyle(
-          duration: animationDuration,
-          curve: CustomCurves.easeOut,
-          style: GoogleFonts.inter(
-            color: foregroundColor,
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
+              : Colors.white.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: enabled
+                ? kitColors.brandSky
+                : Colors.white.withValues(alpha: 0.1),
           ),
-          child: const Text('Confirm Selection'),
+          boxShadow: enabled
+              ? [
+                  BoxShadow(
+                    color: kitColors.brandSky.withValues(alpha: 0.3),
+                    blurRadius: 20,
+                  ),
+                ]
+              : const [],
+        ),
+        child: TextButton(
+          onPressed: enabled ? onPressed : null,
+          style: TextButton.styleFrom(
+            foregroundColor: foregroundColor,
+            disabledForegroundColor: Colors.white.withValues(alpha: 0.3),
+            shape: const StadiumBorder(),
+          ),
+          child: AnimatedDefaultTextStyle(
+            duration: animationDuration,
+            curve: CustomCurves.easeOut,
+            style: GoogleFonts.inter(
+              color: foregroundColor,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+            ),
+            child: const Text(_confirmSelectionLabel),
+          ),
         ),
       ),
     );

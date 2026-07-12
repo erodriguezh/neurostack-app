@@ -1,14 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:neurostack/features/user/domain/enums/subscription_status.dart';
-import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 import 'package:neurostack/paywall/domain/trial_expiry_policy.dart';
 
 import '../../factories/entitlement_snapshot_factory.dart';
 
 void main() {
-  const policy = TrialExpiryPolicy(
-    resolver: SubscriptionStatusResolver(),
-  );
+  const policy = TrialExpiryPolicy();
 
   group('TrialExpiryPolicy', () {
     group('shouldShowReminder', () {
@@ -52,6 +49,43 @@ void main() {
         );
 
         expect(result, isFalse);
+      });
+
+      test('exactReminderWindowBoundaries_returnTrue', () {
+        final now = DateTime(2026, 6, 19, 10);
+
+        for (final expirationDate in [
+          now,
+          now.add(const Duration(hours: 24)),
+        ]) {
+          final snapshot = EntitlementSnapshotFactory.activeTrial(
+            expirationDate: expirationDate,
+          );
+
+          expect(
+            policy.shouldShowReminder(snapshot: snapshot, now: now),
+            isTrue,
+          );
+        }
+      });
+
+      test('nonActiveTrialInputs_returnFalse', () {
+        final now = DateTime(2026, 6, 19, 10);
+        final snapshots = [
+          null,
+          EntitlementSnapshotFactory.expiredTrial(),
+          EntitlementSnapshotFactory.activePaidMonthly(
+            expirationDate: now.add(const Duration(hours: 12)),
+          ),
+          EntitlementSnapshotFactory.activeTrial(),
+        ];
+
+        for (final snapshot in snapshots) {
+          expect(
+            policy.shouldShowReminder(snapshot: snapshot, now: now),
+            isFalse,
+          );
+        }
       });
     });
 
@@ -108,6 +142,25 @@ void main() {
         );
 
         expect(result, isFalse);
+      });
+
+      test('freshInstallWithoutExpiredTrial_returnsFalse', () {
+        final snapshots = [
+          null,
+          EntitlementSnapshotFactory.expiredPaid(),
+          EntitlementSnapshotFactory.activeTrial(),
+        ];
+
+        for (final snapshot in snapshots) {
+          expect(
+            policy.shouldShowExpiredModal(
+              effectiveStatus: SubscriptionStatus.free,
+              lastSeen: null,
+              snapshot: snapshot,
+            ),
+            isFalse,
+          );
+        }
       });
     });
   });

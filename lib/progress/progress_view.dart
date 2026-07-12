@@ -17,7 +17,6 @@ import 'package:neurostack/core/utils/locator.dart';
 import 'package:neurostack/core/utils/navigation/router_service.dart';
 import 'package:neurostack/features/auth/data/auth_service.dart';
 import 'package:neurostack/features/auth/data/cached_user_store.dart';
-import 'package:neurostack/features/auth/domain/auth_state.dart';
 import 'package:neurostack/features/protocol/data/cached_protocol_store.dart';
 import 'package:neurostack/features/protocol/domain/repositories/protocol_repository.dart';
 import 'package:neurostack/features/session/data/data_sources/session_local_data_source.dart';
@@ -31,6 +30,7 @@ import 'package:neurostack/progress/data/cached_week_progress_store.dart';
 import 'package:neurostack/progress/progress_state.dart';
 import 'package:neurostack/progress/progress_view_model.dart';
 import 'package:neurostack/progress/widgets/progress_grid.dart';
+import 'package:neurostack/paywall/data/revenuecat_service.dart';
 
 const _progressOfflineBanner = HomeBannerModel(
   type: HomeBannerType.offline,
@@ -57,6 +57,7 @@ class _ProgressViewState extends State<ProgressView>
     sessionRepository: locator<SessionRepository>(),
     sessionLocalDataSource: locator<SessionLocalDataSource>(),
     connectivityService: locator<ConnectivityService>(),
+    revenueCatService: locator<RevenueCatService>(),
     cachedUserStore: locator<CachedUserStore>(),
     cachedWeekProgressStore: locator<CachedWeekProgressStore>(),
   );
@@ -259,15 +260,7 @@ class _ProgressViewState extends State<ProgressView>
     required String protocolId,
     required DateTime day,
   }) async {
-    // Resolve userId from auth state
-    final authState = locator<AuthService>().authState.value;
-    String? userId;
-    if (authState is AuthenticatedOnline) {
-      userId = authState.user.id;
-    } else if (authState is AuthenticatedOffline) {
-      userId = authState.user.id;
-    }
-
+    final userId = _viewModel.currentUserId;
     if (userId == null) {
       locator<NotifyService>().setToastEvent(
         ToastEventError(message: 'Unable to identify user'),
@@ -307,10 +300,12 @@ class _ProgressViewState extends State<ProgressView>
       context,
       protocol: protocol,
       userId: userId,
+      protocolLimit: _viewModel.entitlement.value.protocolLimit,
       initialDate: day,
       onSessionLogged: (session) {
-        sessionCountFuture =
-            locator<ReviewTriggerHelper>().captureSessionCount(resolvedUserId);
+        sessionCountFuture = locator<ReviewTriggerHelper>().captureSessionCount(
+          resolvedUserId,
+        );
         _viewModel.onSessionLogged(session);
       },
     );
@@ -323,8 +318,10 @@ class _ProgressViewState extends State<ProgressView>
         () async {
           try {
             final count = await sessionCountFuture!;
-            await locator<ReviewTriggerHelper>()
-                .triggerReviewIfNeeded(count, resolvedUserId);
+            await locator<ReviewTriggerHelper>().triggerReviewIfNeeded(
+              count,
+              resolvedUserId,
+            );
           } catch (_) {
             // Non-critical — review prompt is best-effort
           }

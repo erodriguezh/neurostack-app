@@ -31,7 +31,7 @@ abstract final class UserFailures {
   );
 
   // Session logging - INV-U4
-  // Note: Trial expiration gating (INV-U5) is enforced by SubscriptionStatusResolver.
+  // Trial expiration gating (INV-U5) uses the resolved Entitlement limit.
   static const onboardingNotCompleted = DomainFailure(
     code: 'User.OnboardingNotCompleted',
     message: 'Complete onboarding to start tracking sessions',

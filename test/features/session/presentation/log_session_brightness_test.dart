@@ -11,27 +11,31 @@ import 'package:neurostack/features/session/presentation/view_models/log_session
 import 'package:neurostack/features/session/presentation/views/log_session_view.dart';
 
 import '../../../constants/test_constants.dart';
-import '../../../factories/protocol_factory.dart';
+import '../../../factories/factories.dart';
 import '../../../helpers/contrast_ratio.dart';
 import '../../../mocks/fake_params.dart';
 import '../../../mocks/mock_services.dart';
+
+final _eligibleUser = UserFactory.create(
+  onboardingCompleted: true,
+  stack: StackFactory.withProtocol(ProtocolFactory.reconstitute().id),
+);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(() {
-    registerFallbackValue(FakeCheckEligibilityParams());
     registerFallbackValue(FakePendingSession());
   });
 
-  late MockCheckEligibilityUseCase mockCheckEligibility;
+  late MockUserRepository mockCheckEligibility;
   late MockSessionLocalDataSource mockLocalDataSource;
   late MockSessionSyncService mockSyncService;
   late MockNotifyService mockNotifyService;
   late MockUuid mockUuid;
 
   setUp(() {
-    mockCheckEligibility = MockCheckEligibilityUseCase();
+    mockCheckEligibility = MockUserRepository();
     mockLocalDataSource = MockSessionLocalDataSource();
     mockSyncService = MockSessionSyncService();
     mockNotifyService = MockNotifyService();
@@ -44,8 +48,8 @@ void main() {
 
     // Default: eligible
     when(
-      () => mockCheckEligibility.execute(any()),
-    ).thenAnswer((_) async => right(unit));
+      () => mockCheckEligibility.getById(any()),
+    ).thenAnswer((_) async => right(_eligibleUser));
   });
 
   LogSessionViewModel createViewModel() {
@@ -53,7 +57,8 @@ void main() {
       protocol: ProtocolFactory.reconstitute(),
       initialDate: DateTime.now(),
       userId: TestConstants.user.id,
-      checkEligibilityUseCase: mockCheckEligibility,
+      userRepository: mockCheckEligibility,
+      protocolLimit: null,
       sessionLocalDataSource: mockLocalDataSource,
       sessionSyncService: mockSyncService,
       notifyService: mockNotifyService,
@@ -84,10 +89,12 @@ void main() {
           'renders without error',
           (tester) async {
             final vm = createViewModel();
-            await tester.pumpWidget(wrap(
-              brightness: brightness,
-              viewModel: vm,
-            ));
+            await tester.pumpWidget(
+              wrap(
+                brightness: brightness,
+                viewModel: vm,
+              ),
+            );
             await tester.pumpAndSettle();
 
             expect(find.text('Log Session'), findsAtLeast(1));
@@ -100,20 +107,22 @@ void main() {
           'header title uses semantic ink color',
           (tester) async {
             final vm = createViewModel();
-            await tester.pumpWidget(wrap(
-              brightness: brightness,
-              viewModel: vm,
-            ));
+            await tester.pumpWidget(
+              wrap(
+                brightness: brightness,
+                viewModel: vm,
+              ),
+            );
             await tester.pumpAndSettle();
 
             final theme = AppTheme.buildTheme(brightness);
-            final semanticColors =
-                theme.extension<AppSemanticColors>()!;
+            final semanticColors = theme.extension<AppSemanticColors>()!;
 
             // "Log Session" appears in both header and CTA button.
             // The header uses Newsreader italic font, so find it by style.
-            final titleTexts =
-                tester.widgetList<Text>(find.text('Log Session'));
+            final titleTexts = tester.widgetList<Text>(
+              find.text('Log Session'),
+            );
             final headerTitle = titleTexts.firstWhere(
               (t) => t.style?.fontStyle == FontStyle.italic,
             );
@@ -130,15 +139,16 @@ void main() {
           'field labels use semantic inkSubtle color',
           (tester) async {
             final vm = createViewModel();
-            await tester.pumpWidget(wrap(
-              brightness: brightness,
-              viewModel: vm,
-            ));
+            await tester.pumpWidget(
+              wrap(
+                brightness: brightness,
+                viewModel: vm,
+              ),
+            );
             await tester.pumpAndSettle();
 
             final theme = AppTheme.buildTheme(brightness);
-            final semanticColors =
-                theme.extension<AppSemanticColors>()!;
+            final semanticColors = theme.extension<AppSemanticColors>()!;
 
             final whenLabel = tester.widget<Text>(find.text('WHEN'));
             expect(
@@ -154,8 +164,7 @@ void main() {
           'header title contrast >= 4.5:1 against surface',
           (tester) async {
             final theme = AppTheme.buildTheme(brightness);
-            final semanticColors =
-                theme.extension<AppSemanticColors>()!;
+            final semanticColors = theme.extension<AppSemanticColors>()!;
 
             final ratio = contrastRatio(
               semanticColors.ink,

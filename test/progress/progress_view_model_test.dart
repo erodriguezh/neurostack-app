@@ -27,9 +27,11 @@ import 'package:neurostack/features/user/domain/value_objects/stack.dart'
 import 'package:neurostack/progress/data/cached_week_progress_store.dart';
 import 'package:neurostack/progress/progress_state.dart';
 import 'package:neurostack/progress/progress_view_model.dart';
+import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../factories/factories.dart';
+import '../mocks/fake_revenuecat_client.dart';
 
 void main() {
   group('ProgressViewModel', () {
@@ -142,6 +144,7 @@ void main() {
           sessionRepository: FakeSessionRepository(),
           sessionLocalDataSource: sessionLocalDataSource,
           connectivityService: FakeConnectivityService(),
+          revenueCatService: RevenueCatService(FakeRevenueCatClient()),
           cachedUserStore: FakeCachedUserStore(),
           cachedWeekProgressStore: cachedWeekProgressStore,
         );
@@ -374,6 +377,7 @@ void main() {
           sessionRepository: sessionRepository,
           sessionLocalDataSource: sessionLocalDataSource,
           connectivityService: connectivityService,
+          revenueCatService: RevenueCatService(FakeRevenueCatClient()),
           cachedUserStore: cachedUserStore,
           cachedWeekProgressStore: FakeCachedWeekProgressStore(),
         );
@@ -527,6 +531,74 @@ void main() {
               c.date.day == sessionDay.day && c.date.month == sessionDay.month,
         );
         expect(todayCell.state, CellState.completed);
+      });
+    });
+
+    group('entitlement seam', () {
+      late FakeAuthService authService;
+      late RevenueCatService revenueCatService;
+
+      setUp(() {
+        authService = FakeAuthService();
+        revenueCatService = RevenueCatService(FakeRevenueCatClient());
+      });
+
+      ProgressViewModel createViewModel() {
+        return ProgressViewModel(
+          notifyService: FakeNotifyService(),
+          routerService: FakeRouterService(),
+          authService: authService,
+          userRepository: FakeUserRepository(),
+          protocolRepository: FakeProtocolRepository(),
+          sessionRepository: FakeSessionRepository(),
+          sessionLocalDataSource: FakeSessionLocalDataSource(),
+          connectivityService: FakeConnectivityService(),
+          revenueCatService: revenueCatService,
+          cachedUserStore: FakeCachedUserStore(),
+          cachedWeekProgressStore: FakeCachedWeekProgressStore(),
+        );
+      }
+
+      test(
+        'publishes free entitlement on init and updates when the '
+        'RevenueCat snapshot changes',
+        () async {
+          // Arrange: authenticated free user
+          const userId = 'user-001';
+          authService.setAuthenticatedOnline(userId);
+
+          final viewModel = createViewModel();
+          addTearDown(viewModel.dispose);
+
+          await viewModel.init();
+
+          // Free user is limited
+          expect(viewModel.entitlement.value.isPremium, isFalse);
+          expect(
+            viewModel.entitlement.value.protocolLimit,
+            kFreeProtocolLimit,
+          );
+
+          // Act: RevenueCat reports an active paid subscription
+          revenueCatService.entitlementSnapshot.value =
+              EntitlementSnapshotFactory.activePaidMonthly(userId: userId);
+          await pumpEventQueue();
+
+          // Assert: the published entitlement is re-resolved reactively
+          expect(viewModel.entitlement.value.isPremium, isTrue);
+          expect(viewModel.entitlement.value.protocolLimit, isNull);
+        },
+      );
+
+      test('currentUserId reflects the authenticated user', () {
+        final viewModel = createViewModel();
+        addTearDown(viewModel.dispose);
+
+        expect(viewModel.currentUserId, isNull);
+
+        authService.setAuthenticatedOnline('user-001');
+
+        expect(viewModel.currentUserId, 'user-001');
       });
     });
   });

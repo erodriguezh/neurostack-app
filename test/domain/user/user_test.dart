@@ -29,7 +29,7 @@ void main() {
         final user = UserFactory.createFreeUnderLimit();
 
         // Act
-        final result = user.activateProtocol('protocol-2');
+        final result = user.activateProtocol('protocol-2', limit: 2);
 
         // Assert
         expect(result, isRight<User>());
@@ -50,7 +50,7 @@ void main() {
           );
 
           // Act
-          final result = user.activateProtocol('protocol-1');
+          final result = user.activateProtocol('protocol-1', limit: 2);
 
           // Assert
           expect(result, isLeftWith(UserFailures.protocolAlreadyActive));
@@ -67,7 +67,7 @@ void main() {
         );
 
         // Act - add second (should succeed)
-        final result1 = user.activateProtocol('protocol-2');
+        final result1 = user.activateProtocol('protocol-2', limit: 2);
 
         // Assert - first activation succeeds
         expect(result1, isRight<User>());
@@ -77,7 +77,7 @@ void main() {
         );
 
         // Act - add third (should fail at boundary)
-        final result2 = userAtLimit.activateProtocol('protocol-3');
+        final result2 = userAtLimit.activateProtocol('protocol-3', limit: 2);
 
         // Assert - second activation fails with specific error
         expect(result2, isLeftWith(UserFailures.protocolLimitReached));
@@ -93,17 +93,14 @@ void main() {
         );
 
         // Act - add 6th protocol
-        final result = user.activateProtocol('p-6');
+        final result = user.activateProtocol('p-6', limit: null);
 
         // Assert - should succeed (no limit on trial)
         expect(result, isRight<User>());
       });
 
-      // Trial expiration gating is now handled by SubscriptionStatusResolver,
-      // not the User entity. A user with subscriptionStatus == trial is treated
-      // as trial (unlimited protocols).
       test(
-        'activateProtocol_whenTrialStatus_allowsUnlimited',
+        'activateProtocol_whenLimitIsUnlimited_allowsThirdProtocol',
         () {
           // Arrange - trial status with 2 protocols
           final user = UserFactory.create(
@@ -113,9 +110,9 @@ void main() {
           );
 
           // Act - try to add 3rd protocol
-          final result = user.activateProtocol('protocol-3');
+          final result = user.activateProtocol('protocol-3', limit: null);
 
-          // Assert - succeeds because trial status has no protocol limit
+          // Assert - succeeds because the resolved limit is unlimited
           expect(result, isRight<User>());
         },
       );
@@ -129,7 +126,7 @@ void main() {
         );
 
         // Act - add 11th protocol
-        final result = user.activateProtocol('protocol-10');
+        final result = user.activateProtocol('protocol-10', limit: null);
 
         // Assert - should succeed (no limit on premium)
         expect(result, isRight<User>());
@@ -144,7 +141,7 @@ void main() {
         );
 
         // Act - add 11th protocol
-        final result = user.activateProtocol('protocol-10');
+        final result = user.activateProtocol('protocol-10', limit: null);
 
         // Assert - should succeed (no limit on premium)
         expect(result, isRight<User>());
@@ -315,7 +312,7 @@ void main() {
           );
 
           // Act
-          final result = user.canLogSession('protocol-1');
+          final result = user.canLogSession('protocol-1', limit: 2);
 
           // Assert
           expect(result, isLeftWith(UserFailures.onboardingNotCompleted));
@@ -332,41 +329,40 @@ void main() {
           );
 
           // Act
-          final result = user.canLogSession('protocol-2');
+          final result = user.canLogSession('protocol-2', limit: 2);
 
           // Assert
           expect(result, isLeftWith(UserFailures.protocolNotInStack));
         },
       );
 
-      // Trial expiration gating is now handled by SubscriptionStatusResolver.
-      // The User entity treats trial status as unlimited.
-      test(
-        'canLogSession_whenTrialOverLimit_succeedsBecauseTrialIsUnlimited',
-        () {
-          // Arrange - trial with 3 protocols
-          final user = UserFactory.createExpiredTrialOverLimit();
+      test('canLogSession_whenStackExceedsLimit_isBlocked', () {
+        final user = UserFactory.createExpiredTrialOverLimit();
 
-          // Act - try to log session for any protocol
-          final result = user.canLogSession(StackFactory.protocol1);
+        final result = user.canLogSession(StackFactory.protocol1, limit: 2);
 
-          // Assert - succeeds; trial status has no protocol limit
-          expect(result, isRight<Unit>());
-        },
-      );
+        expect(result, isLeftWith(UserFailures.tooManyActiveProtocols));
+      });
 
-      test('canLogSession_whenTrialAtFreeCapacity_succeeds', () {
-        // Arrange - trial with exactly 2 protocols
+      test('canLogSession_whenLimitIsUnlimited_succeeds', () {
+        final user = UserFactory.createExpiredTrialOverLimit();
+
+        final result = user.canLogSession(
+          StackFactory.protocol1,
+          limit: null,
+        );
+
+        expect(result, isRight<Unit>());
+      });
+
+      test('canLogSession_whenExactlyAtLimit_succeeds', () {
         final user = UserFactory.create(
-          subscriptionStatus: SubscriptionStatus.trial,
           stack: StackFactory.atFreeCapacity(),
           onboardingCompleted: true,
         );
 
-        // Act
-        final result = user.canLogSession('protocol-1');
+        final result = user.canLogSession('protocol-1', limit: 2);
 
-        // Assert - should succeed (trial status means unlimited)
         expect(result, isRight<Unit>());
       });
 
@@ -379,7 +375,7 @@ void main() {
         );
 
         // Act
-        final result = user.canLogSession('protocol-1');
+        final result = user.canLogSession('protocol-1', limit: 2);
 
         // Assert
         expect(result, isRight<Unit>());
@@ -427,7 +423,7 @@ void main() {
         );
 
         // Act
-        final result = user.activateProtocol('protocol-123');
+        final result = user.activateProtocol('protocol-123', limit: 2);
 
         // Assert
         final updated = result.getOrElse(

@@ -13,6 +13,7 @@ import 'package:neurostack/features/auth/data/cached_user_store.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:neurostack/home/widgets/home_bottom_nav.dart';
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
+import 'package:neurostack/paywall/domain/entitlement.dart';
 import 'package:neurostack/settings/settings_view_model.dart';
 import 'package:neurostack/settings/widgets/settings_support_section.dart';
 import 'package:neurostack/settings/widgets/settings_upgrade_banner.dart';
@@ -87,15 +88,11 @@ class _SettingsViewState extends State<SettingsView> {
                   ),
                   // Upgrade banner + Support & Resources section
                   SliverToBoxAdapter(
-                    child: ListenableBuilder(
-                      listenable: Listenable.merge([
-                        _viewModel.entitlement,
-                        _viewModel.canAccessPremium,
-                      ]),
-                      builder: (context, _) {
-                        final isPremium = _viewModel.isPremium;
-                        final canAccessPremium =
-                            _viewModel.canAccessPremium.value;
+                    child: ValueListenableBuilder<Entitlement>(
+                      valueListenable: _viewModel.entitlement,
+                      builder: (context, entitlement, _) {
+                        final isPremium = entitlement.isPremium;
+                        final canAccessPremium = entitlement.canAccessPremium;
                         return Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [

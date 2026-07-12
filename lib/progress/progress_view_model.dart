@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:logging/logging.dart';
+import 'package:neurostack/core/abstractions/entitlement_listener_mixin.dart';
+import 'package:neurostack/core/abstractions/premium_aware_view_model_mixin.dart';
 import 'package:neurostack/core/failures/domain_failure.dart';
 import 'package:neurostack/core/models/home_bottom_tab.dart';
 import 'package:neurostack/core/utils/auth_helpers.dart' as auth;
@@ -19,10 +21,12 @@ import 'package:neurostack/features/session/domain/repositories/session_reposito
 import 'package:neurostack/features/user/domain/entities/user.dart';
 import 'package:neurostack/features/user/domain/repositories/user_repository.dart';
 import 'package:neurostack/home/home_bottom_tab_coordinator.dart';
+import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:neurostack/progress/data/cached_week_progress_store.dart';
 import 'package:neurostack/progress/progress_state.dart';
 
-class ProgressViewModel {
+class ProgressViewModel
+    with EntitlementListenerMixin, PremiumAwareViewModelMixin {
   final Logger _logger = Logger('Progress');
 
   ProgressViewModel({
@@ -34,6 +38,7 @@ class ProgressViewModel {
     required SessionRepository sessionRepository,
     required SessionLocalDataSource sessionLocalDataSource,
     required ConnectivityService connectivityService,
+    required RevenueCatService revenueCatService,
     CachedUserStore? cachedUserStore,
     CachedWeekProgressStore? cachedWeekProgressStore,
     HomeBottomTabCoordinator? tabCoordinator,
@@ -44,13 +49,16 @@ class ProgressViewModel {
        _sessionRepository = sessionRepository,
        _sessionLocalDataSource = sessionLocalDataSource,
        _connectivityService = connectivityService,
+       _revenueCatService = revenueCatService,
        _cachedUserStore = cachedUserStore,
        _cachedWeekProgressStore = cachedWeekProgressStore,
        _tabCoordinator =
            tabCoordinator ??
            HomeBottomTabCoordinator(
              routerService: routerService,
-           );
+           ) {
+    initPremiumAwareness();
+  }
 
   final NotifyService _notifyService;
   final AuthService _authService;
@@ -59,6 +67,7 @@ class ProgressViewModel {
   final SessionRepository _sessionRepository;
   final SessionLocalDataSource _sessionLocalDataSource;
   final ConnectivityService _connectivityService;
+  final RevenueCatService _revenueCatService;
   final CachedUserStore? _cachedUserStore;
   final CachedWeekProgressStore? _cachedWeekProgressStore;
   final HomeBottomTabCoordinator _tabCoordinator;
@@ -72,7 +81,23 @@ class ProgressViewModel {
   User? _cachedUser;
   ProgressLoaded? _lastLoaded;
 
+  // --- Mixin wiring ---
+
+  @override
+  RevenueCatService get entitlementListenerService => _revenueCatService;
+
+  @override
+  AuthService get premiumAuthService => _authService;
+
+  @override
+  CachedUserStore? get premiumCachedUserStore => _cachedUserStore;
+
+  /// The current authenticated user's ID, or `null` when unavailable.
+  String? get currentUserId => auth.resolveUserId(_authService);
+
   Future<void> init() async {
+    initEntitlementListener();
+
     _connectivityListener ??= _handleConnectivityChange;
     _connectivityService.status.removeListener(_connectivityListener!);
     _connectivityService.status.addListener(_connectivityListener!);
@@ -136,6 +161,8 @@ class ProgressViewModel {
     if (_connectivityListener != null) {
       _connectivityService.status.removeListener(_connectivityListener!);
     }
+    disposeEntitlementListener();
+    disposePremiumAwareness();
     state.dispose();
   }
 
@@ -171,6 +198,7 @@ class ProgressViewModel {
       // Build rows even if sessions is empty (to show active protocols)
       if (cachedUser != null) {
         _cachedUser = cachedUser;
+        updateEntitlement(cachedUser);
         final sessions = await _sessionLocalDataSource.listSessions(
           cachedUser.id,
           from: weekStart,
@@ -272,6 +300,7 @@ class ProgressViewModel {
     }
 
     final user = userResult.getOrElse((_) => throw StateError('Unreachable'));
+    updateEntitlement(user);
     final isOnline = _connectivityService.status.value == NetworkStatus.online;
 
     // If online, fetch from remote and upsert to local cache (best-effort)

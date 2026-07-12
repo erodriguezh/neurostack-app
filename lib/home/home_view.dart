@@ -24,7 +24,6 @@ import 'package:neurostack/features/user/domain/repositories/user_repository.dar
 import 'package:neurostack/paywall/data/revenuecat_service.dart';
 import 'package:neurostack/paywall/data/trial_expiration_decision_store.dart';
 import 'package:neurostack/paywall/data/trial_reminder_service.dart';
-import 'package:neurostack/paywall/domain/subscription_status_resolver.dart';
 import 'package:neurostack/paywall/domain/trial_expiry_policy.dart';
 import 'package:neurostack/paywall/widgets/protocol_selection_modal.dart';
 import 'package:neurostack/paywall/widgets/trial_expired_modal.dart';
@@ -54,7 +53,6 @@ class _HomeViewState extends State<HomeView> {
     sessionRepository: locator<SessionRepository>(),
     sessionLocalDataSource: locator<SessionLocalDataSource>(),
     connectivityService: locator<ConnectivityService>(),
-    subscriptionStatusResolver: locator<SubscriptionStatusResolver>(),
     trialExpiryPolicy: locator<TrialExpiryPolicy>(),
     revenueCatService: locator<RevenueCatService>(),
     trialExpirationDecisionStore: locator<TrialExpirationDecisionStore>(),
@@ -345,6 +343,7 @@ class _HomeViewState extends State<HomeView> {
       context,
       protocol: request.protocol,
       userId: userId,
+      protocolLimit: _viewModel.entitlement.value.protocolLimit,
       initialDate: request.initialDate,
       onSessionLogged: (session) {
         sessionCountFuture = locator<ReviewTriggerHelper>().captureSessionCount(
@@ -398,7 +397,7 @@ class _HomeViewState extends State<HomeView> {
           if (!mounted) return;
 
           final user = _viewModel.state.value.user;
-          if (user != null && _viewModel.isTrialOrPremiumExpired(user)) {
+          if (user != null && _viewModel.isTrialOrPremiumExpired) {
             continue; // Re-show modal
           }
           // User subscribed: mark decision resolved and exit loop
@@ -406,8 +405,8 @@ class _HomeViewState extends State<HomeView> {
           return;
         case TrialExpiredChoice.continueWithFree:
           final user = _viewModel.state.value.user;
-          final freeLimit = SubscriptionStatus.free.protocolLimit ?? 2;
-          final success = user != null && user.activeProtocolCount > freeLimit
+          final success =
+              user != null && user.activeProtocolCount > kFreeProtocolLimit
               ? await _runStackTrimFlow(user)
               : await _viewModel.handleUseFreeTier();
           if (success) {
