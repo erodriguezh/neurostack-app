@@ -31,7 +31,10 @@ void main() {
     ),
   ];
 
-  Future<void> pumpModal(WidgetTester tester) async {
+  Future<void> pumpModal(
+    WidgetTester tester, {
+    List<ProtocolSelectionItem>? modalItems,
+  }) async {
     tester.view.physicalSize = const Size(800, 1200);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(() {
@@ -43,7 +46,7 @@ void main() {
       MaterialApp(
         theme: AppTheme.buildTheme(Brightness.dark),
         home: Scaffold(
-          body: ProtocolSelectionModal(items: items),
+          body: ProtocolSelectionModal(items: modalItems ?? items),
         ),
       ),
     );
@@ -147,6 +150,57 @@ void main() {
   });
 
   group('ProtocolSelectionModal', () {
+    final preselectionRenderingCases = [
+      (
+        scenario: 'withHighestSessionCounts',
+        items: [
+          selectionItem('first', 1),
+          selectionItem('second', 8),
+          selectionItem('third', 5),
+        ],
+        expectedSelected: {'second', 'third'},
+      ),
+      (
+        // Two protocols tie at 5 sessions; stack order breaks the tie.
+        scenario: 'withPartiallyTiedSessionCounts',
+        items: [
+          selectionItem('first', 8),
+          selectionItem('second', 5),
+          selectionItem('third', 5),
+        ],
+        expectedSelected: {'first', 'second'},
+      ),
+      (
+        scenario: 'withAllZeroSessionCounts',
+        items: [
+          selectionItem('first', 0),
+          selectionItem('second', 0),
+          selectionItem('third', 0),
+        ],
+        expectedSelected: {'first', 'second'},
+      ),
+    ];
+
+    for (final testCase in preselectionRenderingCases) {
+      testWidgets('render_${testCase.scenario}_preselectsExpectedRows', (
+        tester,
+      ) async {
+        final semantics = tester.ensureSemantics();
+        await pumpModal(tester, modalItems: testCase.items);
+
+        for (final item in testCase.items) {
+          final row = tester.getSemantics(find.text(item.name));
+          expect(
+            row.hasFlag(SemanticsFlag.isSelected),
+            testCase.expectedSelected.contains(item.protocolId),
+            reason: '${item.name} selection state',
+          );
+        }
+        expect(find.text('2/2 SELECTED'), findsOneWidget);
+        semantics.dispose();
+      });
+    }
+
     testWidgets('rowsExposeAccessibleSelectionStateAndDetails', (
       tester,
     ) async {
