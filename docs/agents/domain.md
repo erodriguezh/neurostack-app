@@ -4,10 +4,10 @@ How the engineering skills should consume this repo's domain documentation when 
 
 ## Before exploring, read these
 
-- **`docs/ubiquitous-language.md`** — the canonical glossary for this repo. Covers monetization terms (Free Tier, Premium Trial, Subscription Status, Protocol Limit), core domain terms (Protocol, Session, etc.), and other domain language. This file plays the role that `CONTEXT.md` plays in other repos — treat it as the authoritative source for terminology.
-- **`docs/adr/`** — does not exist yet. When ADRs appear here in the future, read the ones that touch the area you're about to work in.
+- **`GLOSSARY.md`** at the repo root — the canonical glossary for this repo. Covers monetization terms (Free Tier, Premium Trial, Subscription Status, Protocol Limit), core domain terms (Protocol, Session, etc.), and other domain language. Treat it as the authoritative source for terminology.
+- **`docs/adr/`** — read ADRs that touch the area you're about to work in.
 
-If `docs/adr/` does not exist, **proceed silently**. Don't flag its absence; don't suggest creating it upfront. The producer skill (`/grill-with-docs`) creates ADRs lazily when decisions actually get resolved.
+If any of these files don't exist, **proceed silently**. Don't flag their absence; don't suggest creating them upfront. The producer skill (`/grill-with-docs`) creates ADRs lazily when decisions actually get resolved.
 
 ## File structure
 
@@ -15,9 +15,9 @@ This is a **single-context** repo (one Flutter app, no monorepo split):
 
 ```
 /
+├── GLOSSARY.md                  ← canonical glossary
 ├── docs/
-│   ├── ubiquitous-language.md   ← canonical glossary (acts as CONTEXT.md)
-│   ├── adr/                     ← does not exist yet; will appear over time
+│   ├── adr/                     ← architecture decision records
 │   └── specs/                   ← spec documents
 ├── lib/                         ← app code (feature-first)
 └── test/
@@ -25,7 +25,7 @@ This is a **single-context** repo (one Flutter app, no monorepo split):
 
 ## Use the glossary's vocabulary
 
-When your output names a domain concept (in an issue title, a refactor proposal, a hypothesis, a test name), use the term as defined in `docs/ubiquitous-language.md`. Don't drift to synonyms the glossary explicitly avoids.
+When your output names a domain concept (in an issue title, a refactor proposal, a hypothesis, a test name), use the term as defined in `GLOSSARY.md`. Don't drift to synonyms the glossary explicitly avoids.
 
 If the concept you need isn't in the glossary yet, that's a signal — either you're inventing language the project doesn't use (reconsider) or there's a real gap (note it for `/grill-with-docs`).
 

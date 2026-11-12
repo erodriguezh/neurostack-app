@@ -47,6 +47,7 @@ app.*.map.json
 
 # Keys
 /env/env.json
+/env/env.appstore.json
 
 # Claude local settings
 .claude/settings.local.json

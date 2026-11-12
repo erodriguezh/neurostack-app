@@ -16,7 +16,7 @@
 - [App Launch and Handoff to Flutter](./best_practices/architecture/app_launch_and_handoff_to_flutter.md) - lean main(), deferred Supabase + SharedPreferences, BestRouterConfig lazy creation, 1000ms minimum splash, entrance animation, StartupViewModel injection seams
 
 ## Domain
-- [Ubiquitous Language](./ubiquitous-language.md) - domain terms, subscription tiers, invariants, business rules, INV-U1, INV-M2
+- [Glossary (ubiquitous language)](../GLOSSARY.md) - domain terms, subscription tiers, invariants, business rules, INV-U1, INV-M2
 - [DomainFailure](../lib/core/failures/domain_failure.dart) - canonical failure shape and naming convention ({Aggregate}.{Invariant})
 
 ## UI
