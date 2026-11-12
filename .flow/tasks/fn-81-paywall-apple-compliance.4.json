@@ -1,0 +1,18 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-03-24T20:26:40.967243Z",
+  "depends_on": [
+    "fn-81-paywall-apple-compliance.1",
+    "fn-81-paywall-apple-compliance.2",
+    "fn-81-paywall-apple-compliance.3"
+  ],
+  "epic": "fn-81-paywall-apple-compliance",
+  "id": "fn-81-paywall-apple-compliance.4",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-81-paywall-apple-compliance.4.md",
+  "status": "todo",
+  "title": "End-to-end verification with Test Store",
+  "updated_at": "2026-03-24T20:28:47.860500Z"
+}

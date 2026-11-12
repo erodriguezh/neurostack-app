@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-03-24T20:26:27.941605Z",
+  "depends_on": [],
+  "epic": "fn-81-paywall-apple-compliance",
+  "id": "fn-81-paywall-apple-compliance.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-81-paywall-apple-compliance.1.md",
+  "status": "todo",
+  "title": "Fix hosted paywall + configure trials in RevenueCat dashboard",
+  "updated_at": "2026-03-24T20:27:21.693462Z"
+}
